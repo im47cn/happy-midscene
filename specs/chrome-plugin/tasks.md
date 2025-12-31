@@ -95,7 +95,8 @@ apps/chrome-extension/src/extension/ai-test-generator/
     ├── CommitView.tsx        # 提交视图
     ├── GitLabConfig.tsx      # GitLab 配置
     ├── ShortcutsHelp.tsx     # 快捷键帮助
-    └── HistoryView.tsx       # 执行历史
+    ├── HistoryView.tsx       # 执行历史
+    └── ErrorBoundary.tsx     # 错误边界处理
 ```
 
 ## 待优化/后续迭代 🔄
@@ -103,20 +104,20 @@ apps/chrome-extension/src/extension/ai-test-generator/
 ### 功能增强
 - [ ] H5 移动端模式支持
 - [x] 快捷键操作
-- [ ] 批量用例执行
+- [x] 批量用例执行
 - [x] 执行历史记录
 - [ ] 元素框选修复功能
 
 ### 体验优化
 - [ ] 执行过程中的元素高亮
-- [ ] 更详细的错误信息
+- [x] 更详细的错误信息
 - [ ] 执行截图保存
 - [ ] 多语言支持
 
 ### 技术债务
 - [ ] 单元测试覆盖
 - [ ] E2E 测试
-- [ ] 错误边界处理
+- [x] 错误边界处理
 - [ ] 性能优化
 
 ## 使用方式

@@ -15,6 +15,7 @@ import {
   GitLabStatus,
   ShortcutsHelp,
   HistoryView,
+  ErrorBoundary,
 } from './components';
 import { useKeyboardShortcuts } from './hooks';
 import './styles.less';
@@ -145,4 +146,22 @@ export function AITestGenerator() {
   );
 }
 
-export default AITestGenerator;
+// Wrapped with ErrorBoundary for crash protection
+function AITestGeneratorWithErrorBoundary() {
+  const handleReset = useCallback(() => {
+    // Reset store state on error recovery
+    useGeneratorStore.getState().setCurrentView('input');
+    useGeneratorStore.getState().setError(null);
+  }, []);
+
+  return (
+    <ErrorBoundary
+      fallbackTitle="AI Test Generator 发生错误"
+      onReset={handleReset}
+    >
+      <AITestGenerator />
+    </ErrorBoundary>
+  );
+}
+
+export default AITestGeneratorWithErrorBoundary;
