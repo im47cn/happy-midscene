@@ -18,7 +18,7 @@ export type {
   ExecutionContext,
 };
 
-export type ViewMode = 'input' | 'preview' | 'execute' | 'commit';
+export type ViewMode = 'input' | 'preview' | 'execute' | 'commit' | 'history';
 
 export interface GeneratorState {
   // Input state

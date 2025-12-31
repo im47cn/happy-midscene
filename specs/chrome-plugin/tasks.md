@@ -85,14 +85,17 @@ apps/chrome-extension/src/extension/ai-test-generator/
 │   ├── index.ts
 │   ├── gitlabClient.ts       # GitLab API 客户端
 │   ├── markdownParser.ts     # Markdown 解析器
-│   └── executionEngine.ts    # 执行引擎
+│   ├── executionEngine.ts    # 执行引擎
+│   └── historyService.ts     # 执行历史存储
 └── components/
     ├── index.ts
     ├── MarkdownInput.tsx     # 需求输入
     ├── TestCasePreview.tsx   # 用例预览
     ├── ExecutionView.tsx     # 执行视图
     ├── CommitView.tsx        # 提交视图
-    └── GitLabConfig.tsx      # GitLab 配置
+    ├── GitLabConfig.tsx      # GitLab 配置
+    ├── ShortcutsHelp.tsx     # 快捷键帮助
+    └── HistoryView.tsx       # 执行历史
 ```
 
 ## 待优化/后续迭代 🔄
@@ -101,7 +104,7 @@ apps/chrome-extension/src/extension/ai-test-generator/
 - [ ] H5 移动端模式支持
 - [x] 快捷键操作
 - [ ] 批量用例执行
-- [ ] 执行历史记录
+- [x] 执行历史记录
 - [ ] 元素框选修复功能
 
 ### 体验优化

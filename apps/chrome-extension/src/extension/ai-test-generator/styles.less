@@ -339,6 +339,134 @@
   }
 }
 
+// History View Component
+.history-view-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 12px;
+  }
+
+  .history-content {
+    flex: 1;
+    display: flex;
+    gap: 16px;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .history-list-section {
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
+
+    .history-list {
+      .ant-list-item {
+        padding: 8px 12px;
+        margin-bottom: 8px;
+        background: #fafafa;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+
+        &:hover {
+          background: #f0f0f0;
+        }
+
+        &.selected {
+          background: #e6f7ff;
+          border-color: #1890ff;
+        }
+      }
+    }
+  }
+
+  .history-item-content {
+    width: 100%;
+
+    .history-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .history-item-summary {
+      margin-bottom: 4px;
+    }
+
+    .history-item-progress {
+      margin-bottom: 4px;
+
+      .ant-progress-text {
+        font-size: 11px;
+      }
+    }
+
+    .history-item-footer {
+      display: flex;
+      justify-content: flex-end;
+    }
+  }
+
+  .history-detail-section {
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
+    padding-left: 16px;
+    border-left: 1px solid #f0f0f0;
+  }
+
+  .history-detail-empty {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .history-detail {
+    .detail-header {
+      margin-bottom: 12px;
+    }
+
+    .detail-card {
+      margin-bottom: 12px;
+
+      .stat-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 0;
+      }
+
+      .yaml-preview {
+        max-height: 200px;
+        overflow-y: auto;
+        font-size: 11px;
+        background: #f5f5f5;
+        padding: 8px;
+        border-radius: 4px;
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+    }
+
+    .detail-actions {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+    }
+  }
+}
+
 // Responsive adjustments
 @media (max-width: 400px) {
   .ai-test-generator-container {

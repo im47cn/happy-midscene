@@ -5,7 +5,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { message, Tooltip } from 'antd';
-import { KeyOutlined } from '@ant-design/icons';
+import { KeyOutlined, HistoryOutlined } from '@ant-design/icons';
 import { useGeneratorStore } from './store';
 import {
   MarkdownInput,
@@ -14,8 +14,9 @@ import {
   CommitView,
   GitLabStatus,
   ShortcutsHelp,
+  HistoryView,
 } from './components';
-import { useKeyboardShortcuts, getShortcutText } from './hooks';
+import { useKeyboardShortcuts } from './hooks';
 import './styles.less';
 
 export function AITestGenerator() {
@@ -90,6 +91,14 @@ export function AITestGenerator() {
     enabled: true,
   });
 
+  const handleOpenHistory = useCallback(() => {
+    setCurrentView('history');
+  }, [setCurrentView]);
+
+  const handleCloseHistory = useCallback(() => {
+    setCurrentView('input');
+  }, [setCurrentView]);
+
   const renderContent = () => {
     switch (currentView) {
       case 'input':
@@ -100,6 +109,8 @@ export function AITestGenerator() {
         return <ExecutionView />;
       case 'commit':
         return <CommitView />;
+      case 'history':
+        return <HistoryView onBack={handleCloseHistory} />;
       default:
         return <MarkdownInput />;
     }
@@ -109,12 +120,20 @@ export function AITestGenerator() {
     <div className="ai-test-generator-container">
       <div className="generator-toolbar">
         <GitLabStatus />
-        <Tooltip title="快捷键帮助 (?)">
-          <KeyOutlined
-            className="shortcuts-help-icon"
-            onClick={() => setShowShortcutsHelp(true)}
-          />
-        </Tooltip>
+        <div style={{ display: 'flex', gap: 4 }}>
+          <Tooltip title="执行历史">
+            <HistoryOutlined
+              className="shortcuts-help-icon"
+              onClick={handleOpenHistory}
+            />
+          </Tooltip>
+          <Tooltip title="快捷键帮助 (?)">
+            <KeyOutlined
+              className="shortcuts-help-icon"
+              onClick={() => setShowShortcutsHelp(true)}
+            />
+          </Tooltip>
+        </div>
       </div>
       <div className="generator-content">{renderContent()}</div>
 

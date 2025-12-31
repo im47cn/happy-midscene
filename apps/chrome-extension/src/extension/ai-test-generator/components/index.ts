@@ -4,3 +4,4 @@ export { ExecutionView } from './ExecutionView';
 export { CommitView } from './CommitView';
 export { GitLabConfigModal, GitLabStatus } from './GitLabConfig';
 export { ShortcutsHelp } from './ShortcutsHelp';
+export { HistoryView } from './HistoryView';

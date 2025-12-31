@@ -27,6 +27,7 @@ import {
 import { useEffect, useState, useRef } from 'react';
 import { useGeneratorStore } from '../store';
 import { ExecutionEngine } from '../services/executionEngine';
+import { historyService } from '../services/historyService';
 import type { TestCase, TaskStep } from '../types';
 import {
   ChromeExtensionProxyPage,
@@ -44,6 +45,7 @@ const createAgent = (forceSameTabNavigation = true) => {
 export function ExecutionView() {
   const {
     parseResult,
+    markdownInput,
     executionStatus,
     setExecutionStatus,
     currentStepIndex,
@@ -64,6 +66,7 @@ export function ExecutionView() {
   const [totalProgress, setTotalProgress] = useState(0);
 
   const engineRef = useRef<ExecutionEngine | null>(null);
+  const executionStartTimeRef = useRef<number>(0);
 
   useEffect(() => {
     // Initialize engine
@@ -106,11 +109,35 @@ export function ExecutionView() {
     }
   }, [parseResult]);
 
+  const saveExecutionHistory = async (yaml: string, isCancelled = false) => {
+    if (!parseResult) return;
+
+    try {
+      const currentResults = useGeneratorStore.getState().executionResults;
+      const historyItem = historyService.createHistoryItem(
+        markdownInput,
+        parseResult.cases,
+        currentResults,
+        yaml,
+        executionStartTimeRef.current
+      );
+
+      if (isCancelled) {
+        historyItem.status = 'cancelled';
+      }
+
+      await historyService.addHistoryItem(historyItem);
+    } catch (error) {
+      console.error('Failed to save execution history:', error);
+    }
+  };
+
   const startExecution = async () => {
     if (!parseResult || !engineRef.current) return;
 
     clearExecutionResults();
     setExecutionStatus('running');
+    executionStartTimeRef.current = Date.now();
 
     // Execute all cases sequentially
     const allYamlParts: string[] = [];
@@ -142,11 +169,18 @@ export function ExecutionView() {
       const combinedYaml = allYamlParts.join('\n---\n');
       setGeneratedYaml(combinedYaml);
 
+      // Save to history
+      await saveExecutionHistory(combinedYaml);
+
       setExecutionStatus('completed');
       setCurrentView('commit');
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Execution failed');
       setExecutionStatus('failed');
+
+      // Save failed execution to history
+      const partialYaml = allYamlParts.join('\n---\n');
+      await saveExecutionHistory(partialYaml);
     }
   };
 
@@ -164,9 +198,13 @@ export function ExecutionView() {
     }
   };
 
-  const handleStop = () => {
+  const handleStop = async () => {
     if (engineRef.current) {
       engineRef.current.stop();
+
+      // Save cancelled execution to history
+      await saveExecutionHistory('', true);
+
       setExecutionStatus('idle');
       setCurrentView('preview');
     }
