@@ -99,7 +99,7 @@ apps/chrome-extension/src/extension/ai-test-generator/
 
 ### 功能增强
 - [ ] H5 移动端模式支持
-- [ ] 快捷键操作
+- [x] 快捷键操作
 - [ ] 批量用例执行
 - [ ] 执行历史记录
 - [ ] 元素框选修复功能
