@@ -1,0 +1,293 @@
+/**
+ * AI Test Generator Styles
+ */
+
+.ai-test-generator-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .generator-toolbar {
+    padding: 8px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    background-color: #fafafa;
+
+    .gitlab-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: #f0f0f0;
+      }
+    }
+  }
+
+  .generator-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+
+    // Scrollbar styles
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+
+      &:hover {
+        background: #a1a1a1;
+      }
+    }
+  }
+}
+
+// Markdown Input Component
+.markdown-input-container {
+  .input-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .input-hint {
+    margin-bottom: 8px;
+  }
+
+  .input-actions {
+    margin-top: 16px;
+  }
+}
+
+// Test Case Preview Component
+.test-case-preview-container {
+  .preview-header {
+    margin-bottom: 16px;
+  }
+
+  .preview-content {
+    margin-bottom: 16px;
+  }
+
+  .preview-actions {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 12px 0;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  .test-case-card {
+    margin-bottom: 12px;
+
+    .steps-list {
+      .step-item {
+        display: flex;
+        align-items: flex-start;
+        padding: 8px 0;
+        border-bottom: 1px solid #f5f5f5;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .step-number {
+          width: 24px;
+          color: #999;
+          flex-shrink: 0;
+        }
+
+        .step-status {
+          width: 24px;
+          flex-shrink: 0;
+          text-align: center;
+        }
+
+        .step-content {
+          flex: 1;
+          min-width: 0;
+
+          .step-error {
+            margin-top: 4px;
+          }
+
+          .step-failed-text {
+            color: #ff4d4f;
+            text-decoration: line-through;
+          }
+        }
+
+        .step-actions {
+          flex-shrink: 0;
+          opacity: 0;
+          transition: opacity 0.2s;
+        }
+
+        &:hover .step-actions {
+          opacity: 1;
+        }
+
+        &.step-success {
+          background-color: #f6ffed;
+        }
+
+        &.step-failed {
+          background-color: #fff2f0;
+        }
+
+        &.step-running {
+          background-color: #e6f7ff;
+        }
+      }
+    }
+
+    .params-section {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed #f0f0f0;
+
+      .params-list {
+        margin-top: 4px;
+      }
+    }
+  }
+}
+
+// Execution View Component
+.execution-view-container {
+  .execution-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+  }
+
+  .execution-progress-card {
+    margin-bottom: 16px;
+
+    .case-info {
+      margin-bottom: 8px;
+    }
+  }
+
+  .execution-timeline {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 16px;
+    background-color: #fafafa;
+    border-radius: 8px;
+    margin-bottom: 16px;
+
+    .timeline-step {
+      &.step-running {
+        .step-running-text {
+          color: #1890ff;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  .execution-controls {
+    display: flex;
+    justify-content: center;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  .retry-modal-content {
+    padding: 8px 0;
+  }
+}
+
+.execution-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  gap: 16px;
+}
+
+// Commit View Component
+.commit-view-container {
+  .commit-header {
+    margin-bottom: 16px;
+  }
+
+  .yaml-preview-card {
+    margin-bottom: 16px;
+
+    .ant-card-body {
+      padding: 12px;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+  }
+
+  .gitlab-not-configured {
+    padding: 8px 0;
+  }
+}
+
+// GitLab Config Modal
+.gitlab-config-content {
+  .ant-form-item-extra {
+    margin-top: 4px;
+  }
+}
+
+// Animations
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 400px) {
+  .ai-test-generator-container {
+    .generator-content {
+      padding: 12px;
+    }
+  }
+
+  .markdown-input-container {
+    .input-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+  }
+}

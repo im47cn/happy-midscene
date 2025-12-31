@@ -4,6 +4,7 @@ import {
   MenuOutlined,
   SendOutlined,
   VideoCameraOutlined,
+  ExperimentOutlined,
 } from '@ant-design/icons';
 import {
   NavActions,
@@ -15,6 +16,7 @@ import { useEffect, useState } from 'react';
 import { BrowserExtensionPlayground } from '../../components/playground';
 import Bridge from '../bridge';
 import Recorder from '../recorder';
+import AITestGenerator from '../ai-test-generator';
 import './index.less';
 import { OPENAI_API_KEY } from '@midscene/shared/env';
 import { safeOverrideAIConfig } from '@midscene/visualizer';
@@ -33,17 +35,20 @@ const STORAGE_KEY = 'midscene-popup-mode';
 export function PlaygroundPopup() {
   const { setPopupTab } = useEnvConfig();
   const [currentMode, setCurrentMode] = useState<
-    'playground' | 'bridge' | 'recorder'
+    'playground' | 'bridge' | 'recorder' | 'ai-generator'
   >(() => {
     const savedMode = localStorage.getItem(STORAGE_KEY);
-    return (savedMode as 'playground' | 'bridge' | 'recorder') || 'playground';
+    return (savedMode as 'playground' | 'bridge' | 'recorder' | 'ai-generator') || 'playground';
   });
 
   const { config } = useEnvConfig();
 
   // Sync popupTab with saved mode on mount
   useEffect(() => {
-    setPopupTab(currentMode);
+    // Cast to expected type - ai-generator is extension-only mode
+    if (currentMode !== 'ai-generator') {
+      setPopupTab(currentMode);
+    }
   }, []);
 
   // Override AI configuration
@@ -87,6 +92,16 @@ export function PlaygroundPopup() {
         localStorage.setItem(STORAGE_KEY, 'bridge');
       },
     },
+    {
+      key: 'ai-generator',
+      icon: <ExperimentOutlined />,
+      label: 'AI Test Generator',
+      onClick: () => {
+        setCurrentMode('ai-generator');
+        // ai-generator is extension-only mode, don't sync to visualizer
+        localStorage.setItem(STORAGE_KEY, 'ai-generator');
+      },
+    },
   ];
 
   const renderContent = () => {
@@ -103,6 +118,13 @@ export function PlaygroundPopup() {
       return (
         <div className="popup-content recorder-mode">
           <Recorder />
+        </div>
+      );
+    }
+    if (currentMode === 'ai-generator') {
+      return (
+        <div className="popup-content ai-generator-mode">
+          <AITestGenerator />
         </div>
       );
     }
@@ -152,7 +174,9 @@ export function PlaygroundPopup() {
                 ? 'Playground'
                 : currentMode === 'recorder'
                   ? 'Recorder'
-                  : 'Bridge Mode'}
+                  : currentMode === 'ai-generator'
+                    ? 'AI Test Generator'
+                    : 'Bridge Mode'}
             </span>
           </div>
           <div className="nav-right">
