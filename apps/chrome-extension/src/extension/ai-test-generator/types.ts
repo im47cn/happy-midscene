@@ -5,6 +5,7 @@
 import type { TestCase, TaskStep, ParseResult } from './services/markdownParser';
 import type { GitLabProject, GitLabBranch, GitLabCommitResult } from './services/gitlabClient';
 import type { ExecutionResult, ExecutionStatus, ExecutionContext } from './services/executionEngine';
+import type { DevicePreset } from './config/devicePresets';
 
 export type {
   TestCase,
@@ -16,6 +17,7 @@ export type {
   ExecutionResult,
   ExecutionStatus,
   ExecutionContext,
+  DevicePreset,
 };
 
 export type ViewMode = 'input' | 'preview' | 'execute' | 'commit' | 'history';
@@ -24,6 +26,9 @@ export interface GeneratorState {
   // Input state
   markdownInput: string;
   parseResult: ParseResult | null;
+
+  // Device emulation
+  selectedDeviceId: string;
 
   // Execution state
   executionStatus: ExecutionStatus;

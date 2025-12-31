@@ -5,10 +5,21 @@
 
 import type { TaskStep, TestCase } from './markdownParser';
 
+export interface DeviceEmulationConfig {
+  deviceId: string;
+  width: number;
+  height: number;
+  deviceScaleFactor: number;
+  userAgent: string;
+  isMobile: boolean;
+  hasTouch: boolean;
+}
+
 export interface ExecutionContext {
   url: string;
   viewportWidth?: number;
   viewportHeight?: number;
+  deviceEmulation?: DeviceEmulationConfig;
 }
 
 export interface ExecutionError {
@@ -249,9 +260,71 @@ export class ExecutionEngine {
   }
 
   /**
+   * Apply device emulation settings via CDP
+   */
+  private async applyDeviceEmulation(config: DeviceEmulationConfig): Promise<void> {
+    if (!this.agent?.page) return;
+
+    try {
+      // Use CDP to set device metrics override
+      const page = this.agent.page;
+
+      // Check if the page has sendCommandToDebugger method (ChromeExtensionProxyPage)
+      if (typeof page.sendCommandToDebugger === 'function') {
+        // Set device metrics override
+        await page.sendCommandToDebugger('Emulation.setDeviceMetricsOverride', {
+          width: config.width,
+          height: config.height,
+          deviceScaleFactor: config.deviceScaleFactor,
+          mobile: config.isMobile,
+        });
+
+        // Set user agent if specified
+        if (config.userAgent) {
+          await page.sendCommandToDebugger('Emulation.setUserAgentOverride', {
+            userAgent: config.userAgent,
+          });
+        }
+
+        // Enable touch events if needed
+        if (config.hasTouch) {
+          await page.sendCommandToDebugger('Emulation.setTouchEmulationEnabled', {
+            enabled: true,
+            maxTouchPoints: 5,
+          });
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to apply device emulation:', error);
+    }
+  }
+
+  /**
+   * Clear device emulation settings
+   */
+  private async clearDeviceEmulation(): Promise<void> {
+    if (!this.agent?.page) return;
+
+    try {
+      const page = this.agent.page;
+      if (typeof page.sendCommandToDebugger === 'function') {
+        await page.sendCommandToDebugger('Emulation.clearDeviceMetricsOverride', {});
+        await page.sendCommandToDebugger('Emulation.setTouchEmulationEnabled', {
+          enabled: false,
+        });
+      }
+    } catch (error) {
+      console.warn('Failed to clear device emulation:', error);
+    }
+  }
+
+  /**
    * Destroy agent after execution
    */
   private async destroyAgent(): Promise<void> {
+    // Clear device emulation before destroying
+    await this.clearDeviceEmulation();
+
     if (this.agent?.page?.destroy) {
       await this.agent.page.destroy();
     }
@@ -303,6 +376,11 @@ export class ExecutionEngine {
 
     try {
       await this.initAgent();
+
+      // Apply device emulation if configured
+      if (context?.deviceEmulation) {
+        await this.applyDeviceEmulation(context.deviceEmulation);
+      }
 
       // Navigate to URL if provided
       if (context?.url) {

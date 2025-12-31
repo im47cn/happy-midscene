@@ -81,6 +81,8 @@ apps/chrome-extension/src/extension/ai-test-generator/
 ├── store.ts                  # Zustand 状态管理
 ├── types.ts                  # 类型定义
 ├── styles.less               # 样式文件
+├── config/
+│   └── devicePresets.ts      # 设备预设配置
 ├── services/
 │   ├── index.ts
 │   ├── gitlabClient.ts       # GitLab API 客户端
@@ -96,13 +98,14 @@ apps/chrome-extension/src/extension/ai-test-generator/
     ├── GitLabConfig.tsx      # GitLab 配置
     ├── ShortcutsHelp.tsx     # 快捷键帮助
     ├── HistoryView.tsx       # 执行历史
-    └── ErrorBoundary.tsx     # 错误边界处理
+    ├── ErrorBoundary.tsx     # 错误边界处理
+    └── DeviceSelector.tsx    # 设备选择器
 ```
 
 ## 待优化/后续迭代 🔄
 
 ### 功能增强
-- [ ] H5 移动端模式支持
+- [x] H5 移动端模式支持
 - [x] 快捷键操作
 - [x] 批量用例执行
 - [x] 执行历史记录

@@ -16,6 +16,7 @@ import {
   ShortcutsHelp,
   HistoryView,
   ErrorBoundary,
+  DeviceSelectorCompact,
 } from './components';
 import { useKeyboardShortcuts } from './hooks';
 import './styles.less';
@@ -30,6 +31,8 @@ export function AITestGenerator() {
     parseResult,
     executionStatus,
     generatedYaml,
+    selectedDeviceId,
+    setSelectedDeviceId,
   } = useGeneratorStore();
 
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
@@ -121,7 +124,12 @@ export function AITestGenerator() {
     <div className="ai-test-generator-container">
       <div className="generator-toolbar">
         <GitLabStatus />
-        <div style={{ display: 'flex', gap: 4 }}>
+        <div className="toolbar-right">
+          <DeviceSelectorCompact
+            value={selectedDeviceId}
+            onChange={setSelectedDeviceId}
+            disabled={executionStatus === 'running'}
+          />
           <Tooltip title="执行历史">
             <HistoryOutlined
               className="shortcuts-help-icon"

@@ -14,6 +14,9 @@ interface GeneratorStore extends GeneratorState {
   setMarkdownInput: (input: string) => void;
   parseInput: () => void;
 
+  // Device emulation
+  setSelectedDeviceId: (deviceId: string) => void;
+
   // Execution actions
   setExecutionStatus: (status: ExecutionStatus) => void;
   setCurrentStepIndex: (index: number) => void;
@@ -47,6 +50,7 @@ interface GeneratorStore extends GeneratorState {
 const initialState: GeneratorState & { selectedCaseIds: string[] } = {
   markdownInput: '',
   parseResult: null,
+  selectedDeviceId: 'desktop',
   executionStatus: 'idle',
   currentStepIndex: 0,
   executionResults: [],
@@ -85,6 +89,9 @@ export const useGeneratorStore = create<GeneratorStore>((set, get) => ({
       error: result.parseErrors.length > 0 ? result.parseErrors.join('\n') : null,
     });
   },
+
+  // Device emulation
+  setSelectedDeviceId: (deviceId) => set({ selectedDeviceId: deviceId }),
 
   // Execution actions
   setExecutionStatus: (status) => set({ executionStatus: status }),

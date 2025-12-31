@@ -31,6 +31,12 @@
       }
     }
 
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .shortcuts-help-icon {
       cursor: pointer;
       padding: 4px 8px;
@@ -517,6 +523,29 @@
       margin-top: 16px;
       display: flex;
       justify-content: center;
+    }
+  }
+}
+
+// Device Selector Component
+.device-selector {
+  .device-mode-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+}
+
+.device-info-tooltip {
+  font-size: 12px;
+  line-height: 1.5;
+
+  div {
+    margin-bottom: 2px;
+
+    &:last-child {
+      margin-bottom: 0;
     }
   }
 }

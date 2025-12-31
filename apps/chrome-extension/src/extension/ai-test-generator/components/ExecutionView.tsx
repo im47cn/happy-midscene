@@ -31,8 +31,9 @@ import {
 } from 'antd';
 import { useEffect, useState, useRef } from 'react';
 import { useGeneratorStore } from '../store';
-import { ExecutionEngine, type ExecutionError } from '../services/executionEngine';
+import { ExecutionEngine, type ExecutionError, type DeviceEmulationConfig } from '../services/executionEngine';
 import { historyService } from '../services/historyService';
+import { getDevicePreset } from '../config/devicePresets';
 import type { TestCase, TaskStep } from '../types';
 import {
   ChromeExtensionProxyPage,
@@ -132,6 +133,7 @@ export function ExecutionView() {
     setCurrentView,
     setError,
     selectedCaseIds,
+    selectedDeviceId,
   } = useGeneratorStore();
 
   const [currentCase, setCurrentCase] = useState<TestCase | null>(null);
@@ -240,10 +242,28 @@ export function ExecutionView() {
 
         // Get current tab URL
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+        // Build device emulation config if not desktop
+        const devicePreset = getDevicePreset(selectedDeviceId);
+        let deviceEmulation: DeviceEmulationConfig | undefined;
+
+        if (devicePreset && devicePreset.isMobile) {
+          deviceEmulation = {
+            deviceId: devicePreset.id,
+            width: devicePreset.width,
+            height: devicePreset.height,
+            deviceScaleFactor: devicePreset.deviceScaleFactor,
+            userAgent: devicePreset.userAgent,
+            isMobile: devicePreset.isMobile,
+            hasTouch: devicePreset.hasTouch,
+          };
+        }
+
         const context = {
           url: tab?.url || '',
-          viewportWidth: 1280,
-          viewportHeight: 720,
+          viewportWidth: devicePreset?.width || 1280,
+          viewportHeight: devicePreset?.height || 720,
+          deviceEmulation,
         };
 
         const result = await engineRef.current.executeTestCase(testCase, context);
