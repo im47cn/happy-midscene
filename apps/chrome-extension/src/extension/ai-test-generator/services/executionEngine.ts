@@ -11,19 +11,32 @@ export interface ExecutionContext {
   viewportHeight?: number;
 }
 
+export interface ExecutionError {
+  message: string;
+  type: 'element_not_found' | 'timeout' | 'action_failed' | 'navigation_failed' | 'assertion_failed' | 'unknown';
+  details?: string;
+  suggestion?: string;
+  elementInfo?: {
+    selector?: string;
+    description?: string;
+    candidates?: string[];
+  };
+}
+
 export interface ExecutionResult {
   stepId: string;
   success: boolean;
   generatedAction?: string;
   screenshot?: string;
   error?: string;
+  errorDetails?: ExecutionError;
   duration: number;
 }
 
 export interface ExecutionCallbacks {
   onStepStart?: (step: TaskStep, index: number) => void;
   onStepComplete?: (step: TaskStep, result: ExecutionResult) => void;
-  onStepFailed?: (step: TaskStep, error: string) => void;
+  onStepFailed?: (step: TaskStep, error: string, errorDetails?: ExecutionError) => void;
   onHighlight?: (element: { x: number; y: number; width: number; height: number }) => void;
   onProgress?: (current: number, total: number) => void;
 }
@@ -106,6 +119,94 @@ function generateYamlAction(step: TaskStep): string {
   }
 }
 
+/**
+ * Parse error to extract detailed information
+ */
+function parseErrorDetails(error: unknown, stepText: string): ExecutionError {
+  const message = error instanceof Error ? error.message : String(error);
+  const lowerMessage = message.toLowerCase();
+
+  // Element not found
+  if (lowerMessage.includes('element not found') ||
+      lowerMessage.includes('cannot find') ||
+      lowerMessage.includes('no element') ||
+      lowerMessage.includes('unable to locate') ||
+      lowerMessage.includes('找不到') ||
+      lowerMessage.includes('未找到')) {
+    return {
+      message,
+      type: 'element_not_found',
+      details: '无法在页面上找到匹配的元素',
+      suggestion: '请尝试：1. 使用更具体的描述 2. 检查元素是否可见 3. 等待页面完全加载',
+      elementInfo: {
+        description: stepText,
+      },
+    };
+  }
+
+  // Timeout
+  if (lowerMessage.includes('timeout') ||
+      lowerMessage.includes('timed out') ||
+      lowerMessage.includes('超时')) {
+    return {
+      message,
+      type: 'timeout',
+      details: '操作执行超时',
+      suggestion: '请检查：1. 网络连接是否正常 2. 页面是否正在加载 3. 目标元素是否需要更长时间才能出现',
+    };
+  }
+
+  // Navigation failed
+  if (lowerMessage.includes('navigation') ||
+      lowerMessage.includes('navigate') ||
+      lowerMessage.includes('goto') ||
+      lowerMessage.includes('跳转')) {
+    return {
+      message,
+      type: 'navigation_failed',
+      details: '页面导航失败',
+      suggestion: '请检查：1. URL 是否正确 2. 网络连接是否正常 3. 页面是否需要身份验证',
+    };
+  }
+
+  // Assertion failed
+  if (lowerMessage.includes('assert') ||
+      lowerMessage.includes('expect') ||
+      lowerMessage.includes('verify') ||
+      lowerMessage.includes('验证失败') ||
+      lowerMessage.includes('断言')) {
+    return {
+      message,
+      type: 'assertion_failed',
+      details: '页面状态验证失败',
+      suggestion: '请检查：1. 验证条件是否正确 2. 页面内容是否符合预期 3. 是否需要等待某些元素加载',
+    };
+  }
+
+  // Action failed
+  if (lowerMessage.includes('click') ||
+      lowerMessage.includes('type') ||
+      lowerMessage.includes('input') ||
+      lowerMessage.includes('scroll') ||
+      lowerMessage.includes('点击') ||
+      lowerMessage.includes('输入')) {
+    return {
+      message,
+      type: 'action_failed',
+      details: '操作执行失败',
+      suggestion: '请检查：1. 元素是否可点击/可交互 2. 是否被其他元素遮挡 3. 页面是否完全加载',
+    };
+  }
+
+  // Unknown error
+  return {
+    message,
+    type: 'unknown',
+    details: '发生未知错误',
+    suggestion: '请尝试：1. 刷新页面 2. 修改操作描述 3. 检查控制台日志获取更多信息',
+  };
+}
+
 export class ExecutionEngine {
   private status: ExecutionStatus = 'idle';
   private currentStepIndex = 0;
@@ -176,10 +277,13 @@ export class ExecutionEngine {
 
       return result;
     } catch (error) {
+      const errorDetails = parseErrorDetails(error, step.originalText);
+
       return {
         stepId: step.id,
         success: false,
-        error: error instanceof Error ? error.message : String(error),
+        error: errorDetails.message,
+        errorDetails,
         duration: Date.now() - startTime,
       };
     }
@@ -239,7 +343,7 @@ export class ExecutionEngine {
           this.callbacks.onStepComplete?.(step, result);
         } else {
           step.error = result.error;
-          this.callbacks.onStepFailed?.(step, result.error || 'Unknown error');
+          this.callbacks.onStepFailed?.(step, result.error || 'Unknown error', result.errorDetails);
 
           // Pause on failure for human intervention
           this.status = 'paused';

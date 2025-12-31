@@ -11,6 +11,9 @@ import {
   PlayCircleOutlined,
   StopOutlined,
   ReloadOutlined,
+  InfoCircleOutlined,
+  BulbOutlined,
+  ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import {
   Button,
@@ -23,10 +26,12 @@ import {
   Modal,
   Alert,
   Spin,
+  Tag,
+  Collapse,
 } from 'antd';
 import { useEffect, useState, useRef } from 'react';
 import { useGeneratorStore } from '../store';
-import { ExecutionEngine } from '../services/executionEngine';
+import { ExecutionEngine, type ExecutionError } from '../services/executionEngine';
 import { historyService } from '../services/historyService';
 import type { TestCase, TaskStep } from '../types';
 import {
@@ -35,6 +40,75 @@ import {
 } from '@midscene/web/chrome-extension';
 
 const { Text, Title } = Typography;
+
+// Error type labels in Chinese
+const errorTypeLabels: Record<ExecutionError['type'], string> = {
+  element_not_found: '元素未找到',
+  timeout: '操作超时',
+  action_failed: '操作失败',
+  navigation_failed: '导航失败',
+  assertion_failed: '验证失败',
+  unknown: '未知错误',
+};
+
+// Error type colors
+const errorTypeColors: Record<ExecutionError['type'], string> = {
+  element_not_found: 'orange',
+  timeout: 'gold',
+  action_failed: 'red',
+  navigation_failed: 'purple',
+  assertion_failed: 'magenta',
+  unknown: 'default',
+};
+
+// Detailed error display component
+function DetailedErrorDisplay({ errorDetails }: { errorDetails: ExecutionError }) {
+  return (
+    <div className="detailed-error">
+      <div className="error-header">
+        <Tag color={errorTypeColors[errorDetails.type]}>
+          {errorTypeLabels[errorDetails.type]}
+        </Tag>
+        <Text type="danger">{errorDetails.details}</Text>
+      </div>
+
+      {errorDetails.message && (
+        <Collapse
+          size="small"
+          ghost
+          items={[
+            {
+              key: 'message',
+              label: (
+                <Space>
+                  <InfoCircleOutlined />
+                  <Text type="secondary">详细信息</Text>
+                </Space>
+              ),
+              children: (
+                <Text code copyable style={{ fontSize: 11, wordBreak: 'break-all' }}>
+                  {errorDetails.message}
+                </Text>
+              ),
+            },
+          ]}
+        />
+      )}
+
+      {errorDetails.suggestion && (
+        <Alert
+          type="info"
+          icon={<BulbOutlined />}
+          message={
+            <Text style={{ fontSize: 12 }}>{errorDetails.suggestion}</Text>
+          }
+          style={{ marginTop: 8 }}
+          showIcon
+        />
+      )}
+    </div>
+  );
+}
 
 // Create agent factory
 const createAgent = (forceSameTabNavigation = true) => {
@@ -65,6 +139,8 @@ export function ExecutionView() {
   const [retryStepId, setRetryStepId] = useState<string | null>(null);
   const [retryInstruction, setRetryInstruction] = useState('');
   const [totalProgress, setTotalProgress] = useState(0);
+  const [currentErrorDetails, setCurrentErrorDetails] = useState<ExecutionError | null>(null);
+  const [stepErrorMap, setStepErrorMap] = useState<Map<string, ExecutionError>>(new Map());
 
   const engineRef = useRef<ExecutionEngine | null>(null);
   const executionStartTimeRef = useRef<number>(0);
@@ -78,13 +154,23 @@ export function ExecutionView() {
       onStepStart: (step, index) => {
         updateStepStatus(step.id, 'running');
         setCurrentStepIndex(index);
+        setCurrentErrorDetails(null);
       },
       onStepComplete: (step, result) => {
         updateStepStatus(step.id, 'success');
         addExecutionResult(result);
       },
-      onStepFailed: (step, error) => {
+      onStepFailed: (step, error, errorDetails) => {
         updateStepStatus(step.id, 'failed');
+        // Store error details for display
+        if (errorDetails) {
+          setCurrentErrorDetails(errorDetails);
+          setStepErrorMap((prev) => {
+            const next = new Map(prev);
+            next.set(step.id, errorDetails);
+            return next;
+          });
+        }
         // Show retry modal
         setRetryStepId(step.id);
         setRetryInstruction(step.originalText);
@@ -346,14 +432,18 @@ export function ExecutionView() {
                 >
                   {index + 1}. {step.originalText}
                 </Text>
-                {step.error && (
+                {step.status === 'failed' && stepErrorMap.has(step.id) ? (
+                  <div style={{ marginTop: 8 }}>
+                    <DetailedErrorDisplay errorDetails={stepErrorMap.get(step.id)!} />
+                  </div>
+                ) : step.error ? (
                   <Alert
                     type="error"
                     message={step.error}
                     style={{ marginTop: 8 }}
                     showIcon
                   />
-                )}
+                ) : null}
               </div>
             ),
           }))}
@@ -384,9 +474,15 @@ export function ExecutionView() {
 
       {/* Retry Modal */}
       <Modal
-        title="步骤执行失败"
+        title={
+          <Space>
+            <ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />
+            步骤执行失败
+          </Space>
+        }
         open={retryModalVisible}
         onCancel={() => setRetryModalVisible(false)}
+        width={500}
         footer={[
           <Button key="skip" onClick={handleSkipStep}>
             跳过此步骤
@@ -397,20 +493,30 @@ export function ExecutionView() {
         ]}
       >
         <div className="retry-modal-content">
-          <Text>AI 无法定位到元素或执行失败。您可以修改指令后重试：</Text>
+          {currentErrorDetails && (
+            <div style={{ marginBottom: 16 }}>
+              <DetailedErrorDisplay errorDetails={currentErrorDetails} />
+            </div>
+          )}
+
+          <Text strong>修改指令后重试：</Text>
           <Input.TextArea
             value={retryInstruction}
             onChange={(e) => setRetryInstruction(e.target.value)}
             rows={3}
-            style={{ marginTop: 12 }}
+            style={{ marginTop: 8 }}
             placeholder="修改指令描述..."
           />
-          <Alert
-            type="info"
-            message="提示：尝试使用更具体的描述，如元素的颜色、位置或文字内容"
-            style={{ marginTop: 12 }}
-            showIcon
-          />
+
+          {!currentErrorDetails?.suggestion && (
+            <Alert
+              type="info"
+              icon={<BulbOutlined />}
+              message="提示：尝试使用更具体的描述，如元素的颜色、位置或文字内容"
+              style={{ marginTop: 12 }}
+              showIcon
+            />
+          )}
         </div>
       </Modal>
     </div>
