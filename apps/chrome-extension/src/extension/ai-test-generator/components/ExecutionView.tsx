@@ -57,6 +57,7 @@ export function ExecutionView() {
     setGeneratedYaml,
     setCurrentView,
     setError,
+    selectedCaseIds,
   } = useGeneratorStore();
 
   const [currentCase, setCurrentCase] = useState<TestCase | null>(null);
@@ -139,11 +140,16 @@ export function ExecutionView() {
     setExecutionStatus('running');
     executionStartTimeRef.current = Date.now();
 
-    // Execute all cases sequentially
+    // Determine which cases to execute
+    const casesToExecute = selectedCaseIds.length > 0
+      ? parseResult.cases.filter((c) => selectedCaseIds.includes(c.id))
+      : parseResult.cases;
+
+    // Execute selected cases sequentially
     const allYamlParts: string[] = [];
 
     try {
-      for (const testCase of parseResult.cases) {
+      for (const testCase of casesToExecute) {
         setCurrentCase(testCase);
 
         // Get current tab URL

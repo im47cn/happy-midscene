@@ -11,6 +11,8 @@ import {
   EditOutlined,
   DeleteOutlined,
   PlusOutlined,
+  CheckSquareOutlined,
+  BorderOutlined,
 } from '@ant-design/icons';
 import {
   Button,
@@ -23,8 +25,10 @@ import {
   Input,
   Empty,
   Popconfirm,
+  Checkbox,
+  Tooltip,
 } from 'antd';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useGeneratorStore } from '../store';
 import type { TaskStep, TestCase } from '../types';
 
@@ -123,6 +127,8 @@ function StepItem({ step, index, onEdit, onDelete }: StepItemProps) {
 
 interface TestCaseCardProps {
   testCase: TestCase;
+  selected?: boolean;
+  onSelect?: (caseId: string, selected: boolean) => void;
   onExecute?: (testCase: TestCase) => void;
   onEditStep?: (caseId: string, stepId: string, newText: string) => void;
   onDeleteStep?: (caseId: string, stepId: string) => void;
@@ -131,6 +137,8 @@ interface TestCaseCardProps {
 
 function TestCaseCard({
   testCase,
+  selected = false,
+  onSelect,
   onExecute,
   onEditStep,
   onDeleteStep,
@@ -142,10 +150,17 @@ function TestCaseCard({
 
   return (
     <Card
-      className="test-case-card"
+      className={`test-case-card ${selected ? 'selected' : ''}`}
       size="small"
       title={
         <Space>
+          {onSelect && (
+            <Checkbox
+              checked={selected}
+              onChange={(e) => onSelect(testCase.id, e.target.checked)}
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
           <Text strong>{testCase.name}</Text>
           <Tag color="blue">{totalSteps} 步骤</Tag>
           {completedSteps > 0 && (
@@ -229,7 +244,27 @@ export function TestCasePreview() {
     parseResult,
     setCurrentView,
     executionStatus,
+    setSelectedCaseIds,
   } = useGeneratorStore();
+
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Calculate selection state
+  const allCaseIds = useMemo(
+    () => parseResult?.cases.map((c) => c.id) || [],
+    [parseResult]
+  );
+
+  const isAllSelected = selectedIds.size === allCaseIds.length && allCaseIds.length > 0;
+  const isPartialSelected = selectedIds.size > 0 && selectedIds.size < allCaseIds.length;
+
+  const selectedCount = selectedIds.size;
+  const selectedStepsCount = useMemo(() => {
+    if (!parseResult) return 0;
+    return parseResult.cases
+      .filter((c) => selectedIds.has(c.id))
+      .reduce((acc, c) => acc + c.steps.length, 0);
+  }, [parseResult, selectedIds]);
 
   if (!parseResult || parseResult.cases.length === 0) {
     return (
@@ -244,7 +279,35 @@ export function TestCasePreview() {
     );
   }
 
+  const handleSelectCase = (caseId: string, selected: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (selected) {
+        next.add(caseId);
+      } else {
+        next.delete(caseId);
+      }
+      return next;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(allCaseIds));
+    }
+  };
+
+  const handleExecuteSelected = () => {
+    // Store selected case IDs for execution
+    setSelectedCaseIds(Array.from(selectedIds));
+    setCurrentView('execute');
+  };
+
   const handleExecuteAll = () => {
+    // Clear selection to execute all
+    setSelectedCaseIds([]);
     setCurrentView('execute');
   };
 
@@ -255,33 +318,72 @@ export function TestCasePreview() {
   return (
     <div className="test-case-preview-container">
       <div className="preview-header">
-        <Title level={5} style={{ margin: 0 }}>
-          测试用例预览
-        </Title>
-        <Text type="secondary">
-          共 {parseResult.cases.length} 个用例，
-          {parseResult.cases.reduce((acc, c) => acc + c.steps.length, 0)} 个步骤
-        </Text>
+        <div className="header-title">
+          <Title level={5} style={{ margin: 0 }}>
+            测试用例预览
+          </Title>
+          <Text type="secondary">
+            共 {parseResult.cases.length} 个用例，
+            {parseResult.cases.reduce((acc, c) => acc + c.steps.length, 0)} 个步骤
+          </Text>
+        </div>
+        <div className="header-actions">
+          <Tooltip title={isAllSelected ? '取消全选' : '全选'}>
+            <Button
+              type="text"
+              size="small"
+              icon={isAllSelected ? <CheckSquareOutlined /> : <BorderOutlined />}
+              onClick={handleSelectAll}
+            >
+              {isAllSelected ? '取消全选' : '全选'}
+            </Button>
+          </Tooltip>
+        </div>
       </div>
+
+      {selectedCount > 0 && (
+        <div className="selection-info">
+          <Tag color="blue">
+            已选择 {selectedCount} 个用例，{selectedStepsCount} 个步骤
+          </Tag>
+        </div>
+      )}
 
       <div className="preview-content">
         {parseResult.cases.map((testCase) => (
-          <TestCaseCard key={testCase.id} testCase={testCase} />
+          <TestCaseCard
+            key={testCase.id}
+            testCase={testCase}
+            selected={selectedIds.has(testCase.id)}
+            onSelect={handleSelectCase}
+          />
         ))}
       </div>
 
       <div className="preview-actions">
         <Space style={{ width: '100%' }}>
           <Button onClick={handleBack}>返回修改</Button>
-          <Button
-            type="primary"
-            icon={<PlayCircleOutlined />}
-            onClick={handleExecuteAll}
-            loading={executionStatus === 'running'}
-            style={{ flex: 1 }}
-          >
-            开始生成脚本
-          </Button>
+          {selectedCount > 0 ? (
+            <Button
+              type="primary"
+              icon={<PlayCircleOutlined />}
+              onClick={handleExecuteSelected}
+              loading={executionStatus === 'running'}
+              style={{ flex: 1 }}
+            >
+              执行选中 ({selectedCount})
+            </Button>
+          ) : (
+            <Button
+              type="primary"
+              icon={<PlayCircleOutlined />}
+              onClick={handleExecuteAll}
+              loading={executionStatus === 'running'}
+              style={{ flex: 1 }}
+            >
+              执行全部
+            </Button>
+          )}
         </Space>
       </div>
     </div>

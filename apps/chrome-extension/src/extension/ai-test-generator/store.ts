@@ -33,6 +33,10 @@ interface GeneratorStore extends GeneratorState {
   setCommitPath: (path: string) => void;
   setCommitMessage: (message: string) => void;
 
+  // Batch execution
+  selectedCaseIds: string[];
+  setSelectedCaseIds: (ids: string[]) => void;
+
   // UI actions
   setCurrentView: (view: ViewMode) => void;
   setLoading: (loading: boolean) => void;
@@ -40,7 +44,7 @@ interface GeneratorStore extends GeneratorState {
   reset: () => void;
 }
 
-const initialState: GeneratorState = {
+const initialState: GeneratorState & { selectedCaseIds: string[] } = {
   markdownInput: '',
   parseResult: null,
   executionStatus: 'idle',
@@ -57,6 +61,7 @@ const initialState: GeneratorState = {
   currentView: 'input',
   isLoading: false,
   error: null,
+  selectedCaseIds: [],
 };
 
 export const useGeneratorStore = create<GeneratorStore>((set, get) => ({
@@ -138,6 +143,10 @@ export const useGeneratorStore = create<GeneratorStore>((set, get) => ({
   setCommitPath: (path) => set({ commitPath: path }),
 
   setCommitMessage: (message) => set({ commitMessage: message }),
+
+  // Batch execution
+  selectedCaseIds: [],
+  setSelectedCaseIds: (ids) => set({ selectedCaseIds: ids }),
 
   // UI actions
   setCurrentView: (view) => set({ currentView: view }),

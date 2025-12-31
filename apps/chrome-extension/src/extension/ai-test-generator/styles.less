@@ -92,7 +92,22 @@
 // Test Case Preview Component
 .test-case-preview-container {
   .preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: 16px;
+
+    .header-title {
+      flex: 1;
+    }
+
+    .header-actions {
+      flex-shrink: 0;
+    }
+  }
+
+  .selection-info {
+    margin-bottom: 12px;
   }
 
   .preview-content {
@@ -109,6 +124,12 @@
 
   .test-case-card {
     margin-bottom: 12px;
+    transition: all 0.2s;
+
+    &.selected {
+      border-color: #1890ff;
+      background-color: #e6f7ff;
+    }
 
     .steps-list {
       .step-item {
