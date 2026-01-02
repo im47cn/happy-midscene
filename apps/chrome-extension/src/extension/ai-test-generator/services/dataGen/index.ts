@@ -52,3 +52,31 @@ export { TemplateManager, templateManager } from './templateManager';
 
 // Data Pool Manager
 export { DataPoolManager, dataPoolManager } from './dataPoolManager';
+
+// Semantic Parser
+export {
+  parseSemanticType,
+  parseSemanticTypeWithConfidence,
+  parseFieldType,
+  extractConstraints,
+  getSemanticKeywords,
+  addSemanticKeywords,
+} from './semanticParser';
+
+// Field Recognizer
+export {
+  FieldRecognizer,
+  fieldRecognizer,
+  createFieldDefinition,
+  createFormFields,
+  type RawFieldInfo,
+  type RecognizedField,
+  type RecognizeOptions,
+} from './fieldRecognizer';
+
+// Smart Input Executor
+export {
+  SmartInputExecutor,
+  smartInputExecutor,
+  type SmartInputRecord,
+} from './smartInputExecutor';

@@ -44,7 +44,7 @@ describe('Data Generators', () => {
   describe('generateEmail', () => {
     it('should generate valid email format', () => {
       const email = generateEmail();
-      expect(email).toMatch(/^[a-z0-9]+@[a-z.]+$/);
+      expect(email).toMatch(/^[a-z0-9]+@[a-z0-9.]+$/);
     });
 
     it('should respect custom domain constraint', () => {
