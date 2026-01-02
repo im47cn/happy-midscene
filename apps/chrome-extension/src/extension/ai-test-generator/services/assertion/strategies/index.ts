@@ -69,7 +69,7 @@ export class SuccessMessageStrategy implements AssertionStrategy {
             target: element.description,
             operator: 'contains',
           },
-          yamlOutput: `- aiAssert: "页面包含文本 '${element.description}'"`,
+          yamlOutput: `- ai: "验证页面包含文本 '${element.description}'"`,
           source: 'rule',
         });
       }
@@ -128,7 +128,7 @@ export class NavigationStrategy implements AssertionStrategy {
           expectedValue: afterPath,
           operator: 'contains',
         },
-        yamlOutput: `- aiAssert: "当前 URL 包含 '${afterPath}'"`,
+        yamlOutput: `- ai: "验证当前 URL 包含 '${afterPath}'"`,
         source: 'rule',
       }];
     } catch {
@@ -208,7 +208,7 @@ export class ElementVisibilityStrategy implements AssertionStrategy {
         parameters: {
           target: element.description,
         },
-        yamlOutput: `- aiAssert: "元素 '${element.description}' 可见"`,
+        yamlOutput: `- ai: "验证元素 '${element.description}' 可见"`,
         source: 'rule',
       });
     }
