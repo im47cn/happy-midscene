@@ -323,6 +323,39 @@ class HealingStorage implements IFingerprintStorage, IHealingHistoryStorage {
       console.error('Failed to clear history:', error);
     }
   }
+
+  /**
+   * Update a history entry (for userConfirmed and fingerprintUpdated tracking)
+   */
+  async updateHistoryEntry(entry: HealingHistoryEntry): Promise<void> {
+    try {
+      const db = await this.ensureDB();
+
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction([HISTORY_STORE], 'readwrite');
+        const store = transaction.objectStore(HISTORY_STORE);
+        const request = store.put(entry);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      console.error('Failed to update history entry:', error);
+    }
+  }
+
+  /**
+   * Get a history entry by healingId
+   */
+  async getHistoryByHealingId(healingId: string): Promise<HealingHistoryEntry | null> {
+    try {
+      const allHistory = await this.getAllHistory();
+      return allHistory.find((h) => h.result.healingId === healingId) || null;
+    } catch (error) {
+      console.error('Failed to get history by healingId:', error);
+      return null;
+    }
+  }
 }
 
 // Export singleton instance

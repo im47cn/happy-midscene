@@ -234,20 +234,23 @@ export class HealingEngine implements IHealingEngine {
 
   /**
    * Confirm healing result (accept or reject)
+   * @returns The healed element info if accepted, null otherwise
    */
   async confirmHealing(
     healingId: string,
     accepted: boolean,
     newDescription?: string
-  ): Promise<void> {
+  ): Promise<{ center: [number, number]; rect: Rect } | null> {
     // Find the history entry
-    const allHistory = await healingStorage.getAllHistoryEntries();
-    const entry = allHistory.find((h) => h.result.healingId === healingId);
+    const entry = await healingStorage.getHistoryByHealingId(healingId);
 
     if (!entry) {
       console.warn('Healing history entry not found:', healingId);
-      return;
+      return null;
     }
+
+    let fingerprintUpdated = false;
+    let healedElement: { center: [number, number]; rect: Rect } | null = null;
 
     if (accepted && entry.result.success && entry.result.element) {
       // Update fingerprint with new location
@@ -267,8 +270,20 @@ export class HealingEngine implements IHealingEngine {
         }
 
         await healingStorage.update(updated);
+        fingerprintUpdated = true;
+        healedElement = entry.result.element;
       }
     }
+
+    // Update history entry with userConfirmed and fingerprintUpdated status
+    const updatedEntry: HealingHistoryEntry = {
+      ...entry,
+      userConfirmed: accepted,
+      fingerprintUpdated,
+    };
+    await healingStorage.updateHistoryEntry(updatedEntry);
+
+    return healedElement;
   }
 
   /**

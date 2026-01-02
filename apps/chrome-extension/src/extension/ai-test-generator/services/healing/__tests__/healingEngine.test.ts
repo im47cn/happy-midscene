@@ -17,6 +17,8 @@ vi.mock('../storage', () => ({
     getAllHistoryEntries: vi.fn().mockResolvedValue([]),
     getAllFingerprints: vi.fn().mockResolvedValue([]),
     cleanupExpired: vi.fn().mockResolvedValue(0),
+    getHistoryByHealingId: vi.fn(),
+    updateHistoryEntry: vi.fn(),
   },
 }));
 
@@ -360,6 +362,141 @@ describe('HealingEngine', () => {
       expect(stats.averageConfidence).toBe(80); // (90 + 70) / 2
       expect(stats.unstableElements).toHaveLength(2);
       expect(stats.unstableElements[0].healingCount).toBe(3);
+    });
+  });
+
+  describe('confirmHealing', () => {
+    it('should return null when history entry not found', async () => {
+      vi.mocked(healingStorage.getHistoryByHealingId).mockResolvedValue(null);
+
+      const result = await engine.confirmHealing('non-existent', true);
+
+      expect(result).toBeNull();
+      expect(healingStorage.updateHistoryEntry).not.toHaveBeenCalled();
+    });
+
+    it('should update userConfirmed to true when accepted', async () => {
+      const historyEntry = {
+        id: 'entry-1',
+        stepId: 'step-1',
+        timestamp: Date.now(),
+        originalDescription: 'Click button',
+        failureReason: '',
+        result: {
+          success: true,
+          healingId: 'healing-1',
+          element: { center: [150, 150] as [number, number], rect: { left: 100, top: 125, width: 100, height: 50 } },
+          strategy: 'normal' as const,
+          attemptsCount: 1,
+          confidence: 85,
+          confidenceFactors: { distanceScore: 80, sizeScore: 90, strategyScore: 100 },
+          timeCost: 500,
+        },
+        userConfirmed: false,
+        fingerprintUpdated: false,
+      };
+
+      const fingerprint: SemanticFingerprint = {
+        id: 'fp-1',
+        stepId: 'step-1',
+        semanticDescription: 'Submit button',
+        lastKnownCenter: [100, 100],
+        lastKnownRect: { left: 50, top: 75, width: 100, height: 50 },
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        healingCount: 0,
+      };
+
+      vi.mocked(healingStorage.getHistoryByHealingId).mockResolvedValue(historyEntry);
+      vi.mocked(healingStorage.get).mockResolvedValue(fingerprint);
+
+      const result = await engine.confirmHealing('healing-1', true);
+
+      expect(result).not.toBeNull();
+      expect(result?.center).toEqual([150, 150]);
+      expect(healingStorage.update).toHaveBeenCalledWith(expect.objectContaining({
+        lastKnownCenter: [150, 150],
+        healingCount: 1,
+      }));
+      expect(healingStorage.updateHistoryEntry).toHaveBeenCalledWith(expect.objectContaining({
+        userConfirmed: true,
+        fingerprintUpdated: true,
+      }));
+    });
+
+    it('should update userConfirmed to false when rejected', async () => {
+      const historyEntry = {
+        id: 'entry-1',
+        stepId: 'step-1',
+        timestamp: Date.now(),
+        originalDescription: 'Click button',
+        failureReason: '',
+        result: {
+          success: true,
+          healingId: 'healing-1',
+          element: { center: [150, 150] as [number, number], rect: { left: 100, top: 125, width: 100, height: 50 } },
+          strategy: 'normal' as const,
+          attemptsCount: 1,
+          confidence: 85,
+          confidenceFactors: { distanceScore: 80, sizeScore: 90, strategyScore: 100 },
+          timeCost: 500,
+        },
+        userConfirmed: false,
+        fingerprintUpdated: false,
+      };
+
+      vi.mocked(healingStorage.getHistoryByHealingId).mockResolvedValue(historyEntry);
+
+      const result = await engine.confirmHealing('healing-1', false);
+
+      expect(result).toBeNull();
+      expect(healingStorage.update).not.toHaveBeenCalled();
+      expect(healingStorage.updateHistoryEntry).toHaveBeenCalledWith(expect.objectContaining({
+        userConfirmed: false,
+        fingerprintUpdated: false,
+      }));
+    });
+
+    it('should update semantic description when newDescription provided', async () => {
+      const historyEntry = {
+        id: 'entry-1',
+        stepId: 'step-1',
+        timestamp: Date.now(),
+        originalDescription: 'Click button',
+        failureReason: '',
+        result: {
+          success: true,
+          healingId: 'healing-1',
+          element: { center: [150, 150] as [number, number], rect: { left: 100, top: 125, width: 100, height: 50 } },
+          strategy: 'normal' as const,
+          attemptsCount: 1,
+          confidence: 85,
+          confidenceFactors: { distanceScore: 80, sizeScore: 90, strategyScore: 100 },
+          timeCost: 500,
+        },
+        userConfirmed: false,
+        fingerprintUpdated: false,
+      };
+
+      const fingerprint: SemanticFingerprint = {
+        id: 'fp-1',
+        stepId: 'step-1',
+        semanticDescription: 'Old description',
+        lastKnownCenter: [100, 100],
+        lastKnownRect: { left: 50, top: 75, width: 100, height: 50 },
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        healingCount: 0,
+      };
+
+      vi.mocked(healingStorage.getHistoryByHealingId).mockResolvedValue(historyEntry);
+      vi.mocked(healingStorage.get).mockResolvedValue(fingerprint);
+
+      await engine.confirmHealing('healing-1', true, 'New improved description');
+
+      expect(healingStorage.update).toHaveBeenCalledWith(expect.objectContaining({
+        semanticDescription: 'New improved description',
+      }));
     });
   });
 });

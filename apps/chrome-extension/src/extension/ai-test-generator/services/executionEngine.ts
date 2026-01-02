@@ -483,13 +483,33 @@ export class ExecutionEngine {
       }
 
       if (accepted && healResult.element) {
-        // Confirm healing and update fingerprint
-        await healingEngine.confirmHealing(healResult.healingId, true);
+        // Confirm healing and get healed element info
+        const healedElement = await healingEngine.confirmHealing(healResult.healingId, true);
 
-        // Re-execute the step using the healed element location
-        // For now, we'll use aiAct again as Midscene should find the element now
+        if (!healedElement) {
+          console.debug('Failed to get healed element info');
+          return null;
+        }
+
+        // Execute action using the healed element's coordinates
         try {
-          await this.agent.aiAct(step.originalText);
+          const [x, y] = healedElement.center;
+          const actionType = this.inferActionType(step.originalText);
+
+          if (actionType === 'click') {
+            // Use direct coordinate click for healed element
+            await this.agent.page.mouse.click(x, y, { button: 'left' });
+          } else if (actionType === 'input') {
+            // Click the element first, then input text
+            await this.agent.page.mouse.click(x, y, { button: 'left' });
+            const inputValue = this.extractInputValue(step.originalText);
+            if (inputValue) {
+              await this.agent.page.keyboard.type(inputValue);
+            }
+          } else {
+            // For other actions, fallback to aiAct but with a hint about the location
+            await this.agent.aiAct(step.originalText);
+          }
 
           return {
             stepId: step.id,
@@ -510,6 +530,74 @@ export class ExecutionEngine {
       console.debug('Self-healing failed:', healError);
       return null;
     }
+  }
+
+  /**
+   * Infer action type from step text
+   */
+  private inferActionType(stepText: string): 'click' | 'input' | 'other' {
+    const lowerText = stepText.toLowerCase();
+
+    // Input action patterns
+    const inputPatterns = [
+      /输入|填写|填入|键入|录入/,
+      /input|type|enter|fill/,
+      /在.*(输入|填写)/,
+    ];
+    for (const pattern of inputPatterns) {
+      if (pattern.test(lowerText)) {
+        return 'input';
+      }
+    }
+
+    // Click action patterns
+    const clickPatterns = [
+      /点击|点选|单击|按下|触击/,
+      /click|tap|press|select/,
+    ];
+    for (const pattern of clickPatterns) {
+      if (pattern.test(lowerText)) {
+        return 'click';
+      }
+    }
+
+    return 'other';
+  }
+
+  /**
+   * Extract input value from step text
+   */
+  private extractInputValue(stepText: string): string | null {
+    // Match quoted strings
+    const quotePatterns = [
+      /"([^"]+)"/,          // Double quotes
+      /'([^']+)'/,          // Single quotes
+      /「([^」]+)」/,        // Chinese quotes
+      /『([^』]+)』/,        // Japanese quotes
+      /"([^"]+)"/,          // Smart quotes
+    ];
+
+    for (const pattern of quotePatterns) {
+      const match = stepText.match(pattern);
+      if (match) {
+        return match[1];
+      }
+    }
+
+    // Try to extract value after "输入" or "input"
+    const inputValuePatterns = [
+      /(?:输入|填写|填入|键入)\s*[:：]?\s*(.+?)(?:\s|$)/,
+      /(?:input|type|enter|fill)\s*[:：]?\s*(.+?)(?:\s|$)/i,
+    ];
+
+    for (const pattern of inputValuePatterns) {
+      const match = stepText.match(pattern);
+      if (match) {
+        return match[1].trim();
+      }
+    }
+
+    return null;
   }
 
   /**
