@@ -621,6 +621,570 @@
   }
 }
 
+// Analytics Dashboard Component
+.analytics-dashboard {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+  }
+
+  .dashboard-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+
+      &:hover {
+        background: #a1a1a1;
+      }
+    }
+  }
+}
+
+.dashboard-overview,
+.dashboard-cases,
+.dashboard-failures {
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+
+    @media (max-width: 600px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .charts-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+
+    .chart-col {
+      flex: 1;
+      min-width: 0;
+
+      &.chart-col-2 {
+        flex: 2;
+      }
+    }
+
+    @media (max-width: 500px) {
+      flex-direction: column;
+    }
+  }
+}
+
+// KPI Card Component
+.kpi-card {
+  .kpi-card-content {
+    text-align: center;
+
+    .kpi-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 8px;
+
+      .kpi-icon {
+        font-size: 14px;
+        color: #1890ff;
+      }
+
+      .kpi-title {
+        font-size: 13px;
+        color: #8c8c8c;
+      }
+    }
+
+    .kpi-trend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      margin-top: 4px;
+      font-size: 12px;
+
+      .trend-value {
+        font-weight: 500;
+      }
+    }
+  }
+
+  &.health-score-card {
+    .health-score-value {
+      font-size: 32px;
+      font-weight: bold;
+      line-height: 1.2;
+    }
+
+    .trend-text {
+      font-size: 12px;
+      color: #8c8c8c;
+    }
+  }
+}
+
+// Trend Chart Component
+.trend-chart-card,
+.pass-rate-chart-card,
+.duration-chart-card {
+  .trend-chart,
+  .pass-rate-chart,
+  .duration-chart {
+    .chart-legend {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 12px;
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        color: #666;
+
+        .legend-color {
+          width: 12px;
+          height: 12px;
+          border-radius: 2px;
+        }
+      }
+    }
+
+    .chart-container {
+      display: flex;
+      gap: 8px;
+
+      .chart-y-axis {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        font-size: 10px;
+        color: #8c8c8c;
+        text-align: right;
+        min-width: 40px;
+      }
+
+      .chart-bars {
+        flex: 1;
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-end;
+
+        .bar-group {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+
+          .bar-stack {
+            display: flex;
+            flex-direction: column-reverse;
+          }
+
+          .bar {
+            border-radius: 2px 2px 0 0;
+            min-height: 2px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+
+            &:hover {
+              opacity: 0.8;
+            }
+          }
+
+          .bar-label {
+            font-size: 10px;
+            color: #8c8c8c;
+            margin-top: 4px;
+          }
+        }
+      }
+    }
+
+    .chart-svg-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+
+      .chart-x-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        color: #8c8c8c;
+        margin-top: 4px;
+        padding: 0 4px;
+      }
+    }
+  }
+}
+
+// Failure Charts Component
+.failure-pie-card {
+  .failure-pie-chart {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .pie-container {
+      flex-shrink: 0;
+    }
+
+    .pie-legend {
+      flex: 1;
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 0;
+        font-size: 12px;
+
+        .legend-color {
+          width: 10px;
+          height: 10px;
+          border-radius: 2px;
+          flex-shrink: 0;
+        }
+
+        .legend-label {
+          flex: 1;
+          color: #666;
+        }
+
+        .legend-value {
+          color: #262626;
+          font-weight: 500;
+        }
+      }
+    }
+
+    @media (max-width: 400px) {
+      flex-direction: column;
+    }
+  }
+}
+
+.hotspots-card {
+  .hotspot-item {
+    .hotspot-content {
+      width: 100%;
+
+      .hotspot-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+
+        .hotspot-rank {
+          font-weight: bold;
+          color: #ff4d4f;
+          min-width: 24px;
+        }
+
+        .hotspot-description {
+          flex: 1;
+          font-size: 13px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+
+      .hotspot-stats {
+        display: flex;
+        align-items: center;
+        margin-bottom: 4px;
+        font-size: 12px;
+        color: #8c8c8c;
+
+        .hotspot-count {
+          margin-right: auto;
+        }
+      }
+    }
+  }
+}
+
+.patterns-card {
+  .pattern-item {
+    .pattern-content {
+      width: 100%;
+
+      .pattern-header {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+
+      .pattern-description {
+        font-size: 13px;
+        margin-bottom: 4px;
+      }
+
+      .pattern-suggestion {
+        font-size: 12px;
+        color: #faad14;
+      }
+    }
+  }
+}
+
+// Case List Component
+.case-list-card {
+  .case-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .case-list-table {
+    .recent-results {
+      display: flex;
+      gap: 3px;
+
+      .result-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+
+        &.passed {
+          background: #52c41a;
+        }
+
+        &.failed {
+          background: #ff4d4f;
+        }
+      }
+    }
+  }
+}
+
+.case-summary-card {
+  .case-summary {
+    .summary-total {
+      text-align: center;
+      margin-bottom: 12px;
+
+      .total-number {
+        font-size: 32px;
+        font-weight: bold;
+        color: #1890ff;
+        display: block;
+      }
+
+      .total-label {
+        font-size: 12px;
+        color: #8c8c8c;
+      }
+    }
+
+    .summary-bar {
+      display: flex;
+      height: 12px;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 12px;
+
+      .bar-segment {
+        min-width: 4px;
+        transition: width 0.3s;
+      }
+    }
+
+    .summary-legend {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+
+        .legend-color {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+        }
+
+        .legend-label {
+          color: #8c8c8c;
+        }
+
+        .legend-count {
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
+
+// Chart loading state
+.chart-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Alert Settings Component
+.alert-settings {
+  .alert-settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0;
+
+    .header-title {
+      font-size: 16px;
+      font-weight: 500;
+    }
+  }
+
+  .alert-settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .rules-card,
+  .events-card {
+    .rule-item {
+      .rule-content {
+        width: 100%;
+
+        .rule-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+
+          .rule-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            .rule-name {
+              font-weight: 500;
+            }
+          }
+        }
+
+        .rule-details {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 4px;
+          font-size: 12px;
+          color: #8c8c8c;
+
+          .rule-threshold,
+          .rule-window {
+            padding-left: 8px;
+            border-left: 1px solid #f0f0f0;
+          }
+        }
+
+        .rule-channels {
+          margin-bottom: 4px;
+        }
+
+        .rule-last-triggered {
+          font-size: 11px;
+          color: #bfbfbf;
+        }
+      }
+    }
+
+    .event-item {
+      &.acknowledged {
+        opacity: 0.6;
+      }
+
+      .event-content {
+        width: 100%;
+
+        .event-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 4px;
+
+          .event-rule {
+            font-weight: 500;
+            font-size: 13px;
+          }
+
+          .event-time {
+            font-size: 11px;
+            color: #8c8c8c;
+          }
+        }
+
+        .event-message {
+          font-size: 12px;
+          color: #595959;
+        }
+      }
+    }
+  }
+
+  .rule-form {
+    .ant-form-item {
+      margin-bottom: 16px;
+    }
+  }
+}
+
+.dashboard-alerts {
+  padding: 8px 0;
+}
+
 // Responsive adjustments
 @media (max-width: 400px) {
   .ai-test-generator-container {
@@ -634,6 +1198,15 @@
       flex-direction: column;
       align-items: flex-start;
       gap: 8px;
+    }
+  }
+
+  .analytics-dashboard {
+    .dashboard-header {
+      .header-right {
+        width: 100%;
+        justify-content: flex-end;
+      }
     }
   }
 }

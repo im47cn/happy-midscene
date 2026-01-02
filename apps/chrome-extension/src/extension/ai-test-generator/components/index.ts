@@ -7,3 +7,4 @@ export { ShortcutsHelp } from './ShortcutsHelp';
 export { HistoryView } from './HistoryView';
 export { ErrorBoundary, ErrorFallback } from './ErrorBoundary';
 export { DeviceSelector, DeviceSelectorCompact } from './DeviceSelector';
+export { HealingConfirmDialog } from './HealingConfirmDialog';

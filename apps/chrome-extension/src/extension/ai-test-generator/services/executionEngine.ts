@@ -4,6 +4,11 @@
  */
 
 import type { TaskStep, TestCase } from './markdownParser';
+import type { HealingResult, SelfHealingConfig } from '../types/healing';
+import { healingEngine } from './healing';
+import { DEFAULT_SELF_HEALING_CONFIG } from '../types/healing';
+import { dataCollector, alertManager } from './analytics';
+import type { StepRecord, ExecutionRecord } from '../types/analytics';
 
 export interface DeviceEmulationConfig {
   deviceId: string;
@@ -42,6 +47,9 @@ export interface ExecutionResult {
   error?: string;
   errorDetails?: ExecutionError;
   duration: number;
+  // Self-healing info
+  healingResult?: HealingResult;
+  healedByAI?: boolean;
 }
 
 export interface ExecutionCallbacks {
@@ -50,6 +58,9 @@ export interface ExecutionCallbacks {
   onStepFailed?: (step: TaskStep, error: string, errorDetails?: ExecutionError) => void;
   onHighlight?: (element: { x: number; y: number; width: number; height: number }) => void;
   onProgress?: (current: number, total: number) => void;
+  // Self-healing callbacks
+  onHealingAttempt?: (step: TaskStep, healingResult: HealingResult) => void;
+  onHealingConfirmRequest?: (step: TaskStep, healingResult: HealingResult) => Promise<boolean>;
 }
 
 export type ExecutionStatus = 'idle' | 'running' | 'paused' | 'completed' | 'failed';
@@ -226,8 +237,26 @@ export class ExecutionEngine {
   private callbacks: ExecutionCallbacks = {};
   private isPaused = false;
   private resumeResolve: (() => void) | null = null;
+  private selfHealingConfig: SelfHealingConfig;
 
-  constructor(private getAgent: (forceSameTabNavigation?: boolean) => any) {}
+  constructor(private getAgent: (forceSameTabNavigation?: boolean) => any, selfHealingConfig?: Partial<SelfHealingConfig>) {
+    this.selfHealingConfig = { ...DEFAULT_SELF_HEALING_CONFIG, ...selfHealingConfig };
+  }
+
+  /**
+   * Update self-healing configuration
+   */
+  setSelfHealingConfig(config: Partial<SelfHealingConfig>): void {
+    this.selfHealingConfig = { ...this.selfHealingConfig, ...config };
+    healingEngine.updateConfig(config);
+  }
+
+  /**
+   * Get self-healing configuration
+   */
+  getSelfHealingConfig(): SelfHealingConfig {
+    return { ...this.selfHealingConfig };
+  }
 
   /**
    * Set execution callbacks
@@ -332,7 +361,38 @@ export class ExecutionEngine {
   }
 
   /**
-   * Execute a single step
+   * Extract element info from agent dump after successful aiAct
+   */
+  private extractElementFromDump(): { center: [number, number]; rect: any } | null {
+    try {
+      const executions = this.agent?.dump?.executions;
+      if (!executions || executions.length === 0) return null;
+
+      const lastExecution = executions[executions.length - 1];
+      const locateTasks = lastExecution.tasks?.filter(
+        (t: any) => t.type === 'Planning' && t.subType === 'Locate'
+      );
+
+      if (!locateTasks || locateTasks.length === 0) return null;
+
+      const lastLocate = locateTasks[locateTasks.length - 1];
+      const element = lastLocate?.output?.element;
+
+      if (element?.center && element?.rect) {
+        return {
+          center: element.center,
+          rect: element.rect,
+        };
+      }
+      return null;
+    } catch (error) {
+      console.debug('Failed to extract element from dump:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Execute a single step with self-healing support
    */
   private async executeStep(step: TaskStep): Promise<ExecutionResult> {
     const startTime = Date.now();
@@ -340,6 +400,23 @@ export class ExecutionEngine {
     try {
       // Use Midscene's AI action
       await this.agent.aiAct(step.originalText);
+
+      // Success: try to collect fingerprint for future healing
+      if (this.selfHealingConfig.enabled) {
+        const elementInfo = this.extractElementFromDump();
+        if (elementInfo) {
+          try {
+            healingEngine.setAgent(this.agent);
+            await healingEngine.collectFingerprint(
+              step.id,
+              elementInfo.center,
+              elementInfo.rect
+            );
+          } catch (fpError) {
+            console.debug('Failed to collect fingerprint:', fpError);
+          }
+        }
+      }
 
       const result: ExecutionResult = {
         stepId: step.id,
@@ -352,6 +429,17 @@ export class ExecutionEngine {
     } catch (error) {
       const errorDetails = parseErrorDetails(error, step.originalText);
 
+      // Try self-healing if enabled and error is element_not_found
+      if (
+        this.selfHealingConfig.enabled &&
+        errorDetails.type === 'element_not_found'
+      ) {
+        const healingResult = await this.tryHealing(step, errorDetails);
+        if (healingResult) {
+          return healingResult;
+        }
+      }
+
       return {
         stepId: step.id,
         success: false,
@@ -359,6 +447,68 @@ export class ExecutionEngine {
         errorDetails,
         duration: Date.now() - startTime,
       };
+    }
+  }
+
+  /**
+   * Attempt self-healing for a failed step
+   */
+  private async tryHealing(
+    step: TaskStep,
+    originalError: ExecutionError
+  ): Promise<ExecutionResult | null> {
+    try {
+      healingEngine.setAgent(this.agent);
+      const healResult = await healingEngine.heal(step.id, step.originalText);
+
+      // Notify about healing attempt
+      this.callbacks.onHealingAttempt?.(step, healResult);
+
+      if (!healResult.success) {
+        return null;
+      }
+
+      const action = healingEngine.determineAction(healResult);
+
+      if (action === 'reject') {
+        return null;
+      }
+
+      // For auto_accept or request_confirmation
+      let accepted = action === 'auto_accept';
+
+      if (action === 'request_confirmation' && this.callbacks.onHealingConfirmRequest) {
+        // Ask user for confirmation
+        accepted = await this.callbacks.onHealingConfirmRequest(step, healResult);
+      }
+
+      if (accepted && healResult.element) {
+        // Confirm healing and update fingerprint
+        await healingEngine.confirmHealing(healResult.healingId, true);
+
+        // Re-execute the step using the healed element location
+        // For now, we'll use aiAct again as Midscene should find the element now
+        try {
+          await this.agent.aiAct(step.originalText);
+
+          return {
+            stepId: step.id,
+            success: true,
+            generatedAction: generateYamlAction(step),
+            duration: healResult.timeCost,
+            healingResult: healResult,
+            healedByAI: true,
+          };
+        } catch (retryError) {
+          console.debug('Retry after healing failed:', retryError);
+          return null;
+        }
+      }
+
+      return null;
+    } catch (healError) {
+      console.debug('Self-healing failed:', healError);
+      return null;
     }
   }
 
@@ -373,6 +523,8 @@ export class ExecutionEngine {
     this.currentStepIndex = 0;
     this.executionResults = [];
     this.isPaused = false;
+
+    const executionStartTime = Date.now();
 
     try {
       await this.initAgent();
@@ -445,6 +597,9 @@ export class ExecutionEngine {
       // Generate YAML content
       const yamlContent = this.generateYaml(testCase, context);
 
+      // Record execution for analytics
+      await this.recordExecutionAnalytics(testCase, context, executionStartTime);
+
       return {
         success: allSuccess,
         results: this.executionResults,
@@ -452,9 +607,72 @@ export class ExecutionEngine {
       };
     } catch (error) {
       this.status = 'failed';
+      // Still try to record failed execution
+      try {
+        await this.recordExecutionAnalytics(testCase, context, executionStartTime);
+      } catch (analyticsError) {
+        console.debug('Failed to record analytics:', analyticsError);
+      }
       throw error;
     } finally {
       await this.destroyAgent();
+    }
+  }
+
+  /**
+   * Record execution data for analytics
+   */
+  private async recordExecutionAnalytics(
+    testCase: TestCase,
+    context: ExecutionContext | undefined,
+    startTime: number
+  ): Promise<void> {
+    try {
+      // Convert execution results to step records
+      const stepRecords: StepRecord[] = this.executionResults.map((result, index) => {
+        const step = testCase.steps[index];
+        return {
+          index,
+          description: step?.originalText || `Step ${index + 1}`,
+          status: result.success ? 'passed' : 'failed',
+          duration: result.duration,
+          aiResponseTime: result.duration, // Approximate
+          retryCount: result.healedByAI ? 1 : 0,
+        };
+      });
+
+      // Determine viewport from context
+      const viewport = context?.deviceEmulation
+        ? { width: context.deviceEmulation.width, height: context.deviceEmulation.height }
+        : { width: context?.viewportWidth || 1920, height: context?.viewportHeight || 1080 };
+
+      // Create execution record
+      const executionRecord = dataCollector.createExecutionRecord(
+        testCase.id || `case-${Date.now()}`,
+        testCase.name,
+        stepRecords,
+        {
+          browser: 'chrome',
+          viewport,
+          url: context?.url || window.location.href,
+        },
+        // Include healing info if any step was healed
+        this.executionResults.some(r => r.healedByAI)
+          ? {
+              attempted: true,
+              success: this.executionResults.some(r => r.healedByAI && r.success),
+              strategy: 'ai_relocate',
+            }
+          : undefined
+      );
+
+      // Record the execution
+      await dataCollector.recordExecution(executionRecord);
+
+      // Check alert rules
+      await alertManager.checkAlerts(executionRecord);
+    } catch (error) {
+      console.debug('Failed to record execution analytics:', error);
     }
   }
 
