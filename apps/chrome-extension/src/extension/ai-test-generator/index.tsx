@@ -5,7 +5,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { message, Tooltip } from 'antd';
-import { KeyOutlined, HistoryOutlined } from '@ant-design/icons';
+import { KeyOutlined, HistoryOutlined, BarChartOutlined } from '@ant-design/icons';
 import { useGeneratorStore } from './store';
 import {
   MarkdownInput,
@@ -18,6 +18,7 @@ import {
   ErrorBoundary,
   DeviceSelectorCompact,
 } from './components';
+import { Dashboard } from './components/analytics';
 import { useKeyboardShortcuts } from './hooks';
 import './styles.less';
 
@@ -103,6 +104,14 @@ export function AITestGenerator() {
     setCurrentView('input');
   }, [setCurrentView]);
 
+  const handleOpenAnalytics = useCallback(() => {
+    setCurrentView('analytics');
+  }, [setCurrentView]);
+
+  const handleCloseAnalytics = useCallback(() => {
+    setCurrentView('input');
+  }, [setCurrentView]);
+
   const renderContent = () => {
     switch (currentView) {
       case 'input':
@@ -115,6 +124,8 @@ export function AITestGenerator() {
         return <CommitView />;
       case 'history':
         return <HistoryView onBack={handleCloseHistory} />;
+      case 'analytics':
+        return <Dashboard onBack={handleCloseAnalytics} />;
       default:
         return <MarkdownInput />;
     }
@@ -134,6 +145,12 @@ export function AITestGenerator() {
             <HistoryOutlined
               className="shortcuts-help-icon"
               onClick={handleOpenHistory}
+            />
+          </Tooltip>
+          <Tooltip title="分析仪表板">
+            <BarChartOutlined
+              className="shortcuts-help-icon"
+              onClick={handleOpenAnalytics}
             />
           </Tooltip>
           <Tooltip title="快捷键帮助 (?)">

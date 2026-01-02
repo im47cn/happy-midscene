@@ -14,6 +14,7 @@ import {
   InfoCircleOutlined,
   BulbOutlined,
   ExclamationCircleOutlined,
+  ThunderboltOutlined,
 } from '@ant-design/icons';
 import {
   Button,
@@ -28,6 +29,7 @@ import {
   Spin,
   Tag,
   Collapse,
+  message,
 } from 'antd';
 import { useEffect, useState, useRef } from 'react';
 import { useGeneratorStore } from '../store';
@@ -35,6 +37,9 @@ import { ExecutionEngine, type ExecutionError, type DeviceEmulationConfig } from
 import { historyService } from '../services/historyService';
 import { getDevicePreset } from '../config/devicePresets';
 import type { TestCase, TaskStep } from '../types';
+import type { TaskStep as ExecutionTaskStep } from '../services/markdownParser';
+import type { HealingResult } from '../types/healing';
+import { HealingConfirmDialog } from './HealingConfirmDialog';
 import {
   ChromeExtensionProxyPage,
   ChromeExtensionProxyPageAgent,
@@ -144,6 +149,12 @@ export function ExecutionView() {
   const [currentErrorDetails, setCurrentErrorDetails] = useState<ExecutionError | null>(null);
   const [stepErrorMap, setStepErrorMap] = useState<Map<string, ExecutionError>>(new Map());
 
+  // Self-healing state
+  const [healingDialogVisible, setHealingDialogVisible] = useState(false);
+  const [currentHealingResult, setCurrentHealingResult] = useState<HealingResult | null>(null);
+  const [healingStepDescription, setHealingStepDescription] = useState('');
+  const healingResolveRef = useRef<((accepted: boolean) => void) | null>(null);
+
   const engineRef = useRef<ExecutionEngine | null>(null);
   const executionStartTimeRef = useRef<number>(0);
 
@@ -161,6 +172,19 @@ export function ExecutionView() {
       onStepComplete: (step, result) => {
         updateStepStatus(step.id, 'success');
         addExecutionResult(result);
+
+        // Show healing success indicator if step was healed
+        if (result.healedByAI) {
+          message.success({
+            content: (
+              <span>
+                <ThunderboltOutlined style={{ marginRight: 8 }} />
+                步骤已通过 AI 自愈成功执行
+              </span>
+            ),
+            duration: 3,
+          });
+        }
       },
       onStepFailed: (step, error, errorDetails) => {
         updateStepStatus(step.id, 'failed');
@@ -180,6 +204,22 @@ export function ExecutionView() {
       },
       onProgress: (current, total) => {
         setTotalProgress(Math.round((current / total) * 100));
+      },
+      onHealingAttempt: (step: ExecutionTaskStep, _healingResult: HealingResult) => {
+        message.loading({
+          content: `正在尝试 AI 自愈: ${step.originalText.slice(0, 30)}...`,
+          key: 'healing',
+          duration: 0,
+        });
+      },
+      onHealingConfirmRequest: (step: ExecutionTaskStep, healingResult: HealingResult) => {
+        message.destroy('healing');
+        return new Promise<boolean>((resolve) => {
+          healingResolveRef.current = resolve;
+          setCurrentHealingResult(healingResult);
+          setHealingStepDescription(step.originalText);
+          setHealingDialogVisible(true);
+        });
       },
     });
 
@@ -356,6 +396,30 @@ export function ExecutionView() {
       engineRef.current.resume();
       setExecutionStatus('running');
     }
+  };
+
+  // Healing dialog handlers
+  const handleHealingConfirm = () => {
+    setHealingDialogVisible(false);
+    if (healingResolveRef.current) {
+      healingResolveRef.current(true);
+      healingResolveRef.current = null;
+    }
+    setCurrentHealingResult(null);
+  };
+
+  const handleHealingReject = () => {
+    setHealingDialogVisible(false);
+    if (healingResolveRef.current) {
+      healingResolveRef.current(false);
+      healingResolveRef.current = null;
+    }
+    setCurrentHealingResult(null);
+  };
+
+  const handleHealingCancel = () => {
+    // Treat cancel as reject
+    handleHealingReject();
   };
 
   const getStatusColor = () => {
@@ -539,6 +603,16 @@ export function ExecutionView() {
           )}
         </div>
       </Modal>
+
+      {/* Self-Healing Confirm Dialog */}
+      <HealingConfirmDialog
+        visible={healingDialogVisible}
+        healingResult={currentHealingResult}
+        stepDescription={healingStepDescription}
+        onConfirm={handleHealingConfirm}
+        onReject={handleHealingReject}
+        onCancel={handleHealingCancel}
+      />
     </div>
   );
 }

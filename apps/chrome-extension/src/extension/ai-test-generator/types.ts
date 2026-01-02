@@ -20,7 +20,7 @@ export type {
   DevicePreset,
 };
 
-export type ViewMode = 'input' | 'preview' | 'execute' | 'commit' | 'history';
+export type ViewMode = 'input' | 'preview' | 'execute' | 'commit' | 'history' | 'analytics';
 
 export interface GeneratorState {
   // Input state

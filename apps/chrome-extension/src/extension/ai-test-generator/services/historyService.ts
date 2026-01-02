@@ -190,8 +190,8 @@ class HistoryService {
     startTime: number
   ): ExecutionHistoryItem {
     const now = Date.now();
-    const successSteps = results.filter((r) => r.status === 'success').length;
-    const failedSteps = results.filter((r) => r.status === 'failed').length;
+    const successSteps = results.filter((r) => r.success).length;
+    const failedSteps = results.filter((r) => !r.success).length;
     const totalSteps = results.length;
 
     let status: ExecutionHistoryItem['status'];
