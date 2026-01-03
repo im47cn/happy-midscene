@@ -112,10 +112,10 @@ function StepItem({ step, index, onEdit, onDelete }: StepItemProps) {
             />
             {onDelete && (
               <Popconfirm
-                title="确定删除此步骤?"
+                title={t('deleteTestCaseConfirm')}
                 onConfirm={() => onDelete(step.id)}
-                okText="删除"
-                cancelText="取消"
+                okText={t('delete')}
+                cancelText={t('cancel')}
               >
                 <Button
                   type="text"
@@ -254,6 +254,7 @@ export function TestCasePreview() {
   const { parseResult, setCurrentView, executionStatus, setSelectedCaseIds } =
     useGeneratorStore();
 
+  const { t } = useI18n();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // Calculate selection state
