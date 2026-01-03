@@ -155,6 +155,7 @@ export function ExecutionView() {
     selectedDeviceId,
   } = useGeneratorStore();
 
+  const { t } = useI18n();
   const [currentCase, setCurrentCase] = useState<TestCase | null>(null);
   const [retryModalVisible, setRetryModalVisible] = useState(false);
   const [retryStepId, setRetryStepId] = useState<string | null>(null);
@@ -197,7 +198,7 @@ export function ExecutionView() {
             content: (
               <span>
                 <ThunderboltOutlined style={{ marginRight: 8 }} />
-                步骤已通过 AI 自愈成功执行
+                {t('stepHealedSuccess')}
               </span>
             ),
             duration: 3,
@@ -228,7 +229,7 @@ export function ExecutionView() {
         _healingResult: HealingResult,
       ) => {
         message.loading({
-          content: `正在尝试 AI 自愈: ${step.originalText.slice(0, 30)}...`,
+          content: `${t('healingAttempt')}: ${step.originalText.slice(0, 30)}...`,
           key: 'healing',
           duration: 0,
         });
@@ -478,15 +479,15 @@ export function ExecutionView() {
   const getStatusText = () => {
     switch (executionStatus) {
       case 'running':
-        return '执行中...';
+        return t('statusRunning') + '...';
       case 'paused':
-        return '已暂停';
+        return t('statusPaused');
       case 'completed':
-        return '执行完成';
+        return t('executionComplete');
       case 'failed':
-        return '执行失败';
+        return t('executionFailed');
       default:
-        return '准备就绪';
+        return t('statusReady');
     }
   };
 
@@ -494,7 +495,7 @@ export function ExecutionView() {
     return (
       <div className="execution-loading">
         <Spin size="large" />
-        <Text>准备执行...</Text>
+        <Text>{t('preparingExecution')}...</Text>
       </div>
     );
   }
@@ -503,7 +504,7 @@ export function ExecutionView() {
     <div className="execution-view-container">
       <div className="execution-header">
         <Title level={5} style={{ margin: 0 }}>
-          脚本生成中
+          {t('generatingScript')}
         </Title>
         <Space>
           <div
@@ -516,7 +517,7 @@ export function ExecutionView() {
 
       <Card size="small" className="execution-progress-card">
         <div className="case-info">
-          <Text strong>当前用例: {currentCase.name}</Text>
+          <Text strong>{t('currentCase')}: {currentCase.name}</Text>
         </div>
         <Progress
           percent={totalProgress}
@@ -524,7 +525,7 @@ export function ExecutionView() {
           strokeColor={getStatusColor()}
         />
         <Text type="secondary">
-          步骤 {currentStepIndex + 1} / {currentCase.steps.length}
+          {t('step')} {currentStepIndex + 1} / {currentCase.steps.length}
         </Text>
       </Card>
 
@@ -580,7 +581,7 @@ export function ExecutionView() {
         <Space>
           {executionStatus === 'running' && (
             <Button icon={<PauseCircleOutlined />} onClick={handlePause}>
-              暂停
+              {t('pause')}
             </Button>
           )}
           {executionStatus === 'paused' && (
@@ -589,11 +590,11 @@ export function ExecutionView() {
               icon={<PlayCircleOutlined />}
               onClick={handleResume}
             >
-              继续
+              {t('resume')}
             </Button>
           )}
           <Button icon={<StopOutlined />} onClick={handleStop} danger>
-            停止
+            {t('stop')}
           </Button>
         </Space>
       </div>
@@ -603,7 +604,7 @@ export function ExecutionView() {
         title={
           <Space>
             <ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />
-            步骤执行失败
+            {t('stepExecutionFailed')}
           </Space>
         }
         open={retryModalVisible}
@@ -611,7 +612,7 @@ export function ExecutionView() {
         width={500}
         footer={[
           <Button key="skip" onClick={handleSkipStep}>
-            跳过此步骤
+            {t('skipThisStep')}
           </Button>,
           <Button
             key="retry"
@@ -619,7 +620,7 @@ export function ExecutionView() {
             icon={<ReloadOutlined />}
             onClick={handleRetry}
           >
-            重试
+            {t('retry')}
           </Button>,
         ]}
       >
@@ -630,20 +631,20 @@ export function ExecutionView() {
             </div>
           )}
 
-          <Text strong>修改指令后重试：</Text>
+          <Text strong>{t('modifyAndRetry')}：</Text>
           <Input.TextArea
             value={retryInstruction}
             onChange={(e) => setRetryInstruction(e.target.value)}
             rows={3}
             style={{ marginTop: 8 }}
-            placeholder="修改指令描述..."
+            placeholder={t('modifyInstructionPlaceholder')}
           />
 
           {!currentErrorDetails?.suggestion && (
             <Alert
               type="info"
               icon={<BulbOutlined />}
-              message="提示：尝试使用更具体的描述，如元素的颜色、位置或文字内容"
+              message={t('retryHint')}
               style={{ marginTop: 12 }}
               showIcon
             />

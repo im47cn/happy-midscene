@@ -10,6 +10,7 @@ import {
 } from '@ant-design/icons';
 import { Divider, Select, Space, Tag, Tooltip, Typography } from 'antd';
 import { useMemo, useState } from 'react';
+import { useI18n } from '../../../i18n';
 import {
   type DevicePreset,
   devicePresets,
@@ -54,17 +55,18 @@ function formatDeviceLabel(device: DevicePreset): React.ReactNode {
 
 // Device info tooltip content
 function DeviceInfoTooltip({ device }: { device: DevicePreset }) {
+  const { t } = useI18n();
   return (
     <div className="device-info-tooltip">
       <div>
         <strong>{device.name}</strong>
       </div>
       <div>
-        Resolution: {device.width}×{device.height}
+        {t('resolution')}: {device.width}×{device.height}
       </div>
-      <div>Scale: {device.deviceScaleFactor}x</div>
-      <div>Touch: {device.hasTouch ? 'Yes' : 'No'}</div>
-      {device.isMobile && <div>Mobile: Yes</div>}
+      <div>{t('scale')}: {device.deviceScaleFactor}x</div>
+      <div>{t('touch')}: {device.hasTouch ? t('yes') : t('no')}</div>
+      {device.isMobile && <div>{t('mobile')}: {t('yes')}</div>}
     </div>
   );
 }
@@ -74,6 +76,7 @@ export function DeviceSelector({
   onChange,
   disabled = false,
 }: DeviceSelectorProps) {
+  const { t } = useI18n();
   const selectedDevice = useMemo(() => getDevicePreset(value), [value]);
 
   const handleChange = (deviceId: string) => {
@@ -87,7 +90,7 @@ export function DeviceSelector({
         label: (
           <Space>
             {categoryIcons.desktop}
-            <span>{categoryLabels.desktop}</span>
+            <span>{t('desktop')}</span>
           </Space>
         ),
         options: devicePresetsByCategory.desktop.map((device) => ({
@@ -99,7 +102,7 @@ export function DeviceSelector({
         label: (
           <Space>
             {categoryIcons.mobile}
-            <span>{categoryLabels.mobile}</span>
+            <span>{t('mobile')}</span>
           </Space>
         ),
         options: devicePresetsByCategory.mobile.map((device) => ({
@@ -111,7 +114,7 @@ export function DeviceSelector({
         label: (
           <Space>
             {categoryIcons.tablet}
-            <span>{categoryLabels.tablet}</span>
+            <span>{t('tablet')}</span>
           </Space>
         ),
         options: devicePresetsByCategory.tablet.map((device) => ({
@@ -120,7 +123,7 @@ export function DeviceSelector({
         })),
       },
     ];
-  }, []);
+  }, [t]);
 
   return (
     <div className="device-selector">
@@ -130,7 +133,7 @@ export function DeviceSelector({
         options={options}
         disabled={disabled}
         style={{ width: '100%' }}
-        placeholder="Select device"
+        placeholder={t('selectDevice')}
         optionLabelProp="label"
         popupMatchSelectWidth={false}
         dropdownStyle={{ minWidth: 220 }}
@@ -138,10 +141,10 @@ export function DeviceSelector({
       {selectedDevice && selectedDevice.isMobile && (
         <div className="device-mode-indicator">
           <Tag color="blue" icon={<MobileOutlined />}>
-            H5 Mode
+            {t('h5Mode')}
           </Tag>
           <Text type="secondary" style={{ fontSize: 11 }}>
-            Touch events enabled
+            {t('touchEventsEnabled')}
           </Text>
         </div>
       )}

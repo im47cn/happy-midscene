@@ -313,15 +313,10 @@ export function Dashboard({ onBack, onSettings }: DashboardProps) {
   return (
     <div className="analytics-dashboard">
       <div className="dashboard-header">
-        <div className="header-left">
-          <Button type="text" icon={<ArrowLeftOutlined />} onClick={onBack}>
-            返回
-          </Button>
-          <Title level={5} style={{ margin: 0 }}>
-            <BarChartOutlined style={{ marginRight: 8 }} />
-            测试分析仪表板
-          </Title>
-        </div>
+        <Title level={5} style={{ margin: 0 }}>
+          <BarChartOutlined style={{ marginRight: 8 }} />
+          测试分析仪表板
+        </Title>
         <div className="header-right">
           <Space>
             <Radio.Group

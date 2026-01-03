@@ -22,6 +22,7 @@ import {
   Typography,
 } from 'antd';
 import { useEffect, useState } from 'react';
+import { useI18n } from '../../../i18n';
 import { type GitLabConfig, gitlabClient } from '../services/gitlabClient';
 import { useGeneratorStore } from '../store';
 
@@ -33,6 +34,7 @@ interface GitLabConfigProps {
 }
 
 export function GitLabConfigModal({ visible, onClose }: GitLabConfigProps) {
+  const { t } = useI18n();
   const [form] = Form.useForm();
   const { checkGitLabConfig } = useGeneratorStore();
 
@@ -82,7 +84,7 @@ export function GitLabConfigModal({ visible, onClose }: GitLabConfigProps) {
     } catch (error) {
       setTestResult({
         success: false,
-        message: error instanceof Error ? error.message : 'Validation failed',
+        message: error instanceof Error ? error.message : t('validationFailed'),
       });
     } finally {
       setLoading(false);
@@ -104,7 +106,7 @@ export function GitLabConfigModal({ visible, onClose }: GitLabConfigProps) {
     } catch (error) {
       setTestResult({
         success: false,
-        message: error instanceof Error ? error.message : 'Save failed',
+        message: error instanceof Error ? error.message : t('saveFailed'),
       });
     } finally {
       setLoading(false);
@@ -124,17 +126,17 @@ export function GitLabConfigModal({ visible, onClose }: GitLabConfigProps) {
       title={
         <Space>
           <SettingOutlined />
-          <span>GitLab 配置</span>
+          <span>{t('gitlabConfig')}</span>
         </Space>
       }
       open={visible}
       onCancel={onClose}
       footer={[
         <Button key="clear" onClick={handleClear} danger>
-          清除配置
+          {t('clearConfig')}
         </Button>,
         <Button key="test" onClick={handleTest} loading={loading}>
-          测试连接
+          {t('testConnection')}
         </Button>,
         <Button
           key="save"
@@ -143,15 +145,15 @@ export function GitLabConfigModal({ visible, onClose }: GitLabConfigProps) {
           loading={loading}
           disabled={!testResult?.success}
         >
-          保存
+          {t('save')}
         </Button>,
       ]}
       width={500}
     >
       <div className="gitlab-config-content">
         <Alert
-          message="安全提示"
-          description="您的 GitLab Token 将加密存储在本地浏览器中，不会上传至任何服务器。"
+          message={t('securityTip')}
+          description={t('gitlabTokenSecurityDesc')}
           type="info"
           showIcon
           style={{ marginBottom: 16 }}
@@ -160,10 +162,10 @@ export function GitLabConfigModal({ visible, onClose }: GitLabConfigProps) {
         <Form form={form} layout="vertical">
           <Form.Item
             name="baseUrl"
-            label="GitLab 服务器地址"
+            label={t('gitlabServerUrl')}
             rules={[
-              { required: true, message: '请输入 GitLab 地址' },
-              { type: 'url', message: '请输入有效的 URL' },
+              { required: true, message: t('pleaseEnterGitlabUrl') },
+              { type: 'url', message: t('pleaseEnterValidUrl') },
             ]}
           >
             <Input placeholder="https://gitlab.example.com" />
@@ -171,17 +173,16 @@ export function GitLabConfigModal({ visible, onClose }: GitLabConfigProps) {
 
           <Form.Item
             name="privateToken"
-            label="Private Access Token"
-            rules={[{ required: true, message: '请输入 Token' }]}
+            label={t('privateAccessToken')}
+            rules={[{ required: true, message: t('pleaseEnterToken') }]}
             extra={
               <Text type="secondary" style={{ fontSize: 12 }}>
-                需要 <code>api</code> 和 <code>write_repository</code> 权限。
+                {t('tokenPermissionsRequired')}{' '}
                 <Link
                   href="https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html"
                   target="_blank"
                 >
-                  {' '}
-                  如何创建 Token?
+                  {t('howToCreateToken')}
                 </Link>
               </Text>
             }
@@ -197,7 +198,7 @@ export function GitLabConfigModal({ visible, onClose }: GitLabConfigProps) {
 
         {testResult && (
           <Alert
-            message={testResult.success ? '连接成功' : '连接失败'}
+            message={testResult.success ? t('connectionSuccess') : t('connectionFailed')}
             description={testResult.message}
             type={testResult.success ? 'success' : 'error'}
             showIcon
@@ -218,6 +219,7 @@ export function GitLabConfigModal({ visible, onClose }: GitLabConfigProps) {
 
 // Compact status display for main view
 export function GitLabStatus() {
+  const { t } = useI18n();
   const { gitlabConfigured, checkGitLabConfig } = useGeneratorStore();
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -231,16 +233,16 @@ export function GitLabStatus() {
         {gitlabConfigured ? (
           <Space>
             <CheckCircleOutlined style={{ color: '#52c41a' }} />
-            <Text type="secondary">GitLab 已配置</Text>
+            <Text type="secondary">{t('gitlabConfigured')}</Text>
           </Space>
         ) : (
           <Space>
             <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
-            <Text type="secondary">GitLab 未配置</Text>
+            <Text type="secondary">{t('gitlabNotConfigured')}</Text>
           </Space>
         )}
         <Button type="link" size="small">
-          设置
+          {t('settings')}
         </Button>
       </div>
 

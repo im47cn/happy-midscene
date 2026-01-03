@@ -372,7 +372,7 @@ export function TestCasePreview() {
 
       <div className="preview-actions">
         <Space style={{ width: '100%' }}>
-          <Button onClick={handleBack}>返回修改</Button>
+          <Button onClick={handleBack}>{t('backToEdit')}</Button>
           {selectedCount > 0 ? (
             <Button
               type="primary"
@@ -381,7 +381,7 @@ export function TestCasePreview() {
               loading={executionStatus === 'running'}
               style={{ flex: 1 }}
             >
-              执行选中 ({selectedCount})
+              {t('runSelected')} ({selectedCount})
             </Button>
           ) : (
             <Button
@@ -391,7 +391,7 @@ export function TestCasePreview() {
               loading={executionStatus === 'running'}
               style={{ flex: 1 }}
             >
-              执行全部
+              {t('runAll')}
             </Button>
           )}
         </Space>

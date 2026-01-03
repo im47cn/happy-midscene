@@ -19,6 +19,7 @@ import {
 } from 'antd';
 import type React from 'react';
 import { useCallback, useState } from 'react';
+import { useI18n } from '../../../../i18n';
 import type { LicenseType, PlatformType, SearchQuery, TemplateCategory } from '../types';
 
 const { Option } = Select;
@@ -28,34 +29,35 @@ interface TemplateSearchProps {
   loading?: boolean;
 }
 
-const SORT_OPTIONS = [
-  { value: 'downloads', label: 'Most Downloads' },
-  { value: 'rating', label: 'Highest Rated' },
-  { value: 'publishedAt', label: 'Newest' },
-  { value: 'relevance', label: 'Relevance' },
-];
-
-const PLATFORM_OPTIONS: { value: PlatformType; label: string }[] = [
-  { value: 'web', label: 'Web' },
-  { value: 'android', label: 'Android' },
-  { value: 'ios', label: 'iOS' },
-];
-
-const RATING_OPTIONS = [
-  { value: 4, label: '4+ Stars' },
-  { value: 3, label: '3+ Stars' },
-  { value: 2, label: '2+ Stars' },
-];
-
 export const TemplateSearch: React.FC<TemplateSearchProps> = ({
   onSearch,
   loading = false,
 }) => {
+  const { t } = useI18n();
   const [keyword, setKeyword] = useState('');
   const [sortBy, setSortBy] = useState<string>('downloads');
   const [platforms, setPlatforms] = useState<PlatformType[]>([]);
   const [minRating, setMinRating] = useState<number | undefined>();
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const SORT_OPTIONS = [
+    { value: 'downloads', label: t('mostDownloads') },
+    { value: 'rating', label: t('highestRated') },
+    { value: 'publishedAt', label: t('newest') },
+    { value: 'relevance', label: t('relevance') },
+  ];
+
+  const PLATFORM_OPTIONS: { value: PlatformType; label: string }[] = [
+    { value: 'web', label: 'Web' },
+    { value: 'android', label: 'Android' },
+    { value: 'ios', label: 'iOS' },
+  ];
+
+  const RATING_OPTIONS = [
+    { value: 4, label: t('fourPlusStars') },
+    { value: 3, label: t('threePlusStars') },
+    { value: 2, label: t('twoPlusStars') },
+  ];
 
   const handleSearch = useCallback(() => {
     const query: SearchQuery = {
@@ -90,10 +92,10 @@ export const TemplateSearch: React.FC<TemplateSearchProps> = ({
       key: 'platforms',
       label: (
         <div style={{ padding: '8px 0' }}>
-          <div style={{ marginBottom: 8, fontWeight: 500 }}>Platforms</div>
+          <div style={{ marginBottom: 8, fontWeight: 500 }}>{t('platforms')}</div>
           <Select
             mode="multiple"
-            placeholder="Select platforms"
+            placeholder={t('selectPlatforms')}
             value={platforms}
             onChange={setPlatforms}
             style={{ width: '100%' }}
@@ -112,9 +114,9 @@ export const TemplateSearch: React.FC<TemplateSearchProps> = ({
       key: 'rating',
       label: (
         <div style={{ padding: '8px 0' }}>
-          <div style={{ marginBottom: 8, fontWeight: 500 }}>Minimum Rating</div>
+          <div style={{ marginBottom: 8, fontWeight: 500 }}>{t('minimumRating')}</div>
           <Select
-            placeholder="Any rating"
+            placeholder={t('anyRating')}
             value={minRating}
             onChange={setMinRating}
             style={{ width: '100%' }}
@@ -133,7 +135,7 @@ export const TemplateSearch: React.FC<TemplateSearchProps> = ({
       key: 'clear',
       label: (
         <Button type="link" onClick={handleClearFilters} style={{ padding: 0 }}>
-          Clear all filters
+          {t('clearAllFilters')}
         </Button>
       ),
     },
@@ -144,7 +146,7 @@ export const TemplateSearch: React.FC<TemplateSearchProps> = ({
       <Row gutter={8} align="middle">
         <Col flex="auto">
           <Input
-            placeholder="Search templates..."
+            placeholder={t('searchTemplates')}
             prefix={<SearchOutlined />}
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
@@ -177,7 +179,7 @@ export const TemplateSearch: React.FC<TemplateSearchProps> = ({
               icon={<FilterOutlined />}
               disabled={loading}
             >
-              Filters
+              {t('filters')}
               {activeFiltersCount > 0 && (
                 <Tag color="blue" style={{ marginLeft: 4, marginRight: 0 }}>
                   {activeFiltersCount}
@@ -188,7 +190,7 @@ export const TemplateSearch: React.FC<TemplateSearchProps> = ({
         </Col>
         <Col>
           <Button type="primary" onClick={handleSearch} loading={loading}>
-            Search
+            {t('search')}
           </Button>
         </Col>
       </Row>
@@ -207,7 +209,7 @@ export const TemplateSearch: React.FC<TemplateSearchProps> = ({
           ))}
           {minRating !== undefined && (
             <Tag closable onClose={() => setMinRating(undefined)}>
-              {minRating}+ Stars
+              {minRating}+ {t('stars')}
             </Tag>
           )}
         </Space>

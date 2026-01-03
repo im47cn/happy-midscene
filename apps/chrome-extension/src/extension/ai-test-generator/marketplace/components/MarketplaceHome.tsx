@@ -20,6 +20,7 @@ import {
 } from 'antd';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
+import { useI18n } from '../../../../i18n';
 import { marketplaceAPI, templateStorage } from '../services';
 import type {
   CategoryInfo,
@@ -49,6 +50,7 @@ export const MarketplaceHome: React.FC<MarketplaceHomeProps> = ({
   onBack,
   onApplyTemplate,
 }) => {
+  const { t } = useI18n();
   const [viewMode, setViewMode] = useState<ViewMode>('browse');
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
@@ -230,12 +232,9 @@ export const MarketplaceHome: React.FC<MarketplaceHomeProps> = ({
   return (
     <div className="marketplace-home" style={{ padding: '0 8px' }}>
       {/* Header */}
-      <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
-        {onBack && (
-          <Button type="text" icon={<ArrowLeftOutlined />} onClick={onBack} />
-        )}
-        <Title level={4} style={{ margin: 0, flex: 1 }}>
-          Template Marketplace
+      <div style={{ marginBottom: 16 }}>
+        <Title level={4} style={{ margin: 0 }}>
+          {t('templateMarketplace')}
         </Title>
       </div>
 
@@ -248,11 +247,11 @@ export const MarketplaceHome: React.FC<MarketplaceHomeProps> = ({
           value={viewMode}
           onChange={(value) => setViewMode(value as ViewMode)}
           options={[
-            { value: 'browse', label: 'Browse', icon: <AppstoreOutlined /> },
-            { value: 'featured', label: 'Featured', icon: <RocketOutlined /> },
-            { value: 'popular', label: 'Popular', icon: <FireOutlined /> },
-            { value: 'latest', label: 'Latest', icon: <HistoryOutlined /> },
-            { value: 'favorites', label: 'Favorites', icon: <HeartOutlined /> },
+            { value: 'browse', label: t('browse'), icon: <AppstoreOutlined /> },
+            { value: 'featured', label: t('featured'), icon: <RocketOutlined /> },
+            { value: 'popular', label: t('popular'), icon: <FireOutlined /> },
+            { value: 'latest', label: t('latest'), icon: <HistoryOutlined /> },
+            { value: 'favorites', label: t('favorites'), icon: <HeartOutlined /> },
           ]}
         />
       </div>
@@ -270,7 +269,7 @@ export const MarketplaceHome: React.FC<MarketplaceHomeProps> = ({
 
       {/* Template Grid */}
       {loading ? (
-        <LoadingState type="spinner" text="Loading templates..." />
+        <LoadingState type="spinner" text={t('loadingTemplates')} />
       ) : templates.length === 0 ? (
         <EmptyState
           type={viewMode === 'favorites' ? 'favorites' : viewMode === 'browse' ? 'search' : 'templates'}

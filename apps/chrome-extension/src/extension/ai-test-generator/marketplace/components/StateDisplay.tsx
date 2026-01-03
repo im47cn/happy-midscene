@@ -14,6 +14,7 @@ import {
 import { Alert, Button, Empty, Result, Skeleton, Space, Spin, Typography } from 'antd';
 import type React from 'react';
 import { useCallback, useMemo } from 'react';
+import { useI18n } from '../../../../i18n';
 
 const { Text, Paragraph } = Typography;
 
@@ -35,11 +36,14 @@ interface LoadingStateProps {
  */
 export const LoadingState: React.FC<LoadingStateProps> = ({
   type = 'spinner',
-  text = 'Loading...',
+  text,
   size = 'default',
   rows = 3,
   fullScreen = false,
 }) => {
+  const { t } = useI18n();
+  const loadingText = text || t('loading');
+
   const spinnerSize = useMemo(() => {
     switch (size) {
       case 'small':
@@ -64,7 +68,7 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
         return (
           <Space>
             <LoadingOutlined style={{ fontSize: spinnerSize / 2 }} />
-            <Text type="secondary">{text}</Text>
+            <Text type="secondary">{loadingText}</Text>
           </Space>
         );
 
@@ -86,7 +90,7 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
           >
             <Spin
               indicator={<LoadingOutlined style={{ fontSize: spinnerSize }} spin />}
-              tip={text}
+              tip={loadingText}
             />
           </div>
         );
@@ -107,11 +111,11 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
             <Spin
               indicator={<LoadingOutlined style={{ fontSize: spinnerSize }} spin />}
             />
-            {text && <Text type="secondary">{text}</Text>}
+            {loadingText && <Text type="secondary">{loadingText}</Text>}
           </div>
         );
     }
-  }, [type, text, spinnerSize, rows, fullScreen]);
+  }, [type, loadingText, spinnerSize, rows, fullScreen]);
 
   if (fullScreen && type === 'spinner') {
     return (
@@ -162,41 +166,43 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
   onRetry,
   showDetails = false,
 }) => {
+  const { t } = useI18n();
+
   const errorConfig = useMemo(() => {
     switch (type) {
       case 'network':
         return {
           icon: <WifiOutlined style={{ fontSize: 48, color: '#faad14' }} />,
-          defaultTitle: 'Network Error',
-          defaultMessage: 'Unable to connect. Please check your internet connection.',
+          defaultTitle: t('networkError'),
+          defaultMessage: t('networkErrorMessage'),
         };
       case 'notFound':
         return {
           icon: <SearchOutlined style={{ fontSize: 48, color: '#8c8c8c' }} />,
-          defaultTitle: 'Not Found',
-          defaultMessage: 'The requested resource could not be found.',
+          defaultTitle: t('notFound'),
+          defaultMessage: t('notFoundMessage'),
         };
       case 'permission':
         return {
           icon: <ExclamationCircleOutlined style={{ fontSize: 48, color: '#ff4d4f' }} />,
-          defaultTitle: 'Access Denied',
-          defaultMessage: 'You do not have permission to access this resource.',
+          defaultTitle: t('accessDenied'),
+          defaultMessage: t('accessDeniedMessage'),
         };
       case 'server':
         return {
           icon: <ExclamationCircleOutlined style={{ fontSize: 48, color: '#ff4d4f' }} />,
-          defaultTitle: 'Server Error',
-          defaultMessage: 'Something went wrong on our end. Please try again later.',
+          defaultTitle: t('serverError'),
+          defaultMessage: t('serverErrorMessage'),
         };
       case 'unknown':
       default:
         return {
           icon: <ExclamationCircleOutlined style={{ fontSize: 48, color: '#faad14' }} />,
-          defaultTitle: 'Something Went Wrong',
-          defaultMessage: 'An unexpected error occurred. Please try again.',
+          defaultTitle: t('somethingWentWrong'),
+          defaultMessage: t('unexpectedError'),
         };
     }
-  }, [type]);
+  }, [type, t]);
 
   const handleRetry = useCallback(() => {
     if (onRetry) {
@@ -235,7 +241,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
             icon={<ReloadOutlined />}
             onClick={handleRetry}
           >
-            Try Again
+            {t('tryAgain')}
           </Button>
         )}
       </Space>
@@ -266,41 +272,43 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   action,
   icon,
 }) => {
+  const { t } = useI18n();
+
   const emptyConfig = useMemo(() => {
     switch (type) {
       case 'search':
         return {
           icon: <SearchOutlined style={{ fontSize: 48, color: '#bfbfbf' }} />,
-          defaultTitle: 'No Results Found',
-          defaultDescription: 'Try adjusting your search or filters.',
+          defaultTitle: t('noResultsFound'),
+          defaultDescription: t('tryAdjustingFilters'),
         };
       case 'favorites':
         return {
           icon: <InboxOutlined style={{ fontSize: 48, color: '#bfbfbf' }} />,
-          defaultTitle: 'No Favorites Yet',
-          defaultDescription: 'Add templates to your favorites to see them here.',
+          defaultTitle: t('noFavoritesYet'),
+          defaultDescription: t('addTemplatesToFavorites'),
         };
       case 'history':
         return {
           icon: <InboxOutlined style={{ fontSize: 48, color: '#bfbfbf' }} />,
-          defaultTitle: 'No History',
-          defaultDescription: 'Templates you use will appear here.',
+          defaultTitle: t('noHistory'),
+          defaultDescription: t('templatesWillAppearHere'),
         };
       case 'templates':
         return {
           icon: <InboxOutlined style={{ fontSize: 48, color: '#bfbfbf' }} />,
-          defaultTitle: 'No Templates',
-          defaultDescription: 'No templates available in this category.',
+          defaultTitle: t('noTemplates'),
+          defaultDescription: t('noTemplatesInCategory'),
         };
       case 'default':
       default:
         return {
           icon: null,
-          defaultTitle: 'No Data',
-          defaultDescription: 'There is nothing to show here.',
+          defaultTitle: t('noData'),
+          defaultDescription: t('nothingToShow'),
         };
     }
-  }, [type]);
+  }, [type, t]);
 
   return (
     <Empty

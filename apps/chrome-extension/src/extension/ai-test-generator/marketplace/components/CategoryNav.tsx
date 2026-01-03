@@ -19,6 +19,7 @@ import {
 } from '@ant-design/icons';
 import { Badge, Space, Tag, Typography } from 'antd';
 import type React from 'react';
+import { useI18n } from '../../../../i18n';
 import type { CategoryInfo, TemplateCategory } from '../types';
 import { CATEGORY_METADATA } from '../types';
 
@@ -63,6 +64,8 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
   showCounts = true,
   direction = 'horizontal',
 }) => {
+  const { t } = useI18n();
+
   const handleCategoryClick = (category: TemplateCategory) => {
     if (selectedCategory === category) {
       onCategoryChange(undefined);
@@ -87,7 +90,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
           }}
         >
           <AppstoreOutlined />
-          <Text strong={!selectedCategory}>All</Text>
+          <Text strong={!selectedCategory}>{t('all')}</Text>
         </div>
         {categories.map((cat) => (
           <div
@@ -130,7 +133,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
       >
         <Space size={4}>
           <AppstoreOutlined />
-          All
+          {t('all')}
         </Space>
       </Tag>
       {categories.map((cat) => (

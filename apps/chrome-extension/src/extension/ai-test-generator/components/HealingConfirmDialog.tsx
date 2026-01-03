@@ -19,6 +19,7 @@ import {
   Tag,
   Typography,
 } from 'antd';
+import { useI18n } from '../../../i18n';
 import type { HealingResult } from '../types/healing';
 
 const { Text, Title } = Typography;
@@ -35,37 +36,43 @@ interface HealingConfirmDialogProps {
 /**
  * Get confidence level info based on score
  */
-function getConfidenceLevel(confidence: number): {
+function getConfidenceLevel(
+  confidence: number,
+  t: (key: string) => string,
+): {
   color: string;
   status: 'success' | 'normal' | 'exception';
   label: string;
 } {
   if (confidence >= 80) {
-    return { color: 'green', status: 'success', label: '高' };
+    return { color: 'green', status: 'success', label: t('high') };
   }
   if (confidence >= 50) {
-    return { color: 'orange', status: 'normal', label: '中' };
+    return { color: 'orange', status: 'normal', label: t('medium') };
   }
-  return { color: 'red', status: 'exception', label: '低' };
+  return { color: 'red', status: 'exception', label: t('low') };
 }
 
 /**
  * Get strategy display info
  */
-function getStrategyInfo(strategy: 'normal' | 'deepThink'): {
+function getStrategyInfo(
+  strategy: 'normal' | 'deepThink',
+  t: (key: string) => string,
+): {
   label: string;
   color: string;
   icon: React.ReactNode;
 } {
   if (strategy === 'normal') {
     return {
-      label: '标准模式',
+      label: t('normalMode'),
       color: 'blue',
       icon: <AimOutlined />,
     };
   }
   return {
-    label: '深度思考',
+    label: t('deepThink'),
     color: 'purple',
     icon: <ThunderboltOutlined />,
   };
@@ -79,19 +86,21 @@ export function HealingConfirmDialog({
   onReject,
   onCancel,
 }: HealingConfirmDialogProps) {
+  const { t } = useI18n();
+
   if (!healingResult) {
     return null;
   }
 
-  const confidenceLevel = getConfidenceLevel(healingResult.confidence);
-  const strategyInfo = getStrategyInfo(healingResult.strategy);
+  const confidenceLevel = getConfidenceLevel(healingResult.confidence, t);
+  const strategyInfo = getStrategyInfo(healingResult.strategy, t);
 
   return (
     <Modal
       title={
         <Space>
           <CheckCircleOutlined style={{ color: '#52c41a' }} />
-          <span>AI 自愈成功</span>
+          <span>{t('aiHealingSuccess')}</span>
         </Space>
       }
       open={visible}
@@ -99,10 +108,10 @@ export function HealingConfirmDialog({
       width={520}
       footer={[
         <Button key="reject" onClick={onReject}>
-          拒绝修复
+          {t('rejectFix')}
         </Button>,
         <Button key="confirm" type="primary" onClick={onConfirm}>
-          采用修复
+          {t('acceptFix')}
         </Button>,
       ]}
     >
@@ -110,8 +119,8 @@ export function HealingConfirmDialog({
         <Alert
           type="info"
           icon={<ExclamationCircleOutlined />}
-          message="发现可能的元素匹配"
-          description="AI 在页面上找到了一个与原始描述匹配的元素，请确认是否采用此修复。"
+          message={t('possibleElementMatch')}
+          description={t('aiFoundMatchingElement')}
           style={{ marginBottom: 16 }}
           showIcon
         />
@@ -122,25 +131,25 @@ export function HealingConfirmDialog({
           bordered
           style={{ marginBottom: 16 }}
         >
-          <Descriptions.Item label="原始步骤">
+          <Descriptions.Item label={t('originalStep')}>
             <Text>{stepDescription}</Text>
           </Descriptions.Item>
-          <Descriptions.Item label="修复策略">
+          <Descriptions.Item label={t('healingStrategy')}>
             <Tag icon={strategyInfo.icon} color={strategyInfo.color}>
               {strategyInfo.label}
             </Tag>
           </Descriptions.Item>
-          <Descriptions.Item label="尝试次数">
-            <Text>{healingResult.attemptsCount} 次</Text>
+          <Descriptions.Item label={t('attempts')}>
+            <Text>{healingResult.attemptsCount} {t('times')}</Text>
           </Descriptions.Item>
-          <Descriptions.Item label="耗时">
-            <Text>{(healingResult.timeCost / 1000).toFixed(2)} 秒</Text>
+          <Descriptions.Item label={t('timeCost')}>
+            <Text>{(healingResult.timeCost / 1000).toFixed(2)} {t('seconds')}</Text>
           </Descriptions.Item>
         </Descriptions>
 
         <div className="confidence-section" style={{ marginBottom: 16 }}>
           <Title level={5} style={{ marginBottom: 8 }}>
-            置信度评估
+            {t('confidenceAssessment')}
           </Title>
           <Progress
             percent={healingResult.confidence}
@@ -157,17 +166,17 @@ export function HealingConfirmDialog({
           <div className="confidence-factors" style={{ marginTop: 12 }}>
             <Space size="large">
               <div>
-                <Text type="secondary">位置偏移：</Text>
+                <Text type="secondary">{t('positionOffset')}：</Text>
                 <Text strong>
                   {healingResult.confidenceFactors.distanceScore}%
                 </Text>
               </div>
               <div>
-                <Text type="secondary">尺寸变化：</Text>
+                <Text type="secondary">{t('sizeChange')}：</Text>
                 <Text strong>{healingResult.confidenceFactors.sizeScore}%</Text>
               </div>
               <div>
-                <Text type="secondary">策略评分：</Text>
+                <Text type="secondary">{t('strategyScore')}：</Text>
                 <Text strong>
                   {healingResult.confidenceFactors.strategyScore}%
                 </Text>
@@ -179,7 +188,7 @@ export function HealingConfirmDialog({
         {healingResult.element && (
           <div className="element-info">
             <Text type="secondary">
-              元素位置：({Math.round(healingResult.element.center[0])},{' '}
+              {t('elementPosition')}：({Math.round(healingResult.element.center[0])},{' '}
               {Math.round(healingResult.element.center[1])})
             </Text>
           </div>
