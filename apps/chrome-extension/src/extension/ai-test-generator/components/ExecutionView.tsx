@@ -48,17 +48,21 @@ import { useGeneratorStore } from '../store';
 import type { TaskStep, TestCase } from '../types';
 import type { HealingResult } from '../types/healing';
 import { HealingConfirmDialog } from './HealingConfirmDialog';
+import { useI18n } from '../../../i18n';
 
 const { Text, Title } = Typography;
 
-// Error type labels in Chinese
-const errorTypeLabels: Record<ExecutionError['type'], string> = {
-  element_not_found: '元素未找到',
-  timeout: '操作超时',
-  action_failed: '操作失败',
-  navigation_failed: '导航失败',
-  assertion_failed: '验证失败',
-  unknown: '未知错误',
+// Error type labels - now using i18n
+const getErrorTypeLabel = (type: ExecutionError['type'], t: (key: string) => string): string => {
+  const labels: Record<ExecutionError['type'], string> = {
+    element_not_found: t('elementNotFound'),
+    timeout: t('timeout'),
+    action_failed: t('actionFailed'),
+    navigation_failed: t('navigationFailed'),
+    assertion_failed: t('assertionFailed'),
+    unknown: t('unknownError'),
+  };
+  return labels[type];
 };
 
 // Error type colors
