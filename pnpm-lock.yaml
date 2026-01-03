@@ -192,6 +192,9 @@ importers:
       highlight.js:
         specifier: 11.11.1
         version: 11.11.1
+      js-yaml:
+        specifier: 4.1.0
+        version: 4.1.0
       jszip:
         specifier: 3.10.1
         version: 3.10.1
@@ -232,6 +235,9 @@ importers:
       '@types/chrome':
         specifier: 0.0.279
         version: 0.0.279
+      '@types/js-yaml':
+        specifier: 4.0.9
+        version: 4.0.9
       '@types/react':
         specifier: ^18.3.1
         version: 18.3.23
@@ -7311,10 +7317,6 @@ packages:
 
   js-yaml@4.1.0:
     resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
-    hasBin: true
-
-  js-yaml@4.1.1:
-    resolution: {integrity: sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==}
     hasBin: true
 
   jsbn@1.1.0:
@@ -15762,7 +15764,7 @@ snapshots:
       commander: 11.1.0
       edit-json-file: 1.8.1
       globby: 13.2.2
-      js-yaml: 4.1.1
+      js-yaml: 4.1.0
       semver: 7.5.2
       table: 6.9.0
       type-fest: 4.41.0
@@ -16117,7 +16119,7 @@ snapshots:
   cosmiconfig@8.3.6(typescript@5.8.3):
     dependencies:
       import-fresh: 3.3.1
-      js-yaml: 4.1.1
+      js-yaml: 4.1.0
       parse-json: 5.2.0
       path-type: 4.0.0
     optionalDependencies:
@@ -16127,7 +16129,7 @@ snapshots:
     dependencies:
       env-paths: 2.2.1
       import-fresh: 3.3.1
-      js-yaml: 4.1.1
+      js-yaml: 4.1.0
       parse-json: 5.2.0
     optionalDependencies:
       typescript: 5.8.3
@@ -16832,7 +16834,7 @@ snapshots:
       imurmurhash: 0.1.4
       is-glob: 4.0.3
       is-path-inside: 3.0.3
-      js-yaml: 4.1.1
+      js-yaml: 4.1.0
       json-stable-stringify-without-jsonify: 1.0.1
       levn: 0.4.1
       lodash.merge: 4.6.2
@@ -18270,10 +18272,6 @@ snapshots:
       esprima: 4.0.1
 
   js-yaml@4.1.0:
-    dependencies:
-      argparse: 2.0.1
-
-  js-yaml@4.1.1:
     dependencies:
       argparse: 2.0.1
 
