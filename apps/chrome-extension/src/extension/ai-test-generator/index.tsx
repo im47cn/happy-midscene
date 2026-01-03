@@ -7,6 +7,7 @@ import {
   BarChartOutlined,
   HistoryOutlined,
   KeyOutlined,
+  SafetyCertificateOutlined,
 } from '@ant-design/icons';
 import { Tooltip, message } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
@@ -22,6 +23,7 @@ import {
   TestCasePreview,
 } from './components';
 import { Dashboard } from './components/analytics';
+import { MaskingSettings } from './components/masking';
 import { useKeyboardShortcuts } from './hooks';
 import { useGeneratorStore } from './store';
 import './styles.less';
@@ -116,6 +118,14 @@ export function AITestGenerator() {
     setCurrentView('input');
   }, [setCurrentView]);
 
+  const handleOpenSettings = useCallback(() => {
+    setCurrentView('settings');
+  }, [setCurrentView]);
+
+  const handleCloseSettings = useCallback(() => {
+    setCurrentView('input');
+  }, [setCurrentView]);
+
   const renderContent = () => {
     switch (currentView) {
       case 'input':
@@ -130,6 +140,27 @@ export function AITestGenerator() {
         return <HistoryView onBack={handleCloseHistory} />;
       case 'analytics':
         return <Dashboard onBack={handleCloseAnalytics} />;
+      case 'settings':
+        return (
+          <div style={{ padding: '8px 0' }}>
+            <MaskingSettings />
+            <div style={{ padding: '16px', textAlign: 'center' }}>
+              <button
+                type="button"
+                onClick={handleCloseSettings}
+                style={{
+                  padding: '6px 16px',
+                  cursor: 'pointer',
+                  borderRadius: '4px',
+                  border: '1px solid #d9d9d9',
+                  background: '#fff',
+                }}
+              >
+                返回
+              </button>
+            </div>
+          </div>
+        );
       default:
         return <MarkdownInput />;
     }
@@ -155,6 +186,12 @@ export function AITestGenerator() {
             <BarChartOutlined
               className="shortcuts-help-icon"
               onClick={handleOpenAnalytics}
+            />
+          </Tooltip>
+          <Tooltip title="脱敏设置">
+            <SafetyCertificateOutlined
+              className="shortcuts-help-icon"
+              onClick={handleOpenSettings}
             />
           </Tooltip>
           <Tooltip title="快捷键帮助 (?)">

@@ -38,7 +38,8 @@ export type ViewMode =
   | 'execute'
   | 'commit'
   | 'history'
-  | 'analytics';
+  | 'analytics'
+  | 'settings';
 
 export interface GeneratorState {
   // Input state
