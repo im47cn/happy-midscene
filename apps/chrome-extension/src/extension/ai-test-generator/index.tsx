@@ -257,9 +257,11 @@ function AITestGeneratorWithErrorBoundary() {
     useGeneratorStore.getState().setError(null);
   }, []);
 
+  const { t } = useI18n();
+
   return (
     <ErrorBoundary
-      fallbackTitle="AI Test Generator 发生错误"
+      fallbackTitle={t('aiGenError')}
       onReset={handleReset}
     >
       <AITestGenerator />

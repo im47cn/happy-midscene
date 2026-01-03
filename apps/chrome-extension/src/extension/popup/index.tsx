@@ -24,6 +24,7 @@ import {
   ChromeExtensionProxyPage,
   ChromeExtensionProxyPageAgent,
 } from '@midscene/web/chrome-extension';
+import { useI18n } from '../../i18n';
 // remember to destroy the agent when the tab is destroyed: agent.page.destroy()
 const extensionAgentForTab = (forceSameTabNavigation = true) => {
   const page = new ChromeExtensionProxyPage(forceSameTabNavigation);
@@ -34,6 +35,7 @@ const STORAGE_KEY = 'midscene-popup-mode';
 
 export function PlaygroundPopup() {
   const { setPopupTab } = useEnvConfig();
+  const { t } = useI18n();
   const [currentMode, setCurrentMode] = useState<
     'playground' | 'bridge' | 'recorder' | 'ai-generator'
   >(() => {
@@ -68,7 +70,7 @@ export function PlaygroundPopup() {
     {
       key: 'playground',
       icon: <SendOutlined />,
-      label: 'Playground',
+      label: t('menuPlayground'),
       onClick: () => {
         setCurrentMode('playground');
         setPopupTab('playground');
@@ -77,7 +79,7 @@ export function PlaygroundPopup() {
     },
     {
       key: 'recorder',
-      label: 'Recorder (Preview)',
+      label: t('menuRecorder'),
       icon: <VideoCameraOutlined />,
       onClick: () => {
         setCurrentMode('recorder');
@@ -88,7 +90,7 @@ export function PlaygroundPopup() {
     {
       key: 'bridge',
       icon: <ApiOutlined />,
-      label: 'Bridge Mode',
+      label: t('menuBridge'),
       onClick: () => {
         setCurrentMode('bridge');
         setPopupTab('bridge');
@@ -98,7 +100,7 @@ export function PlaygroundPopup() {
     {
       key: 'ai-generator',
       icon: <ExperimentOutlined />,
-      label: 'AI Test Generator',
+      label: t('menuAIGenerator'),
       onClick: () => {
         setCurrentMode('ai-generator');
         // ai-generator is extension-only mode, don't sync to visualizer
@@ -174,12 +176,12 @@ export function PlaygroundPopup() {
             </Dropdown>
             <span className="nav-title">
               {currentMode === 'playground'
-                ? 'Playground'
+                ? t('playground')
                 : currentMode === 'recorder'
-                  ? 'Recorder'
+                  ? t('recorder')
                   : currentMode === 'ai-generator'
-                    ? 'AI Test Generator'
-                    : 'Bridge Mode'}
+                    ? t('aiGenerator')
+                    : t('bridge')}
             </span>
           </div>
           <div className="nav-right">

@@ -11,6 +11,7 @@ import {
 import { Alert, Button, Input, Space, Typography, Upload, message } from 'antd';
 import type { UploadProps } from 'antd';
 import { useGeneratorStore } from '../store';
+import { useI18n } from '../../../i18n';
 
 const { TextArea } = Input;
 const { Text, Title } = Typography;
@@ -41,6 +42,8 @@ export function MarkdownInput() {
     setCurrentView,
   } = useGeneratorStore();
 
+  const { t } = useI18n();
+
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMarkdownInput(e.target.value);
   };
@@ -54,7 +57,7 @@ export function MarkdownInput() {
 
   const handleLoadExample = () => {
     setMarkdownInput(EXAMPLE_MARKDOWN);
-    message.success('示例已加载');
+    message.success(t('exampleLoaded'));
   };
 
   const handleClear = () => {
@@ -69,7 +72,7 @@ export function MarkdownInput() {
       reader.onload = (e) => {
         const content = e.target?.result as string;
         setMarkdownInput(content);
-        message.success(`已加载文件: ${file.name}`);
+        message.success(`${t('fileLoaded')}: ${file.name}`);
       };
       reader.readAsText(file);
       return false; // Prevent auto upload
@@ -80,20 +83,20 @@ export function MarkdownInput() {
     <div className="markdown-input-container">
       <div className="input-header">
         <Title level={5} style={{ margin: 0 }}>
-          <FileTextOutlined /> 输入测试需求
+          <FileTextOutlined /> {t('inputTestRequirements')}
         </Title>
         <Space>
           <Button size="small" onClick={handleLoadExample}>
-            加载示例
+            {t('loadExample')}
           </Button>
           <Upload {...uploadProps}>
             <Button size="small" icon={<UploadOutlined />}>
-              上传文件
+              {t('uploadFile')}
             </Button>
           </Upload>
           {markdownInput && (
             <Button size="small" icon={<ClearOutlined />} onClick={handleClear}>
-              清空
+              {t('clear')}
             </Button>
           )}
         </Space>
@@ -101,30 +104,21 @@ export function MarkdownInput() {
 
       <div className="input-hint">
         <Text type="secondary">
-          使用 Markdown 格式描述测试用例：# 或 ##
-          作为用例名称，数字列表作为测试步骤
+          {t('inputPlaceholder').split('\n')[0]}
         </Text>
       </div>
 
       <TextArea
         value={markdownInput}
         onChange={handleChange}
-        placeholder={`示例格式：
-
-## 登录测试
-
-1. 点击登录按钮
-2. 输入用户名 "admin"
-3. 输入密码
-4. 点击提交
-5. 验证登录成功`}
+        placeholder={t('inputPlaceholder')}
         rows={12}
         style={{ fontFamily: 'monospace', fontSize: 13 }}
       />
 
       {error && (
         <Alert
-          message="解析提示"
+          message={t('parseFailed')}
           description={error}
           type="warning"
           showIcon
@@ -139,7 +133,7 @@ export function MarkdownInput() {
           disabled={!markdownInput.trim()}
           block
         >
-          解析需求
+          {t('parseAndPreview')}
         </Button>
       </div>
     </div>
