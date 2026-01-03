@@ -31,6 +31,7 @@ import {
 import { useMemo, useState } from 'react';
 import { useGeneratorStore } from '../store';
 import type { TaskStep, TestCase } from '../types';
+import { useI18n } from '../../../i18n';
 
 const { Text, Title } = Typography;
 const { Panel } = Collapse;
@@ -45,6 +46,7 @@ interface StepItemProps {
 function StepItem({ step, index, onEdit, onDelete }: StepItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(step.originalText);
+  const { t } = useI18n();
 
   const getStatusIcon = () => {
     switch (step.status) {
@@ -55,7 +57,7 @@ function StepItem({ step, index, onEdit, onDelete }: StepItemProps) {
       case 'running':
         return <LoadingOutlined style={{ color: '#1890ff' }} />;
       case 'skipped':
-        return <Tag color="default">跳过</Tag>;
+        return <Tag color="default">{t('statusSkipped')}</Tag>;
       default:
         return <span style={{ color: '#d9d9d9' }}>○</span>;
     }
