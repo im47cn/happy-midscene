@@ -4,7 +4,11 @@
  */
 
 import {
+  EditOutlined,
   EyeInvisibleOutlined,
+  ExperimentOutlined,
+  OrderedListOutlined,
+  PlusOutlined,
   ReloadOutlined,
   SafetyCertificateOutlined,
   SearchOutlined,
@@ -30,6 +34,9 @@ import type {
   ScreenshotMaskingLevel,
 } from '../../types/masking';
 import { DEFAULT_MASKING_CONFIG } from '../../types/masking';
+import { RuleEditor } from './RuleEditor';
+import { RuleTester } from './RuleTester';
+import { WhitelistManagerUI } from './WhitelistManager';
 
 /**
  * Category display configuration
@@ -66,6 +73,10 @@ export const MaskingSettings: React.FC<MaskingSettingsProps> = ({
   const [searchText, setSearchText] = useState('');
   const [testInput, setTestInput] = useState('');
   const [testResult, setTestResult] = useState('');
+  const [showRuleEditor, setShowRuleEditor] = useState(false);
+  const [editingRule, setEditingRule] = useState<DetectionRule | null>(null);
+  const [showRuleTester, setShowRuleTester] = useState(false);
+  const [showWhitelist, setShowWhitelist] = useState(false);
 
   // Load rules on mount
   useEffect(() => {
@@ -92,6 +103,38 @@ export const MaskingSettings: React.FC<MaskingSettingsProps> = ({
       detectorEngine.disableRule(ruleId);
     }
     setRules([...detectorEngine.getRules()]);
+  }, []);
+
+  // Open rule editor for new rule
+  const handleAddRule = useCallback(() => {
+    setEditingRule(null);
+    setShowRuleEditor(true);
+  }, []);
+
+  // Open rule editor for existing rule
+  const handleEditRule = useCallback((rule: DetectionRule) => {
+    setEditingRule(rule);
+    setShowRuleEditor(true);
+  }, []);
+
+  // Save rule (create or update)
+  const handleSaveRule = useCallback((rule: DetectionRule) => {
+    if (editingRule) {
+      // Update existing rule
+      detectorEngine.removeRule(rule.id);
+    }
+    detectorEngine.addRule(rule);
+    setRules([...detectorEngine.getRules()]);
+    setShowRuleEditor(false);
+    setEditingRule(null);
+  }, [editingRule]);
+
+  // Delete rule
+  const handleDeleteRule = useCallback((ruleId: string) => {
+    detectorEngine.removeRule(ruleId);
+    setRules([...detectorEngine.getRules()]);
+    setShowRuleEditor(false);
+    setEditingRule(null);
   }, []);
 
   // Test masking
@@ -284,15 +327,38 @@ export const MaskingSettings: React.FC<MaskingSettingsProps> = ({
         title="检测规则"
         size="small"
         extra={
-          <Input
-            size="small"
-            placeholder="搜索规则"
-            prefix={<SearchOutlined />}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            style={{ width: 150 }}
-            allowClear
-          />
+          <Space>
+            <Input
+              size="small"
+              placeholder="搜索规则"
+              prefix={<SearchOutlined />}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              style={{ width: 120 }}
+              allowClear
+            />
+            <Tooltip title="添加规则">
+              <Button
+                size="small"
+                icon={<PlusOutlined />}
+                onClick={handleAddRule}
+              />
+            </Tooltip>
+            <Tooltip title="规则测试器">
+              <Button
+                size="small"
+                icon={<ExperimentOutlined />}
+                onClick={() => setShowRuleTester(true)}
+              />
+            </Tooltip>
+            <Tooltip title="白名单管理">
+              <Button
+                size="small"
+                icon={<OrderedListOutlined />}
+                onClick={() => setShowWhitelist(true)}
+              />
+            </Tooltip>
+          </Space>
         }
       >
         <List
@@ -302,6 +368,14 @@ export const MaskingSettings: React.FC<MaskingSettingsProps> = ({
             <List.Item
               key={rule.id}
               actions={[
+                <Tooltip key="edit" title="编辑">
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<EditOutlined />}
+                    onClick={() => handleEditRule(rule)}
+                  />
+                </Tooltip>,
                 <Switch
                   key="switch"
                   size="small"
@@ -353,6 +427,91 @@ export const MaskingSettings: React.FC<MaskingSettingsProps> = ({
           style={{ maxHeight: 300, overflow: 'auto' }}
         />
       </Card>
+
+      {/* Rule Editor Modal */}
+      <RuleEditor
+        visible={showRuleEditor}
+        rule={editingRule}
+        onSave={handleSaveRule}
+        onCancel={() => {
+          setShowRuleEditor(false);
+          setEditingRule(null);
+        }}
+        onDelete={handleDeleteRule}
+        existingRuleIds={rules.map((r) => r.id)}
+      />
+
+      {/* Rule Tester Modal */}
+      {showRuleTester && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.5)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowRuleTester(false);
+            }
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 8,
+              maxWidth: 800,
+              maxHeight: '80vh',
+              overflow: 'auto',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            }}
+          >
+            <RuleTester onClose={() => setShowRuleTester(false)} />
+          </div>
+        </div>
+      )}
+
+      {/* Whitelist Manager Modal */}
+      {showWhitelist && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.5)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowWhitelist(false);
+            }
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 8,
+              maxWidth: 600,
+              maxHeight: '80vh',
+              overflow: 'auto',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            }}
+          >
+            <WhitelistManagerUI onClose={() => setShowWhitelist(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

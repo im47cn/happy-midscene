@@ -56,6 +56,15 @@ export {
   createMaskRegionsFromElements,
 } from './imageMasker';
 
+// Whitelist manager
+export {
+  WhitelistManager,
+  whitelistManager,
+  type WhitelistEntry,
+  type WhitelistType,
+  type WhitelistConfig,
+} from './whitelistManager';
+
 /**
  * Quick mask function for convenience
  * @param text - Text to mask
