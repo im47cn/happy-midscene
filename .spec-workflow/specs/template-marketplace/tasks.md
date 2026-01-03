@@ -68,19 +68,19 @@
   - YAML 生成
   - 导入到项目
 
-- [ ] **使用向导** (`components/ApplyWizard.tsx`)
+- [x] **使用向导** (`components/ApplyWizard.tsx`)
   - 步骤引导
   - 参数配置
   - 预览确认
 
-- [ ] **版本选择** (`components/VersionSelector.tsx`)
+- [x] **版本选择** (`components/VersionSelector.tsx`)
   - 版本列表
   - 版本比较
   - 更新日志
 
 ## Phase 5: 模板发布
 
-- [ ] **发布表单** (`components/PublishForm.tsx`)
+- [x] **发布表单** (`components/PublishForm.tsx`)
   - 基本信息输入
   - 媒体上传
   - 参数定义
@@ -90,7 +90,7 @@
   - 恶意代码检测
   - 内容规范检查
 
-- [ ] **发布预览** (`components/PublishPreview.tsx`)
+- [x] **发布预览** (`components/PublishPreview.tsx`)
   - 最终效果预览
   - 审核状态展示
   - 提交确认
@@ -114,12 +114,12 @@
   - 快捷访问
   - 推荐展示
 
-- [ ] **离线支持**
+- [x] **离线支持** (`services/offlineSupport.ts`)
   - 模板缓存
   - 离线浏览
   - 同步机制
 
-- [ ] **性能优化**
+- [x] **性能优化** (`services/performanceOptimizations.ts`)
   - 图片懒加载
   - 搜索防抖
   - 列表虚拟化
@@ -143,15 +143,19 @@ apps/chrome-extension/src/extension/ai-test-generator/
 │   │   ├── YamlPreview.tsx      # YAML 预览
 │   │   ├── ReviewList.tsx       # 评价列表
 │   │   ├── ReviewForm.tsx       # 评价表单
-│   │   ├── PublishForm.tsx      # 发布表单 (TODO)
-│   │   ├── ApplyWizard.tsx      # 使用向导 (TODO)
+│   │   ├── PublishForm.tsx      # 发布表单
+│   │   ├── PublishPreview.tsx   # 发布预览
+│   │   ├── ApplyWizard.tsx      # 使用向导
+│   │   ├── VersionSelector.tsx  # 版本选择
 │   │   └── CategoryNav.tsx      # 分类导航
 │   ├── services/
 │   │   ├── marketplaceAPI.ts    # API 接口
 │   │   ├── templateStorage.ts   # 本地存储
 │   │   ├── templateApplier.ts   # 模板应用
 │   │   ├── templateAuditor.ts   # 内容审核
-│   │   └── ratingSystem.ts      # 评价系统
+│   │   ├── ratingSystem.ts      # 评价系统
+│   │   ├── offlineSupport.ts    # 离线支持
+│   │   └── performanceOptimizations.ts # 性能优化
 │   └── types/
 │       └── marketplace.ts       # 类型定义
 ```
