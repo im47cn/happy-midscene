@@ -8,6 +8,7 @@ import {
   HistoryOutlined,
   KeyOutlined,
   SafetyCertificateOutlined,
+  ShopOutlined,
 } from '@ant-design/icons';
 import { Tooltip, message } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
@@ -25,6 +26,7 @@ import {
 import { Dashboard } from './components/analytics';
 import { MaskingSettings } from './components/masking';
 import { useKeyboardShortcuts } from './hooks';
+import { MarketplaceHome } from './marketplace';
 import { useGeneratorStore } from './store';
 import './styles.less';
 
@@ -126,6 +128,26 @@ export function AITestGenerator() {
     setCurrentView('input');
   }, [setCurrentView]);
 
+  const handleOpenMarketplace = useCallback(() => {
+    setCurrentView('marketplace');
+  }, [setCurrentView]);
+
+  const handleCloseMarketplace = useCallback(() => {
+    setCurrentView('input');
+  }, [setCurrentView]);
+
+  const handleApplyTemplate = useCallback(
+    (yaml: string) => {
+      // Apply the template YAML to the input
+      useGeneratorStore.getState().setMarkdownInput(
+        `# Applied Template\n\n\`\`\`yaml\n${yaml}\n\`\`\`\n`
+      );
+      setCurrentView('input');
+      message.success('Template applied! You can now modify and run it.');
+    },
+    [setCurrentView]
+  );
+
   const renderContent = () => {
     switch (currentView) {
       case 'input':
@@ -161,6 +183,13 @@ export function AITestGenerator() {
             </div>
           </div>
         );
+      case 'marketplace':
+        return (
+          <MarketplaceHome
+            onBack={handleCloseMarketplace}
+            onApplyTemplate={handleApplyTemplate}
+          />
+        );
       default:
         return <MarkdownInput />;
     }
@@ -192,6 +221,12 @@ export function AITestGenerator() {
             <SafetyCertificateOutlined
               className="shortcuts-help-icon"
               onClick={handleOpenSettings}
+            />
+          </Tooltip>
+          <Tooltip title="模板市场">
+            <ShopOutlined
+              className="shortcuts-help-icon"
+              onClick={handleOpenMarketplace}
             />
           </Tooltip>
           <Tooltip title="快捷键帮助 (?)">

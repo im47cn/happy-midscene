@@ -39,7 +39,8 @@ export type ViewMode =
   | 'commit'
   | 'history'
   | 'analytics'
-  | 'settings';
+  | 'settings'
+  | 'marketplace';
 
 export interface GeneratorState {
   // Input state
