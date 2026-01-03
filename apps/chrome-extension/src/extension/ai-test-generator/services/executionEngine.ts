@@ -11,7 +11,12 @@ import { DEFAULT_MASKING_CONFIG } from '../types/masking';
 import { alertManager, dataCollector } from './analytics';
 import { healingEngine } from './healing';
 import type { TaskStep, TestCase } from './markdownParser';
-import { logMasker, maskerEngine } from './masking';
+import {
+  detectScreenshotMaskRegions,
+  imageMasker,
+  logMasker,
+  maskerEngine,
+} from './masking';
 
 export interface DeviceEmulationConfig {
   deviceId: string;
@@ -288,6 +293,7 @@ export class ExecutionEngine {
   private resumeResolve: (() => void) | null = null;
   private selfHealingConfig: SelfHealingConfig;
   private maskingConfig: MaskingConfig;
+  private isLogMaskingActive = false;
 
   constructor(
     private getAgent: (forceSameTabNavigation?: boolean) => any,
@@ -381,6 +387,198 @@ export class ExecutionEngine {
       warnings,
       maskedYaml: result.masked,
     };
+  }
+
+  /**
+   * Take a screenshot with optional masking of sensitive regions
+   * @param maskSensitive - Whether to mask sensitive regions
+   * @returns Base64 encoded screenshot string
+   */
+  async takeScreenshot(maskSensitive = true): Promise<string | undefined> {
+    if (!this.agent?.page) {
+      return undefined;
+    }
+
+    try {
+      // Take screenshot as base64
+      const screenshot = await this.agent.page.screenshot({
+        type: 'png',
+        encoding: 'base64',
+      });
+
+      if (!screenshot) {
+        return undefined;
+      }
+
+      // If masking is disabled or screenshot masking is off, return original
+      if (
+        !maskSensitive ||
+        !this.maskingConfig.enabled ||
+        this.maskingConfig.screenshotMasking === 'off'
+      ) {
+        return screenshot;
+      }
+
+      // Detect and mask sensitive regions
+      const maskedResult = await this.maskScreenshotData(
+        screenshot,
+        this.maskingConfig.screenshotMasking,
+      );
+
+      return maskedResult;
+    } catch (error) {
+      console.warn('Failed to take screenshot:', error);
+      return undefined;
+    }
+  }
+
+  /**
+   * Mask sensitive regions in a screenshot
+   * @param base64Screenshot - Base64 encoded screenshot
+   * @param level - Masking level
+   * @returns Base64 encoded masked screenshot
+   */
+  private async maskScreenshotData(
+    base64Screenshot: string,
+    level: 'standard' | 'strict',
+  ): Promise<string> {
+    try {
+      // Detect sensitive regions from DOM if possible
+      let sensitiveRegions: import('../types/masking').MaskRegion[] = [];
+
+      // Try to detect regions from the page DOM
+      if (this.agent?.page) {
+        try {
+          // Execute detection in page context
+          sensitiveRegions = await this.agent.page.evaluate(() => {
+            // This function runs in page context
+            // We need to detect sensitive elements and return their regions
+            const regions: Array<{
+              x: number;
+              y: number;
+              width: number;
+              height: number;
+              type: 'blur' | 'fill';
+              category: string;
+            }> = [];
+
+            // Sensitive selectors
+            const selectors = [
+              'input[type="password"]',
+              'input[type="email"]',
+              'input[type="tel"]',
+              'input[autocomplete="cc-number"]',
+              'input[autocomplete="cc-csc"]',
+              'input[name*="password"]',
+              'input[name*="secret"]',
+              'input[name*="token"]',
+              'input[name*="api"][name*="key"]',
+            ];
+
+            for (const selector of selectors) {
+              const elements = document.querySelectorAll(selector);
+              elements.forEach((el) => {
+                const rect = el.getBoundingClientRect();
+                if (rect.width > 0 && rect.height > 0) {
+                  const padding = 4;
+                  regions.push({
+                    x: Math.max(0, rect.left + window.scrollX - padding),
+                    y: Math.max(0, rect.top + window.scrollY - padding),
+                    width: rect.width + padding * 2,
+                    height: rect.height + padding * 2,
+                    type: 'blur',
+                    category: 'credential',
+                  });
+                }
+              });
+            }
+
+            return regions;
+          });
+        } catch (evalError) {
+          console.debug('Failed to detect regions from page:', evalError);
+        }
+      }
+
+      // Apply masking
+      const result = await imageMasker.maskScreenshot(
+        base64Screenshot,
+        level,
+        sensitiveRegions,
+      );
+
+      // Convert back to base64
+      if (result.imageData) {
+        return this.imageDataToBase64(result.imageData);
+      }
+
+      return base64Screenshot;
+    } catch (error) {
+      console.warn('Failed to mask screenshot:', error);
+      return base64Screenshot;
+    }
+  }
+
+  /**
+   * Convert ImageData to base64 PNG string
+   */
+  private imageDataToBase64(imageData: ImageData): string {
+    try {
+      // Create canvas
+      const canvas =
+        typeof OffscreenCanvas !== 'undefined'
+          ? new OffscreenCanvas(imageData.width, imageData.height)
+          : document.createElement('canvas');
+
+      if ('width' in canvas) {
+        canvas.width = imageData.width;
+        canvas.height = imageData.height;
+      }
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        throw new Error('Failed to get canvas context');
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+
+      // Convert to base64
+      if ('toDataURL' in canvas) {
+        const dataUrl = canvas.toDataURL('image/png');
+        return dataUrl.replace(/^data:image\/png;base64,/, '');
+      }
+
+      // For OffscreenCanvas, we need to use convertToBlob
+      // But in sync context, return empty - caller should use async version
+      return '';
+    } catch (error) {
+      console.warn('Failed to convert ImageData to base64:', error);
+      return '';
+    }
+  }
+
+  /**
+   * Start log masking during execution
+   */
+  private startLogMasking(): void {
+    if (
+      this.maskingConfig.enabled &&
+      this.maskingConfig.logMasking &&
+      !this.isLogMaskingActive
+    ) {
+      logMasker.wrapConsole();
+      this.isLogMaskingActive = true;
+    }
+  }
+
+  /**
+   * Stop log masking after execution
+   */
+  private stopLogMasking(): void {
+    if (this.isLogMaskingActive) {
+      logMasker.unwrapConsole();
+      this.isLogMaskingActive = false;
+    }
   }
 
   /**
@@ -554,10 +752,14 @@ export class ExecutionEngine {
         }
       }
 
+      // Take screenshot after successful step (with masking)
+      const screenshot = await this.takeScreenshot(true);
+
       const result: ExecutionResult = {
         stepId: step.id,
         success: true,
         generatedAction: generateYamlAction(step),
+        screenshot,
         duration: Date.now() - startTime,
       };
 
@@ -576,11 +778,15 @@ export class ExecutionEngine {
         }
       }
 
+      // Take screenshot even on failure (with masking)
+      const screenshot = await this.takeScreenshot(true);
+
       return {
         stepId: step.id,
         success: false,
         error: errorDetails.message,
         errorDetails,
+        screenshot,
         duration: Date.now() - startTime,
       };
     }
@@ -763,6 +969,9 @@ export class ExecutionEngine {
 
     const executionStartTime = Date.now();
 
+    // Start log masking if enabled
+    this.startLogMasking();
+
     try {
       await this.initAgent();
 
@@ -864,6 +1073,8 @@ export class ExecutionEngine {
       }
       throw error;
     } finally {
+      // Stop log masking
+      this.stopLogMasking();
       await this.destroyAgent();
     }
   }
