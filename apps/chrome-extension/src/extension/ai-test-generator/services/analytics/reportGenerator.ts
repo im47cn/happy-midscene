@@ -1,6 +1,6 @@
 /**
  * Report Generator Service
- * Generates analytics reports in various formats
+ * Generates analytics reports in various formats with data masking support
  */
 
 import type {
@@ -9,12 +9,14 @@ import type {
   DateRange,
   FailureType,
   Hotspot,
+  MaskingStats,
   Report,
   ReportFailureAnalysis,
   ReportSummary,
   ReportType,
 } from '../../types/analytics';
 import { FAILURE_TYPE_LABELS } from '../../types/analytics';
+import { auditLogger, maskerEngine } from '../masking';
 import { analysisEngine } from './analysisEngine';
 import { analyticsStorage } from './analyticsStorage';
 
@@ -63,6 +65,10 @@ class ReportGenerator {
 
     const summary = this.calculateSummary(dailyStats);
     const failureAnalysis = this.analyzeFailures(dailyStats, hotspots);
+
+    // Get masking statistics for the date range
+    const maskingStats = await this.getMaskingStats(dateRange);
+
     const recommendations = this.generateRecommendations(
       summary,
       failureAnalysis,
@@ -70,6 +76,9 @@ class ReportGenerator {
     );
 
     const title = this.generateTitle(type, dateRange);
+
+    // Apply masking to case names if needed
+    const maskedCaseStats = await this.maskCaseStats(this.getTopCases(caseStats));
 
     const report: Report = {
       id: `report-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -80,13 +89,68 @@ class ReportGenerator {
       summary,
       failureAnalysis,
       recommendations,
-      caseStats: this.getTopCases(caseStats),
+      caseStats: maskedCaseStats,
+      maskingStats,
     };
 
     // Save report
     await analyticsStorage.saveReport(report);
 
     return report;
+  }
+
+  /**
+   * Get masking statistics for the date range
+   */
+  private async getMaskingStats(dateRange: DateRange): Promise<MaskingStats> {
+    const config = maskerEngine.getConfig();
+    const startTime = new Date(dateRange.startDate).getTime();
+    const endTime = new Date(dateRange.endDate).getTime() + 24 * 60 * 60 * 1000; // End of day
+
+    try {
+      const auditStats = await auditLogger.getStats(startTime, endTime);
+
+      return {
+        enabled: config.enabled,
+        totalMasked: auditStats.totalMasked,
+        byCategory: auditStats.byCategory,
+        byType: auditStats.byType,
+      };
+    } catch (error) {
+      console.debug('Failed to get masking stats:', error);
+      return {
+        enabled: config.enabled,
+        totalMasked: 0,
+        byCategory: {},
+        byType: { text: 0, screenshot: 0, log: 0, yaml: 0 },
+      };
+    }
+  }
+
+  /**
+   * Mask sensitive data in case stats
+   */
+  private async maskCaseStats(caseStats: CaseStats[]): Promise<CaseStats[]> {
+    const config = maskerEngine.getConfig();
+    if (!config.enabled || !config.textMasking) {
+      return caseStats;
+    }
+
+    const maskedStats: CaseStats[] = [];
+
+    for (const stat of caseStats) {
+      try {
+        const maskedResult = await maskerEngine.maskText(stat.caseName, 'text');
+        maskedStats.push({
+          ...stat,
+          caseName: maskedResult.masked,
+        });
+      } catch {
+        maskedStats.push(stat);
+      }
+    }
+
+    return maskedStats;
   }
 
   /**
@@ -267,6 +331,9 @@ class ReportGenerator {
       .map((r) => `<li>${r}</li>`)
       .join('');
 
+    // Generate masking stats section
+    const maskingSection = this.generateMaskingSection(report);
+
     return `
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -331,12 +398,78 @@ class ReportGenerator {
     ${recommendationItems}
   </ul>
 
+  ${maskingSection}
+
   <p class="generated">
     生成时间: ${new Date(report.generatedAt).toLocaleString('zh-CN')}<br>
     报告 ID: ${report.id}
   </p>
 </body>
 </html>`;
+  }
+
+  /**
+   * Generate masking statistics section for HTML report
+   */
+  private generateMaskingSection(report: Report): string {
+    if (!report.maskingStats || !report.maskingStats.enabled) {
+      return '';
+    }
+
+    const { totalMasked, byCategory, byType } = report.maskingStats;
+
+    if (totalMasked === 0) {
+      return `
+  <h2>数据脱敏</h2>
+  <p>数据脱敏已启用，本期报告未检测到敏感数据。</p>`;
+    }
+
+    const categoryLabels: Record<string, string> = {
+      credential: '凭证信息',
+      pii: '个人信息',
+      financial: '金融信息',
+      health: '健康信息',
+      custom: '自定义',
+    };
+
+    const categoryRows = Object.entries(byCategory)
+      .filter(([_, count]) => count > 0)
+      .map(
+        ([category, count]) =>
+          `<tr><td>${categoryLabels[category] || category}</td><td>${count}</td></tr>`,
+      )
+      .join('');
+
+    return `
+  <h2>数据脱敏统计</h2>
+  <div class="summary" style="grid-template-columns: repeat(5, 1fr);">
+    <div class="summary-card">
+      <div class="summary-value">${totalMasked}</div>
+      <div class="summary-label">脱敏总数</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value">${byType.text}</div>
+      <div class="summary-label">文本脱敏</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value">${byType.screenshot}</div>
+      <div class="summary-label">截图脱敏</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value">${byType.log}</div>
+      <div class="summary-label">日志脱敏</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value">${byType.yaml}</div>
+      <div class="summary-label">YAML脱敏</div>
+    </div>
+  </div>
+
+  <h3>按类别分布</h3>
+  <table>
+    <tr><th>类别</th><th>数量</th></tr>
+    ${categoryRows || '<tr><td colspan="2">无分类数据</td></tr>'}
+  </table>`;
   }
 
   /**
@@ -386,6 +519,18 @@ class ReportGenerator {
       lines.push(
         `"${c.caseName}","${c.passRate.toFixed(1)}%","${this.formatDuration(c.avgDuration)}","${c.stabilityScore}","${c.isFlaky ? '是' : '否'}"`,
       );
+    }
+    lines.push('');
+
+    // Masking stats
+    if (report.maskingStats?.enabled) {
+      lines.push('"数据脱敏统计"');
+      lines.push('"指标","值"');
+      lines.push(`"脱敏总数","${report.maskingStats.totalMasked}"`);
+      lines.push(`"文本脱敏","${report.maskingStats.byType.text}"`);
+      lines.push(`"截图脱敏","${report.maskingStats.byType.screenshot}"`);
+      lines.push(`"日志脱敏","${report.maskingStats.byType.log}"`);
+      lines.push(`"YAML脱敏","${report.maskingStats.byType.yaml}"`);
     }
 
     return lines.join('\n');

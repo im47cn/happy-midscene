@@ -238,6 +238,21 @@ export interface ReportFailureAnalysis {
 }
 
 /**
+ * Masking statistics for reports
+ */
+export interface MaskingStats {
+  enabled: boolean;
+  totalMasked: number;
+  byCategory: Record<string, number>;
+  byType: {
+    text: number;
+    screenshot: number;
+    log: number;
+    yaml: number;
+  };
+}
+
+/**
  * Generated report
  */
 export interface Report {
@@ -250,6 +265,7 @@ export interface Report {
   failureAnalysis: ReportFailureAnalysis;
   recommendations: string[];
   caseStats: CaseStats[];
+  maskingStats?: MaskingStats;
 }
 
 /**

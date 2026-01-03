@@ -87,6 +87,21 @@ export {
   type RegionDetectorConfig,
 } from './regionDetector';
 
+// Audit logger
+export {
+  auditLogger,
+  type AuditStats,
+} from './auditLogger';
+
+// YAML checker
+export {
+  yamlChecker,
+  type WarningSeverity,
+  type YamlWarning,
+  type YamlReplacementSuggestion,
+  type YamlCheckResult,
+} from './yamlChecker';
+
 /**
  * Quick mask function for convenience
  * @param text - Text to mask
