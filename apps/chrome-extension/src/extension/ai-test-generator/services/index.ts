@@ -4,3 +4,4 @@ export * from './executionEngine';
 export * from './historyService';
 export * from './healing';
 export * from './masking';
+export * from './recommendation';
