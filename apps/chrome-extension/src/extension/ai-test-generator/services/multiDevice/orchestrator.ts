@@ -239,8 +239,8 @@ export class Orchestrator {
           });
         }
 
-        // Check stop
-        if (this.state === 'idle') {
+        // Check stop - use getState() to avoid type narrowing
+        if (this.getState() === 'idle') {
           break;
         }
 

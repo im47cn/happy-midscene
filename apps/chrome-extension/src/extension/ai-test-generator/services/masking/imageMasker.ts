@@ -320,11 +320,9 @@ export class ImageMasker implements IImageMasker {
 
   /**
    * Create a canvas element (works in both browser and worker contexts)
+   * Returns HTMLCanvasElement for consistent typing - OffscreenCanvas is cast
    */
-  private createCanvas(
-    width: number,
-    height: number,
-  ): HTMLCanvasElement | OffscreenCanvas {
+  private createCanvas(width: number, height: number): HTMLCanvasElement {
     // Try OffscreenCanvas first (works in workers)
     if (typeof OffscreenCanvas !== 'undefined') {
       return new OffscreenCanvas(width, height) as unknown as HTMLCanvasElement;

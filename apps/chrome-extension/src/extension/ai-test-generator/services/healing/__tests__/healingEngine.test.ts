@@ -4,6 +4,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ChromeExtensionProxyPageAgent } from '@midscene/web/chrome-extension';
 import type {
   SelfHealingConfig,
   SemanticFingerprint,
@@ -27,23 +28,20 @@ vi.mock('../storage', () => ({
 
 import { healingStorage } from '../storage';
 
-// Mock agent
-const createMockAgent = (overrides = {}) => ({
-  describeElementAtPoint: vi
-    .fn()
-    .mockResolvedValue({
+// Mock agent - cast to partial type for testing
+const createMockAgent = (overrides = {}) =>
+  ({
+    describeElementAtPoint: vi.fn().mockResolvedValue({
       prompt: 'A blue button',
       deepThink: false,
       verifyResult: true,
     }),
-  aiLocate: vi
-    .fn()
-    .mockResolvedValue({
+    aiLocate: vi.fn().mockResolvedValue({
       center: [150, 150],
       rect: { left: 100, top: 125, width: 100, height: 50 },
     }),
-  ...overrides,
-});
+    ...overrides,
+  }) as unknown as ChromeExtensionProxyPageAgent;
 
 describe('HealingEngine', () => {
   let engine: HealingEngine;

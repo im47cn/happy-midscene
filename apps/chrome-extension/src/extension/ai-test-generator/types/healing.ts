@@ -141,11 +141,12 @@ export interface IHealingEngine {
   heal(stepId: string, originalDescription: string): Promise<HealingResult>;
 
   // Confirm healing result
+  // Returns the healed element info if accepted and successful, null otherwise
   confirmHealing(
     healingId: string,
     accepted: boolean,
     newDescription?: string,
-  ): Promise<void>;
+  ): Promise<{ center: [number, number]; rect: Rect } | null>;
 
   // Get statistics
   getStatistics(): Promise<HealingStatistics>;

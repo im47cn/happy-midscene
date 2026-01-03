@@ -380,10 +380,10 @@ describe('Smart Data Generation System Integration', () => {
       // Should have cases for boundaries - check for any boundary-related cases
       const hasBoundaryCases = testCases.some(
         (tc) =>
-          tc.category === 'minimum' ||
-          tc.category === 'maximum' ||
-          tc.category === 'min_length' ||
-          tc.category === 'max_length' ||
+          tc.category === 'min' ||
+          tc.category === 'max' ||
+          tc.category === 'boundary-1' ||
+          tc.category === 'boundary+1' ||
           tc.category === 'empty',
       );
       expect(hasBoundaryCases).toBe(true);

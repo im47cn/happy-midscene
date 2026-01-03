@@ -442,10 +442,7 @@ describe('DataCollector', () => {
   });
 
   describe('failure type inference', () => {
-    const testInferFailureType = (
-      description: string,
-      expectedType: string,
-    ) => {
+    const testInferFailureType = (description: string) => {
       const steps: StepRecord[] = [
         {
           index: 0,

@@ -313,13 +313,11 @@ export class OCREngine {
 
   /**
    * Convert ImageData to data URL
+   * Note: Always uses HTMLCanvasElement since toDataURL is not available on OffscreenCanvas
    */
   private imageDataToDataURL(imageData: ImageData): string {
-    const canvas =
-      typeof OffscreenCanvas !== 'undefined'
-        ? new OffscreenCanvas(imageData.width, imageData.height)
-        : document.createElement('canvas');
-
+    // Always use HTMLCanvasElement for toDataURL support
+    const canvas = document.createElement('canvas');
     canvas.width = imageData.width;
     canvas.height = imageData.height;
 
@@ -329,17 +327,7 @@ export class OCREngine {
     }
 
     ctx.putImageData(imageData, 0, 0);
-
-    if (canvas instanceof OffscreenCanvas) {
-      // For OffscreenCanvas, we need to convert differently
-      const blob = (canvas as OffscreenCanvas).convertToBlob?.({ type: 'image/png' });
-      if (blob) {
-        // This is async, but we'll handle it synchronously for now
-        return canvas.toDataURL?.('image/png') || '';
-      }
-    }
-
-    return (canvas as HTMLCanvasElement).toDataURL('image/png');
+    return canvas.toDataURL('image/png');
   }
 
   /**

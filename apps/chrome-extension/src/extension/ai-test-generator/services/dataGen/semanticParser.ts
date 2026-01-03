@@ -3,7 +3,11 @@
  * Parses field labels and placeholders to determine semantic type
  */
 
-import type { FieldType, SemanticType } from '../../types/dataGen';
+import type {
+  FieldConstraints,
+  FieldType,
+  SemanticType,
+} from '../../types/dataGen';
 
 /**
  * Keyword mapping for semantic type detection
@@ -336,15 +340,8 @@ export function extractConstraints(
     max?: number;
     pattern?: string;
   },
-): {
-  required: boolean;
-  minLength?: number;
-  maxLength?: number;
-  minValue?: number;
-  maxValue?: number;
-  pattern?: string;
-} {
-  const constraints: ReturnType<typeof extractConstraints> = {
+): FieldConstraints {
+  const constraints: FieldConstraints = {
     required: attributes?.required ?? false,
   };
 

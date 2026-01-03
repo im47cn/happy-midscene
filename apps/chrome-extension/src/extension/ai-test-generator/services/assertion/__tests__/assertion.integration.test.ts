@@ -236,7 +236,7 @@ describe('Smart Assertion System Integration', () => {
         id: 'tpl-login',
         name: 'Login Success',
         description: 'Verify login was successful',
-        category: 'authentication',
+        category: 'user',
         trigger: {
           actionType: 'click',
           intentPattern: 'login',
@@ -255,7 +255,7 @@ describe('Smart Assertion System Integration', () => {
       assertionGenerator.setConfig({
         enabled: true,
         enableTemplates: true,
-        templateCategories: ['authentication'],
+        templateCategories: ['user'],
       });
 
       const { recommendations } = await assertionGenerator.analyzeAndGenerate(
@@ -274,33 +274,33 @@ describe('Smart Assertion System Integration', () => {
     });
 
     it('should filter templates by category', async () => {
-      const authTemplate: AssertionTemplate = {
-        id: 'tpl-auth',
-        name: 'Auth Template',
-        description: 'Auth check',
-        category: 'authentication',
+      const userTemplate: AssertionTemplate = {
+        id: 'tpl-user',
+        name: 'User Template',
+        description: 'User check',
+        category: 'user',
         trigger: { actionType: 'click' },
         assertion: { type: 'element_visible', parameters: {} },
         createdAt: Date.now(),
         usageCount: 0,
       };
 
-      const paymentTemplate: AssertionTemplate = {
-        id: 'tpl-payment',
-        name: 'Payment Template',
-        description: 'Payment check',
-        category: 'payment',
+      const systemTemplate: AssertionTemplate = {
+        id: 'tpl-system',
+        name: 'System Template',
+        description: 'System check',
+        category: 'system',
         trigger: { actionType: 'click' },
         assertion: { type: 'element_visible', parameters: {} },
         createdAt: Date.now(),
         usageCount: 0,
       };
 
-      assertionGenerator.setTemplates([authTemplate, paymentTemplate]);
+      assertionGenerator.setTemplates([userTemplate, systemTemplate]);
       assertionGenerator.setConfig({
         enabled: true,
         enableTemplates: true,
-        templateCategories: ['authentication'], // Only auth category
+        templateCategories: ['user'], // Only user category
       });
 
       const { recommendations } = await assertionGenerator.analyzeAndGenerate(
@@ -547,9 +547,10 @@ describe('Smart Assertion System Integration', () => {
           afterTitle: '',
           visibleChanges: [
             {
-              type: 'new_element',
-              selector: '.success-message',
+              type: 'appeared',
+              region: { x: 100, y: 200, width: 200, height: 50 },
               description: 'Success message appeared',
+              confidence: 0.9,
             },
           ],
         },

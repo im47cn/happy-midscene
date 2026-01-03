@@ -201,19 +201,18 @@ describe('OCREngine with mocked Tesseract', () => {
     const engine = new OCREngine();
     await engine.initialize();
 
-    // Mock canvas and image APIs
-    vi.stubGlobal('OffscreenCanvas', class {
-      width = 100;
-      height = 100;
-      getContext() {
-        return {
-          putImageData: vi.fn(),
-          getImageData: vi.fn().mockReturnValue(new MockImageData(100, 100)),
-        };
-      }
-      toDataURL() {
-        return 'data:image/png;base64,mock';
-      }
+    // Mock canvas via document.createElement for imageDataToDataURL
+    const mockCanvas = {
+      width: 100,
+      height: 100,
+      getContext: vi.fn().mockReturnValue({
+        putImageData: vi.fn(),
+        getImageData: vi.fn().mockReturnValue(new MockImageData(100, 100)),
+      }),
+      toDataURL: vi.fn().mockReturnValue('data:image/png;base64,mock'),
+    };
+    vi.stubGlobal('document', {
+      createElement: vi.fn().mockReturnValue(mockCanvas),
     });
 
     const mockImageData = new MockImageData(100, 100);

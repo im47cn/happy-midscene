@@ -107,6 +107,7 @@ describe('ExecutionEngine Integration', () => {
       status: 'pending' as const,
       ...step,
     })),
+    potentialParams: [],
   });
 
   beforeEach(() => {
@@ -147,8 +148,6 @@ describe('ExecutionEngine Integration', () => {
         lastKnownRect: { left: 50, top: 75, width: 100, height: 50 },
         createdAt: Date.now() - 1000,
         updatedAt: Date.now() - 1000,
-        successCount: 5,
-        healedCount: 0,
         healingCount: 0,
       };
       vi.mocked(healingStorage.get).mockResolvedValue(existingFingerprint);
@@ -274,8 +273,6 @@ describe('ExecutionEngine Integration', () => {
         lastKnownRect: { left: 50, top: 75, width: 100, height: 50 },
         createdAt: Date.now() - 1000,
         updatedAt: Date.now() - 1000,
-        successCount: 5,
-        healedCount: 0,
         healingCount: 0,
       };
       vi.mocked(healingStorage.get).mockResolvedValue(existingFingerprint);

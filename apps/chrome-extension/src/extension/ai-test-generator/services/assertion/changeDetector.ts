@@ -87,7 +87,8 @@ function isElementVisible(element: Element): boolean {
  */
 function getElementAttributes(element: Element): Record<string, string> {
   const attrs: Record<string, string> = {};
-  for (const attr of element.attributes) {
+  for (let i = 0; i < element.attributes.length; i++) {
+    const attr = element.attributes[i];
     if (
       [
         'class',
@@ -114,7 +115,8 @@ function getElementAttributes(element: Element): Record<string, string> {
 function getElementText(element: Element): string {
   // Get direct text content, not from children
   let text = '';
-  for (const node of element.childNodes) {
+  for (let i = 0; i < element.childNodes.length; i++) {
+    const node = element.childNodes[i];
     if (node.nodeType === Node.TEXT_NODE) {
       text += node.textContent?.trim() || '';
     }
@@ -231,7 +233,8 @@ class ChangeDetector {
 
     const selectedElements = document.querySelectorAll(selectors.join(','));
 
-    for (const element of selectedElements) {
+    for (let i = 0; i < selectedElements.length; i++) {
+      const element = selectedElements[i];
       const boundingBox = getBoundingBox(element);
       const isVisible = isElementVisible(element);
 

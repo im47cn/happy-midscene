@@ -10,6 +10,7 @@ import type {
   CaseStats,
   DailyStats,
   ExecutionRecord,
+  NotificationChannel,
   Report,
   StepRecord,
 } from '../../../types/analytics';
@@ -580,7 +581,7 @@ describe('Analytics Dashboard System Integration', () => {
           threshold: 80,
         },
         notification: {
-          channels: ['browser'] as const,
+          channels: ['browser'] as NotificationChannel[],
         },
       };
 
@@ -648,9 +649,8 @@ describe('Analytics Dashboard System Integration', () => {
           threshold: 1,
         },
         notification: {
-          channels: ['browser'],
+          channels: ['browser'] as NotificationChannel[],
         },
-        cooldownMinutes: 60,
         createdAt: Date.now(),
         lastTriggered: Date.now() - 30 * 60 * 1000, // 30 minutes ago
       };
@@ -687,7 +687,7 @@ describe('Analytics Dashboard System Integration', () => {
           threshold: 50,
         },
         notification: {
-          channels: ['browser', 'webhook'] as const,
+          channels: ['browser', 'webhook'] as NotificationChannel[],
           webhookUrl: 'https://example.com/webhook',
         },
       };

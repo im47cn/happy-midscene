@@ -237,7 +237,7 @@ describe('AnalysisEngine', () => {
           lastRun: Date.now(),
           stabilityScore: 92,
           isFlaky: false,
-          recentResults: ['passed', 'passed', 'passed', 'passed', 'failed'],
+          recentResults: ['passed', 'passed', 'passed', 'passed', 'failed'] as ('passed' | 'failed')[],
         },
       ];
 
@@ -284,7 +284,7 @@ describe('AnalysisEngine', () => {
           lastRun: Date.now(),
           stabilityScore: 35,
           isFlaky: true,
-          recentResults: ['failed', 'passed', 'failed', 'failed', 'passed'],
+          recentResults: ['failed', 'passed', 'failed', 'failed', 'passed'] as ('passed' | 'failed')[],
         },
       ];
 

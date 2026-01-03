@@ -255,7 +255,8 @@ export class RegionDetector {
     // Detect by selector
     for (const selector of this.selectors) {
       const matches = root.querySelectorAll(selector.selector);
-      for (const element of matches) {
+      for (let i = 0; i < matches.length; i++) {
+        const element = matches[i];
         if (!this.isElementVisible(element) && !this.config.includeHidden) {
           continue;
         }
@@ -290,7 +291,8 @@ export class RegionDetector {
     const elements: ElementInfo[] = [];
     const inputs = root.querySelectorAll('input, textarea');
 
-    for (const input of inputs) {
+    for (let i = 0; i < inputs.length; i++) {
+      const input = inputs[i];
       // Skip already detected types
       if (input.getAttribute('type') === 'password') {
         continue;

@@ -1,1 +1,2 @@
-export { EnvConfigReminder } from './EnvConfigReminder';
+// Re-export from @midscene/visualizer for convenience
+export { EnvConfigReminder } from '@midscene/visualizer';
