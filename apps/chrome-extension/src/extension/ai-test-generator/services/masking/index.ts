@@ -65,6 +65,28 @@ export {
   type WhitelistConfig,
 } from './whitelistManager';
 
+// OCR engine
+export {
+  OCREngine,
+  ocrEngine,
+  type OCRWord,
+  type OCRLine,
+  type OCRResult,
+  type OCRConfig,
+  type SensitiveTextMatch,
+} from './ocrEngine';
+
+// Region detector
+export {
+  RegionDetector,
+  regionDetector,
+  detectScreenshotMaskRegions,
+  type ElementInfo,
+  type SensitiveElementType,
+  type DetectionSelector,
+  type RegionDetectorConfig,
+} from './regionDetector';
+
 /**
  * Quick mask function for convenience
  * @param text - Text to mask

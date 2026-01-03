@@ -11,10 +11,27 @@ import type {
 } from '../../types/masking';
 
 /**
+ * OCR detection options for strict mode
+ */
+export interface OCRDetectionOptions {
+  enabled: boolean;
+  minConfidence: number;
+}
+
+/**
+ * Default OCR options
+ */
+const DEFAULT_OCR_OPTIONS: OCRDetectionOptions = {
+  enabled: false,
+  minConfidence: 60,
+};
+
+/**
  * ImageMasker implementation
  * Uses Canvas API to blur/fill sensitive regions in images
  */
 export class ImageMasker implements IImageMasker {
+  private ocrOptions: OCRDetectionOptions = { ...DEFAULT_OCR_OPTIONS };
   /**
    * Mask sensitive regions in a screenshot
    * @param imageData - ImageData or base64 string
@@ -50,10 +67,15 @@ export class ImageMasker implements IImageMasker {
     }
 
     // Get regions to mask
-    const regions = sensitiveRegions || [];
+    let regions = sensitiveRegions || [];
 
-    // If no regions provided, we can't detect automatically in MVP
-    // In strict mode with OCR, we would analyze the image here
+    // In strict mode with OCR enabled, detect sensitive text in the image
+    if (level === 'strict' && this.ocrOptions.enabled && regions.length === 0) {
+      const ocrRegions = await this.detectWithOCR(imgData);
+      regions = ocrRegions;
+    }
+
+    // If no regions to mask, return original
     if (regions.length === 0) {
       return {
         imageData: imgData,
@@ -313,6 +335,61 @@ export class ImageMasker implements IImageMasker {
     canvas.width = width;
     canvas.height = height;
     return canvas;
+  }
+
+  /**
+   * Detect sensitive text in image using OCR
+   */
+  private async detectWithOCR(imageData: ImageData): Promise<MaskRegion[]> {
+    try {
+      // Lazy import to avoid circular dependencies
+      const { ocrEngine } = await import('./ocrEngine');
+
+      // Initialize OCR if needed
+      const available = await ocrEngine.initialize();
+      if (!available) {
+        return [];
+      }
+
+      // Detect sensitive text
+      const matches = await ocrEngine.detectSensitiveText(imageData);
+
+      // Filter by confidence
+      return matches
+        .filter((m) => m.confidence >= this.ocrOptions.minConfidence)
+        .map((m) => m.region);
+    } catch (error) {
+      console.warn('OCR detection failed:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Enable or disable OCR detection
+   */
+  setOCREnabled(enabled: boolean): void {
+    this.ocrOptions.enabled = enabled;
+  }
+
+  /**
+   * Check if OCR is enabled
+   */
+  isOCREnabled(): boolean {
+    return this.ocrOptions.enabled;
+  }
+
+  /**
+   * Set OCR options
+   */
+  setOCROptions(options: Partial<OCRDetectionOptions>): void {
+    this.ocrOptions = { ...this.ocrOptions, ...options };
+  }
+
+  /**
+   * Get OCR options
+   */
+  getOCROptions(): OCRDetectionOptions {
+    return { ...this.ocrOptions };
   }
 }
 
