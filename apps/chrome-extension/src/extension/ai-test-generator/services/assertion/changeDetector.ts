@@ -4,9 +4,9 @@
  */
 
 import type {
-  VisualChange,
   BoundingBox,
   ElementInfo,
+  VisualChange,
 } from '../../types/assertion';
 
 /**
@@ -47,7 +47,7 @@ function calculateElementHash(el: SnapshotElement): string {
   let hash = 0;
   for (let i = 0; i < data.length; i++) {
     const char = data.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash;
   }
   return hash.toString(36);
@@ -88,7 +88,20 @@ function isElementVisible(element: Element): boolean {
 function getElementAttributes(element: Element): Record<string, string> {
   const attrs: Record<string, string> = {};
   for (const attr of element.attributes) {
-    if (['class', 'id', 'role', 'type', 'name', 'aria-label', 'placeholder', 'value', 'href', 'src'].includes(attr.name)) {
+    if (
+      [
+        'class',
+        'id',
+        'role',
+        'type',
+        'name',
+        'aria-label',
+        'placeholder',
+        'value',
+        'href',
+        'src',
+      ].includes(attr.name)
+    ) {
       attrs[attr.name] = attr.value;
     }
   }
@@ -112,7 +125,11 @@ function getElementText(element: Element): string {
 /**
  * Check if elements are similar by position
  */
-function isSimilarPosition(box1: BoundingBox, box2: BoundingBox, threshold = 50): boolean {
+function isSimilarPosition(
+  box1: BoundingBox,
+  box2: BoundingBox,
+  threshold = 50,
+): boolean {
   return (
     Math.abs(box1.x - box2.x) < threshold &&
     Math.abs(box1.y - box2.y) < threshold &&
@@ -127,15 +144,17 @@ function isSimilarPosition(box1: BoundingBox, box2: BoundingBox, threshold = 50)
 function classifyChange(
   description: string,
   tagName: string,
-  attributes: Record<string, string>
+  attributes: Record<string, string>,
 ): { confidence: number; isImportant: boolean } {
   const lowerDesc = description.toLowerCase();
   const lowerTag = tagName.toLowerCase();
 
   // High confidence: Modal, dialog, toast, alert
-  if (/modal|dialog|toast|alert|popup|notification/i.test(lowerDesc) ||
-      attributes.role === 'dialog' ||
-      attributes.role === 'alertdialog') {
+  if (
+    /modal|dialog|toast|alert|popup|notification/i.test(lowerDesc) ||
+    attributes.role === 'dialog' ||
+    attributes.role === 'alertdialog'
+  ) {
     return { confidence: 95, isImportant: true };
   }
 
@@ -263,8 +282,10 @@ class ChangeDetector {
     }
 
     const changes: VisualChange[] = [];
-    const beforeHashes = new Set(this.beforeSnapshot.elements.map(e => e.hash));
-    const afterHashes = new Set(afterSnapshot.elements.map(e => e.hash));
+    const beforeHashes = new Set(
+      this.beforeSnapshot.elements.map((e) => e.hash),
+    );
+    const afterHashes = new Set(afterSnapshot.elements.map((e) => e.hash));
 
     // Find new elements (appeared)
     for (const afterEl of afterSnapshot.elements) {
@@ -272,7 +293,7 @@ class ChangeDetector {
         const { confidence, isImportant } = classifyChange(
           afterEl.text,
           afterEl.tagName,
-          afterEl.attributes
+          afterEl.attributes,
         );
 
         if (isImportant || confidence >= 60) {
@@ -299,7 +320,7 @@ class ChangeDetector {
         const { confidence, isImportant } = classifyChange(
           beforeEl.text,
           beforeEl.tagName,
-          beforeEl.attributes
+          beforeEl.attributes,
         );
 
         if (isImportant || confidence >= 60) {
@@ -333,7 +354,7 @@ class ChangeDetector {
             const { confidence } = classifyChange(
               afterEl.text,
               afterEl.tagName,
-              afterEl.attributes
+              afterEl.attributes,
             );
 
             changes.push({
@@ -358,9 +379,7 @@ class ChangeDetector {
     this.beforeSnapshot = null;
 
     // Sort by confidence and limit results
-    return changes
-      .sort((a, b) => b.confidence - a.confidence)
-      .slice(0, 10);
+    return changes.sort((a, b) => b.confidence - a.confidence).slice(0, 10);
   }
 
   /**
@@ -389,7 +408,10 @@ class ChangeDetector {
   /**
    * Detect title change
    */
-  detectTitleChange(beforeTitle: string, afterTitle: string): VisualChange | null {
+  detectTitleChange(
+    beforeTitle: string,
+    afterTitle: string,
+  ): VisualChange | null {
     if (beforeTitle === afterTitle || !afterTitle) {
       return null;
     }
@@ -407,7 +429,7 @@ class ChangeDetector {
    */
   hasSignificantChanges(): boolean {
     const changes = this.detectChanges();
-    return changes.some(c => c.confidence >= 0.7);
+    return changes.some((c) => c.confidence >= 0.7);
   }
 
   /**

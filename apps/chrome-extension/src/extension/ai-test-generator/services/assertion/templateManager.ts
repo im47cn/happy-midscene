@@ -4,12 +4,12 @@
  */
 
 import type {
-  AssertionTemplate,
+  AssertionParams,
   AssertionRecommendation,
+  AssertionTemplate,
+  AssertionType,
   TemplateCategory,
   TemplateTrigger,
-  AssertionType,
-  AssertionParams,
 } from '../../types/assertion';
 
 /**
@@ -27,7 +27,10 @@ function generateId(): string {
 /**
  * System preset templates
  */
-const SYSTEM_TEMPLATES: Omit<AssertionTemplate, 'id' | 'createdAt' | 'usageCount'>[] = [
+const SYSTEM_TEMPLATES: Omit<
+  AssertionTemplate,
+  'id' | 'createdAt' | 'usageCount'
+>[] = [
   // Login success
   {
     name: '登录成功验证',
@@ -162,7 +165,7 @@ class TemplateManager {
   private initSystemTemplates(): void {
     for (const templateData of SYSTEM_TEMPLATES) {
       const existingSystem = Array.from(this.templates.values()).find(
-        t => t.category === 'system' && t.name === templateData.name
+        (t) => t.category === 'system' && t.name === templateData.name,
       );
 
       if (!existingSystem) {
@@ -208,7 +211,7 @@ class TemplateManager {
       }
 
       const templates = Array.from(this.templates.values()).filter(
-        t => t.category !== 'system'
+        (t) => t.category !== 'system',
       );
       localStorage.setItem(STORAGE_KEY, JSON.stringify(templates));
     } catch (error) {
@@ -227,10 +230,12 @@ class TemplateManager {
   /**
    * Get templates by category
    */
-  async getByCategory(category: TemplateCategory): Promise<AssertionTemplate[]> {
+  async getByCategory(
+    category: TemplateCategory,
+  ): Promise<AssertionTemplate[]> {
     await this.init();
     return Array.from(this.templates.values()).filter(
-      t => t.category === category
+      (t) => t.category === category,
     );
   }
 
@@ -246,7 +251,7 @@ class TemplateManager {
    * Create new template
    */
   async create(
-    data: Omit<AssertionTemplate, 'id' | 'createdAt' | 'usageCount'>
+    data: Omit<AssertionTemplate, 'id' | 'createdAt' | 'usageCount'>,
   ): Promise<AssertionTemplate> {
     await this.init();
 
@@ -269,7 +274,7 @@ class TemplateManager {
   async createFromRecommendation(
     recommendation: AssertionRecommendation,
     name: string,
-    trigger: TemplateTrigger
+    trigger: TemplateTrigger,
   ): Promise<AssertionTemplate> {
     return this.create({
       name,
@@ -288,7 +293,7 @@ class TemplateManager {
    */
   async update(
     id: string,
-    updates: Partial<Omit<AssertionTemplate, 'id' | 'createdAt'>>
+    updates: Partial<Omit<AssertionTemplate, 'id' | 'createdAt'>>,
   ): Promise<AssertionTemplate | null> {
     await this.init();
 
@@ -357,14 +362,22 @@ class TemplateManager {
     intent: string,
     actionType?: string,
     targetText?: string,
-    url?: string
+    url?: string,
   ): Promise<AssertionTemplate[]> {
     await this.init();
 
     const matches: AssertionTemplate[] = [];
 
     for (const template of this.templates.values()) {
-      if (this.matchesTrigger(template.trigger, intent, actionType, targetText, url)) {
+      if (
+        this.matchesTrigger(
+          template.trigger,
+          intent,
+          actionType,
+          targetText,
+          url,
+        )
+      ) {
         matches.push(template);
       }
     }
@@ -381,7 +394,7 @@ class TemplateManager {
     intent: string,
     actionType?: string,
     targetText?: string,
-    url?: string
+    url?: string,
   ): boolean {
     // Check intent pattern
     if (trigger.intentPattern) {
@@ -423,7 +436,7 @@ class TemplateManager {
 
     let templates = Array.from(this.templates.values());
     if (category) {
-      templates = templates.filter(t => t.category === category);
+      templates = templates.filter((t) => t.category === category);
     }
 
     return JSON.stringify(templates, null, 2);
@@ -447,7 +460,7 @@ class TemplateManager {
 
         // Check for existing
         const existing = Array.from(this.templates.values()).find(
-          t => t.name === template.name && t.category === template.category
+          (t) => t.name === template.name && t.category === template.category,
         );
 
         if (existing && !overwrite) {
@@ -488,7 +501,7 @@ class TemplateManager {
     await this.init();
 
     return Array.from(this.templates.values())
-      .filter(t => t.usageCount > 0)
+      .filter((t) => t.usageCount > 0)
       .sort((a, b) => b.usageCount - a.usageCount)
       .slice(0, limit);
   }

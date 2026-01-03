@@ -3,26 +3,29 @@
  * Displays a list of assertion recommendations with keyboard navigation
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import {
-  Card,
-  Empty,
-  Spin,
-  Typography,
-  Button,
-  Space,
-  Tooltip,
-  Badge,
-} from 'antd';
 import {
   BulbOutlined,
   CloseOutlined,
   ReloadOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import type { AssertionRecommendation, ValidationResult } from '../../types/assertion';
-import { AssertionCard } from './AssertionCard';
+import {
+  Badge,
+  Button,
+  Card,
+  Empty,
+  Space,
+  Spin,
+  Tooltip,
+  Typography,
+} from 'antd';
+import { useCallback, useEffect, useState } from 'react';
 import { assertionValidator } from '../../services/assertion';
+import type {
+  AssertionRecommendation,
+  ValidationResult,
+} from '../../types/assertion';
+import { AssertionCard } from './AssertionCard';
 
 const { Text } = Typography;
 
@@ -54,9 +57,9 @@ export function AssertionRecommendations({
   autoValidate = true,
 }: AssertionRecommendationsProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [validationResults, setValidationResults] = useState<Map<string, ValidationResult>>(
-    new Map()
-  );
+  const [validationResults, setValidationResults] = useState<
+    Map<string, ValidationResult>
+  >(new Map());
   const [validatingIds, setValidatingIds] = useState<Set<string>>(new Set());
 
   // Reset selection when recommendations change
@@ -83,12 +86,12 @@ export function AssertionRecommendations({
           if (e.shiftKey || e.key === 'ArrowUp') {
             e.preventDefault();
             setSelectedIndex((prev) =>
-              prev > 0 ? prev - 1 : recommendations.length - 1
+              prev > 0 ? prev - 1 : recommendations.length - 1,
             );
           } else {
             e.preventDefault();
             setSelectedIndex((prev) =>
-              prev < recommendations.length - 1 ? prev + 1 : 0
+              prev < recommendations.length - 1 ? prev + 1 : 0,
             );
           }
           break;
@@ -96,7 +99,7 @@ export function AssertionRecommendations({
         case 'ArrowDown':
           e.preventDefault();
           setSelectedIndex((prev) =>
-            prev < recommendations.length - 1 ? prev + 1 : 0
+            prev < recommendations.length - 1 ? prev + 1 : 0,
           );
           break;
 
@@ -138,7 +141,14 @@ export function AssertionRecommendations({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [recommendations, selectedIndex, onAccept, onReject, onEdit, onSaveAsTemplate]);
+  }, [
+    recommendations,
+    selectedIndex,
+    onAccept,
+    onReject,
+    onEdit,
+    onSaveAsTemplate,
+  ]);
 
   // Validate single recommendation
   const validateRecommendation = useCallback(
@@ -162,7 +172,7 @@ export function AssertionRecommendations({
         });
       }
     },
-    [validatingIds]
+    [validatingIds],
   );
 
   // Validate all recommendations
@@ -174,7 +184,7 @@ export function AssertionRecommendations({
 
   // Get count of passed validations
   const passedCount = Array.from(validationResults.values()).filter(
-    (r) => r.success
+    (r) => r.success,
   ).length;
 
   if (loading) {

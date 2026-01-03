@@ -3,8 +3,13 @@
  * Tests for alert rules and notification management
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { AlertRule, AlertEvent, ExecutionRecord, CaseStats } from '../../../types/analytics';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type {
+  AlertEvent,
+  AlertRule,
+  CaseStats,
+  ExecutionRecord,
+} from '../../../types/analytics';
 
 // Mock analyticsStorage
 vi.mock('../analyticsStorage', () => ({
@@ -24,10 +29,13 @@ vi.mock('../analyticsStorage', () => ({
 
 // Mock Notification API
 const mockNotification = vi.fn();
-vi.stubGlobal('Notification', Object.assign(mockNotification, {
-  permission: 'granted',
-  requestPermission: vi.fn().mockResolvedValue('granted'),
-}));
+vi.stubGlobal(
+  'Notification',
+  Object.assign(mockNotification, {
+    permission: 'granted',
+    requestPermission: vi.fn().mockResolvedValue('granted'),
+  }),
+);
 
 import { alertManager } from '../alertManager';
 import { analyticsStorage } from '../analyticsStorage';
@@ -37,7 +45,9 @@ describe('AlertManager', () => {
     vi.clearAllMocks();
   });
 
-  const createExecution = (overrides?: Partial<ExecutionRecord>): ExecutionRecord => ({
+  const createExecution = (
+    overrides?: Partial<ExecutionRecord>,
+  ): ExecutionRecord => ({
     id: `exec-${Date.now()}`,
     caseId: 'case-1',
     caseName: 'Test Case 1',
@@ -46,7 +56,11 @@ describe('AlertManager', () => {
     duration: 5000,
     status: 'passed',
     steps: [],
-    environment: { browser: 'Chrome', viewport: { width: 1920, height: 1080 }, url: 'https://example.com' },
+    environment: {
+      browser: 'Chrome',
+      viewport: { width: 1920, height: 1080 },
+      url: 'https://example.com',
+    },
     ...overrides,
   });
 
@@ -79,7 +93,9 @@ describe('AlertManager', () => {
       // This test verifies the logic: if rules exist, no new rules are created
       // The actual implementation checks getAllAlertRules and skips saveAlertRule
       // Since alertManager is a singleton, we test the logic indirectly
-      vi.mocked(analyticsStorage.getAllAlertRules).mockResolvedValue([createAlertRule()]);
+      vi.mocked(analyticsStorage.getAllAlertRules).mockResolvedValue([
+        createAlertRule(),
+      ]);
 
       // Verify the mock is set up correctly
       const rules = await analyticsStorage.getAllAlertRules();
@@ -148,7 +164,9 @@ describe('AlertManager', () => {
       const rule = createAlertRule({
         condition: { type: 'pass_rate', threshold: 70, timeWindow: 60 },
       });
-      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([rule]);
+      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([
+        rule,
+      ]);
 
       // Mock executions with low pass rate
       const executions = [
@@ -157,7 +175,9 @@ describe('AlertManager', () => {
         createExecution({ status: 'failed' }),
         createExecution({ status: 'failed' }),
       ];
-      vi.mocked(analyticsStorage.getExecutionsByTimeRange).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getExecutionsByTimeRange).mockResolvedValue(
+        executions,
+      );
 
       const record = createExecution({ status: 'failed' });
       const events = await alertManager.checkAlerts(record);
@@ -172,7 +192,9 @@ describe('AlertManager', () => {
       const rule = createAlertRule({
         condition: { type: 'pass_rate', threshold: 70, timeWindow: 60 },
       });
-      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([rule]);
+      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([
+        rule,
+      ]);
 
       const executions = [
         createExecution({ status: 'passed' }),
@@ -180,7 +202,9 @@ describe('AlertManager', () => {
         createExecution({ status: 'passed' }),
         createExecution({ status: 'failed' }),
       ];
-      vi.mocked(analyticsStorage.getExecutionsByTimeRange).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getExecutionsByTimeRange).mockResolvedValue(
+        executions,
+      );
 
       const record = createExecution({ status: 'passed' });
       const events = await alertManager.checkAlerts(record);
@@ -192,8 +216,12 @@ describe('AlertManager', () => {
       const rule = createAlertRule({
         condition: { type: 'pass_rate', threshold: 70, timeWindow: 60 },
       });
-      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([rule]);
-      vi.mocked(analyticsStorage.getExecutionsByTimeRange).mockResolvedValue([]);
+      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([
+        rule,
+      ]);
+      vi.mocked(analyticsStorage.getExecutionsByTimeRange).mockResolvedValue(
+        [],
+      );
 
       const record = createExecution({ status: 'failed' });
       const events = await alertManager.checkAlerts(record);
@@ -207,7 +235,9 @@ describe('AlertManager', () => {
       const rule = createAlertRule({
         condition: { type: 'consecutive_failures', threshold: 3 },
       });
-      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([rule]);
+      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([
+        rule,
+      ]);
 
       const caseExecutions = [
         createExecution({ status: 'failed' }),
@@ -215,7 +245,9 @@ describe('AlertManager', () => {
         createExecution({ status: 'failed' }),
         createExecution({ status: 'passed' }),
       ];
-      vi.mocked(analyticsStorage.getExecutionsByCaseId).mockResolvedValue(caseExecutions);
+      vi.mocked(analyticsStorage.getExecutionsByCaseId).mockResolvedValue(
+        caseExecutions,
+      );
 
       const record = createExecution({ status: 'failed' });
       const events = await alertManager.checkAlerts(record);
@@ -228,7 +260,9 @@ describe('AlertManager', () => {
       const rule = createAlertRule({
         condition: { type: 'consecutive_failures', threshold: 3 },
       });
-      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([rule]);
+      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([
+        rule,
+      ]);
 
       const record = createExecution({ status: 'passed' });
       const events = await alertManager.checkAlerts(record);
@@ -240,14 +274,18 @@ describe('AlertManager', () => {
       const rule = createAlertRule({
         condition: { type: 'consecutive_failures', threshold: 3 },
       });
-      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([rule]);
+      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([
+        rule,
+      ]);
 
       const caseExecutions = [
         createExecution({ status: 'failed' }),
         createExecution({ status: 'failed' }),
         createExecution({ status: 'passed' }),
       ];
-      vi.mocked(analyticsStorage.getExecutionsByCaseId).mockResolvedValue(caseExecutions);
+      vi.mocked(analyticsStorage.getExecutionsByCaseId).mockResolvedValue(
+        caseExecutions,
+      );
 
       const record = createExecution({ status: 'failed' });
       const events = await alertManager.checkAlerts(record);
@@ -261,7 +299,9 @@ describe('AlertManager', () => {
       const rule = createAlertRule({
         condition: { type: 'duration', threshold: 50 }, // 50% above average
       });
-      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([rule]);
+      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([
+        rule,
+      ]);
 
       const caseStats: CaseStats = {
         caseId: 'case-1',
@@ -287,7 +327,9 @@ describe('AlertManager', () => {
       const rule = createAlertRule({
         condition: { type: 'duration', threshold: 50 },
       });
-      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([rule]);
+      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([
+        rule,
+      ]);
 
       const caseStats: CaseStats = {
         caseId: 'case-1',
@@ -314,7 +356,9 @@ describe('AlertManager', () => {
       const rule = createAlertRule({
         condition: { type: 'flaky_detected', threshold: 0 },
       });
-      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([rule]);
+      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([
+        rule,
+      ]);
 
       const caseStats: CaseStats = {
         caseId: 'case-1',
@@ -339,7 +383,9 @@ describe('AlertManager', () => {
       const rule = createAlertRule({
         condition: { type: 'flaky_detected', threshold: 0 },
       });
-      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([rule]);
+      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([
+        rule,
+      ]);
 
       const caseStats: CaseStats = {
         caseId: 'case-1',
@@ -375,7 +421,9 @@ describe('AlertManager', () => {
           acknowledged: false,
         },
       ];
-      vi.mocked(analyticsStorage.getRecentAlertEvents).mockResolvedValue(events);
+      vi.mocked(analyticsStorage.getRecentAlertEvents).mockResolvedValue(
+        events,
+      );
 
       const result = await alertManager.getRecentEvents(20);
 
@@ -388,7 +436,9 @@ describe('AlertManager', () => {
     it('should acknowledge an event', async () => {
       await alertManager.acknowledgeEvent('event-1');
 
-      expect(analyticsStorage.acknowledgeAlertEvent).toHaveBeenCalledWith('event-1');
+      expect(analyticsStorage.acknowledgeAlertEvent).toHaveBeenCalledWith(
+        'event-1',
+      );
     });
   });
 
@@ -426,7 +476,9 @@ describe('AlertManager', () => {
           acknowledged: false,
         },
       ];
-      vi.mocked(analyticsStorage.getRecentAlertEvents).mockResolvedValue(events);
+      vi.mocked(analyticsStorage.getRecentAlertEvents).mockResolvedValue(
+        events,
+      );
 
       const count = await alertManager.getUnacknowledgedCount();
 
@@ -439,7 +491,9 @@ describe('AlertManager', () => {
       const rule = createAlertRule({
         condition: { type: 'pass_rate', threshold: 70, timeWindow: 60 },
       });
-      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([rule]);
+      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([
+        rule,
+      ]);
 
       const executions = [
         createExecution({ status: 'passed' }),
@@ -447,7 +501,9 @@ describe('AlertManager', () => {
         createExecution({ status: 'failed' }),
         createExecution({ status: 'failed' }),
       ];
-      vi.mocked(analyticsStorage.getExecutionsByTimeRange).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getExecutionsByTimeRange).mockResolvedValue(
+        executions,
+      );
 
       const record = createExecution({ status: 'failed' });
       const events = await alertManager.checkAlerts(record);
@@ -461,14 +517,18 @@ describe('AlertManager', () => {
       const rule = createAlertRule({
         condition: { type: 'consecutive_failures', threshold: 3 },
       });
-      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([rule]);
+      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([
+        rule,
+      ]);
 
       const caseExecutions = [
         createExecution({ status: 'failed' }),
         createExecution({ status: 'failed' }),
         createExecution({ status: 'failed' }),
       ];
-      vi.mocked(analyticsStorage.getExecutionsByCaseId).mockResolvedValue(caseExecutions);
+      vi.mocked(analyticsStorage.getExecutionsByCaseId).mockResolvedValue(
+        caseExecutions,
+      );
 
       const record = createExecution({ status: 'failed' });
       const events = await alertManager.checkAlerts(record);
@@ -484,13 +544,17 @@ describe('AlertManager', () => {
         condition: { type: 'pass_rate', threshold: 70, timeWindow: 60 },
         notification: { channels: ['browser'] },
       });
-      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([rule]);
+      vi.mocked(analyticsStorage.getEnabledAlertRules).mockResolvedValue([
+        rule,
+      ]);
 
       const executions = [
         createExecution({ status: 'failed' }),
         createExecution({ status: 'failed' }),
       ];
-      vi.mocked(analyticsStorage.getExecutionsByTimeRange).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getExecutionsByTimeRange).mockResolvedValue(
+        executions,
+      );
 
       const record = createExecution({ status: 'failed' });
       const events = await alertManager.checkAlerts(record);

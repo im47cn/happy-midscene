@@ -5,8 +5,8 @@
 
 import type {
   DataTemplate,
-  TemplateField,
   ITemplateManager,
+  TemplateField,
 } from '../../types/dataGen';
 import { generateForSemanticType } from './generators';
 
@@ -25,16 +25,39 @@ function generateId(): string {
 /**
  * System preset templates
  */
-const SYSTEM_TEMPLATES: Omit<DataTemplate, 'id' | 'createdAt' | 'updatedAt' | 'usageCount'>[] = [
+const SYSTEM_TEMPLATES: Omit<
+  DataTemplate,
+  'id' | 'createdAt' | 'updatedAt' | 'usageCount'
+>[] = [
   {
     name: '标准用户注册',
     description: '常用的用户注册表单数据模板',
     category: 'system',
     fields: [
-      { fieldId: 'username', fieldName: '用户名', generationType: 'random', generatorId: 'username' },
-      { fieldId: 'password', fieldName: '密码', generationType: 'fixed', fixedValue: 'Test@123456' },
-      { fieldId: 'email', fieldName: '邮箱', generationType: 'random', generatorId: 'email' },
-      { fieldId: 'mobile', fieldName: '手机号', generationType: 'random', generatorId: 'mobile_phone' },
+      {
+        fieldId: 'username',
+        fieldName: '用户名',
+        generationType: 'random',
+        generatorId: 'username',
+      },
+      {
+        fieldId: 'password',
+        fieldName: '密码',
+        generationType: 'fixed',
+        fixedValue: 'Test@123456',
+      },
+      {
+        fieldId: 'email',
+        fieldName: '邮箱',
+        generationType: 'random',
+        generatorId: 'email',
+      },
+      {
+        fieldId: 'mobile',
+        fieldName: '手机号',
+        generationType: 'random',
+        generatorId: 'mobile_phone',
+      },
     ],
     variables: {},
   },
@@ -43,8 +66,18 @@ const SYSTEM_TEMPLATES: Omit<DataTemplate, 'id' | 'createdAt' | 'updatedAt' | 'u
     description: '用户登录表单数据模板',
     category: 'system',
     fields: [
-      { fieldId: 'username', fieldName: '用户名', generationType: 'variable', variableName: 'loginUsername' },
-      { fieldId: 'password', fieldName: '密码', generationType: 'variable', variableName: 'loginPassword' },
+      {
+        fieldId: 'username',
+        fieldName: '用户名',
+        generationType: 'variable',
+        variableName: 'loginUsername',
+      },
+      {
+        fieldId: 'password',
+        fieldName: '密码',
+        generationType: 'variable',
+        variableName: 'loginPassword',
+      },
     ],
     variables: {
       loginUsername: 'testuser',
@@ -56,10 +89,30 @@ const SYSTEM_TEMPLATES: Omit<DataTemplate, 'id' | 'createdAt' | 'updatedAt' | 'u
     description: '个人信息表单数据模板',
     category: 'system',
     fields: [
-      { fieldId: 'realname', fieldName: '真实姓名', generationType: 'random', generatorId: 'realname' },
-      { fieldId: 'id_card', fieldName: '身份证号', generationType: 'random', generatorId: 'id_card' },
-      { fieldId: 'address', fieldName: '地址', generationType: 'random', generatorId: 'address' },
-      { fieldId: 'postal_code', fieldName: '邮编', generationType: 'random', generatorId: 'postal_code' },
+      {
+        fieldId: 'realname',
+        fieldName: '真实姓名',
+        generationType: 'random',
+        generatorId: 'realname',
+      },
+      {
+        fieldId: 'id_card',
+        fieldName: '身份证号',
+        generationType: 'random',
+        generatorId: 'id_card',
+      },
+      {
+        fieldId: 'address',
+        fieldName: '地址',
+        generationType: 'random',
+        generatorId: 'address',
+      },
+      {
+        fieldId: 'postal_code',
+        fieldName: '邮编',
+        generationType: 'random',
+        generatorId: 'postal_code',
+      },
     ],
     variables: {},
   },
@@ -68,9 +121,24 @@ const SYSTEM_TEMPLATES: Omit<DataTemplate, 'id' | 'createdAt' | 'updatedAt' | 'u
     description: '银行卡相关表单数据模板',
     category: 'system',
     fields: [
-      { fieldId: 'realname', fieldName: '持卡人姓名', generationType: 'random', generatorId: 'realname' },
-      { fieldId: 'bank_card', fieldName: '银行卡号', generationType: 'random', generatorId: 'bank_card' },
-      { fieldId: 'mobile', fieldName: '预留手机号', generationType: 'random', generatorId: 'mobile_phone' },
+      {
+        fieldId: 'realname',
+        fieldName: '持卡人姓名',
+        generationType: 'random',
+        generatorId: 'realname',
+      },
+      {
+        fieldId: 'bank_card',
+        fieldName: '银行卡号',
+        generationType: 'random',
+        generatorId: 'bank_card',
+      },
+      {
+        fieldId: 'mobile',
+        fieldName: '预留手机号',
+        generationType: 'random',
+        generatorId: 'mobile_phone',
+      },
     ],
     variables: {},
   },
@@ -79,9 +147,24 @@ const SYSTEM_TEMPLATES: Omit<DataTemplate, 'id' | 'createdAt' | 'updatedAt' | 'u
     description: '公司相关表单数据模板',
     category: 'system',
     fields: [
-      { fieldId: 'company', fieldName: '公司名称', generationType: 'random', generatorId: 'company' },
-      { fieldId: 'job_title', fieldName: '职位', generationType: 'random', generatorId: 'job_title' },
-      { fieldId: 'address', fieldName: '公司地址', generationType: 'random', generatorId: 'address' },
+      {
+        fieldId: 'company',
+        fieldName: '公司名称',
+        generationType: 'random',
+        generatorId: 'company',
+      },
+      {
+        fieldId: 'job_title',
+        fieldName: '职位',
+        generationType: 'random',
+        generatorId: 'job_title',
+      },
+      {
+        fieldId: 'address',
+        fieldName: '公司地址',
+        generationType: 'random',
+        generatorId: 'address',
+      },
     ],
     variables: {},
   },
@@ -106,7 +189,7 @@ export class TemplateManager implements ITemplateManager {
     // Add system templates if not present
     for (const template of SYSTEM_TEMPLATES) {
       const existing = [...this.templates.values()].find(
-        (t) => t.name === template.name && t.category === 'system'
+        (t) => t.name === template.name && t.category === 'system',
       );
 
       if (!existing) {
@@ -159,7 +242,10 @@ export class TemplateManager implements ITemplateManager {
    * Create a new template
    */
   async create(
-    template: Omit<DataTemplate, 'id' | 'createdAt' | 'updatedAt' | 'usageCount'>
+    template: Omit<
+      DataTemplate,
+      'id' | 'createdAt' | 'updatedAt' | 'usageCount'
+    >,
   ): Promise<DataTemplate> {
     await this.init();
 
@@ -181,7 +267,10 @@ export class TemplateManager implements ITemplateManager {
   /**
    * Update an existing template
    */
-  async update(id: string, updates: Partial<DataTemplate>): Promise<DataTemplate | null> {
+  async update(
+    id: string,
+    updates: Partial<DataTemplate>,
+  ): Promise<DataTemplate | null> {
     await this.init();
 
     const template = this.templates.get(id);
@@ -255,7 +344,7 @@ export class TemplateManager implements ITemplateManager {
    */
   async applyTemplate(
     templateId: string,
-    variables: Record<string, unknown> = {}
+    variables: Record<string, unknown> = {},
   ): Promise<Record<string, unknown>> {
     await this.init();
 
@@ -307,7 +396,7 @@ export class TemplateManager implements ITemplateManager {
   /**
    * Get popular templates (by usage count)
    */
-  async getPopular(limit: number = 5): Promise<DataTemplate[]> {
+  async getPopular(limit = 5): Promise<DataTemplate[]> {
     await this.init();
     return [...this.templates.values()]
       .sort((a, b) => b.usageCount - a.usageCount)

@@ -3,15 +3,15 @@
  * Tests the end-to-end flow from data collection to analysis and reporting
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
-  ExecutionRecord,
-  StepRecord,
-  DailyStats,
-  CaseStats,
-  AlertRule,
   AlertEvent,
+  AlertRule,
+  CaseStats,
+  DailyStats,
+  ExecutionRecord,
   Report,
+  StepRecord,
 } from '../../../types/analytics';
 
 // Mock storage state - must be declared before vi.mock for hoisting
@@ -30,10 +30,12 @@ vi.mock('../analyticsStorage', () => {
         mockExecutions.push(record);
       }),
       getExecutionsByTimeRange: vi.fn(async (start: number, end: number) => {
-        return mockExecutions.filter(e => e.startTime >= start && e.endTime <= end);
+        return mockExecutions.filter(
+          (e) => e.startTime >= start && e.endTime <= end,
+        );
       }),
       getFailedExecutions: vi.fn(async (limit?: number) => {
-        const failed = mockExecutions.filter(e => e.status === 'failed');
+        const failed = mockExecutions.filter((e) => e.status === 'failed');
         return limit ? failed.slice(0, limit) : failed;
       }),
       getDailyStats: vi.fn(async (date: string) => {
@@ -61,16 +63,16 @@ vi.mock('../analyticsStorage', () => {
         return Array.from(mockCaseStats.values());
       }),
       getFlakyCases: vi.fn(async () => {
-        return Array.from(mockCaseStats.values()).filter(c => c.isFlaky);
+        return Array.from(mockCaseStats.values()).filter((c) => c.isFlaky);
       }),
       getAllAlertRules: vi.fn(async () => {
         return [...mockAlertRules];
       }),
       getEnabledAlertRules: vi.fn(async () => {
-        return mockAlertRules.filter(r => r.enabled);
+        return mockAlertRules.filter((r) => r.enabled);
       }),
       saveAlertRule: vi.fn(async (rule: AlertRule) => {
-        const idx = mockAlertRules.findIndex(r => r.id === rule.id);
+        const idx = mockAlertRules.findIndex((r) => r.id === rule.id);
         if (idx >= 0) {
           mockAlertRules[idx] = rule;
         } else {
@@ -78,7 +80,7 @@ vi.mock('../analyticsStorage', () => {
         }
       }),
       deleteAlertRule: vi.fn(async (ruleId: string) => {
-        mockAlertRules = mockAlertRules.filter(r => r.id !== ruleId);
+        mockAlertRules = mockAlertRules.filter((r) => r.id !== ruleId);
       }),
       getAlertEvents: vi.fn(async (limit?: number) => {
         return mockAlertEvents.slice(0, limit || 100);
@@ -96,19 +98,20 @@ vi.mock('../analyticsStorage', () => {
         return [...mockReports];
       }),
       getExecutionsByCaseId: vi.fn(async (caseId: string) => {
-        return mockExecutions.filter(e => e.caseId === caseId)
+        return mockExecutions
+          .filter((e) => e.caseId === caseId)
           .sort((a, b) => b.startTime - a.startTime);
       }),
     },
   };
 });
 
-import { dataCollector } from '../dataCollector';
+import { alertManager } from '../alertManager';
 import { analysisEngine } from '../analysisEngine';
+import { analyticsStorage } from '../analyticsStorage';
+import { dataCollector } from '../dataCollector';
 import { failureAnalyzer } from '../failureAnalyzer';
 import { reportGenerator } from '../reportGenerator';
-import { alertManager } from '../alertManager';
-import { analyticsStorage } from '../analyticsStorage';
 
 describe('Analytics Dashboard System Integration', () => {
   beforeEach(() => {
@@ -127,7 +130,9 @@ describe('Analytics Dashboard System Integration', () => {
   });
 
   describe('Data Collection to Analysis Flow', () => {
-    const createStepRecords = (statuses: ('passed' | 'failed' | 'skipped')[]): StepRecord[] =>
+    const createStepRecords = (
+      statuses: ('passed' | 'failed' | 'skipped')[],
+    ): StepRecord[] =>
       statuses.map((status, index) => ({
         index,
         description: `Step ${index + 1}`,
@@ -148,7 +153,7 @@ describe('Analytics Dashboard System Integration', () => {
         'case-1',
         'Test Case 1',
         steps,
-        defaultEnv
+        defaultEnv,
       );
 
       expect(record.id).toBeDefined();
@@ -168,7 +173,7 @@ describe('Analytics Dashboard System Integration', () => {
         'case-2',
         'Failing Test',
         steps,
-        defaultEnv
+        defaultEnv,
       );
 
       expect(record.status).toBe('failed');
@@ -180,7 +185,7 @@ describe('Analytics Dashboard System Integration', () => {
       expect(analyticsStorage.saveDailyStats).toHaveBeenCalledWith(
         expect.objectContaining({
           failed: expect.any(Number),
-        })
+        }),
       );
     });
 
@@ -190,7 +195,7 @@ describe('Analytics Dashboard System Integration', () => {
         'case-1',
         'Test 1',
         createStepRecords(['passed']),
-        defaultEnv
+        defaultEnv,
       );
       await dataCollector.recordExecution(record1);
 
@@ -199,7 +204,7 @@ describe('Analytics Dashboard System Integration', () => {
         'case-2',
         'Test 2',
         createStepRecords(['passed']),
-        defaultEnv
+        defaultEnv,
       );
       await dataCollector.recordExecution(record2);
 
@@ -215,7 +220,7 @@ describe('Analytics Dashboard System Integration', () => {
           'flaky-case',
           'Flaky Test',
           createStepRecords([status as 'passed' | 'failed']),
-          defaultEnv
+          defaultEnv,
         );
         await dataCollector.recordExecution(record);
       }
@@ -225,7 +230,7 @@ describe('Analytics Dashboard System Integration', () => {
         expect.objectContaining({
           caseId: 'flaky-case',
           isFlaky: true,
-        })
+        }),
       );
     });
   });
@@ -327,10 +332,16 @@ describe('Analytics Dashboard System Integration', () => {
         recentResults: [],
       });
 
-      const sortedByPassRate = await analysisEngine.getCaseStatsSorted('passRate', false);
+      const sortedByPassRate = await analysisEngine.getCaseStatsSorted(
+        'passRate',
+        false,
+      );
       expect(sortedByPassRate[0].caseId).toBe('case-1');
 
-      const sortedByPassRateAsc = await analysisEngine.getCaseStatsSorted('passRate', true);
+      const sortedByPassRateAsc = await analysisEngine.getCaseStatsSorted(
+        'passRate',
+        true,
+      );
       expect(sortedByPassRateAsc[0].caseId).toBe('case-2');
     });
   });
@@ -348,7 +359,13 @@ describe('Analytics Dashboard System Integration', () => {
           duration: 5000,
           status: 'failed',
           steps: [
-            { index: 0, description: 'Click login button', status: 'failed', duration: 1000, retryCount: 0 },
+            {
+              index: 0,
+              description: 'Click login button',
+              status: 'failed',
+              duration: 1000,
+              retryCount: 0,
+            },
           ],
           environment: {
             browser: 'Chrome',
@@ -365,7 +382,7 @@ describe('Analytics Dashboard System Integration', () => {
 
       const result = await failureAnalyzer.analyzeByType(
         Date.now() - 3600000,
-        Date.now()
+        Date.now(),
       );
 
       expect(result).toBeDefined();
@@ -384,7 +401,13 @@ describe('Analytics Dashboard System Integration', () => {
         duration: 5000,
         status: 'failed',
         steps: [
-          { index: 0, description: 'Click login', status: 'failed', duration: 1000, retryCount: 0 },
+          {
+            index: 0,
+            description: 'Click login',
+            status: 'failed',
+            duration: 1000,
+            retryCount: 0,
+          },
         ],
         environment: {
           browser: 'Chrome',
@@ -416,7 +439,13 @@ describe('Analytics Dashboard System Integration', () => {
         duration: 5000,
         status: 'failed',
         steps: [
-          { index: 0, description: 'Step 1', status: 'failed', duration: 1000, retryCount: 0 },
+          {
+            index: 0,
+            description: 'Step 1',
+            status: 'failed',
+            duration: 1000,
+            retryCount: 0,
+          },
         ],
         environment: {
           browser: 'Chrome',
@@ -579,7 +608,7 @@ describe('Analytics Dashboard System Integration', () => {
         createdAt: Date.now(),
       };
 
-      mockAlertRules =[rule];
+      mockAlertRules = [rule];
 
       // Create a failing execution
       const record: ExecutionRecord = {
@@ -626,7 +655,7 @@ describe('Analytics Dashboard System Integration', () => {
         lastTriggered: Date.now() - 30 * 60 * 1000, // 30 minutes ago
       };
 
-      mockAlertRules =[rule];
+      mockAlertRules = [rule];
 
       const record: ExecutionRecord = {
         id: 'exec-1',
@@ -677,13 +706,15 @@ describe('Analytics Dashboard System Integration', () => {
 
       for (let i = 0; i < 10; i++) {
         const status = i < 8 ? 'passed' : 'failed';
-        const steps: StepRecord[] = [{
-          index: 0,
-          description: `Step ${i}`,
-          status: status as 'passed' | 'failed',
-          duration: 1000 + Math.random() * 2000,
-          retryCount: 0,
-        }];
+        const steps: StepRecord[] = [
+          {
+            index: 0,
+            description: `Step ${i}`,
+            status: status as 'passed' | 'failed',
+            duration: 1000 + Math.random() * 2000,
+            retryCount: 0,
+          },
+        ];
 
         const record = dataCollector.createExecutionRecord(
           `case-${i % 3}`,
@@ -693,7 +724,7 @@ describe('Analytics Dashboard System Integration', () => {
             browser: 'Chrome',
             viewport: { width: 1920, height: 1080 },
             url: 'https://example.com',
-          }
+          },
         );
 
         await dataCollector.recordExecution(record);
@@ -758,8 +789,20 @@ describe('Analytics Dashboard System Integration', () => {
         const record = dataCollector.createExecutionRecord(
           caseId,
           'Consistency Test',
-          [{ index: 0, description: 'Step', status: status as 'passed' | 'failed', duration: 1000, retryCount: 0 }],
-          { browser: 'Chrome', viewport: { width: 1920, height: 1080 }, url: 'https://example.com' }
+          [
+            {
+              index: 0,
+              description: 'Step',
+              status: status as 'passed' | 'failed',
+              duration: 1000,
+              retryCount: 0,
+            },
+          ],
+          {
+            browser: 'Chrome',
+            viewport: { width: 1920, height: 1080 },
+            url: 'https://example.com',
+          },
         );
         await dataCollector.recordExecution(record);
       }
@@ -768,7 +811,7 @@ describe('Analytics Dashboard System Integration', () => {
       expect(analyticsStorage.saveCaseStats).toHaveBeenLastCalledWith(
         expect.objectContaining({
           caseId,
-        })
+        }),
       );
     });
   });

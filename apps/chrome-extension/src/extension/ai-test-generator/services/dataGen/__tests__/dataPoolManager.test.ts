@@ -2,7 +2,7 @@
  * Data Pool Manager Tests
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DataPoolManager } from '../dataPoolManager';
 
 // Mock localStorage
@@ -38,9 +38,9 @@ describe('DataPoolManager', () => {
       const pools = await manager.listPools();
 
       expect(pools.length).toBeGreaterThan(0);
-      expect(pools.some(p => p.id === 'cn_provinces')).toBe(true);
-      expect(pools.some(p => p.id === 'cn_cities')).toBe(true);
-      expect(pools.some(p => p.id === 'cn_surnames')).toBe(true);
+      expect(pools.some((p) => p.id === 'cn_provinces')).toBe(true);
+      expect(pools.some((p) => p.id === 'cn_cities')).toBe(true);
+      expect(pools.some((p) => p.id === 'cn_surnames')).toBe(true);
     });
   });
 
@@ -89,7 +89,7 @@ describe('DataPoolManager', () => {
       });
 
       const pools = await manager.listByCategory('user');
-      const pool = pools.find(p => p.name === 'Sequential Pool');
+      const pool = pools.find((p) => p.name === 'Sequential Pool');
 
       if (pool) {
         const v1 = await manager.pick(pool.id);
@@ -129,7 +129,7 @@ describe('DataPoolManager', () => {
       });
 
       const pools = await manager.listByCategory('user');
-      const pool = pools.find(p => p.name === 'Small Pool');
+      const pool = pools.find((p) => p.name === 'Small Pool');
 
       if (pool) {
         const values = await manager.pickMultiple(pool.id, 10);
@@ -184,7 +184,7 @@ describe('DataPoolManager', () => {
       await manager.init();
 
       await expect(
-        manager.updatePool('cn_provinces', { name: 'Modified' })
+        manager.updatePool('cn_provinces', { name: 'Modified' }),
       ).rejects.toThrow('Cannot modify system pools');
     });
   });
@@ -212,7 +212,7 @@ describe('DataPoolManager', () => {
       await manager.init();
 
       await expect(manager.deletePool('cn_provinces')).rejects.toThrow(
-        'Cannot delete system pools'
+        'Cannot delete system pools',
       );
     });
   });
@@ -232,8 +232,8 @@ describe('DataPoolManager', () => {
       const userPools = await manager.listByCategory('user');
       const systemPools = await manager.listByCategory('system');
 
-      expect(userPools.every(p => p.category === 'user')).toBe(true);
-      expect(systemPools.every(p => p.category === 'system')).toBe(true);
+      expect(userPools.every((p) => p.category === 'user')).toBe(true);
+      expect(systemPools.every((p) => p.category === 'system')).toBe(true);
     });
   });
 
@@ -242,10 +242,10 @@ describe('DataPoolManager', () => {
       await manager.init();
 
       const results = await manager.searchPools('省份');
-      expect(results.some(p => p.id === 'cn_provinces')).toBe(true);
+      expect(results.some((p) => p.id === 'cn_provinces')).toBe(true);
 
       const cityResults = await manager.searchPools('城市');
-      expect(cityResults.some(p => p.id === 'cn_cities')).toBe(true);
+      expect(cityResults.some((p) => p.id === 'cn_cities')).toBe(true);
     });
   });
 
@@ -330,14 +330,14 @@ describe('DataPoolManager', () => {
       expect(imported).toBe(1);
 
       const pools = await newManager.listByCategory('user');
-      expect(pools.some(p => p.name === 'Export Test')).toBe(true);
+      expect(pools.some((p) => p.name === 'Export Test')).toBe(true);
     });
 
     it('should reject invalid JSON', async () => {
       await manager.init();
 
       await expect(manager.importPools('invalid json')).rejects.toThrow(
-        'Invalid pool JSON format'
+        'Invalid pool JSON format',
       );
     });
   });

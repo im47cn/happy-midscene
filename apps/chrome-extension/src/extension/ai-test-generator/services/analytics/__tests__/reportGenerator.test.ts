@@ -3,8 +3,13 @@
  * Tests for report generation functionality
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { DailyStats, CaseStats, Hotspot, Report } from '../../../types/analytics';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type {
+  CaseStats,
+  DailyStats,
+  Hotspot,
+  Report,
+} from '../../../types/analytics';
 
 // Mock dependencies
 vi.mock('../analyticsStorage', () => ({
@@ -23,9 +28,9 @@ vi.mock('../analysisEngine', () => ({
   },
 }));
 
-import { reportGenerator } from '../reportGenerator';
-import { analyticsStorage } from '../analyticsStorage';
 import { analysisEngine } from '../analysisEngine';
+import { analyticsStorage } from '../analyticsStorage';
+import { reportGenerator } from '../reportGenerator';
 
 describe('ReportGenerator', () => {
   beforeEach(() => {
@@ -69,7 +74,9 @@ describe('ReportGenerator', () => {
       const dailyStats = [createDailyStats()];
       const caseStats = [createCaseStats()];
 
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(dailyStats);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(
+        dailyStats,
+      );
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
       vi.mocked(analysisEngine.analyzeFailureHotspots).mockResolvedValue([]);
 
@@ -84,10 +91,16 @@ describe('ReportGenerator', () => {
 
     it('should calculate correct summary', async () => {
       const dailyStats = [
-        createDailyStats({ totalExecutions: 100, passed: 80, avgDuration: 10000 }),
+        createDailyStats({
+          totalExecutions: 100,
+          passed: 80,
+          avgDuration: 10000,
+        }),
       ];
 
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(dailyStats);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(
+        dailyStats,
+      );
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue([]);
 
       const report = await reportGenerator.generateDailyReport('2024-01-15');
@@ -106,7 +119,9 @@ describe('ReportGenerator', () => {
         createDailyStats({ date: '2024-01-15' }),
       ];
 
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(dailyStats);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(
+        dailyStats,
+      );
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue([]);
 
       const report = await reportGenerator.generateWeeklyReport('2024-01-15');
@@ -118,11 +133,21 @@ describe('ReportGenerator', () => {
 
     it('should aggregate stats from multiple days', async () => {
       const dailyStats = [
-        createDailyStats({ date: '2024-01-14', totalExecutions: 50, passed: 40 }),
-        createDailyStats({ date: '2024-01-15', totalExecutions: 50, passed: 45 }),
+        createDailyStats({
+          date: '2024-01-14',
+          totalExecutions: 50,
+          passed: 40,
+        }),
+        createDailyStats({
+          date: '2024-01-15',
+          totalExecutions: 50,
+          passed: 45,
+        }),
       ];
 
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(dailyStats);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(
+        dailyStats,
+      );
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue([]);
 
       const report = await reportGenerator.generateWeeklyReport('2024-01-15');
@@ -171,7 +196,9 @@ describe('ReportGenerator', () => {
         }),
       ];
 
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(dailyStats);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(
+        dailyStats,
+      );
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue([]);
 
       const report = await reportGenerator.generateDailyReport('2024-01-15');
@@ -187,9 +214,13 @@ describe('ReportGenerator', () => {
         { description: 'Enter password', failureCount: 5, percentage: 25 },
       ];
 
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue([createDailyStats()]);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue([
+        createDailyStats(),
+      ]);
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue([]);
-      vi.mocked(analysisEngine.analyzeFailureHotspots).mockResolvedValue(hotspots);
+      vi.mocked(analysisEngine.analyzeFailureHotspots).mockResolvedValue(
+        hotspots,
+      );
 
       const report = await reportGenerator.generateDailyReport('2024-01-15');
 
@@ -203,12 +234,16 @@ describe('ReportGenerator', () => {
         createDailyStats({ totalExecutions: 100, passed: 60 }), // 60% pass rate
       ];
 
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(dailyStats);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(
+        dailyStats,
+      );
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue([]);
 
       const report = await reportGenerator.generateDailyReport('2024-01-15');
 
-      expect(report.recommendations.some(r => r.includes('低于 80%'))).toBe(true);
+      expect(report.recommendations.some((r) => r.includes('低于 80%'))).toBe(
+        true,
+      );
     });
 
     it('should recommend self-healing for many locator failures', async () => {
@@ -225,12 +260,14 @@ describe('ReportGenerator', () => {
         }),
       ];
 
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(dailyStats);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(
+        dailyStats,
+      );
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue([]);
 
       const report = await reportGenerator.generateDailyReport('2024-01-15');
 
-      expect(report.recommendations.some(r => r.includes('自愈'))).toBe(true);
+      expect(report.recommendations.some((r) => r.includes('自愈'))).toBe(true);
     });
 
     it('should warn about flaky tests', async () => {
@@ -239,12 +276,16 @@ describe('ReportGenerator', () => {
         createCaseStats({ isFlaky: true }),
       ];
 
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue([createDailyStats()]);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue([
+        createDailyStats(),
+      ]);
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
       const report = await reportGenerator.generateDailyReport('2024-01-15');
 
-      expect(report.recommendations.some(r => r.includes('Flaky'))).toBe(true);
+      expect(report.recommendations.some((r) => r.includes('Flaky'))).toBe(
+        true,
+      );
     });
 
     it('should provide positive feedback for high pass rate', async () => {
@@ -266,7 +307,9 @@ describe('ReportGenerator', () => {
         }),
       ];
 
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(dailyStats);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(
+        dailyStats,
+      );
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue([]);
       vi.mocked(analysisEngine.analyzeFailureHotspots).mockResolvedValue([]);
 
@@ -279,8 +322,12 @@ describe('ReportGenerator', () => {
 
   describe('exportToHTML', () => {
     it('should generate valid HTML', async () => {
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue([createDailyStats()]);
-      vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue([createCaseStats()]);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue([
+        createDailyStats(),
+      ]);
+      vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue([
+        createCaseStats(),
+      ]);
 
       const report = await reportGenerator.generateDailyReport('2024-01-15');
       const html = reportGenerator.exportToHTML(report);
@@ -293,7 +340,9 @@ describe('ReportGenerator', () => {
     });
 
     it('should include failure type table', async () => {
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue([createDailyStats()]);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue([
+        createDailyStats(),
+      ]);
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue([]);
 
       const report = await reportGenerator.generateDailyReport('2024-01-15');
@@ -304,14 +353,16 @@ describe('ReportGenerator', () => {
     });
 
     it('should include recommendations', async () => {
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue([createDailyStats()]);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue([
+        createDailyStats(),
+      ]);
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue([]);
 
       const report = await reportGenerator.generateDailyReport('2024-01-15');
       const html = reportGenerator.exportToHTML(report);
 
       expect(html).toContain('建议事项');
-      report.recommendations.forEach(r => {
+      report.recommendations.forEach((r) => {
         expect(html).toContain(r);
       });
     });
@@ -319,8 +370,12 @@ describe('ReportGenerator', () => {
 
   describe('exportToCSV', () => {
     it('should generate valid CSV', async () => {
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue([createDailyStats()]);
-      vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue([createCaseStats()]);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue([
+        createDailyStats(),
+      ]);
+      vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue([
+        createCaseStats(),
+      ]);
 
       const report = await reportGenerator.generateDailyReport('2024-01-15');
       const csv = reportGenerator.exportToCSV(report);
@@ -335,7 +390,9 @@ describe('ReportGenerator', () => {
         createCaseStats({ caseName: 'Login Test', passRate: 90 }),
       ];
 
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue([createDailyStats()]);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue([
+        createDailyStats(),
+      ]);
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
       const report = await reportGenerator.generateDailyReport('2024-01-15');
@@ -346,15 +403,17 @@ describe('ReportGenerator', () => {
     });
 
     it('should properly escape CSV fields', async () => {
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue([createDailyStats()]);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue([
+        createDailyStats(),
+      ]);
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue([]);
 
       const report = await reportGenerator.generateDailyReport('2024-01-15');
       const csv = reportGenerator.exportToCSV(report);
 
       // All fields should be quoted
-      const lines = csv.split('\n').filter(l => l.trim());
-      lines.forEach(line => {
+      const lines = csv.split('\n').filter((l) => l.trim());
+      lines.forEach((line) => {
         if (line.includes(',')) {
           expect(line.includes('"')).toBe(true);
         }
@@ -371,9 +430,21 @@ describe('ReportGenerator', () => {
           title: 'Test Report',
           generatedAt: Date.now(),
           dateRange: { startDate: '2024-01-15', endDate: '2024-01-15' },
-          summary: { totalExecutions: 100, passRate: '85.0%', avgDuration: '15.0s', healthScore: 85 },
+          summary: {
+            totalExecutions: 100,
+            passRate: '85.0%',
+            avgDuration: '15.0s',
+            healthScore: 85,
+          },
           failureAnalysis: {
-            byType: { locator_failed: 0, assertion_failed: 0, timeout: 0, network_error: 0, script_error: 0, unknown: 0 },
+            byType: {
+              locator_failed: 0,
+              assertion_failed: 0,
+              timeout: 0,
+              network_error: 0,
+              script_error: 0,
+              unknown: 0,
+            },
             hotspots: [],
           },
           recommendations: [],
@@ -398,9 +469,21 @@ describe('ReportGenerator', () => {
         title: 'Test Report',
         generatedAt: Date.now(),
         dateRange: { startDate: '2024-01-15', endDate: '2024-01-15' },
-        summary: { totalExecutions: 100, passRate: '85.0%', avgDuration: '15.0s', healthScore: 85 },
+        summary: {
+          totalExecutions: 100,
+          passRate: '85.0%',
+          avgDuration: '15.0s',
+          healthScore: 85,
+        },
         failureAnalysis: {
-          byType: { locator_failed: 0, assertion_failed: 0, timeout: 0, network_error: 0, script_error: 0, unknown: 0 },
+          byType: {
+            locator_failed: 0,
+            assertion_failed: 0,
+            timeout: 0,
+            network_error: 0,
+            script_error: 0,
+            unknown: 0,
+          },
           hotspots: [],
         },
         recommendations: [],

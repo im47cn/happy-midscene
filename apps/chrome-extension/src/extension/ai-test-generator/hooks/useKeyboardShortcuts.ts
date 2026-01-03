@@ -3,7 +3,7 @@
  * Provides keyboard navigation and control without leaving the keyboard
  */
 
-import { useEffect, useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useGeneratorStore } from '../store';
 
 export interface ShortcutConfig {
@@ -18,7 +18,9 @@ export interface ShortcutConfig {
 }
 
 // Platform detection for modifier key display
-const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+const isMac =
+  typeof navigator !== 'undefined' &&
+  /Mac|iPod|iPhone|iPad/.test(navigator.platform);
 const modifierKey = isMac ? '⌘' : 'Ctrl';
 
 /**
@@ -26,12 +28,21 @@ const modifierKey = isMac ? '⌘' : 'Ctrl';
  */
 export const SHORTCUTS = {
   // Navigation
-  PARSE: { key: 'Enter', ctrl: true, description: `${modifierKey}+Enter: 解析需求` },
+  PARSE: {
+    key: 'Enter',
+    ctrl: true,
+    description: `${modifierKey}+Enter: 解析需求`,
+  },
   RUN: { key: 'r', ctrl: true, description: `${modifierKey}+R: 开始执行` },
 
   // Execution control
   PAUSE: { key: 'p', ctrl: true, description: `${modifierKey}+P: 暂停执行` },
-  RESUME: { key: 'p', ctrl: true, shift: true, description: `${modifierKey}+Shift+P: 继续执行` },
+  RESUME: {
+    key: 'p',
+    ctrl: true,
+    shift: true,
+    description: `${modifierKey}+Shift+P: 继续执行`,
+  },
   STOP: { key: 'Escape', description: 'Esc: 停止执行' },
   NEXT_STEP: { key: 'n', ctrl: true, description: `${modifierKey}+N: 下一步` },
 
@@ -39,7 +50,12 @@ export const SHORTCUTS = {
   BACK: { key: 'Backspace', alt: true, description: 'Alt+← : 返回上一视图' },
 
   // Actions
-  COPY_YAML: { key: 'c', ctrl: true, shift: true, description: `${modifierKey}+Shift+C: 复制 YAML` },
+  COPY_YAML: {
+    key: 'c',
+    ctrl: true,
+    shift: true,
+    description: `${modifierKey}+Shift+C: 复制 YAML`,
+  },
   SAVE: { key: 's', ctrl: true, description: `${modifierKey}+S: 保存/提交` },
 
   // Help
@@ -49,7 +65,10 @@ export const SHORTCUTS = {
 /**
  * Check if a keyboard event matches a shortcut config
  */
-function matchesShortcut(event: KeyboardEvent, config: Omit<ShortcutConfig, 'description' | 'action'>): boolean {
+function matchesShortcut(
+  event: KeyboardEvent,
+  config: Omit<ShortcutConfig, 'description' | 'action'>,
+): boolean {
   const ctrlOrMeta = isMac ? event.metaKey : event.ctrlKey;
 
   return (
@@ -77,7 +96,9 @@ interface UseKeyboardShortcutsOptions {
 /**
  * Hook to handle keyboard shortcuts
  */
-export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) {
+export function useKeyboardShortcuts(
+  options: UseKeyboardShortcutsOptions = {},
+) {
   const {
     onParse,
     onRun,
@@ -92,95 +113,120 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
     enabled = true,
   } = options;
 
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    if (!enabled) return;
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (!enabled) return;
 
-    // Don't trigger shortcuts when typing in input fields
-    const target = event.target as HTMLElement;
-    const isInputField =
-      target.tagName === 'INPUT' ||
-      target.tagName === 'TEXTAREA' ||
-      target.isContentEditable;
+      // Don't trigger shortcuts when typing in input fields
+      const target = event.target as HTMLElement;
+      const isInputField =
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable;
 
-    // Allow some shortcuts even in input fields
-    const allowInInput = ['Escape'];
-    if (isInputField && !allowInInput.includes(event.key)) {
-      // Allow Ctrl+Enter in textareas for parse
-      if (!(event.key === 'Enter' && (event.ctrlKey || event.metaKey))) {
+      // Allow some shortcuts even in input fields
+      const allowInInput = ['Escape'];
+      if (isInputField && !allowInInput.includes(event.key)) {
+        // Allow Ctrl+Enter in textareas for parse
+        if (!(event.key === 'Enter' && (event.ctrlKey || event.metaKey))) {
+          return;
+        }
+      }
+
+      // Parse (Ctrl+Enter)
+      if (matchesShortcut(event, { key: 'Enter', ctrl: true }) && onParse) {
+        event.preventDefault();
+        onParse();
         return;
       }
-    }
 
-    // Parse (Ctrl+Enter)
-    if (matchesShortcut(event, { key: 'Enter', ctrl: true }) && onParse) {
-      event.preventDefault();
-      onParse();
-      return;
-    }
+      // Run (Ctrl+R)
+      if (matchesShortcut(event, { key: 'r', ctrl: true }) && onRun) {
+        event.preventDefault();
+        onRun();
+        return;
+      }
 
-    // Run (Ctrl+R)
-    if (matchesShortcut(event, { key: 'r', ctrl: true }) && onRun) {
-      event.preventDefault();
-      onRun();
-      return;
-    }
+      // Pause (Ctrl+P)
+      if (
+        matchesShortcut(event, { key: 'p', ctrl: true }) &&
+        !event.shiftKey &&
+        onPause
+      ) {
+        event.preventDefault();
+        onPause();
+        return;
+      }
 
-    // Pause (Ctrl+P)
-    if (matchesShortcut(event, { key: 'p', ctrl: true }) && !event.shiftKey && onPause) {
-      event.preventDefault();
-      onPause();
-      return;
-    }
+      // Resume (Ctrl+Shift+P)
+      if (
+        matchesShortcut(event, { key: 'p', ctrl: true, shift: true }) &&
+        onResume
+      ) {
+        event.preventDefault();
+        onResume();
+        return;
+      }
 
-    // Resume (Ctrl+Shift+P)
-    if (matchesShortcut(event, { key: 'p', ctrl: true, shift: true }) && onResume) {
-      event.preventDefault();
-      onResume();
-      return;
-    }
+      // Stop (Escape)
+      if (event.key === 'Escape' && onStop) {
+        event.preventDefault();
+        onStop();
+        return;
+      }
 
-    // Stop (Escape)
-    if (event.key === 'Escape' && onStop) {
-      event.preventDefault();
-      onStop();
-      return;
-    }
+      // Next Step (Ctrl+N)
+      if (matchesShortcut(event, { key: 'n', ctrl: true }) && onNextStep) {
+        event.preventDefault();
+        onNextStep();
+        return;
+      }
 
-    // Next Step (Ctrl+N)
-    if (matchesShortcut(event, { key: 'n', ctrl: true }) && onNextStep) {
-      event.preventDefault();
-      onNextStep();
-      return;
-    }
+      // Back (Alt+Backspace)
+      if (matchesShortcut(event, { key: 'Backspace', alt: true }) && onBack) {
+        event.preventDefault();
+        onBack();
+        return;
+      }
 
-    // Back (Alt+Backspace)
-    if (matchesShortcut(event, { key: 'Backspace', alt: true }) && onBack) {
-      event.preventDefault();
-      onBack();
-      return;
-    }
+      // Copy YAML (Ctrl+Shift+C)
+      if (
+        matchesShortcut(event, { key: 'c', ctrl: true, shift: true }) &&
+        onCopyYaml
+      ) {
+        event.preventDefault();
+        onCopyYaml();
+        return;
+      }
 
-    // Copy YAML (Ctrl+Shift+C)
-    if (matchesShortcut(event, { key: 'c', ctrl: true, shift: true }) && onCopyYaml) {
-      event.preventDefault();
-      onCopyYaml();
-      return;
-    }
+      // Save (Ctrl+S)
+      if (matchesShortcut(event, { key: 's', ctrl: true }) && onSave) {
+        event.preventDefault();
+        onSave();
+        return;
+      }
 
-    // Save (Ctrl+S)
-    if (matchesShortcut(event, { key: 's', ctrl: true }) && onSave) {
-      event.preventDefault();
-      onSave();
-      return;
-    }
-
-    // Help (?)
-    if (event.key === '?' && event.shiftKey && onHelp) {
-      event.preventDefault();
-      onHelp();
-      return;
-    }
-  }, [enabled, onParse, onRun, onPause, onResume, onStop, onNextStep, onBack, onCopyYaml, onSave, onHelp]);
+      // Help (?)
+      if (event.key === '?' && event.shiftKey && onHelp) {
+        event.preventDefault();
+        onHelp();
+        return;
+      }
+    },
+    [
+      enabled,
+      onParse,
+      onRun,
+      onPause,
+      onResume,
+      onStop,
+      onNextStep,
+      onBack,
+      onCopyYaml,
+      onSave,
+      onHelp,
+    ],
+  );
 
   useEffect(() => {
     if (enabled) {

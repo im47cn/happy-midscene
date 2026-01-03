@@ -4,25 +4,33 @@
  */
 
 import type {
-  FieldDefinition,
-  FieldConstraints,
   BoundaryTestCase,
+  FieldConstraints,
+  FieldDefinition,
 } from '../../types/dataGen';
 
 /**
  * Generate boundary test cases for a field
  */
-export function generateBoundaryTestCases(field: FieldDefinition): BoundaryTestCase[] {
+export function generateBoundaryTestCases(
+  field: FieldDefinition,
+): BoundaryTestCase[] {
   const testCases: BoundaryTestCase[] = [];
   const { constraints, semanticType } = field;
 
   // Generate length boundary cases
-  if (constraints.minLength !== undefined || constraints.maxLength !== undefined) {
+  if (
+    constraints.minLength !== undefined ||
+    constraints.maxLength !== undefined
+  ) {
     testCases.push(...generateLengthBoundaries(constraints, semanticType));
   }
 
   // Generate value boundary cases for numeric types
-  if (constraints.minValue !== undefined || constraints.maxValue !== undefined) {
+  if (
+    constraints.minValue !== undefined ||
+    constraints.maxValue !== undefined
+  ) {
     testCases.push(...generateValueBoundaries(constraints));
   }
 
@@ -56,7 +64,7 @@ export function generateBoundaryTestCases(field: FieldDefinition): BoundaryTestC
  */
 function generateLengthBoundaries(
   constraints: FieldConstraints,
-  semanticType: string
+  semanticType: string,
 ): BoundaryTestCase[] {
   const cases: BoundaryTestCase[] = [];
   const chars = 'a'; // Use simple character for length tests
@@ -115,7 +123,9 @@ function generateLengthBoundaries(
 /**
  * Generate value boundary test cases for numeric fields
  */
-function generateValueBoundaries(constraints: FieldConstraints): BoundaryTestCase[] {
+function generateValueBoundaries(
+  constraints: FieldConstraints,
+): BoundaryTestCase[] {
   const cases: BoundaryTestCase[] = [];
 
   // Minimum value
@@ -249,7 +259,10 @@ function generateSpecialCases(field: FieldDefinition): BoundaryTestCase[] {
       cases.push({
         name: '负数金额',
         value: -100,
-        expectedResult: constraints.minValue !== undefined && constraints.minValue < 0 ? 'valid' : 'invalid',
+        expectedResult:
+          constraints.minValue !== undefined && constraints.minValue < 0
+            ? 'valid'
+            : 'invalid',
         description: '金额通常不能为负数',
         category: 'special',
       });
@@ -319,7 +332,7 @@ function generateSpecialCases(field: FieldDefinition): BoundaryTestCase[] {
  */
 export function analyzeBoundaryCoverage(
   field: FieldDefinition,
-  testCases: BoundaryTestCase[]
+  testCases: BoundaryTestCase[],
 ): {
   totalCases: number;
   validCases: number;
@@ -335,7 +348,8 @@ export function analyzeBoundaryCoverage(
   return {
     totalCases: testCases.length,
     validCases: testCases.filter((tc) => tc.expectedResult === 'valid').length,
-    invalidCases: testCases.filter((tc) => tc.expectedResult === 'invalid').length,
+    invalidCases: testCases.filter((tc) => tc.expectedResult === 'invalid')
+      .length,
     categories,
   };
 }

@@ -4,20 +4,20 @@
  */
 
 import {
+  AimOutlined,
   CheckCircleOutlined,
   ExclamationCircleOutlined,
   ThunderboltOutlined,
-  AimOutlined,
 } from '@ant-design/icons';
 import {
-  Modal,
-  Space,
-  Typography,
-  Tag,
-  Progress,
-  Descriptions,
   Alert,
   Button,
+  Descriptions,
+  Modal,
+  Progress,
+  Space,
+  Tag,
+  Typography,
 } from 'antd';
 import type { HealingResult } from '../types/healing';
 
@@ -148,7 +148,8 @@ export function HealingConfirmDialog({
             strokeColor={confidenceLevel.color}
             format={(percent) => (
               <span>
-                {percent}% <Tag color={confidenceLevel.color}>{confidenceLevel.label}</Tag>
+                {percent}%{' '}
+                <Tag color={confidenceLevel.color}>{confidenceLevel.label}</Tag>
               </span>
             )}
           />
@@ -157,7 +158,9 @@ export function HealingConfirmDialog({
             <Space size="large">
               <div>
                 <Text type="secondary">位置偏移：</Text>
-                <Text strong>{healingResult.confidenceFactors.distanceScore}%</Text>
+                <Text strong>
+                  {healingResult.confidenceFactors.distanceScore}%
+                </Text>
               </div>
               <div>
                 <Text type="secondary">尺寸变化：</Text>
@@ -165,7 +168,9 @@ export function HealingConfirmDialog({
               </div>
               <div>
                 <Text type="secondary">策略评分：</Text>
-                <Text strong>{healingResult.confidenceFactors.strategyScore}%</Text>
+                <Text strong>
+                  {healingResult.confidenceFactors.strategyScore}%
+                </Text>
               </div>
             </Space>
           </div>
@@ -174,7 +179,8 @@ export function HealingConfirmDialog({
         {healingResult.element && (
           <div className="element-info">
             <Text type="secondary">
-              元素位置：({Math.round(healingResult.element.center[0])}, {Math.round(healingResult.element.center[1])})
+              元素位置：({Math.round(healingResult.element.center[0])},{' '}
+              {Math.round(healingResult.element.center[1])})
             </Text>
           </div>
         )}

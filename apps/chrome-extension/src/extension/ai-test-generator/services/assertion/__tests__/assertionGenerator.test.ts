@@ -2,9 +2,9 @@
  * Assertion Generator Tests
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { AssertionGenerator } from '../assertionGenerator';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { ActionContext, AnalysisResult } from '../../../types/assertion';
+import { AssertionGenerator } from '../assertionGenerator';
 
 describe('AssertionGenerator', () => {
   let generator: AssertionGenerator;
@@ -13,7 +13,9 @@ describe('AssertionGenerator', () => {
     generator = new AssertionGenerator();
   });
 
-  const createContext = (overrides: Partial<ActionContext> = {}): ActionContext => ({
+  const createContext = (
+    overrides: Partial<ActionContext> = {},
+  ): ActionContext => ({
     action: {
       type: 'click',
       target: { text: '登录' },
@@ -41,7 +43,9 @@ describe('AssertionGenerator', () => {
     ...overrides,
   });
 
-  const createAnalysis = (overrides: Partial<AnalysisResult> = {}): AnalysisResult => ({
+  const createAnalysis = (
+    overrides: Partial<AnalysisResult> = {},
+  ): AnalysisResult => ({
     needsAssertion: true,
     assertionTypes: ['text_contains', 'url_contains'],
     changes: [
@@ -88,7 +92,9 @@ describe('AssertionGenerator', () => {
 
       const recommendations = await generator.generate(context, analysis);
 
-      const navAssertion = recommendations.find(r => r.type === 'url_contains');
+      const navAssertion = recommendations.find(
+        (r) => r.type === 'url_contains',
+      );
       expect(navAssertion).toBeDefined();
     });
 
@@ -123,7 +129,7 @@ describe('AssertionGenerator', () => {
 
       // Should have text_contains assertion for success message
       const textAssertion = recommendations.find(
-        r => r.type === 'text_contains'
+        (r) => r.type === 'text_contains',
       );
       expect(textAssertion).toBeDefined();
     });
@@ -147,7 +153,7 @@ describe('AssertionGenerator', () => {
 
       for (let i = 1; i < recommendations.length; i++) {
         expect(recommendations[i - 1].confidence).toBeGreaterThanOrEqual(
-          recommendations[i].confidence
+          recommendations[i].confidence,
         );
       }
     });
@@ -189,7 +195,7 @@ describe('AssertionGenerator', () => {
       const yaml = generator.toYamlBatch(recommendations);
 
       expect(yaml).toContain('- ai');
-      const lines = yaml.split('\n').filter(l => l.trim());
+      const lines = yaml.split('\n').filter((l) => l.trim());
       expect(lines.length).toBe(recommendations.length);
     });
   });
@@ -203,7 +209,7 @@ describe('AssertionGenerator', () => {
         0,
         '点击登录',
         'https://example.com/login',
-        'https://example.com/dashboard'
+        'https://example.com/dashboard',
       );
 
       expect(result.recommendations).toHaveLength(0);

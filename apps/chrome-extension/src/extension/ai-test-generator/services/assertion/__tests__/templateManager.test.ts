@@ -2,7 +2,7 @@
  * Template Manager Tests
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TemplateManager } from '../templateManager';
 
 // Mock localStorage
@@ -38,7 +38,7 @@ describe('TemplateManager', () => {
       const templates = await manager.getAll();
 
       expect(templates.length).toBeGreaterThan(0);
-      expect(templates.some(t => t.category === 'system')).toBe(true);
+      expect(templates.some((t) => t.category === 'system')).toBe(true);
     });
 
     it('should only initialize once', async () => {
@@ -89,8 +89,8 @@ describe('TemplateManager', () => {
       const userTemplates = await manager.getByCategory('user');
       const systemTemplates = await manager.getByCategory('system');
 
-      expect(userTemplates.every(t => t.category === 'user')).toBe(true);
-      expect(systemTemplates.every(t => t.category === 'system')).toBe(true);
+      expect(userTemplates.every((t) => t.category === 'user')).toBe(true);
+      expect(systemTemplates.every((t) => t.category === 'system')).toBe(true);
     });
   });
 
@@ -120,7 +120,7 @@ describe('TemplateManager', () => {
       const systemTemplates = await manager.getByCategory('system');
       if (systemTemplates.length > 0) {
         await expect(
-          manager.update(systemTemplates[0].id, { name: 'Modified' })
+          manager.update(systemTemplates[0].id, { name: 'Modified' }),
         ).rejects.toThrow();
       }
     });
@@ -188,7 +188,7 @@ describe('TemplateManager', () => {
       });
 
       const matches = await manager.findMatching('login');
-      expect(matches.some(t => t.name === 'Login Template')).toBe(true);
+      expect(matches.some((t) => t.name === 'Login Template')).toBe(true);
     });
 
     it('should find templates by action type', async () => {
@@ -203,7 +203,7 @@ describe('TemplateManager', () => {
       });
 
       const matches = await manager.findMatching('generic', 'click');
-      expect(matches.some(t => t.name === 'Click Template')).toBe(true);
+      expect(matches.some((t) => t.name === 'Click Template')).toBe(true);
     });
   });
 
@@ -230,7 +230,7 @@ describe('TemplateManager', () => {
       expect(imported).toBeGreaterThan(0);
 
       const templates = await newManager.getByCategory('user');
-      expect(templates.some(t => t.name === 'Export Test')).toBe(true);
+      expect(templates.some((t) => t.name === 'Export Test')).toBe(true);
     });
 
     it('should reject invalid JSON', async () => {

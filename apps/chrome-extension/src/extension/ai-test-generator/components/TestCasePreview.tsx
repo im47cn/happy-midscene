@@ -4,31 +4,31 @@
  */
 
 import {
+  BorderOutlined,
   CheckCircleOutlined,
+  CheckSquareOutlined,
   CloseCircleOutlined,
+  DeleteOutlined,
+  EditOutlined,
   LoadingOutlined,
   PlayCircleOutlined,
-  EditOutlined,
-  DeleteOutlined,
   PlusOutlined,
-  CheckSquareOutlined,
-  BorderOutlined,
 } from '@ant-design/icons';
 import {
   Button,
   Card,
+  Checkbox,
   Collapse,
+  Empty,
+  Input,
+  List,
+  Popconfirm,
   Space,
   Tag,
-  Typography,
-  List,
-  Input,
-  Empty,
-  Popconfirm,
-  Checkbox,
   Tooltip,
+  Typography,
 } from 'antd';
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useGeneratorStore } from '../store';
 import type { TaskStep, TestCase } from '../types';
 
@@ -115,7 +115,12 @@ function StepItem({ step, index, onEdit, onDelete }: StepItemProps) {
                 okText="删除"
                 cancelText="取消"
               >
-                <Button type="text" size="small" icon={<DeleteOutlined />} danger />
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<DeleteOutlined />}
+                  danger
+                />
               </Popconfirm>
             )}
           </Space>
@@ -144,8 +149,12 @@ function TestCaseCard({
   onDeleteStep,
   onAddStep,
 }: TestCaseCardProps) {
-  const completedSteps = testCase.steps.filter((s) => s.status === 'success').length;
-  const failedSteps = testCase.steps.filter((s) => s.status === 'failed').length;
+  const completedSteps = testCase.steps.filter(
+    (s) => s.status === 'success',
+  ).length;
+  const failedSteps = testCase.steps.filter(
+    (s) => s.status === 'failed',
+  ).length;
   const totalSteps = testCase.steps.length;
 
   return (
@@ -240,23 +249,21 @@ function TestCaseCard({
 }
 
 export function TestCasePreview() {
-  const {
-    parseResult,
-    setCurrentView,
-    executionStatus,
-    setSelectedCaseIds,
-  } = useGeneratorStore();
+  const { parseResult, setCurrentView, executionStatus, setSelectedCaseIds } =
+    useGeneratorStore();
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // Calculate selection state
   const allCaseIds = useMemo(
     () => parseResult?.cases.map((c) => c.id) || [],
-    [parseResult]
+    [parseResult],
   );
 
-  const isAllSelected = selectedIds.size === allCaseIds.length && allCaseIds.length > 0;
-  const isPartialSelected = selectedIds.size > 0 && selectedIds.size < allCaseIds.length;
+  const isAllSelected =
+    selectedIds.size === allCaseIds.length && allCaseIds.length > 0;
+  const isPartialSelected =
+    selectedIds.size > 0 && selectedIds.size < allCaseIds.length;
 
   const selectedCount = selectedIds.size;
   const selectedStepsCount = useMemo(() => {
@@ -268,10 +275,7 @@ export function TestCasePreview() {
 
   if (!parseResult || parseResult.cases.length === 0) {
     return (
-      <Empty
-        description="暂无测试用例"
-        style={{ padding: '40px 0' }}
-      >
+      <Empty description="暂无测试用例" style={{ padding: '40px 0' }}>
         <Button type="primary" onClick={() => setCurrentView('input')}>
           返回输入
         </Button>
@@ -324,7 +328,8 @@ export function TestCasePreview() {
           </Title>
           <Text type="secondary">
             共 {parseResult.cases.length} 个用例，
-            {parseResult.cases.reduce((acc, c) => acc + c.steps.length, 0)} 个步骤
+            {parseResult.cases.reduce((acc, c) => acc + c.steps.length, 0)}{' '}
+            个步骤
           </Text>
         </div>
         <div className="header-actions">
@@ -332,7 +337,9 @@ export function TestCasePreview() {
             <Button
               type="text"
               size="small"
-              icon={isAllSelected ? <CheckSquareOutlined /> : <BorderOutlined />}
+              icon={
+                isAllSelected ? <CheckSquareOutlined /> : <BorderOutlined />
+              }
               onClick={handleSelectAll}
             >
               {isAllSelected ? '取消全选' : '全选'}

@@ -3,34 +3,37 @@
  * Displays execution history records with details
  */
 
-import { useEffect, useState, useCallback } from 'react';
 import {
-  Typography,
-  Card,
-  List,
-  Tag,
+  ArrowLeftOutlined,
+  CheckCircleOutlined,
+  ClearOutlined,
+  CloseCircleOutlined,
+  CopyOutlined,
+  DeleteOutlined,
+  ExclamationCircleOutlined,
+  HistoryOutlined,
+  PlayCircleOutlined,
+  ReloadOutlined,
+  StopOutlined,
+} from '@ant-design/icons';
+import {
   Button,
-  Space,
+  Card,
   Empty,
+  List,
   Popconfirm,
-  Tooltip,
   Progress,
+  Space,
+  Tag,
+  Tooltip,
+  Typography,
   message,
 } from 'antd';
+import { useCallback, useEffect, useState } from 'react';
 import {
-  HistoryOutlined,
-  DeleteOutlined,
-  ClearOutlined,
-  ReloadOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  ExclamationCircleOutlined,
-  StopOutlined,
-  PlayCircleOutlined,
-  CopyOutlined,
-  ArrowLeftOutlined,
-} from '@ant-design/icons';
-import { historyService, type ExecutionHistoryItem } from '../services/historyService';
+  type ExecutionHistoryItem,
+  historyService,
+} from '../services/historyService';
 import { useGeneratorStore } from '../store';
 
 const { Text, Title } = Typography;
@@ -42,9 +45,12 @@ interface HistoryViewProps {
 export function HistoryView({ onBack }: HistoryViewProps) {
   const [historyItems, setHistoryItems] = useState<ExecutionHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedItem, setSelectedItem] = useState<ExecutionHistoryItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<ExecutionHistoryItem | null>(
+    null,
+  );
 
-  const { setMarkdownInput, setCurrentView, setGeneratedYaml } = useGeneratorStore();
+  const { setMarkdownInput, setCurrentView, setGeneratedYaml } =
+    useGeneratorStore();
 
   const loadHistory = useCallback(async () => {
     setLoading(true);
@@ -130,7 +136,10 @@ export function HistoryView({ onBack }: HistoryViewProps) {
     const isToday = date.toDateString() === now.toDateString();
 
     if (isToday) {
-      return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleTimeString('zh-CN', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
     }
 
     return date.toLocaleDateString('zh-CN', {
@@ -143,7 +152,9 @@ export function HistoryView({ onBack }: HistoryViewProps) {
 
   const renderHistoryItem = (item: ExecutionHistoryItem) => {
     const successRate =
-      item.totalSteps > 0 ? Math.round((item.successSteps / item.totalSteps) * 100) : 0;
+      item.totalSteps > 0
+        ? Math.round((item.successSteps / item.totalSteps) * 100)
+        : 0;
 
     return (
       <List.Item
@@ -303,7 +314,10 @@ export function HistoryView({ onBack }: HistoryViewProps) {
         )}
 
         <div className="detail-actions">
-          <Button icon={<PlayCircleOutlined />} onClick={() => handleReuse(selectedItem)}>
+          <Button
+            icon={<PlayCircleOutlined />}
+            onClick={() => handleReuse(selectedItem)}
+          >
             重新执行
           </Button>
         </div>
@@ -323,7 +337,11 @@ export function HistoryView({ onBack }: HistoryViewProps) {
           </Title>
         </Space>
         <Space>
-          <Button icon={<ReloadOutlined />} onClick={loadHistory} loading={loading}>
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={loadHistory}
+            loading={loading}
+          >
             刷新
           </Button>
           {historyItems.length > 0 && (

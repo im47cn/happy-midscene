@@ -3,7 +3,11 @@
  * Integrates data generation with test execution
  */
 
-import type { FieldDefinition, SemanticType, GenerateOptions } from '../../types/dataGen';
+import type {
+  FieldDefinition,
+  GenerateOptions,
+  SemanticType,
+} from '../../types/dataGen';
 import { dataGenerator } from './dataGenerator';
 import { dataMasker } from './dataMasker';
 import { fieldRecognizer } from './fieldRecognizer';
@@ -110,45 +114,45 @@ export class SmartInputExecutor {
   private mapToSemanticType(typeStr: string): SemanticType {
     const typeMap: Record<string, SemanticType> = {
       // Chinese
-      '手机号': 'mobile_phone',
-      '手机': 'mobile_phone',
-      '邮箱': 'email',
-      '密码': 'password',
-      '用户名': 'username',
-      '姓名': 'realname',
-      '身份证': 'id_card',
-      '银行卡': 'bank_card',
-      '地址': 'address',
-      '邮编': 'postal_code',
-      '城市': 'city',
-      '公司': 'company',
-      '职位': 'job_title',
-      '金额': 'amount',
-      '数量': 'quantity',
-      '描述': 'description',
-      '验证码': 'captcha',
+      手机号: 'mobile_phone',
+      手机: 'mobile_phone',
+      邮箱: 'email',
+      密码: 'password',
+      用户名: 'username',
+      姓名: 'realname',
+      身份证: 'id_card',
+      银行卡: 'bank_card',
+      地址: 'address',
+      邮编: 'postal_code',
+      城市: 'city',
+      公司: 'company',
+      职位: 'job_title',
+      金额: 'amount',
+      数量: 'quantity',
+      描述: 'description',
+      验证码: 'captcha',
       // English
-      'mobile': 'mobile_phone',
-      'phone': 'mobile_phone',
-      'email': 'email',
-      'password': 'password',
-      'username': 'username',
-      'name': 'realname',
-      'realname': 'realname',
-      'idcard': 'id_card',
-      'id_card': 'id_card',
-      'bankcard': 'bank_card',
-      'bank_card': 'bank_card',
-      'address': 'address',
-      'postal': 'postal_code',
-      'city': 'city',
-      'company': 'company',
-      'job': 'job_title',
-      'amount': 'amount',
-      'quantity': 'quantity',
-      'description': 'description',
-      'captcha': 'captcha',
-      'url': 'url',
+      mobile: 'mobile_phone',
+      phone: 'mobile_phone',
+      email: 'email',
+      password: 'password',
+      username: 'username',
+      name: 'realname',
+      realname: 'realname',
+      idcard: 'id_card',
+      id_card: 'id_card',
+      bankcard: 'bank_card',
+      bank_card: 'bank_card',
+      address: 'address',
+      postal: 'postal_code',
+      city: 'city',
+      company: 'company',
+      job: 'job_title',
+      amount: 'amount',
+      quantity: 'quantity',
+      description: 'description',
+      captcha: 'captcha',
+      url: 'url',
     };
 
     const normalized = typeStr.toLowerCase().replace(/[_\-\s]/g, '');
@@ -161,7 +165,7 @@ export class SmartInputExecutor {
   async generateForStep(
     stepText: string,
     targetLabel?: string,
-    stepId?: string
+    stepId?: string,
   ): Promise<{
     value: unknown;
     maskedValue: string;
@@ -233,10 +237,18 @@ export class SmartInputExecutor {
    */
   async processStepText(stepText: string): Promise<{
     processedText: string;
-    generatedValues: Array<{ original: string; value: unknown; semanticType: SemanticType }>;
+    generatedValues: Array<{
+      original: string;
+      value: unknown;
+      semanticType: SemanticType;
+    }>;
   }> {
     let processedText = stepText;
-    const generatedValues: Array<{ original: string; value: unknown; semanticType: SemanticType }> = [];
+    const generatedValues: Array<{
+      original: string;
+      value: unknown;
+      semanticType: SemanticType;
+    }> = [];
 
     // Process auto-generate - use match() instead of exec() to avoid infinite loop
     let match = processedText.match(DATA_GEN_PATTERNS.autoGenerate);
@@ -312,7 +324,12 @@ export class SmartInputExecutor {
   /**
    * Get masked records for reporting
    */
-  getMaskedRecords(): Array<{ fieldId: string; semanticType: SemanticType; displayValue: string; timestamp: number }> {
+  getMaskedRecords(): Array<{
+    fieldId: string;
+    semanticType: SemanticType;
+    displayValue: string;
+    timestamp: number;
+  }> {
     return this.records.map((r) => ({
       fieldId: r.fieldId,
       semanticType: r.semanticType,

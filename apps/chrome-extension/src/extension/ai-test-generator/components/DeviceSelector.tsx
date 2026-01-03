@@ -3,18 +3,18 @@
  * Allows users to select device presets for H5 mobile mode testing
  */
 
-import { useState, useMemo } from 'react';
-import { Select, Tag, Tooltip, Space, Typography, Divider } from 'antd';
 import {
   DesktopOutlined,
   MobileOutlined,
   TabletOutlined,
 } from '@ant-design/icons';
+import { Divider, Select, Space, Tag, Tooltip, Typography } from 'antd';
+import { useMemo, useState } from 'react';
 import {
+  type DevicePreset,
   devicePresets,
   devicePresetsByCategory,
   getDevicePreset,
-  type DevicePreset,
 } from '../config/devicePresets';
 
 const { Text } = Typography;
@@ -56,8 +56,12 @@ function formatDeviceLabel(device: DevicePreset): React.ReactNode {
 function DeviceInfoTooltip({ device }: { device: DevicePreset }) {
   return (
     <div className="device-info-tooltip">
-      <div><strong>{device.name}</strong></div>
-      <div>Resolution: {device.width}×{device.height}</div>
+      <div>
+        <strong>{device.name}</strong>
+      </div>
+      <div>
+        Resolution: {device.width}×{device.height}
+      </div>
       <div>Scale: {device.deviceScaleFactor}x</div>
       <div>Touch: {device.hasTouch ? 'Yes' : 'No'}</div>
       {device.isMobile && <div>Mobile: Yes</div>}
@@ -155,7 +159,9 @@ export function DeviceSelectorCompact({
 
   return (
     <Tooltip
-      title={selectedDevice ? <DeviceInfoTooltip device={selectedDevice} /> : null}
+      title={
+        selectedDevice ? <DeviceInfoTooltip device={selectedDevice} /> : null
+      }
     >
       <Select
         value={value}

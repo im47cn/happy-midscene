@@ -3,13 +3,13 @@
  * Tests for IndexedDB-based analytics data storage
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
-  ExecutionRecord,
-  DailyStats,
-  CaseStats,
-  AlertRule,
   AlertEvent,
+  AlertRule,
+  CaseStats,
+  DailyStats,
+  ExecutionRecord,
   Report,
 } from '../../../types/analytics';
 
@@ -110,10 +110,18 @@ const mockTransaction = {
               value: values[index],
               continue: () => {
                 index++;
-                setTimeout(() => request.onsuccess?.({ target: { result: index < values.length ? cursor : null } }), 0);
+                setTimeout(
+                  () =>
+                    request.onsuccess?.({
+                      target: { result: index < values.length ? cursor : null },
+                    }),
+                  0,
+                );
               },
               delete: () => {
-                mockStore[storeName].delete(values[index].id || values[index].date);
+                mockStore[storeName].delete(
+                  values[index].id || values[index].date,
+                );
               },
             };
             request.onsuccess?.({ target: { result: cursor } });
@@ -137,10 +145,18 @@ const mockTransaction = {
             value: values[index],
             continue: () => {
               index++;
-              setTimeout(() => request.onsuccess?.({ target: { result: index < values.length ? cursor : null } }), 0);
+              setTimeout(
+                () =>
+                  request.onsuccess?.({
+                    target: { result: index < values.length ? cursor : null },
+                  }),
+                0,
+              );
             },
             delete: () => {
-              mockStore[storeName].delete(values[index].id || values[index].date);
+              mockStore[storeName].delete(
+                values[index].id || values[index].date,
+              );
             },
           };
           request.onsuccess?.({ target: { result: cursor } });
@@ -181,7 +197,9 @@ describe('Analytics Storage', () => {
   });
 
   describe('ExecutionRecord operations', () => {
-    const createMockExecution = (overrides?: Partial<ExecutionRecord>): ExecutionRecord => ({
+    const createMockExecution = (
+      overrides?: Partial<ExecutionRecord>,
+    ): ExecutionRecord => ({
       id: `exec-${Date.now()}`,
       caseId: 'case-1',
       caseName: 'Test Case 1',
@@ -190,8 +208,20 @@ describe('Analytics Storage', () => {
       duration: 10000,
       status: 'passed',
       steps: [
-        { index: 0, description: 'Step 1', status: 'passed', duration: 5000, retryCount: 0 },
-        { index: 1, description: 'Step 2', status: 'passed', duration: 5000, retryCount: 0 },
+        {
+          index: 0,
+          description: 'Step 1',
+          status: 'passed',
+          duration: 5000,
+          retryCount: 0,
+        },
+        {
+          index: 1,
+          description: 'Step 2',
+          status: 'passed',
+          duration: 5000,
+          retryCount: 0,
+        },
       ],
       environment: {
         browser: 'Chrome',
@@ -237,7 +267,9 @@ describe('Analytics Storage', () => {
   });
 
   describe('DailyStats operations', () => {
-    const createMockDailyStats = (overrides?: Partial<DailyStats>): DailyStats => ({
+    const createMockDailyStats = (
+      overrides?: Partial<DailyStats>,
+    ): DailyStats => ({
       date: '2024-01-15',
       totalExecutions: 100,
       passed: 85,
@@ -259,18 +291,25 @@ describe('Analytics Storage', () => {
     it('should create valid daily stats', () => {
       const stats = createMockDailyStats();
       expect(stats.totalExecutions).toBe(100);
-      expect(stats.passed + stats.failed + stats.skipped + stats.error).toBe(100);
+      expect(stats.passed + stats.failed + stats.skipped + stats.error).toBe(
+        100,
+      );
     });
 
     it('should track failures by type', () => {
       const stats = createMockDailyStats();
-      const totalFailuresByType = Object.values(stats.failuresByType).reduce((a, b) => a + b, 0);
+      const totalFailuresByType = Object.values(stats.failuresByType).reduce(
+        (a, b) => a + b,
+        0,
+      );
       expect(totalFailuresByType).toBe(10);
     });
   });
 
   describe('CaseStats operations', () => {
-    const createMockCaseStats = (overrides?: Partial<CaseStats>): CaseStats => ({
+    const createMockCaseStats = (
+      overrides?: Partial<CaseStats>,
+    ): CaseStats => ({
       caseId: 'case-1',
       caseName: 'Login Test',
       totalRuns: 50,
@@ -303,12 +342,16 @@ describe('Analytics Storage', () => {
     it('should track recent results as array', () => {
       const stats = createMockCaseStats();
       expect(Array.isArray(stats.recentResults)).toBe(true);
-      expect(stats.recentResults.every((r) => r === 'passed' || r === 'failed')).toBe(true);
+      expect(
+        stats.recentResults.every((r) => r === 'passed' || r === 'failed'),
+      ).toBe(true);
     });
   });
 
   describe('AlertRule operations', () => {
-    const createMockAlertRule = (overrides?: Partial<AlertRule>): AlertRule => ({
+    const createMockAlertRule = (
+      overrides?: Partial<AlertRule>,
+    ): AlertRule => ({
       id: 'rule-1',
       name: 'Low Pass Rate Alert',
       enabled: true,
@@ -355,7 +398,9 @@ describe('Analytics Storage', () => {
   });
 
   describe('AlertEvent operations', () => {
-    const createMockAlertEvent = (overrides?: Partial<AlertEvent>): AlertEvent => ({
+    const createMockAlertEvent = (
+      overrides?: Partial<AlertEvent>,
+    ): AlertEvent => ({
       id: 'event-1',
       ruleId: 'rule-1',
       ruleName: 'Low Pass Rate Alert',
@@ -406,7 +451,11 @@ describe('Analytics Storage', () => {
           unknown: 0,
         },
         hotspots: [
-          { description: 'Click login button', failureCount: 5, percentage: 50 },
+          {
+            description: 'Click login button',
+            failureCount: 5,
+            percentage: 50,
+          },
         ],
       },
       recommendations: ['Fix locator issues', 'Add retry logic'],

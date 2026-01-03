@@ -25,11 +25,11 @@ test('ai shop', async ({
   await aiInput('secret_sauce', 'in password input');
   await agent.aiTap('Login Button');
 
-  // check the login success
-  await aiAssert('the page title is "Swag Labs"');
+  // check the login success - verify we're on the inventory page
+  await aiAssert('the page shows a product inventory with items for sale');
 
-  // add to cart
-  await aiTap('"add to cart" for black t-shirt products');
+  // add to cart - use actual product name from saucedemo.com
+  await aiTap('"Add to cart" button for "Sauce Labs Backpack"');
 
   await aiTap('click right top cart icon', {
     deepThink: true,

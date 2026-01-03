@@ -2,19 +2,21 @@
  * Assertion Strategies Tests
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import type { ActionContext, AnalysisResult } from '../../../types/assertion';
 import {
-  SuccessMessageStrategy,
+  DataValidationStrategy,
+  ElementVisibilityStrategy,
+  ErrorPreventionStrategy,
   NavigationStrategy,
   StateChangeStrategy,
-  ElementVisibilityStrategy,
-  DataValidationStrategy,
-  ErrorPreventionStrategy,
+  SuccessMessageStrategy,
   getStrategiesByPriority,
 } from '../strategies';
-import type { ActionContext, AnalysisResult } from '../../../types/assertion';
 
-const createContext = (overrides: Partial<ActionContext> = {}): ActionContext => ({
+const createContext = (
+  overrides: Partial<ActionContext> = {},
+): ActionContext => ({
   action: {
     type: 'click',
     target: { text: '按钮' },
@@ -35,7 +37,9 @@ const createContext = (overrides: Partial<ActionContext> = {}): ActionContext =>
   ...overrides,
 });
 
-const createAnalysis = (overrides: Partial<AnalysisResult> = {}): AnalysisResult => ({
+const createAnalysis = (
+  overrides: Partial<AnalysisResult> = {},
+): AnalysisResult => ({
   needsAssertion: true,
   assertionTypes: [],
   changes: [],
@@ -285,7 +289,7 @@ describe('getStrategiesByPriority', () => {
 
     for (let i = 1; i < strategies.length; i++) {
       expect(strategies[i - 1].priority).toBeGreaterThanOrEqual(
-        strategies[i].priority
+        strategies[i].priority,
       );
     }
   });
@@ -315,7 +319,10 @@ describe('YAML format consistency', () => {
         },
       ],
     });
-    const successRecs = await allStrategies[0].generate(successContext, successAnalysis);
+    const successRecs = await allStrategies[0].generate(
+      successContext,
+      successAnalysis,
+    );
     for (const rec of successRecs) {
       expect(rec.yamlOutput).toMatch(/^- ai:/);
       expect(rec.yamlOutput).not.toContain('aiAssert');
@@ -348,7 +355,10 @@ describe('YAML format consistency', () => {
         },
       ],
     });
-    const stateRecs = await allStrategies[2].generate(stateContext, stateAnalysis);
+    const stateRecs = await allStrategies[2].generate(
+      stateContext,
+      stateAnalysis,
+    );
     for (const rec of stateRecs) {
       expect(rec.yamlOutput).toMatch(/^- ai:/);
       expect(rec.yamlOutput).not.toContain('aiAssert');
@@ -384,7 +394,10 @@ describe('YAML format consistency', () => {
     // Test ErrorPreventionStrategy
     const errorContext = createContext();
     const errorAnalysis = createAnalysis({ intent: 'login' });
-    const errorRecs = await allStrategies[5].generate(errorContext, errorAnalysis);
+    const errorRecs = await allStrategies[5].generate(
+      errorContext,
+      errorAnalysis,
+    );
     for (const rec of errorRecs) {
       expect(rec.yamlOutput).toMatch(/^- ai:/);
       expect(rec.yamlOutput).not.toContain('aiAssert');

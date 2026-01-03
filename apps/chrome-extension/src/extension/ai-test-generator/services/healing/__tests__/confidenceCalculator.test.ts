@@ -3,12 +3,14 @@
  * Run with: npx vitest run apps/chrome-extension/src/extension/ai-test-generator/services/healing/__tests__/
  */
 
-import { describe, it, expect } from 'vitest';
-import { calculateConfidence, determineAction } from '../confidenceCalculator';
+import { describe, expect, it } from 'vitest';
 import type { SemanticFingerprint } from '../../../types/healing';
+import { calculateConfidence, determineAction } from '../confidenceCalculator';
 
 // Helper to create test fingerprint
-function createFingerprint(overrides: Partial<SemanticFingerprint> = {}): SemanticFingerprint {
+function createFingerprint(
+  overrides: Partial<SemanticFingerprint> = {},
+): SemanticFingerprint {
   return {
     id: 'test-id',
     stepId: 'step-1',
@@ -26,7 +28,12 @@ describe('calculateConfidence', () => {
   describe('distance scoring', () => {
     it('should give high score when element is at same position', () => {
       const fingerprint = createFingerprint({ lastKnownCenter: [100, 100] });
-      const result = calculateConfidence([100, 100], fingerprint.lastKnownRect, fingerprint, 'normal');
+      const result = calculateConfidence(
+        [100, 100],
+        fingerprint.lastKnownRect,
+        fingerprint,
+        'normal',
+      );
 
       expect(result.factors.distanceScore).toBe(100);
     });
@@ -35,15 +42,30 @@ describe('calculateConfidence', () => {
       const fingerprint = createFingerprint({ lastKnownCenter: [100, 100] });
 
       // 20 pixels away - should lose 10 points (0.5 * 20)
-      const result1 = calculateConfidence([120, 100], fingerprint.lastKnownRect, fingerprint, 'normal');
+      const result1 = calculateConfidence(
+        [120, 100],
+        fingerprint.lastKnownRect,
+        fingerprint,
+        'normal',
+      );
       expect(result1.factors.distanceScore).toBe(90);
 
       // 50 pixels away - should lose 25 points
-      const result2 = calculateConfidence([150, 100], fingerprint.lastKnownRect, fingerprint, 'normal');
+      const result2 = calculateConfidence(
+        [150, 100],
+        fingerprint.lastKnownRect,
+        fingerprint,
+        'normal',
+      );
       expect(result2.factors.distanceScore).toBe(75);
 
       // 100 pixels away - should lose 50 points
-      const result3 = calculateConfidence([200, 100], fingerprint.lastKnownRect, fingerprint, 'normal');
+      const result3 = calculateConfidence(
+        [200, 100],
+        fingerprint.lastKnownRect,
+        fingerprint,
+        'normal',
+      );
       expect(result3.factors.distanceScore).toBe(50);
     });
 
@@ -51,7 +73,12 @@ describe('calculateConfidence', () => {
       const fingerprint = createFingerprint({ lastKnownCenter: [100, 100] });
 
       // 300 pixels away - would be -50 but capped at 0
-      const result = calculateConfidence([400, 100], fingerprint.lastKnownRect, fingerprint, 'normal');
+      const result = calculateConfidence(
+        [400, 100],
+        fingerprint.lastKnownRect,
+        fingerprint,
+        'normal',
+      );
       expect(result.factors.distanceScore).toBe(0);
     });
   });
@@ -63,7 +90,12 @@ describe('calculateConfidence', () => {
       });
       const newRect = { left: 0, top: 0, width: 100, height: 50 };
 
-      const result = calculateConfidence([100, 100], newRect, fingerprint, 'normal');
+      const result = calculateConfidence(
+        [100, 100],
+        newRect,
+        fingerprint,
+        'normal',
+      );
       expect(result.factors.sizeScore).toBe(100);
     });
 
@@ -74,12 +106,22 @@ describe('calculateConfidence', () => {
 
       // Width doubled - ratio = 0.5 * 1.0 = 0.5 -> 50%
       const newRect1 = { left: 0, top: 0, width: 200, height: 50 };
-      const result1 = calculateConfidence([100, 100], newRect1, fingerprint, 'normal');
+      const result1 = calculateConfidence(
+        [100, 100],
+        newRect1,
+        fingerprint,
+        'normal',
+      );
       expect(result1.factors.sizeScore).toBe(50);
 
       // Both dimensions halved - ratio = 0.5 * 0.5 = 0.25 -> 25%
       const newRect2 = { left: 0, top: 0, width: 50, height: 25 };
-      const result2 = calculateConfidence([100, 100], newRect2, fingerprint, 'normal');
+      const result2 = calculateConfidence(
+        [100, 100],
+        newRect2,
+        fingerprint,
+        'normal',
+      );
       expect(result2.factors.sizeScore).toBe(25);
     });
   });
@@ -87,14 +129,24 @@ describe('calculateConfidence', () => {
   describe('strategy scoring', () => {
     it('should give full score for normal strategy', () => {
       const fingerprint = createFingerprint();
-      const result = calculateConfidence([100, 100], fingerprint.lastKnownRect, fingerprint, 'normal');
+      const result = calculateConfidence(
+        [100, 100],
+        fingerprint.lastKnownRect,
+        fingerprint,
+        'normal',
+      );
 
       expect(result.factors.strategyScore).toBe(100);
     });
 
     it('should penalize deepThink strategy', () => {
       const fingerprint = createFingerprint();
-      const result = calculateConfidence([100, 100], fingerprint.lastKnownRect, fingerprint, 'deepThink');
+      const result = calculateConfidence(
+        [100, 100],
+        fingerprint.lastKnownRect,
+        fingerprint,
+        'deepThink',
+      );
 
       expect(result.factors.strategyScore).toBe(90);
     });
@@ -110,7 +162,12 @@ describe('calculateConfidence', () => {
       // Same position, same size, normal strategy
       // Distance: 100, Size: 100, Strategy: 100
       // Weighted: 100 * 0.4 + 100 * 0.3 + 100 * 0.3 = 100
-      const result = calculateConfidence([100, 100], fingerprint.lastKnownRect, fingerprint, 'normal');
+      const result = calculateConfidence(
+        [100, 100],
+        fingerprint.lastKnownRect,
+        fingerprint,
+        'normal',
+      );
       expect(result.confidence).toBe(100);
     });
 
@@ -125,7 +182,12 @@ describe('calculateConfidence', () => {
       // DeepThink (strategy score = 90)
       // Weighted: 50 * 0.4 + 100 * 0.3 + 90 * 0.3 = 20 + 30 + 27 = 77
       const newRect = { left: 150, top: 75, width: 100, height: 50 };
-      const result = calculateConfidence([200, 100], newRect, fingerprint, 'deepThink');
+      const result = calculateConfidence(
+        [200, 100],
+        newRect,
+        fingerprint,
+        'deepThink',
+      );
       expect(result.confidence).toBe(77);
     });
   });

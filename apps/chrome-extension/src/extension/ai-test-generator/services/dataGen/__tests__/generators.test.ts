@@ -2,30 +2,30 @@
  * Data Generators Tests
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-  generateMobilePhone,
+  generateAddress,
+  generateAmount,
+  generateBankCard,
+  generateCaptcha,
+  generateCity,
+  generateCompany,
+  generateDateOfBirth,
+  generateDescription,
   generateEmail,
-  generateRealName,
-  generateUsername,
+  generateForSemanticType,
+  generateIdCard,
+  generateJobTitle,
+  generateLandline,
+  generateMobilePhone,
   generateNickname,
   generatePassword,
-  generateIdCard,
-  generateBankCard,
   generatePostalCode,
-  generateAddress,
-  generateCity,
   generateProvince,
-  generateDateOfBirth,
-  generateAmount,
   generateQuantity,
-  generateDescription,
+  generateRealName,
   generateUrl,
-  generateCompany,
-  generateJobTitle,
-  generateCaptcha,
-  generateLandline,
-  generateForSemanticType,
+  generateUsername,
 } from '../generators';
 
 describe('Data Generators', () => {
@@ -36,7 +36,9 @@ describe('Data Generators', () => {
     });
 
     it('should generate unique phone numbers', () => {
-      const phones = new Set(Array.from({ length: 10 }, () => generateMobilePhone()));
+      const phones = new Set(
+        Array.from({ length: 10 }, () => generateMobilePhone()),
+      );
       expect(phones.size).toBeGreaterThan(1);
     });
   });
@@ -69,7 +71,11 @@ describe('Data Generators', () => {
     });
 
     it('should respect length constraints', () => {
-      const username = generateUsername({ required: false, minLength: 8, maxLength: 10 });
+      const username = generateUsername({
+        required: false,
+        minLength: 8,
+        maxLength: 10,
+      });
       expect(username.length).toBeGreaterThanOrEqual(8);
       expect(username.length).toBeLessThanOrEqual(10);
     });
@@ -93,7 +99,11 @@ describe('Data Generators', () => {
     });
 
     it('should respect length constraints', () => {
-      const password = generatePassword({ required: false, minLength: 12, maxLength: 16 });
+      const password = generatePassword({
+        required: false,
+        minLength: 12,
+        maxLength: 16,
+      });
       expect(password.length).toBeGreaterThanOrEqual(12);
       expect(password.length).toBeLessThanOrEqual(16);
     });
@@ -108,7 +118,39 @@ describe('Data Generators', () => {
     it('should have valid province code', () => {
       const idCard = generateIdCard();
       const provinceCode = idCard.substring(0, 2);
-      const validPrefixes = ['11', '12', '13', '14', '15', '21', '22', '23', '31', '32', '33', '34', '35', '36', '37', '41', '42', '43', '44', '45', '46', '50', '51', '52', '53', '54', '61', '62', '63', '64', '65'];
+      const validPrefixes = [
+        '11',
+        '12',
+        '13',
+        '14',
+        '15',
+        '21',
+        '22',
+        '23',
+        '31',
+        '32',
+        '33',
+        '34',
+        '35',
+        '36',
+        '37',
+        '41',
+        '42',
+        '43',
+        '44',
+        '45',
+        '46',
+        '50',
+        '51',
+        '52',
+        '53',
+        '54',
+        '61',
+        '62',
+        '63',
+        '64',
+        '65',
+      ];
       expect(validPrefixes).toContain(provinceCode);
     });
   });
@@ -160,7 +202,7 @@ describe('Data Generators', () => {
 
     it('should generate reasonable age', () => {
       const date = generateDateOfBirth();
-      const year = parseInt(date.split('-')[0], 10);
+      const year = Number.parseInt(date.split('-')[0], 10);
       expect(year).toBeGreaterThanOrEqual(1960);
       expect(year).toBeLessThanOrEqual(2005);
     });
@@ -175,7 +217,11 @@ describe('Data Generators', () => {
     });
 
     it('should respect value constraints', () => {
-      const amount = generateAmount({ required: false, minValue: 100, maxValue: 200 });
+      const amount = generateAmount({
+        required: false,
+        minValue: 100,
+        maxValue: 200,
+      });
       expect(amount).toBeGreaterThanOrEqual(100);
       expect(amount).toBeLessThanOrEqual(200);
     });
@@ -189,7 +235,11 @@ describe('Data Generators', () => {
     });
 
     it('should respect value constraints', () => {
-      const qty = generateQuantity({ required: false, minValue: 5, maxValue: 10 });
+      const qty = generateQuantity({
+        required: false,
+        minValue: 5,
+        maxValue: 10,
+      });
       expect(qty).toBeGreaterThanOrEqual(5);
       expect(qty).toBeLessThanOrEqual(10);
     });
@@ -251,11 +301,28 @@ describe('Data Generators', () => {
   describe('generateForSemanticType', () => {
     it('should generate data for all semantic types', () => {
       const types = [
-        'username', 'realname', 'nickname', 'email', 'mobile_phone',
-        'landline', 'password', 'captcha', 'id_card', 'bank_card',
-        'address', 'postal_code', 'city', 'province', 'country',
-        'date_of_birth', 'amount', 'quantity', 'description', 'url',
-        'company', 'job_title',
+        'username',
+        'realname',
+        'nickname',
+        'email',
+        'mobile_phone',
+        'landline',
+        'password',
+        'captcha',
+        'id_card',
+        'bank_card',
+        'address',
+        'postal_code',
+        'city',
+        'province',
+        'country',
+        'date_of_birth',
+        'amount',
+        'quantity',
+        'description',
+        'url',
+        'company',
+        'job_title',
       ] as const;
 
       for (const type of types) {

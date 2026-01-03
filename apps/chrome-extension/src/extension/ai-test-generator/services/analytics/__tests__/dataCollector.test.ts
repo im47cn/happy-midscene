@@ -3,7 +3,7 @@
  * Tests for data collection and aggregation functionality
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ExecutionRecord, StepRecord } from '../../../types/analytics';
 
 // Mock analyticsStorage
@@ -18,8 +18,8 @@ vi.mock('../analyticsStorage', () => ({
   },
 }));
 
-import { dataCollector } from '../dataCollector';
 import { analyticsStorage } from '../analyticsStorage';
+import { dataCollector } from '../dataCollector';
 
 describe('DataCollector', () => {
   beforeEach(() => {
@@ -27,7 +27,9 @@ describe('DataCollector', () => {
   });
 
   describe('createExecutionRecord', () => {
-    const createSteps = (statuses: ('passed' | 'failed' | 'skipped')[]): StepRecord[] =>
+    const createSteps = (
+      statuses: ('passed' | 'failed' | 'skipped')[],
+    ): StepRecord[] =>
       statuses.map((status, index) => ({
         index,
         description: `Step ${index + 1}`,
@@ -48,7 +50,7 @@ describe('DataCollector', () => {
         'case-1',
         'Test Case 1',
         steps,
-        defaultEnv
+        defaultEnv,
       );
 
       expect(record.caseId).toBe('case-1');
@@ -65,7 +67,7 @@ describe('DataCollector', () => {
         'case-1',
         'Test Case 1',
         steps,
-        defaultEnv
+        defaultEnv,
       );
 
       expect(record.status).toBe('failed');
@@ -85,7 +87,7 @@ describe('DataCollector', () => {
         'Test Case 1',
         steps,
         defaultEnv,
-        healing
+        healing,
       );
 
       expect(record.healing).toEqual(healing);
@@ -93,15 +95,27 @@ describe('DataCollector', () => {
 
     it('should generate unique IDs for each record', () => {
       const steps = createSteps(['passed']);
-      const record1 = dataCollector.createExecutionRecord('case-1', 'Test', steps, defaultEnv);
-      const record2 = dataCollector.createExecutionRecord('case-1', 'Test', steps, defaultEnv);
+      const record1 = dataCollector.createExecutionRecord(
+        'case-1',
+        'Test',
+        steps,
+        defaultEnv,
+      );
+      const record2 = dataCollector.createExecutionRecord(
+        'case-1',
+        'Test',
+        steps,
+        defaultEnv,
+      );
 
       expect(record1.id).not.toBe(record2.id);
     });
   });
 
   describe('recordExecution', () => {
-    const createMockRecord = (overrides?: Partial<ExecutionRecord>): ExecutionRecord => ({
+    const createMockRecord = (
+      overrides?: Partial<ExecutionRecord>,
+    ): ExecutionRecord => ({
       id: `exec-${Date.now()}`,
       caseId: 'case-1',
       caseName: 'Test Case 1',
@@ -109,7 +123,15 @@ describe('DataCollector', () => {
       endTime: Date.now(),
       duration: 5000,
       status: 'passed',
-      steps: [{ index: 0, description: 'Step 1', status: 'passed', duration: 5000, retryCount: 0 }],
+      steps: [
+        {
+          index: 0,
+          description: 'Step 1',
+          status: 'passed',
+          duration: 5000,
+          retryCount: 0,
+        },
+      ],
       environment: {
         browser: 'Chrome',
         viewport: { width: 1920, height: 1080 },
@@ -139,7 +161,7 @@ describe('DataCollector', () => {
           totalExecutions: 1,
           passed: 1,
           failed: 0,
-        })
+        }),
       );
     });
 
@@ -169,7 +191,7 @@ describe('DataCollector', () => {
         expect.objectContaining({
           totalExecutions: 6,
           passed: 5,
-        })
+        }),
       );
     });
 
@@ -191,7 +213,7 @@ describe('DataCollector', () => {
           failuresByType: expect.objectContaining({
             locator_failed: 1,
           }),
-        })
+        }),
       );
     });
 
@@ -207,7 +229,7 @@ describe('DataCollector', () => {
           totalRuns: 1,
           passRate: 100,
           isFlaky: false,
-        })
+        }),
       );
     });
 
@@ -231,7 +253,7 @@ describe('DataCollector', () => {
         expect.objectContaining({
           totalRuns: 6,
           recentResults: expect.arrayContaining(['passed']),
-        })
+        }),
       );
     });
   });
@@ -247,7 +269,17 @@ describe('DataCollector', () => {
         lastRun: Date.now() - 1000,
         stabilityScore: 55,
         isFlaky: false,
-        recentResults: ['passed', 'failed', 'passed', 'failed', 'passed', 'failed', 'passed', 'failed', 'passed'],
+        recentResults: [
+          'passed',
+          'failed',
+          'passed',
+          'failed',
+          'passed',
+          'failed',
+          'passed',
+          'failed',
+          'passed',
+        ],
       });
 
       const record: ExecutionRecord = {
@@ -259,7 +291,11 @@ describe('DataCollector', () => {
         duration: 3000,
         status: 'failed',
         steps: [],
-        environment: { browser: 'Chrome', viewport: { width: 1920, height: 1080 }, url: 'https://example.com' },
+        environment: {
+          browser: 'Chrome',
+          viewport: { width: 1920, height: 1080 },
+          url: 'https://example.com',
+        },
       };
 
       await dataCollector.recordExecution(record);
@@ -267,7 +303,7 @@ describe('DataCollector', () => {
       expect(analyticsStorage.saveCaseStats).toHaveBeenCalledWith(
         expect.objectContaining({
           isFlaky: true,
-        })
+        }),
       );
     });
 
@@ -281,7 +317,17 @@ describe('DataCollector', () => {
         lastRun: Date.now() - 1000,
         stabilityScore: 100,
         isFlaky: false,
-        recentResults: ['passed', 'passed', 'passed', 'passed', 'passed', 'passed', 'passed', 'passed', 'passed'],
+        recentResults: [
+          'passed',
+          'passed',
+          'passed',
+          'passed',
+          'passed',
+          'passed',
+          'passed',
+          'passed',
+          'passed',
+        ],
       });
 
       const record: ExecutionRecord = {
@@ -293,7 +339,11 @@ describe('DataCollector', () => {
         duration: 3000,
         status: 'passed',
         steps: [],
-        environment: { browser: 'Chrome', viewport: { width: 1920, height: 1080 }, url: 'https://example.com' },
+        environment: {
+          browser: 'Chrome',
+          viewport: { width: 1920, height: 1080 },
+          url: 'https://example.com',
+        },
       };
 
       await dataCollector.recordExecution(record);
@@ -301,18 +351,20 @@ describe('DataCollector', () => {
       expect(analyticsStorage.saveCaseStats).toHaveBeenCalledWith(
         expect.objectContaining({
           isFlaky: false,
-        })
+        }),
       );
     });
   });
 
   describe('getExecutionStats', () => {
     it('should return empty stats when no executions', async () => {
-      vi.mocked(analyticsStorage.getExecutionsByTimeRange).mockResolvedValue([]);
+      vi.mocked(analyticsStorage.getExecutionsByTimeRange).mockResolvedValue(
+        [],
+      );
 
       const stats = await dataCollector.getExecutionStats(
         Date.now() - 86400000,
-        Date.now()
+        Date.now(),
       );
 
       expect(stats).toEqual({
@@ -335,7 +387,11 @@ describe('DataCollector', () => {
           duration: 5000,
           status: 'passed',
           steps: [],
-          environment: { browser: 'Chrome', viewport: { width: 1920, height: 1080 }, url: 'https://example.com' },
+          environment: {
+            browser: 'Chrome',
+            viewport: { width: 1920, height: 1080 },
+            url: 'https://example.com',
+          },
         },
         {
           id: 'exec-2',
@@ -346,7 +402,11 @@ describe('DataCollector', () => {
           duration: 3000,
           status: 'passed',
           steps: [],
-          environment: { browser: 'Chrome', viewport: { width: 1920, height: 1080 }, url: 'https://example.com' },
+          environment: {
+            browser: 'Chrome',
+            viewport: { width: 1920, height: 1080 },
+            url: 'https://example.com',
+          },
         },
         {
           id: 'exec-3',
@@ -357,14 +417,20 @@ describe('DataCollector', () => {
           duration: 4000,
           status: 'failed',
           steps: [],
-          environment: { browser: 'Chrome', viewport: { width: 1920, height: 1080 }, url: 'https://example.com' },
+          environment: {
+            browser: 'Chrome',
+            viewport: { width: 1920, height: 1080 },
+            url: 'https://example.com',
+          },
         },
       ];
-      vi.mocked(analyticsStorage.getExecutionsByTimeRange).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getExecutionsByTimeRange).mockResolvedValue(
+        executions,
+      );
 
       const stats = await dataCollector.getExecutionStats(
         Date.now() - 86400000,
-        Date.now()
+        Date.now(),
       );
 
       expect(stats.total).toBe(3);
@@ -376,54 +442,83 @@ describe('DataCollector', () => {
   });
 
   describe('failure type inference', () => {
-    const testInferFailureType = (description: string, expectedType: string) => {
-      const steps: StepRecord[] = [{
-        index: 0,
-        description,
-        status: 'failed',
-        duration: 1000,
-        retryCount: 0,
-      }];
+    const testInferFailureType = (
+      description: string,
+      expectedType: string,
+    ) => {
+      const steps: StepRecord[] = [
+        {
+          index: 0,
+          description,
+          status: 'failed',
+          duration: 1000,
+          retryCount: 0,
+        },
+      ];
 
       const record = dataCollector.createExecutionRecord(
         'case-1',
         'Test',
         steps,
-        { browser: 'Chrome', viewport: { width: 1920, height: 1080 }, url: 'https://example.com' }
+        {
+          browser: 'Chrome',
+          viewport: { width: 1920, height: 1080 },
+          url: 'https://example.com',
+        },
       );
 
       return record.failure?.type;
     };
 
     it('should infer locator_failed for click/locate steps', () => {
-      expect(testInferFailureType('Click the submit button')).toBe('locator_failed');
-      expect(testInferFailureType('Locate the login form')).toBe('locator_failed');
+      expect(testInferFailureType('Click the submit button')).toBe(
+        'locator_failed',
+      );
+      expect(testInferFailureType('Locate the login form')).toBe(
+        'locator_failed',
+      );
       expect(testInferFailureType('Find element by id')).toBe('locator_failed');
     });
 
     it('should infer assertion_failed for assert/verify steps', () => {
-      expect(testInferFailureType('Assert page title')).toBe('assertion_failed');
-      expect(testInferFailureType('Expect text to be visible')).toBe('assertion_failed');
-      expect(testInferFailureType('Verify user logged in')).toBe('assertion_failed');
+      expect(testInferFailureType('Assert page title')).toBe(
+        'assertion_failed',
+      );
+      expect(testInferFailureType('Expect text to be visible')).toBe(
+        'assertion_failed',
+      );
+      expect(testInferFailureType('Verify user logged in')).toBe(
+        'assertion_failed',
+      );
     });
 
     it('should infer timeout for timeout/wait steps', () => {
       expect(testInferFailureType('Wait for page load')).toBe('timeout');
-      expect(testInferFailureType('Timeout waiting for response')).toBe('timeout');
+      expect(testInferFailureType('Timeout waiting for response')).toBe(
+        'timeout',
+      );
     });
 
     it('should infer network_error for network/api steps', () => {
-      expect(testInferFailureType('Network request failed')).toBe('network_error');
-      expect(testInferFailureType('API call returned error')).toBe('network_error');
+      expect(testInferFailureType('Network request failed')).toBe(
+        'network_error',
+      );
+      expect(testInferFailureType('API call returned error')).toBe(
+        'network_error',
+      );
     });
 
     it('should infer script_error for script errors', () => {
-      expect(testInferFailureType('Script execution error')).toBe('script_error');
+      expect(testInferFailureType('Script execution error')).toBe(
+        'script_error',
+      );
     });
 
     it('should return unknown for unrecognized failures', () => {
       // Note: "happened" contains no keywords that match specific failure types
-      expect(testInferFailureType('The system crashed randomly')).toBe('unknown');
+      expect(testInferFailureType('The system crashed randomly')).toBe(
+        'unknown',
+      );
     });
   });
 });

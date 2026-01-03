@@ -1,10 +1,10 @@
 /// <reference types="chrome" />
 import {
   ApiOutlined,
+  ExperimentOutlined,
   MenuOutlined,
   SendOutlined,
   VideoCameraOutlined,
-  ExperimentOutlined,
 } from '@ant-design/icons';
 import {
   NavActions,
@@ -14,9 +14,9 @@ import {
 import { ConfigProvider, Dropdown } from 'antd';
 import { useEffect, useState } from 'react';
 import { BrowserExtensionPlayground } from '../../components/playground';
+import AITestGenerator from '../ai-test-generator';
 import Bridge from '../bridge';
 import Recorder from '../recorder';
-import AITestGenerator from '../ai-test-generator';
 import './index.less';
 import { OPENAI_API_KEY } from '@midscene/shared/env';
 import { safeOverrideAIConfig } from '@midscene/visualizer';
@@ -38,7 +38,10 @@ export function PlaygroundPopup() {
     'playground' | 'bridge' | 'recorder' | 'ai-generator'
   >(() => {
     const savedMode = localStorage.getItem(STORAGE_KEY);
-    return (savedMode as 'playground' | 'bridge' | 'recorder' | 'ai-generator') || 'playground';
+    return (
+      (savedMode as 'playground' | 'bridge' | 'recorder' | 'ai-generator') ||
+      'playground'
+    );
   });
 
   const { config } = useEnvConfig();

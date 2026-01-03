@@ -3,27 +3,22 @@
  * Displays a single assertion recommendation
  */
 
-import { useState } from 'react';
-import {
-  Card,
-  Tag,
-  Button,
-  Space,
-  Tooltip,
-  Typography,
-  Spin,
-} from 'antd';
 import {
   CheckCircleOutlined,
-  CloseCircleOutlined,
-  EditOutlined,
-  SaveOutlined,
   CheckOutlined,
+  CloseCircleOutlined,
   CloseOutlined,
-  QuestionCircleOutlined,
   CodeOutlined,
+  EditOutlined,
+  QuestionCircleOutlined,
+  SaveOutlined,
 } from '@ant-design/icons';
-import type { AssertionRecommendation, ValidationResult } from '../../types/assertion';
+import { Button, Card, Space, Spin, Tag, Tooltip, Typography } from 'antd';
+import { useState } from 'react';
+import type {
+  AssertionRecommendation,
+  ValidationResult,
+} from '../../types/assertion';
 import { ASSERTION_TYPE_LABELS } from '../../types/assertion';
 
 const { Text, Paragraph } = Typography;
@@ -96,7 +91,8 @@ export function AssertionCard({
 }: AssertionCardProps) {
   const [showYaml, setShowYaml] = useState(false);
 
-  const typeLabel = ASSERTION_TYPE_LABELS[recommendation.type] || recommendation.type;
+  const typeLabel =
+    ASSERTION_TYPE_LABELS[recommendation.type] || recommendation.type;
   const confidenceColor = getConfidenceColor(recommendation.confidence);
 
   return (
@@ -187,19 +183,21 @@ export function AssertionCard({
       )}
 
       {/* Validation error details */}
-      {validationResult && !validationResult.success && validationResult.error && (
-        <div
-          style={{
-            marginTop: 8,
-            padding: 8,
-            backgroundColor: '#fff2f0',
-            borderRadius: 4,
-            fontSize: 12,
-          }}
-        >
-          <Text type="danger">{validationResult.error}</Text>
-        </div>
-      )}
+      {validationResult &&
+        !validationResult.success &&
+        validationResult.error && (
+          <div
+            style={{
+              marginTop: 8,
+              padding: 8,
+              backgroundColor: '#fff2f0',
+              borderRadius: 4,
+              fontSize: 12,
+            }}
+          >
+            <Text type="danger">{validationResult.error}</Text>
+          </div>
+        )}
 
       {/* Actions */}
       <div className="assertion-actions" style={{ marginTop: 12 }}>

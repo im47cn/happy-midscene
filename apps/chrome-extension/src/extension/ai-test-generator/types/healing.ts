@@ -134,20 +134,17 @@ export interface IHealingEngine {
   collectFingerprint(
     stepId: string,
     elementCenter: [number, number],
-    elementRect: Rect
+    elementRect: Rect,
   ): Promise<SemanticFingerprint>;
 
   // Attempt to heal a failed step
-  heal(
-    stepId: string,
-    originalDescription: string
-  ): Promise<HealingResult>;
+  heal(stepId: string, originalDescription: string): Promise<HealingResult>;
 
   // Confirm healing result
   confirmHealing(
     healingId: string,
     accepted: boolean,
-    newDescription?: string
+    newDescription?: string,
   ): Promise<void>;
 
   // Get statistics

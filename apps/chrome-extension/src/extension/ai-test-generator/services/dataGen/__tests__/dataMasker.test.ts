@@ -2,8 +2,8 @@
  * Data Masker Tests
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { DataMasker, maskValue, isSensitiveType } from '../dataMasker';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { DataMasker, isSensitiveType, maskValue } from '../dataMasker';
 
 describe('DataMasker', () => {
   let masker: DataMasker;

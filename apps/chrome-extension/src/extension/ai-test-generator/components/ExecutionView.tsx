@@ -4,46 +4,50 @@
  */
 
 import {
+  BulbOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
+  ExclamationCircleOutlined,
+  InfoCircleOutlined,
   LoadingOutlined,
   PauseCircleOutlined,
   PlayCircleOutlined,
-  StopOutlined,
   ReloadOutlined,
-  InfoCircleOutlined,
-  BulbOutlined,
-  ExclamationCircleOutlined,
+  StopOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
-import {
-  Button,
-  Card,
-  Progress,
-  Space,
-  Typography,
-  Timeline,
-  Input,
-  Modal,
-  Alert,
-  Spin,
-  Tag,
-  Collapse,
-  message,
-} from 'antd';
-import { useEffect, useState, useRef } from 'react';
-import { useGeneratorStore } from '../store';
-import { ExecutionEngine, type ExecutionError, type DeviceEmulationConfig } from '../services/executionEngine';
-import { historyService } from '../services/historyService';
-import { getDevicePreset } from '../config/devicePresets';
-import type { TestCase, TaskStep } from '../types';
-import type { TaskStep as ExecutionTaskStep } from '../services/markdownParser';
-import type { HealingResult } from '../types/healing';
-import { HealingConfirmDialog } from './HealingConfirmDialog';
 import {
   ChromeExtensionProxyPage,
   ChromeExtensionProxyPageAgent,
 } from '@midscene/web/chrome-extension';
+import {
+  Alert,
+  Button,
+  Card,
+  Collapse,
+  Input,
+  Modal,
+  Progress,
+  Space,
+  Spin,
+  Tag,
+  Timeline,
+  Typography,
+  message,
+} from 'antd';
+import { useEffect, useRef, useState } from 'react';
+import { getDevicePreset } from '../config/devicePresets';
+import {
+  type DeviceEmulationConfig,
+  ExecutionEngine,
+  type ExecutionError,
+} from '../services/executionEngine';
+import { historyService } from '../services/historyService';
+import type { TaskStep as ExecutionTaskStep } from '../services/markdownParser';
+import { useGeneratorStore } from '../store';
+import type { TaskStep, TestCase } from '../types';
+import type { HealingResult } from '../types/healing';
+import { HealingConfirmDialog } from './HealingConfirmDialog';
 
 const { Text, Title } = Typography;
 
@@ -68,7 +72,9 @@ const errorTypeColors: Record<ExecutionError['type'], string> = {
 };
 
 // Detailed error display component
-function DetailedErrorDisplay({ errorDetails }: { errorDetails: ExecutionError }) {
+function DetailedErrorDisplay({
+  errorDetails,
+}: { errorDetails: ExecutionError }) {
   return (
     <div className="detailed-error">
       <div className="error-header">
@@ -92,7 +98,11 @@ function DetailedErrorDisplay({ errorDetails }: { errorDetails: ExecutionError }
                 </Space>
               ),
               children: (
-                <Text code copyable style={{ fontSize: 11, wordBreak: 'break-all' }}>
+                <Text
+                  code
+                  copyable
+                  style={{ fontSize: 11, wordBreak: 'break-all' }}
+                >
                   {errorDetails.message}
                 </Text>
               ),
@@ -146,12 +156,16 @@ export function ExecutionView() {
   const [retryStepId, setRetryStepId] = useState<string | null>(null);
   const [retryInstruction, setRetryInstruction] = useState('');
   const [totalProgress, setTotalProgress] = useState(0);
-  const [currentErrorDetails, setCurrentErrorDetails] = useState<ExecutionError | null>(null);
-  const [stepErrorMap, setStepErrorMap] = useState<Map<string, ExecutionError>>(new Map());
+  const [currentErrorDetails, setCurrentErrorDetails] =
+    useState<ExecutionError | null>(null);
+  const [stepErrorMap, setStepErrorMap] = useState<Map<string, ExecutionError>>(
+    new Map(),
+  );
 
   // Self-healing state
   const [healingDialogVisible, setHealingDialogVisible] = useState(false);
-  const [currentHealingResult, setCurrentHealingResult] = useState<HealingResult | null>(null);
+  const [currentHealingResult, setCurrentHealingResult] =
+    useState<HealingResult | null>(null);
   const [healingStepDescription, setHealingStepDescription] = useState('');
   const healingResolveRef = useRef<((accepted: boolean) => void) | null>(null);
 
@@ -205,14 +219,20 @@ export function ExecutionView() {
       onProgress: (current, total) => {
         setTotalProgress(Math.round((current / total) * 100));
       },
-      onHealingAttempt: (step: ExecutionTaskStep, _healingResult: HealingResult) => {
+      onHealingAttempt: (
+        step: ExecutionTaskStep,
+        _healingResult: HealingResult,
+      ) => {
         message.loading({
           content: `正在尝试 AI 自愈: ${step.originalText.slice(0, 30)}...`,
           key: 'healing',
           duration: 0,
         });
       },
-      onHealingConfirmRequest: (step: ExecutionTaskStep, healingResult: HealingResult) => {
+      onHealingConfirmRequest: (
+        step: ExecutionTaskStep,
+        healingResult: HealingResult,
+      ) => {
         message.destroy('healing');
         return new Promise<boolean>((resolve) => {
           healingResolveRef.current = resolve;
@@ -233,7 +253,11 @@ export function ExecutionView() {
 
   // Start execution when view is mounted
   useEffect(() => {
-    if (parseResult && parseResult.cases.length > 0 && executionStatus === 'idle') {
+    if (
+      parseResult &&
+      parseResult.cases.length > 0 &&
+      executionStatus === 'idle'
+    ) {
       startExecution();
     }
   }, [parseResult]);
@@ -248,7 +272,7 @@ export function ExecutionView() {
         parseResult.cases,
         currentResults,
         yaml,
-        executionStartTimeRef.current
+        executionStartTimeRef.current,
       );
 
       if (isCancelled) {
@@ -269,9 +293,10 @@ export function ExecutionView() {
     executionStartTimeRef.current = Date.now();
 
     // Determine which cases to execute
-    const casesToExecute = selectedCaseIds.length > 0
-      ? parseResult.cases.filter((c) => selectedCaseIds.includes(c.id))
-      : parseResult.cases;
+    const casesToExecute =
+      selectedCaseIds.length > 0
+        ? parseResult.cases.filter((c) => selectedCaseIds.includes(c.id))
+        : parseResult.cases;
 
     // Execute selected cases sequentially
     const allYamlParts: string[] = [];
@@ -281,7 +306,10 @@ export function ExecutionView() {
         setCurrentCase(testCase);
 
         // Get current tab URL
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        const [tab] = await chrome.tabs.query({
+          active: true,
+          currentWindow: true,
+        });
 
         // Build device emulation config if not desktop
         const devicePreset = getDevicePreset(selectedDeviceId);
@@ -306,7 +334,10 @@ export function ExecutionView() {
           deviceEmulation,
         };
 
-        const result = await engineRef.current.executeTestCase(testCase, context);
+        const result = await engineRef.current.executeTestCase(
+          testCase,
+          context,
+        );
 
         if (result.success) {
           allYamlParts.push(result.yamlContent);
@@ -368,7 +399,10 @@ export function ExecutionView() {
     setRetryModalVisible(false);
 
     try {
-      const result = await engineRef.current.retryStep(retryStepId, retryInstruction);
+      const result = await engineRef.current.retryStep(
+        retryStepId,
+        retryInstruction,
+      );
 
       if (result.success) {
         updateStepStatus(retryStepId, 'success');
@@ -512,13 +546,17 @@ export function ExecutionView() {
             children: (
               <div className={`timeline-step step-${step.status}`}>
                 <Text
-                  className={step.status === 'running' ? 'step-running-text' : ''}
+                  className={
+                    step.status === 'running' ? 'step-running-text' : ''
+                  }
                 >
                   {index + 1}. {step.originalText}
                 </Text>
                 {step.status === 'failed' && stepErrorMap.has(step.id) ? (
                   <div style={{ marginTop: 8 }}>
-                    <DetailedErrorDisplay errorDetails={stepErrorMap.get(step.id)!} />
+                    <DetailedErrorDisplay
+                      errorDetails={stepErrorMap.get(step.id)!}
+                    />
                   </div>
                 ) : step.error ? (
                   <Alert
@@ -571,7 +609,12 @@ export function ExecutionView() {
           <Button key="skip" onClick={handleSkipStep}>
             跳过此步骤
           </Button>,
-          <Button key="retry" type="primary" icon={<ReloadOutlined />} onClick={handleRetry}>
+          <Button
+            key="retry"
+            type="primary"
+            icon={<ReloadOutlined />}
+            onClick={handleRetry}
+          >
             重试
           </Button>,
         ]}

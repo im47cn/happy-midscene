@@ -4,14 +4,14 @@
  */
 
 import type { Rect } from '@midscene/core';
-import type { SemanticFingerprint, HealingStrategy } from '../../types/healing';
+import type { HealingStrategy, SemanticFingerprint } from '../../types/healing';
 
 /**
  * Calculate distance between two points
  */
 function distanceOfTwoPoints(
   p1: [number, number],
-  p2: [number, number]
+  p2: [number, number],
 ): number {
   const [x1, y1] = p1;
   const [x2, y2] = p2;
@@ -23,8 +23,14 @@ function distanceOfTwoPoints(
  * Returns a value between 0 and 1, where 1 means identical size
  */
 function sizeRatio(rect1: Rect, rect2: Rect): number {
-  const widthRatio = Math.min(rect1.width / rect2.width, rect2.width / rect1.width);
-  const heightRatio = Math.min(rect1.height / rect2.height, rect2.height / rect1.height);
+  const widthRatio = Math.min(
+    rect1.width / rect2.width,
+    rect2.width / rect1.width,
+  );
+  const heightRatio = Math.min(
+    rect1.height / rect2.height,
+    rect2.height / rect1.height,
+  );
   return widthRatio * heightRatio;
 }
 
@@ -55,7 +61,7 @@ export function calculateConfidence(
   newCenter: [number, number],
   newRect: Rect,
   fingerprint: SemanticFingerprint,
-  strategy: HealingStrategy
+  strategy: HealingStrategy,
 ): ConfidenceResult {
   // 1. Distance score (40%)
   // Each pixel of distance reduces score by 0.5
@@ -75,9 +81,7 @@ export function calculateConfidence(
 
   // Weighted average
   const confidence =
-    distanceScore * 0.4 +
-    sizeScore * 0.3 +
-    strategyScore * 0.3;
+    distanceScore * 0.4 + sizeScore * 0.3 + strategyScore * 0.3;
 
   return {
     confidence: Math.round(confidence),
@@ -92,11 +96,14 @@ export function calculateConfidence(
 /**
  * Determine action based on confidence score
  */
-export type ConfidenceAction = 'auto_accept' | 'request_confirmation' | 'reject';
+export type ConfidenceAction =
+  | 'auto_accept'
+  | 'request_confirmation'
+  | 'reject';
 
 export function determineAction(
   confidence: number,
-  autoAcceptThreshold: number
+  autoAcceptThreshold: number,
 ): ConfidenceAction {
   if (confidence >= autoAcceptThreshold) {
     return 'auto_accept';

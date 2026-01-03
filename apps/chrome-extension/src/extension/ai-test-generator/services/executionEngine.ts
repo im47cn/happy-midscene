@@ -3,12 +3,15 @@
  * Orchestrates Midscene.js to execute test steps on the host page
  */
 
-import type { TaskStep, TestCase } from './markdownParser';
+import type { ExecutionRecord, StepRecord } from '../types/analytics';
 import type { HealingResult, SelfHealingConfig } from '../types/healing';
-import { healingEngine } from './healing';
 import { DEFAULT_SELF_HEALING_CONFIG } from '../types/healing';
-import { dataCollector, alertManager } from './analytics';
-import type { StepRecord, ExecutionRecord } from '../types/analytics';
+import type { MaskingConfig } from '../types/masking';
+import { DEFAULT_MASKING_CONFIG } from '../types/masking';
+import { alertManager, dataCollector } from './analytics';
+import { healingEngine } from './healing';
+import type { TaskStep, TestCase } from './markdownParser';
+import { logMasker, maskerEngine } from './masking';
 
 export interface DeviceEmulationConfig {
   deviceId: string;
@@ -29,7 +32,13 @@ export interface ExecutionContext {
 
 export interface ExecutionError {
   message: string;
-  type: 'element_not_found' | 'timeout' | 'action_failed' | 'navigation_failed' | 'assertion_failed' | 'unknown';
+  type:
+    | 'element_not_found'
+    | 'timeout'
+    | 'action_failed'
+    | 'navigation_failed'
+    | 'assertion_failed'
+    | 'unknown';
   details?: string;
   suggestion?: string;
   elementInfo?: {
@@ -55,21 +64,40 @@ export interface ExecutionResult {
 export interface ExecutionCallbacks {
   onStepStart?: (step: TaskStep, index: number) => void;
   onStepComplete?: (step: TaskStep, result: ExecutionResult) => void;
-  onStepFailed?: (step: TaskStep, error: string, errorDetails?: ExecutionError) => void;
-  onHighlight?: (element: { x: number; y: number; width: number; height: number }) => void;
+  onStepFailed?: (
+    step: TaskStep,
+    error: string,
+    errorDetails?: ExecutionError,
+  ) => void;
+  onHighlight?: (element: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }) => void;
   onProgress?: (current: number, total: number) => void;
   // Self-healing callbacks
   onHealingAttempt?: (step: TaskStep, healingResult: HealingResult) => void;
-  onHealingConfirmRequest?: (step: TaskStep, healingResult: HealingResult) => Promise<boolean>;
+  onHealingConfirmRequest?: (
+    step: TaskStep,
+    healingResult: HealingResult,
+  ) => Promise<boolean>;
 }
 
-export type ExecutionStatus = 'idle' | 'running' | 'paused' | 'completed' | 'failed';
+export type ExecutionStatus =
+  | 'idle'
+  | 'running'
+  | 'paused'
+  | 'completed'
+  | 'failed';
 
 /**
  * Convert natural language step to Midscene action
  * Maps common Chinese/English phrases to action types
  */
-function inferActionType(text: string): 'click' | 'type' | 'scroll' | 'wait' | 'assert' | 'navigate' | 'ai' {
+function inferActionType(
+  text: string,
+): 'click' | 'type' | 'scroll' | 'wait' | 'assert' | 'navigate' | 'ai' {
   const lowerText = text.toLowerCase();
 
   // Navigation
@@ -123,11 +151,16 @@ function generateYamlAction(step: TaskStep): string {
 
     case 'wait':
       // Extract duration if present
-      const durationMatch = step.originalText.match(/(\d+)\s*(秒|毫秒|ms|s|second)/i);
+      const durationMatch = step.originalText.match(
+        /(\d+)\s*(秒|毫秒|ms|s|second)/i,
+      );
       if (durationMatch) {
         const value = Number.parseInt(durationMatch[1]);
         const unit = durationMatch[2].toLowerCase();
-        const ms = unit === '秒' || unit === 's' || unit === 'second' ? value * 1000 : value;
+        const ms =
+          unit === '秒' || unit === 's' || unit === 'second'
+            ? value * 1000
+            : value;
         return `- sleep: ${ms}`;
       }
       return `- aiWaitFor: "${step.originalText}"`;
@@ -149,17 +182,20 @@ function parseErrorDetails(error: unknown, stepText: string): ExecutionError {
   const lowerMessage = message.toLowerCase();
 
   // Element not found
-  if (lowerMessage.includes('element not found') ||
-      lowerMessage.includes('cannot find') ||
-      lowerMessage.includes('no element') ||
-      lowerMessage.includes('unable to locate') ||
-      lowerMessage.includes('找不到') ||
-      lowerMessage.includes('未找到')) {
+  if (
+    lowerMessage.includes('element not found') ||
+    lowerMessage.includes('cannot find') ||
+    lowerMessage.includes('no element') ||
+    lowerMessage.includes('unable to locate') ||
+    lowerMessage.includes('找不到') ||
+    lowerMessage.includes('未找到')
+  ) {
     return {
       message,
       type: 'element_not_found',
       details: '无法在页面上找到匹配的元素',
-      suggestion: '请尝试：1. 使用更具体的描述 2. 检查元素是否可见 3. 等待页面完全加载',
+      suggestion:
+        '请尝试：1. 使用更具体的描述 2. 检查元素是否可见 3. 等待页面完全加载',
       elementInfo: {
         description: stepText,
       },
@@ -167,56 +203,68 @@ function parseErrorDetails(error: unknown, stepText: string): ExecutionError {
   }
 
   // Timeout
-  if (lowerMessage.includes('timeout') ||
-      lowerMessage.includes('timed out') ||
-      lowerMessage.includes('超时')) {
+  if (
+    lowerMessage.includes('timeout') ||
+    lowerMessage.includes('timed out') ||
+    lowerMessage.includes('超时')
+  ) {
     return {
       message,
       type: 'timeout',
       details: '操作执行超时',
-      suggestion: '请检查：1. 网络连接是否正常 2. 页面是否正在加载 3. 目标元素是否需要更长时间才能出现',
+      suggestion:
+        '请检查：1. 网络连接是否正常 2. 页面是否正在加载 3. 目标元素是否需要更长时间才能出现',
     };
   }
 
   // Navigation failed
-  if (lowerMessage.includes('navigation') ||
-      lowerMessage.includes('navigate') ||
-      lowerMessage.includes('goto') ||
-      lowerMessage.includes('跳转')) {
+  if (
+    lowerMessage.includes('navigation') ||
+    lowerMessage.includes('navigate') ||
+    lowerMessage.includes('goto') ||
+    lowerMessage.includes('跳转')
+  ) {
     return {
       message,
       type: 'navigation_failed',
       details: '页面导航失败',
-      suggestion: '请检查：1. URL 是否正确 2. 网络连接是否正常 3. 页面是否需要身份验证',
+      suggestion:
+        '请检查：1. URL 是否正确 2. 网络连接是否正常 3. 页面是否需要身份验证',
     };
   }
 
   // Assertion failed
-  if (lowerMessage.includes('assert') ||
-      lowerMessage.includes('expect') ||
-      lowerMessage.includes('verify') ||
-      lowerMessage.includes('验证失败') ||
-      lowerMessage.includes('断言')) {
+  if (
+    lowerMessage.includes('assert') ||
+    lowerMessage.includes('expect') ||
+    lowerMessage.includes('verify') ||
+    lowerMessage.includes('验证失败') ||
+    lowerMessage.includes('断言')
+  ) {
     return {
       message,
       type: 'assertion_failed',
       details: '页面状态验证失败',
-      suggestion: '请检查：1. 验证条件是否正确 2. 页面内容是否符合预期 3. 是否需要等待某些元素加载',
+      suggestion:
+        '请检查：1. 验证条件是否正确 2. 页面内容是否符合预期 3. 是否需要等待某些元素加载',
     };
   }
 
   // Action failed
-  if (lowerMessage.includes('click') ||
-      lowerMessage.includes('type') ||
-      lowerMessage.includes('input') ||
-      lowerMessage.includes('scroll') ||
-      lowerMessage.includes('点击') ||
-      lowerMessage.includes('输入')) {
+  if (
+    lowerMessage.includes('click') ||
+    lowerMessage.includes('type') ||
+    lowerMessage.includes('input') ||
+    lowerMessage.includes('scroll') ||
+    lowerMessage.includes('点击') ||
+    lowerMessage.includes('输入')
+  ) {
     return {
       message,
       type: 'action_failed',
       details: '操作执行失败',
-      suggestion: '请检查：1. 元素是否可点击/可交互 2. 是否被其他元素遮挡 3. 页面是否完全加载',
+      suggestion:
+        '请检查：1. 元素是否可点击/可交互 2. 是否被其他元素遮挡 3. 页面是否完全加载',
     };
   }
 
@@ -225,7 +273,8 @@ function parseErrorDetails(error: unknown, stepText: string): ExecutionError {
     message,
     type: 'unknown',
     details: '发生未知错误',
-    suggestion: '请尝试：1. 刷新页面 2. 修改操作描述 3. 检查控制台日志获取更多信息',
+    suggestion:
+      '请尝试：1. 刷新页面 2. 修改操作描述 3. 检查控制台日志获取更多信息',
   };
 }
 
@@ -238,9 +287,23 @@ export class ExecutionEngine {
   private isPaused = false;
   private resumeResolve: (() => void) | null = null;
   private selfHealingConfig: SelfHealingConfig;
+  private maskingConfig: MaskingConfig;
 
-  constructor(private getAgent: (forceSameTabNavigation?: boolean) => any, selfHealingConfig?: Partial<SelfHealingConfig>) {
-    this.selfHealingConfig = { ...DEFAULT_SELF_HEALING_CONFIG, ...selfHealingConfig };
+  constructor(
+    private getAgent: (forceSameTabNavigation?: boolean) => any,
+    selfHealingConfig?: Partial<SelfHealingConfig>,
+    maskingConfig?: Partial<MaskingConfig>,
+  ) {
+    this.selfHealingConfig = {
+      ...DEFAULT_SELF_HEALING_CONFIG,
+      ...selfHealingConfig,
+    };
+    this.maskingConfig = { ...DEFAULT_MASKING_CONFIG, ...maskingConfig };
+
+    // Apply masking config to masker engine
+    if (maskingConfig) {
+      maskerEngine.setConfig(maskingConfig);
+    }
   }
 
   /**
@@ -256,6 +319,68 @@ export class ExecutionEngine {
    */
   getSelfHealingConfig(): SelfHealingConfig {
     return { ...this.selfHealingConfig };
+  }
+
+  /**
+   * Update masking configuration
+   */
+  setMaskingConfig(config: Partial<MaskingConfig>): void {
+    this.maskingConfig = { ...this.maskingConfig, ...config };
+    maskerEngine.setConfig(config);
+  }
+
+  /**
+   * Get masking configuration
+   */
+  getMaskingConfig(): MaskingConfig {
+    return { ...this.maskingConfig };
+  }
+
+  /**
+   * Mask sensitive data in text (for YAML generation)
+   */
+  private async maskSensitiveData(text: string): Promise<string> {
+    if (!this.maskingConfig.enabled || !this.maskingConfig.yamlMasking) {
+      return text;
+    }
+
+    try {
+      const result = await maskerEngine.maskText(text, 'yaml');
+      return result.masked;
+    } catch (error) {
+      console.warn('Failed to mask sensitive data:', error);
+      return text;
+    }
+  }
+
+  /**
+   * Check if YAML contains sensitive data and warn
+   */
+  async checkYamlForSensitiveData(yaml: string): Promise<{
+    hasSensitiveData: boolean;
+    warnings: string[];
+    maskedYaml: string;
+  }> {
+    if (!this.maskingConfig.enabled) {
+      return { hasSensitiveData: false, warnings: [], maskedYaml: yaml };
+    }
+
+    const result = await maskerEngine.maskText(yaml, 'yaml');
+
+    if (result.matches.length === 0) {
+      return { hasSensitiveData: false, warnings: [], maskedYaml: yaml };
+    }
+
+    const warnings = result.matches.map(
+      (match) =>
+        `发现敏感数据 [${match.ruleName}]: "${match.originalValue.substring(0, 10)}..." 建议使用环境变量替代`,
+    );
+
+    return {
+      hasSensitiveData: true,
+      warnings,
+      maskedYaml: result.masked,
+    };
   }
 
   /**
@@ -291,7 +416,9 @@ export class ExecutionEngine {
   /**
    * Apply device emulation settings via CDP
    */
-  private async applyDeviceEmulation(config: DeviceEmulationConfig): Promise<void> {
+  private async applyDeviceEmulation(
+    config: DeviceEmulationConfig,
+  ): Promise<void> {
     if (!this.agent?.page) return;
 
     try {
@@ -317,10 +444,13 @@ export class ExecutionEngine {
 
         // Enable touch events if needed
         if (config.hasTouch) {
-          await page.sendCommandToDebugger('Emulation.setTouchEmulationEnabled', {
-            enabled: true,
-            maxTouchPoints: 5,
-          });
+          await page.sendCommandToDebugger(
+            'Emulation.setTouchEmulationEnabled',
+            {
+              enabled: true,
+              maxTouchPoints: 5,
+            },
+          );
         }
       }
     } catch (error) {
@@ -337,7 +467,10 @@ export class ExecutionEngine {
     try {
       const page = this.agent.page;
       if (typeof page.sendCommandToDebugger === 'function') {
-        await page.sendCommandToDebugger('Emulation.clearDeviceMetricsOverride', {});
+        await page.sendCommandToDebugger(
+          'Emulation.clearDeviceMetricsOverride',
+          {},
+        );
         await page.sendCommandToDebugger('Emulation.setTouchEmulationEnabled', {
           enabled: false,
         });
@@ -363,14 +496,17 @@ export class ExecutionEngine {
   /**
    * Extract element info from agent dump after successful aiAct
    */
-  private extractElementFromDump(): { center: [number, number]; rect: any } | null {
+  private extractElementFromDump(): {
+    center: [number, number];
+    rect: any;
+  } | null {
     try {
       const executions = this.agent?.dump?.executions;
       if (!executions || executions.length === 0) return null;
 
       const lastExecution = executions[executions.length - 1];
       const locateTasks = lastExecution.tasks?.filter(
-        (t: any) => t.type === 'Planning' && t.subType === 'Locate'
+        (t: any) => t.type === 'Planning' && t.subType === 'Locate',
       );
 
       if (!locateTasks || locateTasks.length === 0) return null;
@@ -410,7 +546,7 @@ export class ExecutionEngine {
             await healingEngine.collectFingerprint(
               step.id,
               elementInfo.center,
-              elementInfo.rect
+              elementInfo.rect,
             );
           } catch (fpError) {
             console.debug('Failed to collect fingerprint:', fpError);
@@ -455,7 +591,7 @@ export class ExecutionEngine {
    */
   private async tryHealing(
     step: TaskStep,
-    originalError: ExecutionError
+    originalError: ExecutionError,
   ): Promise<ExecutionResult | null> {
     try {
       healingEngine.setAgent(this.agent);
@@ -477,14 +613,23 @@ export class ExecutionEngine {
       // For auto_accept or request_confirmation
       let accepted = action === 'auto_accept';
 
-      if (action === 'request_confirmation' && this.callbacks.onHealingConfirmRequest) {
+      if (
+        action === 'request_confirmation' &&
+        this.callbacks.onHealingConfirmRequest
+      ) {
         // Ask user for confirmation
-        accepted = await this.callbacks.onHealingConfirmRequest(step, healResult);
+        accepted = await this.callbacks.onHealingConfirmRequest(
+          step,
+          healResult,
+        );
       }
 
       if (accepted && healResult.element) {
         // Confirm healing and get healed element info
-        const healedElement = await healingEngine.confirmHealing(healResult.healingId, true);
+        const healedElement = await healingEngine.confirmHealing(
+          healResult.healingId,
+          true,
+        );
 
         if (!healedElement) {
           console.debug('Failed to get healed element info');
@@ -570,11 +715,11 @@ export class ExecutionEngine {
   private extractInputValue(stepText: string): string | null {
     // Match quoted strings
     const quotePatterns = [
-      /"([^"]+)"/,          // Double quotes
-      /'([^']+)'/,          // Single quotes
-      /「([^」]+)」/,        // Chinese quotes
-      /『([^』]+)』/,        // Japanese quotes
-      /"([^"]+)"/,          // Smart quotes
+      /"([^"]+)"/, // Double quotes
+      /'([^']+)'/, // Single quotes
+      /「([^」]+)」/, // Chinese quotes
+      /『([^』]+)』/, // Japanese quotes
+      /"([^"]+)"/, // Smart quotes
     ];
 
     for (const pattern of quotePatterns) {
@@ -605,8 +750,12 @@ export class ExecutionEngine {
    */
   async executeTestCase(
     testCase: TestCase,
-    context?: ExecutionContext
-  ): Promise<{ success: boolean; results: ExecutionResult[]; yamlContent: string }> {
+    context?: ExecutionContext,
+  ): Promise<{
+    success: boolean;
+    results: ExecutionResult[];
+    yamlContent: string;
+  }> {
     this.status = 'running';
     this.currentStepIndex = 0;
     this.executionResults = [];
@@ -661,7 +810,11 @@ export class ExecutionEngine {
           this.callbacks.onStepComplete?.(step, result);
         } else {
           step.error = result.error;
-          this.callbacks.onStepFailed?.(step, result.error || 'Unknown error', result.errorDetails);
+          this.callbacks.onStepFailed?.(
+            step,
+            result.error || 'Unknown error',
+            result.errorDetails,
+          );
 
           // Pause on failure for human intervention
           this.status = 'paused';
@@ -686,7 +839,11 @@ export class ExecutionEngine {
       const yamlContent = this.generateYaml(testCase, context);
 
       // Record execution for analytics
-      await this.recordExecutionAnalytics(testCase, context, executionStartTime);
+      await this.recordExecutionAnalytics(
+        testCase,
+        context,
+        executionStartTime,
+      );
 
       return {
         success: allSuccess,
@@ -697,7 +854,11 @@ export class ExecutionEngine {
       this.status = 'failed';
       // Still try to record failed execution
       try {
-        await this.recordExecutionAnalytics(testCase, context, executionStartTime);
+        await this.recordExecutionAnalytics(
+          testCase,
+          context,
+          executionStartTime,
+        );
       } catch (analyticsError) {
         console.debug('Failed to record analytics:', analyticsError);
       }
@@ -713,26 +874,34 @@ export class ExecutionEngine {
   private async recordExecutionAnalytics(
     testCase: TestCase,
     context: ExecutionContext | undefined,
-    startTime: number
+    startTime: number,
   ): Promise<void> {
     try {
       // Convert execution results to step records
-      const stepRecords: StepRecord[] = this.executionResults.map((result, index) => {
-        const step = testCase.steps[index];
-        return {
-          index,
-          description: step?.originalText || `Step ${index + 1}`,
-          status: result.success ? 'passed' : 'failed',
-          duration: result.duration,
-          aiResponseTime: result.duration, // Approximate
-          retryCount: result.healedByAI ? 1 : 0,
-        };
-      });
+      const stepRecords: StepRecord[] = this.executionResults.map(
+        (result, index) => {
+          const step = testCase.steps[index];
+          return {
+            index,
+            description: step?.originalText || `Step ${index + 1}`,
+            status: result.success ? 'passed' : 'failed',
+            duration: result.duration,
+            aiResponseTime: result.duration, // Approximate
+            retryCount: result.healedByAI ? 1 : 0,
+          };
+        },
+      );
 
       // Determine viewport from context
       const viewport = context?.deviceEmulation
-        ? { width: context.deviceEmulation.width, height: context.deviceEmulation.height }
-        : { width: context?.viewportWidth || 1920, height: context?.viewportHeight || 1080 };
+        ? {
+            width: context.deviceEmulation.width,
+            height: context.deviceEmulation.height,
+          }
+        : {
+            width: context?.viewportWidth || 1920,
+            height: context?.viewportHeight || 1080,
+          };
 
       // Create execution record
       const executionRecord = dataCollector.createExecutionRecord(
@@ -745,13 +914,15 @@ export class ExecutionEngine {
           url: context?.url || window.location.href,
         },
         // Include healing info if any step was healed
-        this.executionResults.some(r => r.healedByAI)
+        this.executionResults.some((r) => r.healedByAI)
           ? {
               attempted: true,
-              success: this.executionResults.some(r => r.healedByAI && r.success),
+              success: this.executionResults.some(
+                (r) => r.healedByAI && r.success,
+              ),
               strategy: 'ai_relocate',
             }
-          : undefined
+          : undefined,
       );
 
       // Record the execution
@@ -801,7 +972,10 @@ export class ExecutionEngine {
   /**
    * Retry failed step with modified instruction
    */
-  async retryStep(stepId: string, newInstruction?: string): Promise<ExecutionResult> {
+  async retryStep(
+    stepId: string,
+    newInstruction?: string,
+  ): Promise<ExecutionResult> {
     // This would be called from UI when user modifies the instruction
     // For now, just re-execute
     const step: TaskStep = {

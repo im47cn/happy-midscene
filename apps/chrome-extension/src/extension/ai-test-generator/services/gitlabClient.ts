@@ -128,7 +128,11 @@ export class GitLabClient {
   /**
    * Test API connectivity
    */
-  async testConnection(): Promise<{ success: boolean; message: string; user?: string }> {
+  async testConnection(): Promise<{
+    success: boolean;
+    message: string;
+    user?: string;
+  }> {
     if (!this.config) {
       return { success: false, message: 'No configuration found' };
     }
@@ -187,7 +191,7 @@ export class GitLabClient {
         headers: {
           'PRIVATE-TOKEN': this.config.privateToken,
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -211,7 +215,7 @@ export class GitLabClient {
         headers: {
           'PRIVATE-TOKEN': this.config.privateToken,
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -227,7 +231,7 @@ export class GitLabClient {
   async createBranch(
     projectId: number,
     branchName: string,
-    ref: string
+    ref: string,
   ): Promise<GitLabBranch> {
     if (!this.config) {
       throw new Error('GitLab not configured');
@@ -245,12 +249,14 @@ export class GitLabClient {
           branch: branchName,
           ref: ref,
         }),
-      }
+      },
     );
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(error.message || `Failed to create branch: ${response.status}`);
+      throw new Error(
+        error.message || `Failed to create branch: ${response.status}`,
+      );
     }
 
     return response.json();
@@ -264,7 +270,7 @@ export class GitLabClient {
     filePath: string,
     content: string,
     branch: string,
-    commitMessage: string
+    commitMessage: string,
   ): Promise<GitLabCommitResult> {
     if (!this.config) {
       throw new Error('GitLab not configured');
@@ -278,7 +284,7 @@ export class GitLabClient {
         headers: {
           'PRIVATE-TOKEN': this.config.privateToken,
         },
-      }
+      },
     );
 
     const fileExists = checkResponse.ok;
@@ -298,12 +304,14 @@ export class GitLabClient {
           commit_message: commitMessage,
           encoding: 'base64',
         }),
-      }
+      },
     );
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(error.message || `Failed to commit file: ${response.status}`);
+      throw new Error(
+        error.message || `Failed to commit file: ${response.status}`,
+      );
     }
 
     const result = await response.json();
@@ -333,7 +341,7 @@ export class GitLabClient {
         headers: {
           'PRIVATE-TOKEN': this.config.privateToken,
         },
-      }
+      },
     );
 
     if (!response.ok) {

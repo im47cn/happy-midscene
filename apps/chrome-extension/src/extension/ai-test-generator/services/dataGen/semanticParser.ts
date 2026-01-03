@@ -3,35 +3,141 @@
  * Parses field labels and placeholders to determine semantic type
  */
 
-import type { SemanticType, FieldType } from '../../types/dataGen';
+import type { FieldType, SemanticType } from '../../types/dataGen';
 
 /**
  * Keyword mapping for semantic type detection
  * Maps keywords (in Chinese and English) to semantic types
  */
 const SEMANTIC_KEYWORDS: Record<SemanticType, string[]> = {
-  username: ['用户名', '账号', '登录名', 'username', 'account', 'login', 'user id', 'userid'],
-  realname: ['真实姓名', '姓名', '名字', 'real name', 'full name', 'name', '本名'],
+  username: [
+    '用户名',
+    '账号',
+    '登录名',
+    'username',
+    'account',
+    'login',
+    'user id',
+    'userid',
+  ],
+  realname: [
+    '真实姓名',
+    '姓名',
+    '名字',
+    'real name',
+    'full name',
+    'name',
+    '本名',
+  ],
   nickname: ['昵称', '别名', '显示名', 'nickname', 'display name', 'alias'],
   email: ['邮箱', '电子邮件', '电邮', 'email', 'e-mail', 'mail'],
-  mobile_phone: ['手机', '手机号', '移动电话', 'mobile', 'phone', 'cell', '电话号码', '联系电话'],
+  mobile_phone: [
+    '手机',
+    '手机号',
+    '移动电话',
+    'mobile',
+    'phone',
+    'cell',
+    '电话号码',
+    '联系电话',
+  ],
   landline: ['座机', '固定电话', '固话', 'landline', 'tel', 'telephone'],
-  password: ['密码', '口令', 'password', 'pwd', 'pass', '登录密码', '新密码', '确认密码'],
-  captcha: ['验证码', '验证', 'captcha', 'verification', 'code', 'verify code', '图形验证码', '短信验证码'],
+  password: [
+    '密码',
+    '口令',
+    'password',
+    'pwd',
+    'pass',
+    '登录密码',
+    '新密码',
+    '确认密码',
+  ],
+  captcha: [
+    '验证码',
+    '验证',
+    'captcha',
+    'verification',
+    'code',
+    'verify code',
+    '图形验证码',
+    '短信验证码',
+  ],
   id_card: ['身份证', '身份证号', 'id card', 'id number', 'identity', '证件号'],
-  bank_card: ['银行卡', '卡号', '银行卡号', 'bank card', 'card number', 'debit card', 'credit card'],
-  address: ['地址', '详细地址', '通讯地址', '收货地址', 'address', 'street', '街道'],
+  bank_card: [
+    '银行卡',
+    '卡号',
+    '银行卡号',
+    'bank card',
+    'card number',
+    'debit card',
+    'credit card',
+  ],
+  address: [
+    '地址',
+    '详细地址',
+    '通讯地址',
+    '收货地址',
+    'address',
+    'street',
+    '街道',
+  ],
   postal_code: ['邮编', '邮政编码', 'zip', 'postal', 'zip code', 'postcode'],
   city: ['城市', '所在城市', 'city', 'town'],
   province: ['省份', '省', 'province', 'state', '所在省份'],
   country: ['国家', '国籍', 'country', 'nation', 'nationality'],
-  date_of_birth: ['出生日期', '生日', '出生年月', 'birthday', 'birth date', 'dob', 'date of birth'],
-  amount: ['金额', '价格', '费用', '总价', 'amount', 'price', 'cost', 'total', '付款金额'],
+  date_of_birth: [
+    '出生日期',
+    '生日',
+    '出生年月',
+    'birthday',
+    'birth date',
+    'dob',
+    'date of birth',
+  ],
+  amount: [
+    '金额',
+    '价格',
+    '费用',
+    '总价',
+    'amount',
+    'price',
+    'cost',
+    'total',
+    '付款金额',
+  ],
   quantity: ['数量', '件数', '个数', 'quantity', 'qty', 'count', 'number'],
-  description: ['描述', '备注', '说明', '详情', 'description', 'desc', 'note', 'remark', 'comment'],
+  description: [
+    '描述',
+    '备注',
+    '说明',
+    '详情',
+    'description',
+    'desc',
+    'note',
+    'remark',
+    'comment',
+  ],
   url: ['网址', '链接', 'url', 'link', 'website', 'homepage'],
-  company: ['公司', '单位', '企业', 'company', 'organization', 'corp', 'enterprise', '工作单位'],
-  job_title: ['职位', '职称', '岗位', 'job', 'position', 'title', 'role', '职业'],
+  company: [
+    '公司',
+    '单位',
+    '企业',
+    'company',
+    'organization',
+    'corp',
+    'enterprise',
+    '工作单位',
+  ],
+  job_title: [
+    '职位',
+    '职称',
+    '岗位',
+    'job',
+    'position',
+    'title',
+    'role',
+    '职业',
+  ],
   custom: [],
 };
 
@@ -88,7 +194,10 @@ const SEMANTIC_PRIORITY: SemanticType[] = [
  * Normalize text for matching
  */
 function normalize(text: string): string {
-  return text.toLowerCase().trim().replace(/[_\-\s]+/g, ' ');
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[_\-\s]+/g, ' ');
 }
 
 /**
@@ -96,7 +205,9 @@ function normalize(text: string): string {
  */
 function containsKeyword(text: string, keywords: string[]): boolean {
   const normalizedText = normalize(text);
-  return keywords.some((keyword) => normalizedText.includes(normalize(keyword)));
+  return keywords.some((keyword) =>
+    normalizedText.includes(normalize(keyword)),
+  );
 }
 
 /**
@@ -133,7 +244,10 @@ function calculateMatchScore(text: string, semanticType: SemanticType): number {
 /**
  * Parse semantic type from label text
  */
-export function parseSemanticType(label: string, placeholder?: string): SemanticType {
+export function parseSemanticType(
+  label: string,
+  placeholder?: string,
+): SemanticType {
   const combinedText = `${label} ${placeholder || ''}`;
 
   // Check each semantic type in priority order
@@ -152,7 +266,7 @@ export function parseSemanticType(label: string, placeholder?: string): Semantic
  */
 export function parseSemanticTypeWithConfidence(
   label: string,
-  placeholder?: string
+  placeholder?: string,
 ): { type: SemanticType; confidence: number } {
   const combinedText = `${label} ${placeholder || ''}`;
 
@@ -179,7 +293,7 @@ export function parseSemanticTypeWithConfidence(
 export function parseFieldType(
   htmlType?: string,
   label?: string,
-  placeholder?: string
+  placeholder?: string,
 ): FieldType {
   // First check HTML type attribute
   if (htmlType) {
@@ -189,7 +303,8 @@ export function parseFieldType(
     if (normalizedType === 'number') return 'number';
     if (normalizedType === 'tel') return 'phone';
     if (normalizedType === 'date') return 'date';
-    if (normalizedType === 'datetime-local' || normalizedType === 'datetime') return 'datetime';
+    if (normalizedType === 'datetime-local' || normalizedType === 'datetime')
+      return 'datetime';
     if (normalizedType === 'url') return 'url';
     if (normalizedType === 'file') return 'file';
     if (normalizedType === 'checkbox') return 'checkbox';
@@ -220,7 +335,7 @@ export function extractConstraints(
     min?: number;
     max?: number;
     pattern?: string;
-  }
+  },
 ): {
   required: boolean;
   minLength?: number;
@@ -261,9 +376,13 @@ export function extractConstraints(
 /**
  * Get semantic keywords for a specific type or all types
  */
-export function getSemanticKeywords(semanticType?: SemanticType): string[] | Record<SemanticType, string[]> {
+export function getSemanticKeywords(
+  semanticType?: SemanticType,
+): string[] | Record<SemanticType, string[]> {
   if (semanticType) {
-    return SEMANTIC_KEYWORDS[semanticType] ? [...SEMANTIC_KEYWORDS[semanticType]] : [];
+    return SEMANTIC_KEYWORDS[semanticType]
+      ? [...SEMANTIC_KEYWORDS[semanticType]]
+      : [];
   }
   return { ...SEMANTIC_KEYWORDS };
 }
@@ -273,7 +392,7 @@ export function getSemanticKeywords(semanticType?: SemanticType): string[] | Rec
  */
 export function addSemanticKeywords(
   semanticType: SemanticType,
-  keywords: string[]
+  keywords: string[],
 ): void {
   if (!SEMANTIC_KEYWORDS[semanticType]) {
     SEMANTIC_KEYWORDS[semanticType] = [];

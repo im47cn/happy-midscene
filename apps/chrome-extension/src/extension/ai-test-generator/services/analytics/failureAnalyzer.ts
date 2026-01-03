@@ -5,9 +5,9 @@
 
 import type {
   ExecutionRecord,
+  FAILURE_TYPE_LABELS,
   FailureType,
   Hotspot,
-  FAILURE_TYPE_LABELS,
 } from '../../types/analytics';
 import { analyticsStorage } from './analyticsStorage';
 
@@ -51,7 +51,7 @@ class FailureAnalyzer {
    */
   async analyzeByType(
     startTime: number,
-    endTime: number
+    endTime: number,
   ): Promise<{
     distribution: Record<FailureType, { count: number; percentage: number }>;
     total: number;
@@ -59,7 +59,7 @@ class FailureAnalyzer {
   }> {
     const executions = await analyticsStorage.getExecutionsByTimeRange(
       startTime,
-      endTime
+      endTime,
     );
     const failures = executions.filter((e) => e.status === 'failed');
 
@@ -105,7 +105,7 @@ class FailureAnalyzer {
   /**
    * Analyze failure hotspots with detailed step information
    */
-  async analyzeHotspots(limit: number = 10): Promise<Hotspot[]> {
+  async analyzeHotspots(limit = 10): Promise<Hotspot[]> {
     const failures = await analyticsStorage.getFailedExecutions(1000);
 
     if (failures.length === 0) {
@@ -365,11 +365,11 @@ class FailureAnalyzer {
    */
   async getTimeDistribution(
     startTime: number,
-    endTime: number
+    endTime: number,
   ): Promise<TimeDistribution[]> {
     const executions = await analyticsStorage.getExecutionsByTimeRange(
       startTime,
-      endTime
+      endTime,
     );
 
     const hourStats = new Map<number, { failures: number; total: number }>();
@@ -436,7 +436,10 @@ class FailureAnalyzer {
           const existing = stepFailures.get(step.description);
           if (existing) {
             existing.count++;
-            existing.lastOccurred = Math.max(existing.lastOccurred, f.startTime);
+            existing.lastOccurred = Math.max(
+              existing.lastOccurred,
+              f.startTime,
+            );
           } else {
             stepFailures.set(step.description, {
               count: 1,

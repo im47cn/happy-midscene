@@ -11,7 +11,7 @@ import type {
   AssertionType,
   VisualChange,
 } from '../../../types/assertion';
-import { SUCCESS_KEYWORDS, ERROR_KEYWORDS } from '../../../types/assertion';
+import { ERROR_KEYWORDS, SUCCESS_KEYWORDS } from '../../../types/assertion';
 
 /**
  * Generate unique ID
@@ -25,7 +25,7 @@ function generateId(): string {
  */
 function looksLikeSuccessMessage(text: string): boolean {
   const lowerText = text.toLowerCase();
-  return SUCCESS_KEYWORDS.some(kw => lowerText.includes(kw.toLowerCase()));
+  return SUCCESS_KEYWORDS.some((kw) => lowerText.includes(kw.toLowerCase()));
 }
 
 /**
@@ -33,7 +33,7 @@ function looksLikeSuccessMessage(text: string): boolean {
  */
 function looksLikeErrorMessage(text: string): boolean {
   const lowerText = text.toLowerCase();
-  return ERROR_KEYWORDS.some(kw => lowerText.includes(kw.toLowerCase()));
+  return ERROR_KEYWORDS.some((kw) => lowerText.includes(kw.toLowerCase()));
 }
 
 /**
@@ -45,16 +45,23 @@ export class SuccessMessageStrategy implements AssertionStrategy {
   priority = 100;
 
   applies(context: ActionContext, analysis: AnalysisResult): boolean {
-    const targetIntents = ['submit_form', 'login', 'signup', 'save_data', 'add_to_cart', 'delete_item'];
+    const targetIntents = [
+      'submit_form',
+      'login',
+      'signup',
+      'save_data',
+      'add_to_cart',
+      'delete_item',
+    ];
     return targetIntents.includes(analysis.intent);
   }
 
   async generate(
     context: ActionContext,
-    analysis: AnalysisResult
+    analysis: AnalysisResult,
   ): Promise<AssertionRecommendation[]> {
     const recommendations: AssertionRecommendation[] = [];
-    const newElements = analysis.changes.filter(c => c.type === 'appeared');
+    const newElements = analysis.changes.filter((c) => c.type === 'appeared');
 
     // Find elements that look like success messages
     for (const element of newElements) {
@@ -111,26 +118,28 @@ export class NavigationStrategy implements AssertionStrategy {
 
   async generate(
     context: ActionContext,
-    analysis: AnalysisResult
+    analysis: AnalysisResult,
   ): Promise<AssertionRecommendation[]> {
     const { beforeUrl, afterUrl } = context.pageState;
 
     try {
       const afterPath = new URL(afterUrl).pathname;
 
-      return [{
-        id: generateId(),
-        type: 'url_contains',
-        description: `验证页面跳转到 ${afterPath}`,
-        confidence: 95,
-        reason: '检测到页面导航，应验证目标 URL',
-        parameters: {
-          expectedValue: afterPath,
-          operator: 'contains',
+      return [
+        {
+          id: generateId(),
+          type: 'url_contains',
+          description: `验证页面跳转到 ${afterPath}`,
+          confidence: 95,
+          reason: '检测到页面导航，应验证目标 URL',
+          parameters: {
+            expectedValue: afterPath,
+            operator: 'contains',
+          },
+          yamlOutput: `- ai: "验证当前 URL 包含 '${afterPath}'"`,
+          source: 'rule',
         },
-        yamlOutput: `- ai: "验证当前 URL 包含 '${afterPath}'"`,
-        source: 'rule',
-      }];
+      ];
     } catch {
       return [];
     }
@@ -146,16 +155,16 @@ export class StateChangeStrategy implements AssertionStrategy {
   priority = 80;
 
   applies(context: ActionContext, analysis: AnalysisResult): boolean {
-    return analysis.changes.some(c => c.type === 'modified');
+    return analysis.changes.some((c) => c.type === 'modified');
   }
 
   async generate(
     context: ActionContext,
-    analysis: AnalysisResult
+    analysis: AnalysisResult,
   ): Promise<AssertionRecommendation[]> {
-    const modifications = analysis.changes.filter(c => c.type === 'modified');
+    const modifications = analysis.changes.filter((c) => c.type === 'modified');
 
-    return modifications.map(mod => ({
+    return modifications.map((mod) => ({
       id: generateId(),
       type: 'state_check' as AssertionType,
       description: `验证 ${mod.description} 状态变化`,
@@ -180,22 +189,24 @@ export class ElementVisibilityStrategy implements AssertionStrategy {
 
   applies(context: ActionContext, analysis: AnalysisResult): boolean {
     return analysis.changes.some(
-      c => c.type === 'appeared' && c.confidence >= 0.6
+      (c) => c.type === 'appeared' && c.confidence >= 0.6,
     );
   }
 
   async generate(
     context: ActionContext,
-    analysis: AnalysisResult
+    analysis: AnalysisResult,
   ): Promise<AssertionRecommendation[]> {
     const recommendations: AssertionRecommendation[] = [];
     const newElements = analysis.changes.filter(
-      c => c.type === 'appeared' && c.confidence >= 0.6
+      (c) => c.type === 'appeared' && c.confidence >= 0.6,
     );
 
     // Filter out elements that are likely success/error messages (handled by other strategies)
     const nonMessageElements = newElements.filter(
-      el => !looksLikeSuccessMessage(el.description) && !looksLikeErrorMessage(el.description)
+      (el) =>
+        !looksLikeSuccessMessage(el.description) &&
+        !looksLikeErrorMessage(el.description),
     );
 
     for (const element of nonMessageElements.slice(0, 3)) {
@@ -226,13 +237,19 @@ export class DataValidationStrategy implements AssertionStrategy {
   priority = 75;
 
   applies(context: ActionContext, analysis: AnalysisResult): boolean {
-    const dataIntents = ['add_to_cart', 'delete_item', 'search', 'filter', 'sort'];
+    const dataIntents = [
+      'add_to_cart',
+      'delete_item',
+      'search',
+      'filter',
+      'sort',
+    ];
     return dataIntents.includes(analysis.intent);
   }
 
   async generate(
     context: ActionContext,
-    analysis: AnalysisResult
+    analysis: AnalysisResult,
   ): Promise<AssertionRecommendation[]> {
     const recommendations: AssertionRecommendation[] = [];
     const { intent } = analysis;
@@ -302,10 +319,10 @@ export class ErrorPreventionStrategy implements AssertionStrategy {
 
   async generate(
     context: ActionContext,
-    analysis: AnalysisResult
+    analysis: AnalysisResult,
   ): Promise<AssertionRecommendation[]> {
     const recommendations: AssertionRecommendation[] = [];
-    const newElements = analysis.changes.filter(c => c.type === 'appeared');
+    const newElements = analysis.changes.filter((c) => c.type === 'appeared');
 
     // Check for error messages
     for (const element of newElements) {

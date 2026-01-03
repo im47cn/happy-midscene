@@ -3,26 +3,26 @@
  * Displays test case statistics with filtering and sorting
  */
 
-import { useState, useMemo } from 'react';
-import {
-  Card,
-  Table,
-  Tag,
-  Space,
-  Input,
-  Radio,
-  Tooltip,
-  Progress,
-  Empty,
-} from 'antd';
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   ExclamationCircleOutlined,
-  SearchOutlined,
   QuestionCircleOutlined,
+  SearchOutlined,
 } from '@ant-design/icons';
+import {
+  Card,
+  Empty,
+  Input,
+  Progress,
+  Radio,
+  Space,
+  Table,
+  Tag,
+  Tooltip,
+} from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { useMemo, useState } from 'react';
 import type { CaseStats } from '../../types/analytics';
 
 interface CaseListProps {
@@ -61,7 +61,7 @@ export function CaseList({
     if (search.trim()) {
       const searchLower = search.toLowerCase();
       result = result.filter((c) =>
-        c.caseName.toLowerCase().includes(searchLower)
+        c.caseName.toLowerCase().includes(searchLower),
       );
     }
 
@@ -156,9 +156,7 @@ export function CaseList({
           percent={rate}
           size="small"
           format={(p) => `${p?.toFixed(0)}%`}
-          status={
-            rate >= 80 ? 'success' : rate >= 50 ? 'normal' : 'exception'
-          }
+          status={rate >= 80 ? 'success' : rate >= 50 ? 'normal' : 'exception'}
         />
       ),
     },
@@ -185,9 +183,7 @@ export function CaseList({
       sorter: (a, b) => a.lastRun - b.lastRun,
       defaultSortOrder: 'descend',
       render: (timestamp: number) => (
-        <Tooltip
-          title={new Date(timestamp).toLocaleString('zh-CN')}
-        >
+        <Tooltip title={new Date(timestamp).toLocaleString('zh-CN')}>
           {formatTime(timestamp)}
         </Tooltip>
       ),
@@ -292,8 +288,7 @@ export function CaseSummary({
     { label: '不稳定', count: unstableCases, color: '#ff4d4f' },
   ].filter((s) => s.count > 0);
 
-  const otherCount =
-    totalCases - stableCases - flakyCases - unstableCases;
+  const otherCount = totalCases - stableCases - flakyCases - unstableCases;
   if (otherCount > 0) {
     segments.push({ label: '其他', count: otherCount, color: '#d9d9d9' });
   }
@@ -307,10 +302,7 @@ export function CaseSummary({
         </div>
         <div className="summary-bar">
           {segments.map((seg) => (
-            <Tooltip
-              key={seg.label}
-              title={`${seg.label}: ${seg.count}`}
-            >
+            <Tooltip key={seg.label} title={`${seg.label}: ${seg.count}`}>
               <div
                 className="bar-segment"
                 style={{

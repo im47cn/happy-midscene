@@ -3,12 +3,9 @@
  * Displays failure distribution and hotspots
  */
 
+import { ExclamationCircleOutlined, FireOutlined } from '@ant-design/icons';
+import { Card, Empty, List, Progress, Spin, Tag, Tooltip } from 'antd';
 import { useMemo } from 'react';
-import { Card, Empty, List, Tag, Tooltip, Progress, Spin } from 'antd';
-import {
-  ExclamationCircleOutlined,
-  FireOutlined,
-} from '@ant-design/icons';
 import type { FailureType, Hotspot } from '../../types/analytics';
 import { FAILURE_TYPE_LABELS } from '../../types/analytics';
 
@@ -56,7 +53,12 @@ export function FailureTypePie({
       <Card className="failure-pie-card" size="small">
         <div
           className="chart-loading"
-          style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{
+            height,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
         >
           <Spin />
         </div>
@@ -200,7 +202,12 @@ export function HotspotsList({
       {loading ? (
         <div
           className="chart-loading"
-          style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{
+            height: 200,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
         >
           <Spin />
         </div>
@@ -295,7 +302,9 @@ export function FailurePatterns({
       className="patterns-card"
       title={
         <span>
-          <ExclamationCircleOutlined style={{ color: '#faad14', marginRight: 8 }} />
+          <ExclamationCircleOutlined
+            style={{ color: '#faad14', marginRight: 8 }}
+          />
           失败模式检测
         </span>
       }
@@ -304,7 +313,12 @@ export function FailurePatterns({
       {loading ? (
         <div
           className="chart-loading"
-          style={{ height: 150, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{
+            height: 150,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
         >
           <Spin />
         </div>

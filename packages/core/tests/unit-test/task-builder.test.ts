@@ -133,4 +133,90 @@ describe('TaskBuilder', () => {
 
     expect(tasks.every((task) => task.subTask === true)).toBe(true);
   });
+
+  it('maps Click action type to Tap via alias', async () => {
+    const actionSchema = z.object({
+      locate: getMidsceneLocationSchema().describe('element to locate'),
+    });
+
+    const mockAction: DeviceAction = {
+      name: 'Tap',
+      description: 'mock tap action',
+      paramSchema: actionSchema,
+      call: vi.fn(),
+    };
+
+    const mockInterface = new MockInterface([mockAction]);
+
+    const insightService = {
+      contextRetrieverFn: vi.fn(),
+      locate: vi.fn(),
+    } as unknown as Service;
+
+    const taskBuilder = new TaskBuilder({
+      interfaceInstance: mockInterface,
+      service: insightService,
+      actionSpace: mockInterface.actionSpace(),
+    });
+
+    // Use 'Click' type which should be mapped to 'Tap'
+    const plans: PlanningAction[] = [
+      {
+        type: 'Click',
+        thought: 'click element (should map to Tap)',
+        param: { locate: { prompt: 'button' } },
+      },
+    ];
+
+    // Should not throw "Action type 'Click' not found"
+    const { tasks } = await taskBuilder.build(plans, {} as any, {} as any);
+
+    expect(tasks.map((task) => [task.type, task.subType])).toEqual([
+      ['Planning', 'Locate'],
+      ['Action Space', 'Click'], // subType preserves original name for logging
+    ]);
+  });
+
+  it('maps lowercase click action type to Tap via alias', async () => {
+    const actionSchema = z.object({
+      locate: getMidsceneLocationSchema().describe('element to locate'),
+    });
+
+    const mockAction: DeviceAction = {
+      name: 'Tap',
+      description: 'mock tap action',
+      paramSchema: actionSchema,
+      call: vi.fn(),
+    };
+
+    const mockInterface = new MockInterface([mockAction]);
+
+    const insightService = {
+      contextRetrieverFn: vi.fn(),
+      locate: vi.fn(),
+    } as unknown as Service;
+
+    const taskBuilder = new TaskBuilder({
+      interfaceInstance: mockInterface,
+      service: insightService,
+      actionSpace: mockInterface.actionSpace(),
+    });
+
+    // Use 'click' (lowercase) type which should also be mapped to 'Tap'
+    const plans: PlanningAction[] = [
+      {
+        type: 'click',
+        thought: 'click element (lowercase, should map to Tap)',
+        param: { locate: { prompt: 'button' } },
+      },
+    ];
+
+    // Should not throw "Action type 'click' not found"
+    const { tasks } = await taskBuilder.build(plans, {} as any, {} as any);
+
+    expect(tasks.map((task) => [task.type, task.subType])).toEqual([
+      ['Planning', 'Locate'],
+      ['Action Space', 'click'], // subType preserves original name
+    ]);
+  });
 });

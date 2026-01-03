@@ -8,4 +8,8 @@ export { analysisEngine } from './analysisEngine';
 export { failureAnalyzer } from './failureAnalyzer';
 export { reportGenerator } from './reportGenerator';
 export { alertManager } from './alertManager';
-export type { FailurePattern, FailureCorrelation, TimeDistribution } from './failureAnalyzer';
+export type {
+  FailurePattern,
+  FailureCorrelation,
+  TimeDistribution,
+} from './failureAnalyzer';

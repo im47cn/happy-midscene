@@ -3,8 +3,8 @@
  * Displays execution trends over time using ECharts
  */
 
-import { useEffect, useRef, useMemo } from 'react';
 import { Card, Empty, Spin } from 'antd';
+import { useEffect, useMemo, useRef } from 'react';
 import type { DailyStats } from '../../types/analytics';
 
 // Simple inline chart implementation without external dependencies
@@ -41,7 +41,12 @@ export function TrendChart({
       <Card className="trend-chart-card" size="small">
         <div
           className="chart-loading"
-          style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{
+            height,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
         >
           <Spin />
         </div>
@@ -59,15 +64,14 @@ export function TrendChart({
 
   const barWidth = Math.max(
     12,
-    Math.min(40, (chartRef.current?.clientWidth || 400) / chartData.labels.length - 8)
+    Math.min(
+      40,
+      (chartRef.current?.clientWidth || 400) / chartData.labels.length - 8,
+    ),
   );
 
   return (
-    <Card
-      className="trend-chart-card"
-      title="执行趋势"
-      size="small"
-    >
+    <Card className="trend-chart-card" title="执行趋势" size="small">
       <div ref={chartRef} className="trend-chart" style={{ height }}>
         <div className="chart-legend">
           <span className="legend-item">
@@ -94,10 +98,7 @@ export function TrendChart({
 
               return (
                 <div key={label} className="bar-group">
-                  <div
-                    className="bar-stack"
-                    style={{ height: height - 60 }}
-                  >
+                  <div className="bar-stack" style={{ height: height - 60 }}>
                     <div
                       className="bar bar-failed"
                       style={{
@@ -164,7 +165,12 @@ export function PassRateChart({
       <Card className="pass-rate-chart-card" size="small">
         <div
           className="chart-loading"
-          style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{
+            height,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
         >
           <Spin />
         </div>
@@ -182,7 +188,8 @@ export function PassRateChart({
 
   const chartWidth = 100;
   const chartHeight = height - 50;
-  const stepX = chartData.length > 1 ? chartWidth / (chartData.length - 1) : chartWidth;
+  const stepX =
+    chartData.length > 1 ? chartWidth / (chartData.length - 1) : chartWidth;
 
   // Generate SVG path
   const pathData = chartData
@@ -220,10 +227,7 @@ export function PassRateChart({
               strokeWidth="0.5"
             />
             {/* Area fill */}
-            <path
-              d={areaPath}
-              fill="rgba(24, 144, 255, 0.1)"
-            />
+            <path d={areaPath} fill="rgba(24, 144, 255, 0.1)" />
             {/* Line */}
             <path
               d={pathData}
@@ -253,7 +257,9 @@ export function PassRateChart({
                 ))
               : [
                   <span key="start">{chartData[0].label}</span>,
-                  <span key="end">{chartData[chartData.length - 1].label}</span>,
+                  <span key="end">
+                    {chartData[chartData.length - 1].label}
+                  </span>,
                 ]}
           </div>
         </div>
@@ -297,7 +303,12 @@ export function DurationChart({
       <Card className="duration-chart-card" size="small">
         <div
           className="chart-loading"
-          style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{
+            height,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
         >
           <Spin />
         </div>

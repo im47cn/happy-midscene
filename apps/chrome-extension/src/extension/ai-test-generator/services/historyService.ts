@@ -3,7 +3,7 @@
  * Manages execution history storage using IndexedDB
  */
 
-import type { TestCase, ExecutionResult } from '../types';
+import type { ExecutionResult, TestCase } from '../types';
 
 const DB_NAME = 'midscene-ai-test-generator';
 const DB_VERSION = 1;
@@ -90,7 +90,7 @@ class HistoryService {
         request.onsuccess = () => {
           // Sort by createdAt descending (newest first)
           const items = request.result.sort(
-            (a, b) => b.createdAt - a.createdAt
+            (a, b) => b.createdAt - a.createdAt,
           );
           resolve(items);
         };
@@ -187,7 +187,7 @@ class HistoryService {
     testCases: TestCase[],
     results: ExecutionResult[],
     generatedYaml: string,
-    startTime: number
+    startTime: number,
   ): ExecutionHistoryItem {
     const now = Date.now();
     const successSteps = results.filter((r) => r.success).length;

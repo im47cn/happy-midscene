@@ -2,7 +2,7 @@
  * Smart Input Executor Tests
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { SmartInputExecutor, smartInputExecutor } from '../smartInputExecutor';
 
 describe('SmartInputExecutor', () => {
@@ -14,7 +14,9 @@ describe('SmartInputExecutor', () => {
 
   describe('parseStepText', () => {
     it('should parse auto-generate syntax (Chinese)', () => {
-      const result = executor.parseStepText('在用户名输入框中填写[自动生成:手机]');
+      const result = executor.parseStepText(
+        '在用户名输入框中填写[自动生成:手机]',
+      );
       expect(result.hasDataGenSyntax).toBe(true);
       expect(result.type).toBe('autoGenerate');
       expect(result.semanticType).toBe('mobile_phone');
@@ -81,7 +83,7 @@ describe('SmartInputExecutor', () => {
       const result = await executor.generateForStep(
         '输入[自动生成:手机]',
         '手机号',
-        'step_1'
+        'step_1',
       );
 
       expect(result).not.toBeNull();
@@ -93,7 +95,7 @@ describe('SmartInputExecutor', () => {
       const result = await executor.generateForStep(
         'Enter [auto:email]',
         'Email',
-        'step_2'
+        'step_2',
       );
 
       expect(result).not.toBeNull();
@@ -105,7 +107,7 @@ describe('SmartInputExecutor', () => {
       const result = await executor.generateForStep(
         '填写[随机]',
         '用户名',
-        'step_3'
+        'step_3',
       );
 
       expect(result).not.toBeNull();
@@ -116,7 +118,7 @@ describe('SmartInputExecutor', () => {
       const result = await executor.generateForStep(
         '点击提交按钮',
         '提交',
-        'step_4'
+        'step_4',
       );
 
       expect(result).toBeNull();
@@ -135,7 +137,9 @@ describe('SmartInputExecutor', () => {
 
   describe('processStepText', () => {
     it('should replace single syntax with generated value', async () => {
-      const result = await executor.processStepText('输入[自动生成:mobile]作为联系方式');
+      const result = await executor.processStepText(
+        '输入[自动生成:mobile]作为联系方式',
+      );
 
       expect(result.processedText).not.toContain('[自动生成:mobile]');
       expect(result.processedText).toMatch(/输入1\d{10}作为联系方式/);
@@ -145,7 +149,7 @@ describe('SmartInputExecutor', () => {
 
     it('should replace multiple syntaxes', async () => {
       const result = await executor.processStepText(
-        '用户名[自动生成:username]和邮箱[自动生成:email]'
+        '用户名[自动生成:username]和邮箱[自动生成:email]',
       );
 
       expect(result.processedText).not.toContain('[自动生成:');
@@ -198,7 +202,11 @@ describe('SmartInputExecutor', () => {
   describe('options', () => {
     it('should apply locale option', async () => {
       const cnExecutor = new SmartInputExecutor({ locale: 'zh-CN' });
-      const result = await cnExecutor.generateForStep('[auto:realname]', '姓名', 'step_1');
+      const result = await cnExecutor.generateForStep(
+        '[auto:realname]',
+        '姓名',
+        'step_1',
+      );
 
       expect(result).not.toBeNull();
       // Chinese names are typically 2-4 characters
@@ -207,7 +215,11 @@ describe('SmartInputExecutor', () => {
 
     it('should apply masking option', async () => {
       const noMaskExecutor = new SmartInputExecutor({ applyMasking: false });
-      await noMaskExecutor.generateForStep('[自动生成:mobile]', '手机', 'step_1');
+      await noMaskExecutor.generateForStep(
+        '[自动生成:mobile]',
+        '手机',
+        'step_1',
+      );
 
       // Even with applyMasking: false, maskedValue should still be generated
       // (the option controls whether masking is applied in the result)

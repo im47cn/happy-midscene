@@ -4,10 +4,10 @@
  */
 
 import type {
-  AssertionRecommendation,
-  ValidationResult,
-  AssertionType,
   AssertionParams,
+  AssertionRecommendation,
+  AssertionType,
+  ValidationResult,
 } from '../../types/assertion';
 
 /**
@@ -43,7 +43,7 @@ function findElementByText(text: string): Element | null {
       document,
       null,
       XPathResult.FIRST_ORDERED_NODE_TYPE,
-      null
+      null,
     );
     return result.singleNodeValue as Element | null;
   } catch {
@@ -70,7 +70,10 @@ function isElementVisible(element: Element): boolean {
 /**
  * Check current URL
  */
-function checkUrl(expected: string, operator: 'contains' | 'equals' = 'contains'): boolean {
+function checkUrl(
+  expected: string,
+  operator: 'contains' | 'equals' = 'contains',
+): boolean {
   if (typeof window === 'undefined') {
     return false;
   }
@@ -105,13 +108,14 @@ function getElementValue(element: Element): string {
  */
 function checkElementState(
   element: Element,
-  state: 'enabled' | 'disabled' | 'checked' | 'unchecked'
+  state: 'enabled' | 'disabled' | 'checked' | 'unchecked',
 ): boolean {
-  if (element instanceof HTMLButtonElement ||
-      element instanceof HTMLInputElement ||
-      element instanceof HTMLSelectElement ||
-      element instanceof HTMLTextAreaElement) {
-
+  if (
+    element instanceof HTMLButtonElement ||
+    element instanceof HTMLInputElement ||
+    element instanceof HTMLSelectElement ||
+    element instanceof HTMLTextAreaElement
+  ) {
     switch (state) {
       case 'enabled':
         return !element.disabled;
@@ -148,7 +152,7 @@ function countElements(target: string): number {
         document,
         null,
         XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-        null
+        null,
       );
       return result.snapshotLength;
     } catch {
@@ -164,13 +168,15 @@ class AssertionValidator {
   /**
    * Validate an assertion recommendation
    */
-  async validate(assertion: AssertionRecommendation): Promise<ValidationResult> {
+  async validate(
+    assertion: AssertionRecommendation,
+  ): Promise<ValidationResult> {
     const startTime = Date.now();
 
     try {
       const result = await this.executeWithTimeout(
         () => this.executeAssertion(assertion),
-        VALIDATION_TIMEOUT
+        VALIDATION_TIMEOUT,
       );
 
       return {
@@ -194,7 +200,7 @@ class AssertionValidator {
    */
   private async executeWithTimeout<T>(
     fn: () => Promise<T>,
-    timeout: number
+    timeout: number,
   ): Promise<T> {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
@@ -202,11 +208,11 @@ class AssertionValidator {
       }, timeout);
 
       fn()
-        .then(result => {
+        .then((result) => {
           clearTimeout(timer);
           resolve(result);
         })
-        .catch(error => {
+        .catch((error) => {
           clearTimeout(timer);
           reject(error);
         });
@@ -217,7 +223,7 @@ class AssertionValidator {
    * Execute assertion based on type
    */
   private async executeAssertion(
-    assertion: AssertionRecommendation
+    assertion: AssertionRecommendation,
   ): Promise<{ success: boolean; error: string | null; actualValue?: string }> {
     const { type, parameters } = assertion;
 
@@ -270,7 +276,7 @@ class AssertionValidator {
    * Validate text_contains assertion
    */
   private async validateTextContains(
-    params: AssertionParams
+    params: AssertionParams,
   ): Promise<{ success: boolean; error: string | null; actualValue?: string }> {
     const target = params.target || params.expectedValue || '';
     const exists = checkTextExists(target);
@@ -285,7 +291,7 @@ class AssertionValidator {
    * Validate text_equals assertion
    */
   private async validateTextEquals(
-    params: AssertionParams
+    params: AssertionParams,
   ): Promise<{ success: boolean; error: string | null; actualValue?: string }> {
     const target = params.target || '';
     const expected = params.expectedValue || '';
@@ -312,7 +318,7 @@ class AssertionValidator {
    * Validate element_exists assertion
    */
   private async validateElementExists(
-    params: AssertionParams
+    params: AssertionParams,
   ): Promise<{ success: boolean; error: string | null }> {
     const target = params.target || '';
     const element = findElementByText(target);
@@ -327,7 +333,7 @@ class AssertionValidator {
    * Validate element_visible assertion
    */
   private async validateElementVisible(
-    params: AssertionParams
+    params: AssertionParams,
   ): Promise<{ success: boolean; error: string | null }> {
     const target = params.target || '';
     const element = findElementByText(target);
@@ -351,10 +357,11 @@ class AssertionValidator {
    * Validate url_contains assertion
    */
   private async validateUrlContains(
-    params: AssertionParams
+    params: AssertionParams,
   ): Promise<{ success: boolean; error: string | null; actualValue?: string }> {
     const expected = params.expectedValue || '';
-    const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const currentUrl =
+      typeof window !== 'undefined' ? window.location.href : '';
     const matches = checkUrl(expected, 'contains');
 
     return {
@@ -368,10 +375,11 @@ class AssertionValidator {
    * Validate url_equals assertion
    */
   private async validateUrlEquals(
-    params: AssertionParams
+    params: AssertionParams,
   ): Promise<{ success: boolean; error: string | null; actualValue?: string }> {
     const expected = params.expectedValue || '';
-    const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const currentUrl =
+      typeof window !== 'undefined' ? window.location.href : '';
     const matches = checkUrl(expected, 'equals');
 
     return {
@@ -385,7 +393,7 @@ class AssertionValidator {
    * Validate value_equals assertion
    */
   private async validateValueEquals(
-    params: AssertionParams
+    params: AssertionParams,
   ): Promise<{ success: boolean; error: string | null; actualValue?: string }> {
     const target = params.target || '';
     const expected = params.expectedValue || '';
@@ -403,7 +411,9 @@ class AssertionValidator {
 
     return {
       success: matches,
-      error: matches ? null : `Expected value "${expected}", got "${actualValue}"`,
+      error: matches
+        ? null
+        : `Expected value "${expected}", got "${actualValue}"`,
       actualValue,
     };
   }
@@ -412,7 +422,7 @@ class AssertionValidator {
    * Validate count_equals assertion
    */
   private async validateCountEquals(
-    params: AssertionParams
+    params: AssertionParams,
   ): Promise<{ success: boolean; error: string | null; actualValue?: string }> {
     const target = params.target || '';
     const expectedCount = Number.parseInt(params.expectedValue || '0', 10);
@@ -422,7 +432,9 @@ class AssertionValidator {
 
     return {
       success: matches,
-      error: matches ? null : `Expected ${expectedCount} elements, found ${actualCount}`,
+      error: matches
+        ? null
+        : `Expected ${expectedCount} elements, found ${actualCount}`,
       actualValue: String(actualCount),
     };
   }
@@ -432,7 +444,7 @@ class AssertionValidator {
    */
   private async validateState(
     params: AssertionParams,
-    expectedState: 'enabled' | 'disabled' | 'checked' | 'unchecked'
+    expectedState: 'enabled' | 'disabled' | 'checked' | 'unchecked',
   ): Promise<{ success: boolean; error: string | null }> {
     const target = params.target || '';
     const element = findElementByText(target);
@@ -456,7 +468,7 @@ class AssertionValidator {
    * Validate generic state check
    */
   private async validateStateCheck(
-    params: AssertionParams
+    params: AssertionParams,
   ): Promise<{ success: boolean; error: string | null }> {
     const target = params.target || '';
     const element = findElementByText(target);
@@ -481,7 +493,7 @@ class AssertionValidator {
    * Validate attribute_equals assertion
    */
   private async validateAttributeEquals(
-    params: AssertionParams
+    params: AssertionParams,
   ): Promise<{ success: boolean; error: string | null; actualValue?: string }> {
     const target = params.target || '';
     const attribute = params.attribute || '';
@@ -511,7 +523,7 @@ class AssertionValidator {
    * Validate multiple assertions
    */
   async validateBatch(
-    assertions: AssertionRecommendation[]
+    assertions: AssertionRecommendation[],
   ): Promise<Map<string, ValidationResult>> {
     const results = new Map<string, ValidationResult>();
 
@@ -527,7 +539,7 @@ class AssertionValidator {
    * Preview assertion (validate without modifying state)
    */
   async preview(
-    assertion: AssertionRecommendation
+    assertion: AssertionRecommendation,
   ): Promise<{ valid: boolean; message: string }> {
     const result = await this.validate(assertion);
 

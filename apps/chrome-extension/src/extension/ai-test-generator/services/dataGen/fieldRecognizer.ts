@@ -3,12 +3,17 @@
  * Recognizes form fields and their semantic types from labels, placeholders, and attributes
  */
 
-import type { FieldDefinition, FieldType, SemanticType, FieldConstraints } from '../../types/dataGen';
+import type {
+  FieldConstraints,
+  FieldDefinition,
+  FieldType,
+  SemanticType,
+} from '../../types/dataGen';
 import {
+  extractConstraints,
+  parseFieldType,
   parseSemanticType,
   parseSemanticTypeWithConfidence,
-  parseFieldType,
-  extractConstraints,
 } from './semanticParser';
 
 /**
@@ -80,7 +85,7 @@ export class FieldRecognizer {
     // Parse semantic type
     const { type: semanticType, confidence } = parseSemanticTypeWithConfidence(
       label,
-      rawInfo.placeholder
+      rawInfo.placeholder,
     );
 
     // Parse field type
@@ -201,7 +206,7 @@ export function createFieldDefinition(
     minValue?: number;
     maxValue?: number;
     options?: string[];
-  } = {}
+  } = {},
 ): FieldDefinition {
   return {
     id: generateFieldId(),
@@ -224,38 +229,99 @@ export function createFieldDefinition(
 /**
  * Batch create field definitions for common form types
  */
-export function createFormFields(formType: 'login' | 'register' | 'profile' | 'payment'): FieldDefinition[] {
+export function createFormFields(
+  formType: 'login' | 'register' | 'profile' | 'payment',
+): FieldDefinition[] {
   switch (formType) {
     case 'login':
       return [
-        createFieldDefinition('username', 'username', { label: '用户名', required: true }),
-        createFieldDefinition('password', 'password', { label: '密码', fieldType: 'password', required: true }),
+        createFieldDefinition('username', 'username', {
+          label: '用户名',
+          required: true,
+        }),
+        createFieldDefinition('password', 'password', {
+          label: '密码',
+          fieldType: 'password',
+          required: true,
+        }),
       ];
 
     case 'register':
       return [
-        createFieldDefinition('username', 'username', { label: '用户名', required: true, minLength: 4, maxLength: 20 }),
-        createFieldDefinition('email', 'email', { label: '邮箱', fieldType: 'email', required: true }),
-        createFieldDefinition('mobile', 'mobile_phone', { label: '手机号', fieldType: 'phone', required: true }),
-        createFieldDefinition('password', 'password', { label: '密码', fieldType: 'password', required: true, minLength: 8 }),
-        createFieldDefinition('confirmPassword', 'password', { label: '确认密码', fieldType: 'password', required: true }),
+        createFieldDefinition('username', 'username', {
+          label: '用户名',
+          required: true,
+          minLength: 4,
+          maxLength: 20,
+        }),
+        createFieldDefinition('email', 'email', {
+          label: '邮箱',
+          fieldType: 'email',
+          required: true,
+        }),
+        createFieldDefinition('mobile', 'mobile_phone', {
+          label: '手机号',
+          fieldType: 'phone',
+          required: true,
+        }),
+        createFieldDefinition('password', 'password', {
+          label: '密码',
+          fieldType: 'password',
+          required: true,
+          minLength: 8,
+        }),
+        createFieldDefinition('confirmPassword', 'password', {
+          label: '确认密码',
+          fieldType: 'password',
+          required: true,
+        }),
       ];
 
     case 'profile':
       return [
-        createFieldDefinition('realname', 'realname', { label: '真实姓名', required: true }),
-        createFieldDefinition('idCard', 'id_card', { label: '身份证号', required: true }),
-        createFieldDefinition('mobile', 'mobile_phone', { label: '手机号', fieldType: 'phone' }),
-        createFieldDefinition('email', 'email', { label: '邮箱', fieldType: 'email' }),
-        createFieldDefinition('address', 'address', { label: '地址', fieldType: 'textarea' }),
+        createFieldDefinition('realname', 'realname', {
+          label: '真实姓名',
+          required: true,
+        }),
+        createFieldDefinition('idCard', 'id_card', {
+          label: '身份证号',
+          required: true,
+        }),
+        createFieldDefinition('mobile', 'mobile_phone', {
+          label: '手机号',
+          fieldType: 'phone',
+        }),
+        createFieldDefinition('email', 'email', {
+          label: '邮箱',
+          fieldType: 'email',
+        }),
+        createFieldDefinition('address', 'address', {
+          label: '地址',
+          fieldType: 'textarea',
+        }),
       ];
 
     case 'payment':
       return [
-        createFieldDefinition('cardHolder', 'realname', { label: '持卡人姓名', required: true }),
-        createFieldDefinition('bankCard', 'bank_card', { label: '银行卡号', required: true }),
-        createFieldDefinition('mobile', 'mobile_phone', { label: '预留手机号', fieldType: 'phone', required: true }),
-        createFieldDefinition('amount', 'amount', { label: '金额', fieldType: 'number', required: true, minValue: 0.01 }),
+        createFieldDefinition('cardHolder', 'realname', {
+          label: '持卡人姓名',
+          required: true,
+        }),
+        createFieldDefinition('bankCard', 'bank_card', {
+          label: '银行卡号',
+          required: true,
+        }),
+        createFieldDefinition('mobile', 'mobile_phone', {
+          label: '预留手机号',
+          fieldType: 'phone',
+          required: true,
+        }),
+        createFieldDefinition('amount', 'amount', {
+          label: '金额',
+          fieldType: 'number',
+          required: true,
+          minValue: 0.01,
+        }),
       ];
 
     default:

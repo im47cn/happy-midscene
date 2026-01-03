@@ -3,12 +3,12 @@
  * Displays a key performance indicator with trend
  */
 
-import { Card, Statistic, Tooltip } from 'antd';
 import {
-  ArrowUpOutlined,
   ArrowDownOutlined,
+  ArrowUpOutlined,
   MinusOutlined,
 } from '@ant-design/icons';
+import { Card, Statistic, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 
 interface KPICardProps {

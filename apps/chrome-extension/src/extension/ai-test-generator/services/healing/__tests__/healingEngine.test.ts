@@ -3,9 +3,12 @@
  * Tests the core healing logic without browser dependencies
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type {
+  SelfHealingConfig,
+  SemanticFingerprint,
+} from '../../../types/healing';
 import { HealingEngine } from '../healingEngine';
-import type { SelfHealingConfig, SemanticFingerprint } from '../../../types/healing';
 
 // Mock storage
 vi.mock('../storage', () => ({
@@ -26,8 +29,19 @@ import { healingStorage } from '../storage';
 
 // Mock agent
 const createMockAgent = (overrides = {}) => ({
-  describeElementAtPoint: vi.fn().mockResolvedValue({ prompt: 'A blue button', deepThink: false, verifyResult: true }),
-  aiLocate: vi.fn().mockResolvedValue({ center: [150, 150], rect: { left: 100, top: 125, width: 100, height: 50 } }),
+  describeElementAtPoint: vi
+    .fn()
+    .mockResolvedValue({
+      prompt: 'A blue button',
+      deepThink: false,
+      verifyResult: true,
+    }),
+  aiLocate: vi
+    .fn()
+    .mockResolvedValue({
+      center: [150, 150],
+      rect: { left: 100, top: 125, width: 100, height: 50 },
+    }),
   ...overrides,
 });
 
@@ -72,7 +86,12 @@ describe('HealingEngine', () => {
   describe('collectFingerprint', () => {
     it('should throw if agent not set', async () => {
       await expect(
-        engine.collectFingerprint('step-1', [100, 100], { left: 50, top: 75, width: 100, height: 50 })
+        engine.collectFingerprint('step-1', [100, 100], {
+          left: 50,
+          top: 75,
+          width: 100,
+          height: 50,
+        }),
       ).rejects.toThrow('Agent not set');
     });
 
@@ -85,12 +104,12 @@ describe('HealingEngine', () => {
       const fingerprint = await engine.collectFingerprint(
         'step-1',
         [100, 100],
-        { left: 50, top: 75, width: 100, height: 50 }
+        { left: 50, top: 75, width: 100, height: 50 },
       );
 
       expect(mockAgent.describeElementAtPoint).toHaveBeenCalledWith(
         [100, 100],
-        { verifyPrompt: true, retryLimit: 3 }
+        { verifyPrompt: true, retryLimit: 3 },
       );
       expect(healingStorage.save).toHaveBeenCalled();
       expect(fingerprint.stepId).toBe('step-1');
@@ -118,7 +137,7 @@ describe('HealingEngine', () => {
       const fingerprint = await engine.collectFingerprint(
         'step-1',
         [100, 100],
-        { left: 50, top: 75, width: 100, height: 50 }
+        { left: 50, top: 75, width: 100, height: 50 },
       );
 
       expect(healingStorage.update).toHaveBeenCalled();
@@ -130,7 +149,9 @@ describe('HealingEngine', () => {
 
     it('should use fallback description on AI failure', async () => {
       const mockAgent = createMockAgent({
-        describeElementAtPoint: vi.fn().mockRejectedValue(new Error('AI failed')),
+        describeElementAtPoint: vi
+          .fn()
+          .mockRejectedValue(new Error('AI failed')),
       });
       engine.setAgent(mockAgent);
 
@@ -139,7 +160,7 @@ describe('HealingEngine', () => {
       const fingerprint = await engine.collectFingerprint(
         'step-1',
         [100, 100],
-        { left: 50, top: 75, width: 100, height: 50 }
+        { left: 50, top: 75, width: 100, height: 50 },
       );
 
       expect(fingerprint.semanticDescription).toContain('Element at position');
@@ -148,7 +169,9 @@ describe('HealingEngine', () => {
 
   describe('heal', () => {
     it('should throw if agent not set', async () => {
-      await expect(engine.heal('step-1', 'Click the button')).rejects.toThrow('Agent not set');
+      await expect(engine.heal('step-1', 'Click the button')).rejects.toThrow(
+        'Agent not set',
+      );
     });
 
     it('should return failed result when healing is disabled', async () => {
@@ -196,9 +219,13 @@ describe('HealingEngine', () => {
 
     it('should fallback to deepThink mode when normal fails', async () => {
       const mockAgent = createMockAgent({
-        aiLocate: vi.fn()
+        aiLocate: vi
+          .fn()
           .mockRejectedValueOnce(new Error('Not found'))
-          .mockResolvedValueOnce({ center: [150, 150], rect: { left: 100, top: 125, width: 100, height: 50 } }),
+          .mockResolvedValueOnce({
+            center: [150, 150],
+            rect: { left: 100, top: 125, width: 100, height: 50 },
+          }),
       });
       engine.setAgent(mockAgent);
 
@@ -218,7 +245,9 @@ describe('HealingEngine', () => {
       const result = await engine.heal('step-1', 'Click the button');
 
       expect(mockAgent.aiLocate).toHaveBeenCalledTimes(2);
-      expect(mockAgent.aiLocate).toHaveBeenLastCalledWith('Submit button', { deepThink: true });
+      expect(mockAgent.aiLocate).toHaveBeenLastCalledWith('Submit button', {
+        deepThink: true,
+      });
       expect(result.success).toBe(true);
       expect(result.strategy).toBe('deepThink');
       expect(result.attemptsCount).toBe(2);
@@ -296,11 +325,18 @@ describe('HealingEngine', () => {
       const result = engine.determineAction({
         success: true,
         healingId: 'h-1',
-        element: { center: [100, 100], rect: { left: 50, top: 75, width: 100, height: 50 } },
+        element: {
+          center: [100, 100],
+          rect: { left: 50, top: 75, width: 100, height: 50 },
+        },
         strategy: 'normal',
         attemptsCount: 1,
         confidence: 90,
-        confidenceFactors: { distanceScore: 90, sizeScore: 90, strategyScore: 100 },
+        confidenceFactors: {
+          distanceScore: 90,
+          sizeScore: 90,
+          strategyScore: 100,
+        },
         timeCost: 100,
       });
 
@@ -311,11 +347,18 @@ describe('HealingEngine', () => {
       const result = engine.determineAction({
         success: true,
         healingId: 'h-1',
-        element: { center: [100, 100], rect: { left: 50, top: 75, width: 100, height: 50 } },
+        element: {
+          center: [100, 100],
+          rect: { left: 50, top: 75, width: 100, height: 50 },
+        },
         strategy: 'normal',
         attemptsCount: 1,
         confidence: 65,
-        confidenceFactors: { distanceScore: 60, sizeScore: 70, strategyScore: 100 },
+        confidenceFactors: {
+          distanceScore: 60,
+          sizeScore: 70,
+          strategyScore: 100,
+        },
         timeCost: 100,
       });
 
@@ -326,11 +369,18 @@ describe('HealingEngine', () => {
       const result = engine.determineAction({
         success: true,
         healingId: 'h-1',
-        element: { center: [100, 100], rect: { left: 50, top: 75, width: 100, height: 50 } },
+        element: {
+          center: [100, 100],
+          rect: { left: 50, top: 75, width: 100, height: 50 },
+        },
         strategy: 'normal',
         attemptsCount: 1,
         confidence: 40,
-        confidenceFactors: { distanceScore: 30, sizeScore: 50, strategyScore: 100 },
+        confidenceFactors: {
+          distanceScore: 30,
+          sizeScore: 50,
+          strategyScore: 100,
+        },
         timeCost: 100,
       });
 
@@ -341,14 +391,95 @@ describe('HealingEngine', () => {
   describe('getStatistics', () => {
     it('should calculate statistics from history', async () => {
       vi.mocked(healingStorage.getAllHistoryEntries).mockResolvedValue([
-        { id: '1', stepId: 's1', timestamp: Date.now(), originalDescription: '', failureReason: '', result: { success: true, healingId: 'h1', strategy: 'normal', attemptsCount: 1, confidence: 90, confidenceFactors: { distanceScore: 90, sizeScore: 90, strategyScore: 100 }, timeCost: 500 }, userConfirmed: true, fingerprintUpdated: true },
-        { id: '2', stepId: 's2', timestamp: Date.now(), originalDescription: '', failureReason: '', result: { success: true, healingId: 'h2', strategy: 'deepThink', attemptsCount: 2, confidence: 70, confidenceFactors: { distanceScore: 60, sizeScore: 80, strategyScore: 90 }, timeCost: 1500 }, userConfirmed: true, fingerprintUpdated: true },
-        { id: '3', stepId: 's3', timestamp: Date.now(), originalDescription: '', failureReason: '', result: { success: false, healingId: 'h3', strategy: 'normal', attemptsCount: 2, confidence: 0, confidenceFactors: { distanceScore: 0, sizeScore: 0, strategyScore: 0 }, timeCost: 2000 }, userConfirmed: false, fingerprintUpdated: false },
+        {
+          id: '1',
+          stepId: 's1',
+          timestamp: Date.now(),
+          originalDescription: '',
+          failureReason: '',
+          result: {
+            success: true,
+            healingId: 'h1',
+            strategy: 'normal',
+            attemptsCount: 1,
+            confidence: 90,
+            confidenceFactors: {
+              distanceScore: 90,
+              sizeScore: 90,
+              strategyScore: 100,
+            },
+            timeCost: 500,
+          },
+          userConfirmed: true,
+          fingerprintUpdated: true,
+        },
+        {
+          id: '2',
+          stepId: 's2',
+          timestamp: Date.now(),
+          originalDescription: '',
+          failureReason: '',
+          result: {
+            success: true,
+            healingId: 'h2',
+            strategy: 'deepThink',
+            attemptsCount: 2,
+            confidence: 70,
+            confidenceFactors: {
+              distanceScore: 60,
+              sizeScore: 80,
+              strategyScore: 90,
+            },
+            timeCost: 1500,
+          },
+          userConfirmed: true,
+          fingerprintUpdated: true,
+        },
+        {
+          id: '3',
+          stepId: 's3',
+          timestamp: Date.now(),
+          originalDescription: '',
+          failureReason: '',
+          result: {
+            success: false,
+            healingId: 'h3',
+            strategy: 'normal',
+            attemptsCount: 2,
+            confidence: 0,
+            confidenceFactors: {
+              distanceScore: 0,
+              sizeScore: 0,
+              strategyScore: 0,
+            },
+            timeCost: 2000,
+          },
+          userConfirmed: false,
+          fingerprintUpdated: false,
+        },
       ]);
 
       vi.mocked(healingStorage.getAllFingerprints).mockResolvedValue([
-        { id: 'f1', stepId: 's1', semanticDescription: '', lastKnownCenter: [0, 0], lastKnownRect: { left: 0, top: 0, width: 0, height: 0 }, createdAt: 0, updatedAt: 0, healingCount: 3 },
-        { id: 'f2', stepId: 's2', semanticDescription: '', lastKnownCenter: [0, 0], lastKnownRect: { left: 0, top: 0, width: 0, height: 0 }, createdAt: 0, updatedAt: 0, healingCount: 1 },
+        {
+          id: 'f1',
+          stepId: 's1',
+          semanticDescription: '',
+          lastKnownCenter: [0, 0],
+          lastKnownRect: { left: 0, top: 0, width: 0, height: 0 },
+          createdAt: 0,
+          updatedAt: 0,
+          healingCount: 3,
+        },
+        {
+          id: 'f2',
+          stepId: 's2',
+          semanticDescription: '',
+          lastKnownCenter: [0, 0],
+          lastKnownRect: { left: 0, top: 0, width: 0, height: 0 },
+          createdAt: 0,
+          updatedAt: 0,
+          healingCount: 1,
+        },
       ]);
 
       const stats = await engine.getStatistics();
@@ -385,11 +516,18 @@ describe('HealingEngine', () => {
         result: {
           success: true,
           healingId: 'healing-1',
-          element: { center: [150, 150] as [number, number], rect: { left: 100, top: 125, width: 100, height: 50 } },
+          element: {
+            center: [150, 150] as [number, number],
+            rect: { left: 100, top: 125, width: 100, height: 50 },
+          },
           strategy: 'normal' as const,
           attemptsCount: 1,
           confidence: 85,
-          confidenceFactors: { distanceScore: 80, sizeScore: 90, strategyScore: 100 },
+          confidenceFactors: {
+            distanceScore: 80,
+            sizeScore: 90,
+            strategyScore: 100,
+          },
           timeCost: 500,
         },
         userConfirmed: false,
@@ -407,21 +545,27 @@ describe('HealingEngine', () => {
         healingCount: 0,
       };
 
-      vi.mocked(healingStorage.getHistoryByHealingId).mockResolvedValue(historyEntry);
+      vi.mocked(healingStorage.getHistoryByHealingId).mockResolvedValue(
+        historyEntry,
+      );
       vi.mocked(healingStorage.get).mockResolvedValue(fingerprint);
 
       const result = await engine.confirmHealing('healing-1', true);
 
       expect(result).not.toBeNull();
       expect(result?.center).toEqual([150, 150]);
-      expect(healingStorage.update).toHaveBeenCalledWith(expect.objectContaining({
-        lastKnownCenter: [150, 150],
-        healingCount: 1,
-      }));
-      expect(healingStorage.updateHistoryEntry).toHaveBeenCalledWith(expect.objectContaining({
-        userConfirmed: true,
-        fingerprintUpdated: true,
-      }));
+      expect(healingStorage.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          lastKnownCenter: [150, 150],
+          healingCount: 1,
+        }),
+      );
+      expect(healingStorage.updateHistoryEntry).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userConfirmed: true,
+          fingerprintUpdated: true,
+        }),
+      );
     });
 
     it('should update userConfirmed to false when rejected', async () => {
@@ -434,27 +578,38 @@ describe('HealingEngine', () => {
         result: {
           success: true,
           healingId: 'healing-1',
-          element: { center: [150, 150] as [number, number], rect: { left: 100, top: 125, width: 100, height: 50 } },
+          element: {
+            center: [150, 150] as [number, number],
+            rect: { left: 100, top: 125, width: 100, height: 50 },
+          },
           strategy: 'normal' as const,
           attemptsCount: 1,
           confidence: 85,
-          confidenceFactors: { distanceScore: 80, sizeScore: 90, strategyScore: 100 },
+          confidenceFactors: {
+            distanceScore: 80,
+            sizeScore: 90,
+            strategyScore: 100,
+          },
           timeCost: 500,
         },
         userConfirmed: false,
         fingerprintUpdated: false,
       };
 
-      vi.mocked(healingStorage.getHistoryByHealingId).mockResolvedValue(historyEntry);
+      vi.mocked(healingStorage.getHistoryByHealingId).mockResolvedValue(
+        historyEntry,
+      );
 
       const result = await engine.confirmHealing('healing-1', false);
 
       expect(result).toBeNull();
       expect(healingStorage.update).not.toHaveBeenCalled();
-      expect(healingStorage.updateHistoryEntry).toHaveBeenCalledWith(expect.objectContaining({
-        userConfirmed: false,
-        fingerprintUpdated: false,
-      }));
+      expect(healingStorage.updateHistoryEntry).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userConfirmed: false,
+          fingerprintUpdated: false,
+        }),
+      );
     });
 
     it('should update semantic description when newDescription provided', async () => {
@@ -467,11 +622,18 @@ describe('HealingEngine', () => {
         result: {
           success: true,
           healingId: 'healing-1',
-          element: { center: [150, 150] as [number, number], rect: { left: 100, top: 125, width: 100, height: 50 } },
+          element: {
+            center: [150, 150] as [number, number],
+            rect: { left: 100, top: 125, width: 100, height: 50 },
+          },
           strategy: 'normal' as const,
           attemptsCount: 1,
           confidence: 85,
-          confidenceFactors: { distanceScore: 80, sizeScore: 90, strategyScore: 100 },
+          confidenceFactors: {
+            distanceScore: 80,
+            sizeScore: 90,
+            strategyScore: 100,
+          },
           timeCost: 500,
         },
         userConfirmed: false,
@@ -489,14 +651,22 @@ describe('HealingEngine', () => {
         healingCount: 0,
       };
 
-      vi.mocked(healingStorage.getHistoryByHealingId).mockResolvedValue(historyEntry);
+      vi.mocked(healingStorage.getHistoryByHealingId).mockResolvedValue(
+        historyEntry,
+      );
       vi.mocked(healingStorage.get).mockResolvedValue(fingerprint);
 
-      await engine.confirmHealing('healing-1', true, 'New improved description');
+      await engine.confirmHealing(
+        'healing-1',
+        true,
+        'New improved description',
+      );
 
-      expect(healingStorage.update).toHaveBeenCalledWith(expect.objectContaining({
-        semanticDescription: 'New improved description',
-      }));
+      expect(healingStorage.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          semanticDescription: 'New improved description',
+        }),
+      );
     });
   });
 });

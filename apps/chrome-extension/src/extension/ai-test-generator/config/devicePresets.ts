@@ -36,7 +36,8 @@ export const devicePresets: DevicePreset[] = [
     width: 393,
     height: 852,
     deviceScaleFactor: 3,
-    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
+    userAgent:
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
     isMobile: true,
     hasTouch: true,
     category: 'mobile',
@@ -47,7 +48,8 @@ export const devicePresets: DevicePreset[] = [
     width: 390,
     height: 844,
     deviceScaleFactor: 3,
-    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
+    userAgent:
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
     isMobile: true,
     hasTouch: true,
     category: 'mobile',
@@ -58,7 +60,8 @@ export const devicePresets: DevicePreset[] = [
     width: 375,
     height: 667,
     deviceScaleFactor: 2,
-    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1',
+    userAgent:
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1',
     isMobile: true,
     hasTouch: true,
     category: 'mobile',
@@ -70,7 +73,8 @@ export const devicePresets: DevicePreset[] = [
     width: 412,
     height: 915,
     deviceScaleFactor: 2.625,
-    userAgent: 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36',
+    userAgent:
+      'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36',
     isMobile: true,
     hasTouch: true,
     category: 'mobile',
@@ -81,7 +85,8 @@ export const devicePresets: DevicePreset[] = [
     width: 360,
     height: 780,
     deviceScaleFactor: 3,
-    userAgent: 'Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36',
+    userAgent:
+      'Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36',
     isMobile: true,
     hasTouch: true,
     category: 'mobile',
@@ -92,7 +97,8 @@ export const devicePresets: DevicePreset[] = [
     width: 393,
     height: 851,
     deviceScaleFactor: 2.75,
-    userAgent: 'Mozilla/5.0 (Linux; Android 13; 2211133C) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36',
+    userAgent:
+      'Mozilla/5.0 (Linux; Android 13; 2211133C) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36',
     isMobile: true,
     hasTouch: true,
     category: 'mobile',
@@ -104,7 +110,8 @@ export const devicePresets: DevicePreset[] = [
     width: 1024,
     height: 1366,
     deviceScaleFactor: 2,
-    userAgent: 'Mozilla/5.0 (iPad; CPU OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
+    userAgent:
+      'Mozilla/5.0 (iPad; CPU OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
     isMobile: true,
     hasTouch: true,
     category: 'tablet',
@@ -115,7 +122,8 @@ export const devicePresets: DevicePreset[] = [
     width: 820,
     height: 1180,
     deviceScaleFactor: 2,
-    userAgent: 'Mozilla/5.0 (iPad; CPU OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
+    userAgent:
+      'Mozilla/5.0 (iPad; CPU OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
     isMobile: true,
     hasTouch: true,
     category: 'tablet',
@@ -126,7 +134,8 @@ export const devicePresets: DevicePreset[] = [
     width: 800,
     height: 1280,
     deviceScaleFactor: 2,
-    userAgent: 'Mozilla/5.0 (Linux; Android 12; SM-X700) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
+    userAgent:
+      'Mozilla/5.0 (Linux; Android 12; SM-X700) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
     isMobile: true,
     hasTouch: true,
     category: 'tablet',
@@ -135,14 +144,14 @@ export const devicePresets: DevicePreset[] = [
 
 // Group presets by category
 export const devicePresetsByCategory = {
-  desktop: devicePresets.filter(d => d.category === 'desktop'),
-  mobile: devicePresets.filter(d => d.category === 'mobile'),
-  tablet: devicePresets.filter(d => d.category === 'tablet'),
+  desktop: devicePresets.filter((d) => d.category === 'desktop'),
+  mobile: devicePresets.filter((d) => d.category === 'mobile'),
+  tablet: devicePresets.filter((d) => d.category === 'tablet'),
 };
 
 // Get preset by ID
 export function getDevicePreset(id: string): DevicePreset | undefined {
-  return devicePresets.find(d => d.id === id);
+  return devicePresets.find((d) => d.id === id);
 }
 
 // Default device

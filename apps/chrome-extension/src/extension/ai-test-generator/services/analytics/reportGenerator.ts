@@ -4,19 +4,19 @@
  */
 
 import type {
-  Report,
-  ReportType,
-  ReportSummary,
-  ReportFailureAnalysis,
   CaseStats,
-  DateRange,
   DailyStats,
-  Hotspot,
+  DateRange,
   FailureType,
+  Hotspot,
+  Report,
+  ReportFailureAnalysis,
+  ReportSummary,
+  ReportType,
 } from '../../types/analytics';
 import { FAILURE_TYPE_LABELS } from '../../types/analytics';
-import { analyticsStorage } from './analyticsStorage';
 import { analysisEngine } from './analysisEngine';
+import { analyticsStorage } from './analyticsStorage';
 
 class ReportGenerator {
   /**
@@ -51,11 +51,11 @@ class ReportGenerator {
    */
   private async generateReport(
     type: ReportType,
-    dateRange: DateRange
+    dateRange: DateRange,
   ): Promise<Report> {
     const dailyStats = await analyticsStorage.getDailyStatsRange(
       dateRange.startDate,
-      dateRange.endDate
+      dateRange.endDate,
     );
 
     const caseStats = await analyticsStorage.getAllCaseStats();
@@ -66,7 +66,7 @@ class ReportGenerator {
     const recommendations = this.generateRecommendations(
       summary,
       failureAnalysis,
-      caseStats
+      caseStats,
     );
 
     const title = this.generateTitle(type, dateRange);
@@ -95,7 +95,7 @@ class ReportGenerator {
   private calculateSummary(dailyStats: DailyStats[]): ReportSummary {
     const totalExecutions = dailyStats.reduce(
       (sum, d) => sum + d.totalExecutions,
-      0
+      0,
     );
     const totalPassed = dailyStats.reduce((sum, d) => sum + d.passed, 0);
     const passRate =
@@ -103,7 +103,7 @@ class ReportGenerator {
 
     const totalDuration = dailyStats.reduce(
       (sum, d) => sum + d.avgDuration * d.totalExecutions,
-      0
+      0,
     );
     const avgDuration =
       totalExecutions > 0 ? totalDuration / totalExecutions : 0;
@@ -124,7 +124,7 @@ class ReportGenerator {
    */
   private analyzeFailures(
     dailyStats: DailyStats[],
-    hotspots: Hotspot[]
+    hotspots: Hotspot[],
   ): ReportFailureAnalysis {
     const byType: Record<FailureType, number> = {
       locator_failed: 0,
@@ -150,7 +150,7 @@ class ReportGenerator {
   private generateRecommendations(
     summary: ReportSummary,
     failureAnalysis: ReportFailureAnalysis,
-    caseStats: CaseStats[]
+    caseStats: CaseStats[],
   ): string[] {
     const recommendations: string[] = [];
     const passRate = Number.parseFloat(summary.passRate);
@@ -158,7 +158,7 @@ class ReportGenerator {
     // Pass rate recommendations
     if (passRate < 80) {
       recommendations.push(
-        `通过率 (${summary.passRate}) 低于 80%，建议重点排查失败用例并修复`
+        `通过率 (${summary.passRate}) 低于 80%，建议重点排查失败用例并修复`,
       );
     }
 
@@ -168,36 +168,32 @@ class ReportGenerator {
 
     if (totalFailures > 0) {
       const dominantType = Object.entries(byType).sort(
-        (a, b) => b[1] - a[1]
+        (a, b) => b[1] - a[1],
       )[0];
       const dominantPercentage = (dominantType[1] / totalFailures) * 100;
 
       if (dominantPercentage > 40) {
         const typeName = FAILURE_TYPE_LABELS[dominantType[0] as FailureType];
         recommendations.push(
-          `"${typeName}"类型失败占比 ${dominantPercentage.toFixed(0)}%，建议重点关注此类问题`
+          `"${typeName}"类型失败占比 ${dominantPercentage.toFixed(0)}%，建议重点关注此类问题`,
         );
       }
     }
 
     // Specific failure type recommendations
     if (byType.locator_failed > 5) {
-      recommendations.push(
-        '多个定位失败，建议启用自愈功能或更新元素定位策略'
-      );
+      recommendations.push('多个定位失败，建议启用自愈功能或更新元素定位策略');
     }
 
     if (byType.timeout > 3) {
-      recommendations.push(
-        '存在多个超时失败，建议检查网络环境或增加超时配置'
-      );
+      recommendations.push('存在多个超时失败，建议检查网络环境或增加超时配置');
     }
 
     // Flaky test recommendations
     const flakyCases = caseStats.filter((c) => c.isFlaky);
     if (flakyCases.length > 0) {
       recommendations.push(
-        `检测到 ${flakyCases.length} 个 Flaky 测试，建议优先稳定这些用例`
+        `检测到 ${flakyCases.length} 个 Flaky 测试，建议优先稳定这些用例`,
       );
     }
 
@@ -206,7 +202,7 @@ class ReportGenerator {
       const topHotspot = failureAnalysis.hotspots[0];
       if (topHotspot.failureCount > 5) {
         recommendations.push(
-          `"${topHotspot.description}" 是主要失败热点 (${topHotspot.failureCount}次)，建议重点排查`
+          `"${topHotspot.description}" 是主要失败热点 (${topHotspot.failureCount}次)，建议重点排查`,
         );
       }
     }
@@ -256,14 +252,14 @@ class ReportGenerator {
       .filter(([_, count]) => count > 0)
       .map(
         ([type, count]) =>
-          `<tr><td>${FAILURE_TYPE_LABELS[type as FailureType]}</td><td>${count}</td></tr>`
+          `<tr><td>${FAILURE_TYPE_LABELS[type as FailureType]}</td><td>${count}</td></tr>`,
       )
       .join('');
 
     const hotspotRows = report.failureAnalysis.hotspots
       .map(
         (h, i) =>
-          `<tr><td>${i + 1}</td><td>${h.description}</td><td>${h.failureCount}</td></tr>`
+          `<tr><td>${i + 1}</td><td>${h.description}</td><td>${h.failureCount}</td></tr>`,
       )
       .join('');
 
@@ -351,7 +347,9 @@ class ReportGenerator {
 
     // Header
     lines.push(`"${report.title}"`);
-    lines.push(`"生成时间","${new Date(report.generatedAt).toLocaleString('zh-CN')}"`);
+    lines.push(
+      `"生成时间","${new Date(report.generatedAt).toLocaleString('zh-CN')}"`,
+    );
     lines.push('');
 
     // Summary
@@ -368,9 +366,7 @@ class ReportGenerator {
     lines.push('"类型","数量"');
     for (const [type, count] of Object.entries(report.failureAnalysis.byType)) {
       if (count > 0) {
-        lines.push(
-          `"${FAILURE_TYPE_LABELS[type as FailureType]}","${count}"`
-        );
+        lines.push(`"${FAILURE_TYPE_LABELS[type as FailureType]}","${count}"`);
       }
     }
     lines.push('');
@@ -388,7 +384,7 @@ class ReportGenerator {
     lines.push('"用例名称","通过率","平均耗时","稳定性","是否Flaky"');
     for (const c of report.caseStats) {
       lines.push(
-        `"${c.caseName}","${c.passRate.toFixed(1)}%","${this.formatDuration(c.avgDuration)}","${c.stabilityScore}","${c.isFlaky ? '是' : '否'}"`
+        `"${c.caseName}","${c.passRate.toFixed(1)}%","${this.formatDuration(c.avgDuration)}","${c.stabilityScore}","${c.isFlaky ? '是' : '否'}"`,
       );
     }
 
@@ -416,7 +412,7 @@ class ReportGenerator {
   /**
    * Get recent reports
    */
-  async getRecentReports(limit: number = 10): Promise<Report[]> {
+  async getRecentReports(limit = 10): Promise<Report[]> {
     return analyticsStorage.getRecentReports(limit);
   }
 

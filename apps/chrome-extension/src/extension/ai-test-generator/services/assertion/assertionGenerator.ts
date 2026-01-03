@@ -8,20 +8,20 @@ import type {
   AnalysisResult,
   AssertionRecommendation,
   AssertionStrategy,
-  SmartAssertionConfig,
   AssertionTemplate,
+  SmartAssertionConfig,
 } from '../../types/assertion';
 import { DEFAULT_SMART_ASSERTION_CONFIG } from '../../types/assertion';
-import { contextCollector } from './contextCollector';
 import { changeDetector } from './changeDetector';
+import { contextCollector } from './contextCollector';
 import { intentInferrer } from './intentInferrer';
-import { getStrategiesByPriority, ALL_STRATEGIES } from './strategies';
+import { ALL_STRATEGIES, getStrategiesByPriority } from './strategies';
 
 /**
  * Deduplicate recommendations by type and target
  */
 function deduplicateRecommendations(
-  recommendations: AssertionRecommendation[]
+  recommendations: AssertionRecommendation[],
 ): AssertionRecommendation[] {
   const seen = new Set<string>();
   const unique: AssertionRecommendation[] = [];
@@ -86,7 +86,7 @@ class AssertionGenerator {
     stepIndex: number,
     stepText: string,
     beforeUrl: string,
-    afterUrl: string
+    afterUrl: string,
   ): Promise<{
     analysis: AnalysisResult;
     recommendations: AssertionRecommendation[];
@@ -110,7 +110,7 @@ class AssertionGenerator {
       stepIndex,
       stepText,
       beforeUrl,
-      afterUrl
+      afterUrl,
     );
 
     // Add visual changes if available
@@ -140,7 +140,7 @@ class AssertionGenerator {
    */
   async generate(
     context: ActionContext,
-    analysis: AnalysisResult
+    analysis: AnalysisResult,
   ): Promise<AssertionRecommendation[]> {
     const allRecommendations: AssertionRecommendation[] = [];
 
@@ -173,7 +173,7 @@ class AssertionGenerator {
    */
   private async applyTemplates(
     context: ActionContext,
-    analysis: AnalysisResult
+    analysis: AnalysisResult,
   ): Promise<AssertionRecommendation[]> {
     const recommendations: AssertionRecommendation[] = [];
 
@@ -207,7 +207,7 @@ class AssertionGenerator {
   private matchesTrigger(
     trigger: AssertionTemplate['trigger'],
     context: ActionContext,
-    analysis: AnalysisResult
+    analysis: AnalysisResult,
   ): boolean {
     // Check action type
     if (trigger.actionType && trigger.actionType !== context.action.type) {
@@ -250,7 +250,7 @@ class AssertionGenerator {
 
     switch (type) {
       case 'text_contains':
-        return `- aiAssert: "页面包含文本 '${parameters.expectedValue || ''}'"`
+        return `- aiAssert: "页面包含文本 '${parameters.expectedValue || ''}'"`;
       case 'element_visible':
         return `- aiAssert: "元素 '${parameters.target || ''}' 可见"`;
       case 'url_contains':
@@ -264,14 +264,14 @@ class AssertionGenerator {
    * Process and filter recommendations
    */
   private processRecommendations(
-    recommendations: AssertionRecommendation[]
+    recommendations: AssertionRecommendation[],
   ): AssertionRecommendation[] {
     // Deduplicate
     let processed = deduplicateRecommendations(recommendations);
 
     // Filter by minimum confidence
     processed = processed.filter(
-      rec => rec.confidence >= this.config.minConfidence
+      (rec) => rec.confidence >= this.config.minConfidence,
     );
 
     // Sort by confidence
@@ -294,9 +294,7 @@ class AssertionGenerator {
    * Convert multiple recommendations to YAML
    */
   toYamlBatch(recommendations: AssertionRecommendation[]): string {
-    return recommendations
-      .map(rec => rec.yamlOutput)
-      .join('\n');
+    return recommendations.map((rec) => rec.yamlOutput).join('\n');
   }
 
   /**

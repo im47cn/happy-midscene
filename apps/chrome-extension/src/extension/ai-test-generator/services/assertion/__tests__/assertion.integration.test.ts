@@ -3,14 +3,18 @@
  * Tests the end-to-end flow from context collection to assertion generation
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ContextCollector } from '../contextCollector';
-import { ChangeDetector } from '../changeDetector';
-import { IntentInferrer } from '../intentInferrer';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type {
+  ActionContext,
+  AssertionRecommendation,
+  AssertionTemplate,
+} from '../../../types/assertion';
 import { AssertionGenerator } from '../assertionGenerator';
 import { assertionValidator } from '../assertionValidator';
+import { ChangeDetector } from '../changeDetector';
+import { ContextCollector } from '../contextCollector';
+import { IntentInferrer } from '../intentInferrer';
 import { TemplateManager } from '../templateManager';
-import type { ActionContext, AssertionRecommendation, AssertionTemplate } from '../../../types/assertion';
 
 // Mock window and document for tests
 const mockWindow = {
@@ -63,7 +67,7 @@ describe('Smart Assertion System Integration', () => {
         0,
         stepText,
         beforeUrl,
-        afterUrl
+        afterUrl,
       );
 
       expect(context.action.type).toBe('click');
@@ -81,7 +85,7 @@ describe('Smart Assertion System Integration', () => {
         0,
         stepText,
         beforeUrl,
-        afterUrl
+        afterUrl,
       );
 
       expect(context.action.type).toBe('click');
@@ -98,7 +102,7 @@ describe('Smart Assertion System Integration', () => {
         0,
         stepText,
         beforeUrl,
-        afterUrl
+        afterUrl,
       );
 
       expect(context.action.type).toBe('input');
@@ -115,7 +119,7 @@ describe('Smart Assertion System Integration', () => {
         0,
         stepText,
         beforeUrl,
-        afterUrl
+        afterUrl,
       );
 
       expect(context.action.type).toBe('navigate');
@@ -129,17 +133,18 @@ describe('Smart Assertion System Integration', () => {
       const beforeUrl = 'https://example.com/login';
       const afterUrl = 'https://example.com/dashboard';
 
-      const { analysis, recommendations } = await assertionGenerator.analyzeAndGenerate(
-        'step-1',
-        0,
-        stepText,
-        beforeUrl,
-        afterUrl
-      );
+      const { analysis, recommendations } =
+        await assertionGenerator.analyzeAndGenerate(
+          'step-1',
+          0,
+          stepText,
+          beforeUrl,
+          afterUrl,
+        );
 
       // Should detect URL change and suggest URL assertion
-      const urlAssertions = recommendations.filter(r =>
-        r.type === 'url_contains' || r.type === 'url_equals'
+      const urlAssertions = recommendations.filter(
+        (r) => r.type === 'url_contains' || r.type === 'url_equals',
       );
       expect(urlAssertions.length).toBeGreaterThanOrEqual(0);
     });
@@ -149,13 +154,14 @@ describe('Smart Assertion System Integration', () => {
       const beforeUrl = 'https://example.com/form';
       const afterUrl = 'https://example.com/success';
 
-      const { analysis, recommendations } = await assertionGenerator.analyzeAndGenerate(
-        'step-1',
-        0,
-        stepText,
-        beforeUrl,
-        afterUrl
-      );
+      const { analysis, recommendations } =
+        await assertionGenerator.analyzeAndGenerate(
+          'step-1',
+          0,
+          stepText,
+          beforeUrl,
+          afterUrl,
+        );
 
       // Should identify submit intent
       expect(analysis.intent).toBe('submit_form');
@@ -176,11 +182,11 @@ describe('Smart Assertion System Integration', () => {
         0,
         stepText,
         beforeUrl,
-        afterUrl
+        afterUrl,
       );
 
       // All recommendations should meet threshold
-      recommendations.forEach(rec => {
+      recommendations.forEach((rec) => {
         expect(rec.confidence).toBeGreaterThanOrEqual(90);
       });
     });
@@ -201,7 +207,7 @@ describe('Smart Assertion System Integration', () => {
         0,
         stepText,
         beforeUrl,
-        afterUrl
+        afterUrl,
       );
 
       expect(recommendations.length).toBeLessThanOrEqual(3);
@@ -217,7 +223,7 @@ describe('Smart Assertion System Integration', () => {
         0,
         '点击登录按钮',
         'https://example.com/login',
-        'https://example.com/dashboard'
+        'https://example.com/dashboard',
       );
 
       expect(recommendations).toEqual([]);
@@ -257,11 +263,13 @@ describe('Smart Assertion System Integration', () => {
         0,
         '点击登录按钮',
         'https://example.com/login',
-        'https://example.com/dashboard'
+        'https://example.com/dashboard',
       );
 
       // Should include template-based recommendation
-      const templateRecs = recommendations.filter(r => r.source === 'template');
+      const templateRecs = recommendations.filter(
+        (r) => r.source === 'template',
+      );
       expect(templateRecs.length).toBeGreaterThanOrEqual(0);
     });
 
@@ -300,12 +308,16 @@ describe('Smart Assertion System Integration', () => {
         0,
         '点击按钮',
         'https://example.com',
-        'https://example.com'
+        'https://example.com',
       );
 
-      const templateRecs = recommendations.filter(r => r.source === 'template');
+      const templateRecs = recommendations.filter(
+        (r) => r.source === 'template',
+      );
       // Should not include payment template
-      const paymentRecs = templateRecs.filter(r => r.description?.includes('Payment'));
+      const paymentRecs = templateRecs.filter((r) =>
+        r.description?.includes('Payment'),
+      );
       expect(paymentRecs.length).toBe(0);
     });
   });
@@ -358,7 +370,10 @@ describe('Smart Assertion System Integration', () => {
           actionType: 'click',
           intentPattern: 'login',
         },
-        assertion: { type: 'url_contains', parameters: { expectedValue: 'dashboard' } },
+        assertion: {
+          type: 'url_contains',
+          parameters: { expectedValue: 'dashboard' },
+        },
       });
 
       // Find templates matching login intent
@@ -375,11 +390,11 @@ describe('Smart Assertion System Integration', () => {
         0,
         '点击登录按钮',
         'https://example.com/login',
-        'https://example.com/dashboard'
+        'https://example.com/dashboard',
       );
 
       // Each recommendation should have yamlOutput
-      recommendations.forEach(rec => {
+      recommendations.forEach((rec) => {
         expect(rec.yamlOutput).toBeDefined();
         expect(rec.yamlOutput.length).toBeGreaterThan(0);
       });
@@ -391,7 +406,7 @@ describe('Smart Assertion System Integration', () => {
         0,
         '点击登录按钮',
         'https://example.com/login',
-        'https://example.com/dashboard'
+        'https://example.com/dashboard',
       );
 
       if (recommendations.length > 1) {
@@ -405,7 +420,7 @@ describe('Smart Assertion System Integration', () => {
     it('should detect URL changes', () => {
       const urlChange = changeDetector.detectUrlChange(
         'https://example.com/login',
-        'https://example.com/dashboard'
+        'https://example.com/dashboard',
       );
 
       expect(urlChange).toBeDefined();
@@ -416,7 +431,7 @@ describe('Smart Assertion System Integration', () => {
     it('should not detect change for same URL', () => {
       const urlChange = changeDetector.detectUrlChange(
         'https://example.com/page',
-        'https://example.com/page'
+        'https://example.com/page',
       );
 
       expect(urlChange).toBeNull();
@@ -431,7 +446,7 @@ describe('Smart Assertion System Integration', () => {
         0,
         '点击登录按钮',
         'https://example.com/login',
-        'https://example.com/dashboard'
+        'https://example.com/dashboard',
       );
 
       // 2. Analyze intent
@@ -440,10 +455,13 @@ describe('Smart Assertion System Integration', () => {
       expect(analysis.needsAssertion).toBe(true);
 
       // 3. Generate recommendations
-      const recommendations = await assertionGenerator.generate(context, analysis);
+      const recommendations = await assertionGenerator.generate(
+        context,
+        analysis,
+      );
 
       // 4. Verify recommendations have required fields
-      recommendations.forEach(rec => {
+      recommendations.forEach((rec) => {
         expect(rec.id).toBeDefined();
         expect(rec.type).toBeDefined();
         expect(rec.confidence).toBeGreaterThanOrEqual(0);
@@ -454,34 +472,46 @@ describe('Smart Assertion System Integration', () => {
 
     it('should handle edge cases gracefully', async () => {
       // Empty step text
-      const { recommendations: emptyRecs } = await assertionGenerator.analyzeAndGenerate(
-        'step-1',
-        0,
-        '',
-        'https://example.com',
-        'https://example.com'
-      );
+      const { recommendations: emptyRecs } =
+        await assertionGenerator.analyzeAndGenerate(
+          'step-1',
+          0,
+          '',
+          'https://example.com',
+          'https://example.com',
+        );
       expect(Array.isArray(emptyRecs)).toBe(true);
 
       // Same URL before and after
-      const { recommendations: sameUrlRecs } = await assertionGenerator.analyzeAndGenerate(
-        'step-2',
-        1,
-        '点击按钮',
-        'https://example.com',
-        'https://example.com'
-      );
+      const { recommendations: sameUrlRecs } =
+        await assertionGenerator.analyzeAndGenerate(
+          'step-2',
+          1,
+          '点击按钮',
+          'https://example.com',
+          'https://example.com',
+        );
       expect(Array.isArray(sameUrlRecs)).toBe(true);
     });
   });
 
   describe('Intent Inferrer Analysis', () => {
     it('should identify high-value intents for assertion', () => {
-      const highValueIntents = ['login', 'logout', 'submit_form', 'signup', 'delete_item'];
+      const highValueIntents = [
+        'login',
+        'logout',
+        'submit_form',
+        'signup',
+        'delete_item',
+      ];
 
       for (const intent of highValueIntents) {
         const context: ActionContext = {
-          action: { type: 'click', target: { text: '' }, timestamp: Date.now() },
+          action: {
+            type: 'click',
+            target: { text: '' },
+            timestamp: Date.now(),
+          },
           pageState: {
             beforeUrl: 'https://example.com',
             afterUrl: 'https://example.com/next',
@@ -505,7 +535,11 @@ describe('Smart Assertion System Integration', () => {
 
     it('should detect visual changes as assertion triggers', () => {
       const context: ActionContext = {
-        action: { type: 'click', target: { text: '按钮' }, timestamp: Date.now() },
+        action: {
+          type: 'click',
+          target: { text: '按钮' },
+          timestamp: Date.now(),
+        },
         pageState: {
           beforeUrl: 'https://example.com',
           afterUrl: 'https://example.com',

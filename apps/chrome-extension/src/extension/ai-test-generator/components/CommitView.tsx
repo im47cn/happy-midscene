@@ -4,36 +4,36 @@
  */
 
 import {
+  BranchesOutlined,
   CheckCircleOutlined,
   CopyOutlined,
   DownloadOutlined,
-  GitlabOutlined,
   EditOutlined,
-  LinkOutlined,
   FolderOutlined,
-  BranchesOutlined,
+  GitlabOutlined,
+  LinkOutlined,
 } from '@ant-design/icons';
 import {
+  Alert,
   Button,
   Card,
-  Input,
-  Select,
-  Space,
-  Typography,
-  message,
-  Alert,
   Divider,
   Form,
-  Spin,
+  Input,
   Result,
+  Select,
+  Space,
+  Spin,
+  Typography,
+  message,
 } from 'antd';
 import { useEffect, useState } from 'react';
-import { useGeneratorStore } from '../store';
 import {
-  gitlabClient,
-  type GitLabProject,
   type GitLabBranch,
+  type GitLabProject,
+  gitlabClient,
 } from '../services/gitlabClient';
+import { useGeneratorStore } from '../store';
 import { GitLabConfigModal } from './GitLabConfig';
 
 const { Text, Title, Paragraph, Link } = Typography;
@@ -91,7 +91,9 @@ export function CommitView() {
   useEffect(() => {
     if (parseResult && !commitMessage) {
       const caseNames = parseResult.cases.map((c) => c.name).join(', ');
-      setCommitMessage(`feat(test): add AI-generated test cases\n\nCases: ${caseNames}`);
+      setCommitMessage(
+        `feat(test): add AI-generated test cases\n\nCases: ${caseNames}`,
+      );
     }
   }, [parseResult]);
 
@@ -175,7 +177,7 @@ export function CommitView() {
         await gitlabClient.createBranch(
           selectedProject.id,
           newBranchName,
-          selectedProject.default_branch
+          selectedProject.default_branch,
         );
       }
 
@@ -185,7 +187,7 @@ export function CommitView() {
         commitPath,
         generatedYaml,
         targetBranch,
-        commitMessage
+        commitMessage,
       );
 
       setCommitResult({
@@ -253,7 +255,11 @@ export function CommitView() {
         title="生成的 YAML 脚本"
         extra={
           <Space>
-            <Button size="small" icon={<CopyOutlined />} onClick={handleCopyYaml}>
+            <Button
+              size="small"
+              icon={<CopyOutlined />}
+              onClick={handleCopyYaml}
+            >
               复制
             </Button>
             <Button
@@ -286,7 +292,14 @@ export function CommitView() {
       <Divider />
 
       {/* GitLab Commit Section */}
-      <Card size="small" title={<><GitlabOutlined /> 提交到 GitLab</>}>
+      <Card
+        size="small"
+        title={
+          <>
+            <GitlabOutlined /> 提交到 GitLab
+          </>
+        }
+      >
         {!gitlabConfigured ? (
           <div className="gitlab-not-configured">
             <Alert

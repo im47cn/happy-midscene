@@ -43,7 +43,7 @@ describe('aiAction cacheable option propagation', () => {
       size: vi.fn().mockResolvedValue({ width: 1920, height: 1080, dpr: 1 }),
       actionSpace: vi.fn().mockReturnValue([
         {
-          name: 'Click',
+          name: 'Tap', // Use 'Tap' - 'Click' is aliased to 'Tap' in TaskBuilder
           paramSchema: z.object({
             locate: getMidsceneLocationSchema(),
           }),

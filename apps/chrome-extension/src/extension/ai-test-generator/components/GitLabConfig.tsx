@@ -4,25 +4,25 @@
  */
 
 import {
-  SettingOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
-  LoadingOutlined,
   EyeInvisibleOutlined,
   EyeOutlined,
+  LoadingOutlined,
+  SettingOutlined,
 } from '@ant-design/icons';
 import {
+  Alert,
   Button,
+  Divider,
   Form,
   Input,
   Modal,
   Space,
   Typography,
-  Alert,
-  Divider,
 } from 'antd';
 import { useEffect, useState } from 'react';
-import { gitlabClient, type GitLabConfig } from '../services/gitlabClient';
+import { type GitLabConfig, gitlabClient } from '../services/gitlabClient';
 import { useGeneratorStore } from '../store';
 
 const { Text, Title, Link } = Typography;

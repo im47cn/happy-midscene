@@ -6,16 +6,16 @@
 import type { Rect } from '@midscene/core';
 import type { ChromeExtensionProxyPageAgent } from '@midscene/web/chrome-extension';
 import type {
-  SemanticFingerprint,
-  HealingResult,
   HealingHistoryEntry,
+  HealingResult,
   HealingStatistics,
-  SelfHealingConfig,
   IHealingEngine,
+  SelfHealingConfig,
+  SemanticFingerprint,
 } from '../../types/healing';
 import { DEFAULT_SELF_HEALING_CONFIG } from '../../types/healing';
-import { healingStorage } from './storage';
 import { calculateConfidence, determineAction } from './confidenceCalculator';
+import { healingStorage } from './storage';
 
 /**
  * Generate unique ID
@@ -62,7 +62,7 @@ export class HealingEngine implements IHealingEngine {
   async collectFingerprint(
     stepId: string,
     elementCenter: [number, number],
-    elementRect: Rect
+    elementRect: Rect,
   ): Promise<SemanticFingerprint> {
     if (!this.agent) {
       throw new Error('Agent not set. Call setAgent() first.');
@@ -74,13 +74,19 @@ export class HealingEngine implements IHealingEngine {
     // Generate semantic description using Midscene AI
     let semanticDescription: string;
     try {
-      const describeResult = await this.agent.describeElementAtPoint(elementCenter, {
-        verifyPrompt: true,
-        retryLimit: 3,
-      });
+      const describeResult = await this.agent.describeElementAtPoint(
+        elementCenter,
+        {
+          verifyPrompt: true,
+          retryLimit: 3,
+        },
+      );
       semanticDescription = describeResult.prompt;
     } catch (error) {
-      console.warn('Failed to generate semantic description, using fallback:', error);
+      console.warn(
+        'Failed to generate semantic description, using fallback:',
+        error,
+      );
       // Fallback: use a generic description
       semanticDescription = `Element at position (${elementCenter[0]}, ${elementCenter[1]})`;
     }
@@ -121,7 +127,7 @@ export class HealingEngine implements IHealingEngine {
    */
   async heal(
     stepId: string,
-    originalDescription: string
+    originalDescription: string,
   ): Promise<HealingResult> {
     if (!this.agent) {
       throw new Error('Agent not set. Call setAgent() first.');
@@ -152,7 +158,7 @@ export class HealingEngine implements IHealingEngine {
           result.center,
           result.rect,
           fingerprint,
-          'normal'
+          'normal',
         );
 
         const healingResult: HealingResult = {
@@ -170,7 +176,12 @@ export class HealingEngine implements IHealingEngine {
         };
 
         // Record history
-        await this.recordHistory(stepId, originalDescription, healingResult, fingerprint);
+        await this.recordHistory(
+          stepId,
+          originalDescription,
+          healingResult,
+          fingerprint,
+        );
 
         return healingResult;
       }
@@ -182,16 +193,19 @@ export class HealingEngine implements IHealingEngine {
     if (this.config.enableDeepThink) {
       try {
         attemptsCount++;
-        const result = await this.agent.aiLocate(fingerprint.semanticDescription, {
-          deepThink: true,
-        });
+        const result = await this.agent.aiLocate(
+          fingerprint.semanticDescription,
+          {
+            deepThink: true,
+          },
+        );
 
         if (result.center && result.rect) {
           const { confidence, factors } = calculateConfidence(
             result.center,
             result.rect,
             fingerprint,
-            'deepThink'
+            'deepThink',
           );
 
           const healingResult: HealingResult = {
@@ -209,7 +223,12 @@ export class HealingEngine implements IHealingEngine {
           };
 
           // Record history
-          await this.recordHistory(stepId, originalDescription, healingResult, fingerprint);
+          await this.recordHistory(
+            stepId,
+            originalDescription,
+            healingResult,
+            fingerprint,
+          );
 
           return healingResult;
         }
@@ -223,11 +242,16 @@ export class HealingEngine implements IHealingEngine {
       'All healing strategies failed',
       healingId,
       attemptsCount,
-      Date.now() - startTime
+      Date.now() - startTime,
     );
 
     // Record failed attempt
-    await this.recordHistory(stepId, originalDescription, failedResult, fingerprint);
+    await this.recordHistory(
+      stepId,
+      originalDescription,
+      failedResult,
+      fingerprint,
+    );
 
     return failedResult;
   }
@@ -239,7 +263,7 @@ export class HealingEngine implements IHealingEngine {
   async confirmHealing(
     healingId: string,
     accepted: boolean,
-    newDescription?: string
+    newDescription?: string,
   ): Promise<{ center: [number, number]; rect: Rect } | null> {
     // Find the history entry
     const entry = await healingStorage.getHistoryByHealingId(healingId);
@@ -298,10 +322,10 @@ export class HealingEngine implements IHealingEngine {
     const failureCount = totalAttempts - successCount;
 
     const normalSuccessCount = history.filter(
-      (h) => h.result.success && h.result.strategy === 'normal'
+      (h) => h.result.success && h.result.strategy === 'normal',
     ).length;
     const deepThinkSuccessCount = history.filter(
-      (h) => h.result.success && h.result.strategy === 'deepThink'
+      (h) => h.result.success && h.result.strategy === 'deepThink',
     ).length;
 
     const successfulHeals = history.filter((h) => h.result.success);
@@ -313,7 +337,8 @@ export class HealingEngine implements IHealingEngine {
 
     const averageTimeCost =
       history.length > 0
-        ? history.reduce((sum, h) => sum + h.result.timeCost, 0) / history.length
+        ? history.reduce((sum, h) => sum + h.result.timeCost, 0) /
+          history.length
         : 0;
 
     // Get unstable elements (sorted by healingCount)
@@ -350,7 +375,9 @@ export class HealingEngine implements IHealingEngine {
   /**
    * Determine action based on healing result
    */
-  determineAction(result: HealingResult): 'auto_accept' | 'request_confirmation' | 'reject' {
+  determineAction(
+    result: HealingResult,
+  ): 'auto_accept' | 'request_confirmation' | 'reject' {
     if (!result.success) {
       return 'reject';
     }
@@ -363,7 +390,7 @@ export class HealingEngine implements IHealingEngine {
     reason: string,
     healingId?: string,
     attemptsCount = 0,
-    timeCost = 0
+    timeCost = 0,
   ): HealingResult {
     return {
       success: false,
@@ -384,7 +411,7 @@ export class HealingEngine implements IHealingEngine {
     stepId: string,
     originalDescription: string,
     result: HealingResult,
-    fingerprint: SemanticFingerprint
+    fingerprint: SemanticFingerprint,
   ): Promise<void> {
     const entry: HealingHistoryEntry = {
       id: generateId(),

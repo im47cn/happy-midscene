@@ -3,29 +3,50 @@
  * Tests the end-to-end flow from field recognition to data generation and masking
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
+import type { FieldDefinition, SemanticType } from '../../../types/dataGen';
+import {
+  analyzeBoundaryCoverage,
+  generateBoundaryTestCases,
+} from '../boundaryEngine';
+import { DataGenerator } from '../dataGenerator';
+import { DataMasker } from '../dataMasker';
+import { DataPoolManager } from '../dataPoolManager';
 import {
   FieldRecognizer,
   createFieldDefinition,
   createFormFields,
 } from '../fieldRecognizer';
-import { DataGenerator } from '../dataGenerator';
+import {
+  parseSemanticType,
+  parseSemanticTypeWithConfidence,
+} from '../semanticParser';
 import { SmartInputExecutor } from '../smartInputExecutor';
-import { DataMasker } from '../dataMasker';
-import { DataPoolManager } from '../dataPoolManager';
 import { TemplateManager } from '../templateManager';
-import { generateBoundaryTestCases, analyzeBoundaryCoverage } from '../boundaryEngine';
-import { parseSemanticType, parseSemanticTypeWithConfidence } from '../semanticParser';
-import type { FieldDefinition, SemanticType } from '../../../types/dataGen';
 
 // Mock localStorage for Template Manager
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
   return {
     getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => { store[key] = value; },
-    removeItem: (key: string) => { delete store[key]; },
-    clear: () => { store = {}; },
+    setItem: (key: string, value: string) => {
+      store[key] = value;
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
   };
 })();
 
@@ -126,7 +147,7 @@ describe('Smart Data Generation System Integration', () => {
     it('should correctly recognize Chinese field labels', () => {
       // Test keywords that are in the SEMANTIC_KEYWORDS mapping
       const testCases: Array<[string, SemanticType]> = [
-        ['手机', 'mobile_phone'],  // "手机" is in keywords
+        ['手机', 'mobile_phone'], // "手机" is in keywords
         ['邮箱', 'email'],
         ['密码', 'password'],
         ['身份证', 'id_card'],
@@ -251,11 +272,24 @@ describe('Smart Data Generation System Integration', () => {
   describe('Smart Input Executor Flow', () => {
     it('should parse data generation syntax correctly', () => {
       const testCases = [
-        { text: '输入[自动生成:手机号]', type: 'autoGenerate', semanticType: 'mobile_phone' },
-        { text: 'input [auto:email]', type: 'autoGenerate', semanticType: 'email' },
+        {
+          text: '输入[自动生成:手机号]',
+          type: 'autoGenerate',
+          semanticType: 'mobile_phone',
+        },
+        {
+          text: 'input [auto:email]',
+          type: 'autoGenerate',
+          semanticType: 'email',
+        },
         { text: '填写[随机]', type: 'random' },
         { text: 'enter [random]', type: 'random' },
-        { text: '使用[模板:用户.姓名]', type: 'template', templateName: '用户', templateField: '姓名' },
+        {
+          text: '使用[模板:用户.姓名]',
+          type: 'template',
+          templateName: '用户',
+          templateField: '姓名',
+        },
         { text: 'from [pool:cities]', type: 'pool', poolName: 'cities' },
       ];
 
@@ -278,7 +312,11 @@ describe('Smart Data Generation System Integration', () => {
 
     it('should generate values for step text', async () => {
       const stepText = '在手机号输入框输入[自动生成:手机号]';
-      const result = await smartInputExecutor.generateForStep(stepText, '手机号', 'step-1');
+      const result = await smartInputExecutor.generateForStep(
+        stepText,
+        '手机号',
+        'step-1',
+      );
 
       expect(result).not.toBeNull();
       expect(result!.value).toBeDefined();
@@ -287,16 +325,26 @@ describe('Smart Data Generation System Integration', () => {
     });
 
     it('should process step text and replace syntax', async () => {
-      const stepText = '在用户名框输入[自动生成:用户名]，邮箱框输入[自动生成:邮箱]';
-      const { processedText, generatedValues } = await smartInputExecutor.processStepText(stepText);
+      const stepText =
+        '在用户名框输入[自动生成:用户名]，邮箱框输入[自动生成:邮箱]';
+      const { processedText, generatedValues } =
+        await smartInputExecutor.processStepText(stepText);
 
       expect(processedText).not.toContain('[自动生成');
       expect(generatedValues.length).toBe(2);
     });
 
     it('should maintain records of generated values', async () => {
-      await smartInputExecutor.generateForStep('输入[自动生成:手机号]', '手机号', 'step-1');
-      await smartInputExecutor.generateForStep('输入[自动生成:邮箱]', '邮箱', 'step-2');
+      await smartInputExecutor.generateForStep(
+        '输入[自动生成:手机号]',
+        '手机号',
+        'step-1',
+      );
+      await smartInputExecutor.generateForStep(
+        '输入[自动生成:邮箱]',
+        '邮箱',
+        'step-2',
+      );
 
       const records = smartInputExecutor.getRecords();
       expect(records.length).toBe(2);
@@ -310,7 +358,7 @@ describe('Smart Data Generation System Integration', () => {
       const result = await smartInputExecutor.generateForStep(
         '点击登录按钮',
         '登录',
-        'step-1'
+        'step-1',
       );
 
       expect(result).toBeNull();
@@ -330,12 +378,13 @@ describe('Smart Data Generation System Integration', () => {
       expect(testCases.length).toBeGreaterThan(0);
 
       // Should have cases for boundaries - check for any boundary-related cases
-      const hasBoundaryCases = testCases.some(tc =>
-        tc.category === 'minimum' ||
-        tc.category === 'maximum' ||
-        tc.category === 'min_length' ||
-        tc.category === 'max_length' ||
-        tc.category === 'empty'
+      const hasBoundaryCases = testCases.some(
+        (tc) =>
+          tc.category === 'minimum' ||
+          tc.category === 'maximum' ||
+          tc.category === 'min_length' ||
+          tc.category === 'max_length' ||
+          tc.category === 'empty',
       );
       expect(hasBoundaryCases).toBe(true);
     });
@@ -352,8 +401,12 @@ describe('Smart Data Generation System Integration', () => {
       expect(testCases.length).toBeGreaterThan(0);
 
       // Check for valid/invalid results
-      const validCases = testCases.filter(tc => tc.expectedResult === 'valid');
-      const invalidCases = testCases.filter(tc => tc.expectedResult === 'invalid');
+      const validCases = testCases.filter(
+        (tc) => tc.expectedResult === 'valid',
+      );
+      const invalidCases = testCases.filter(
+        (tc) => tc.expectedResult === 'invalid',
+      );
 
       // At least one type of case should exist
       expect(validCases.length + invalidCases.length).toBeGreaterThan(0);
@@ -440,9 +493,21 @@ describe('Smart Data Generation System Integration', () => {
     it('should complete full workflow from DOM info to masked output', async () => {
       // 1. Simulate raw field info from DOM
       const rawFields = [
-        { label: '用户名', name: 'username', type: 'text', required: true, minLength: 4 },
+        {
+          label: '用户名',
+          name: 'username',
+          type: 'text',
+          required: true,
+          minLength: 4,
+        },
         { label: '手机号', name: 'mobile', type: 'tel', required: true },
-        { label: '密码', name: 'password', type: 'password', required: true, minLength: 8 },
+        {
+          label: '密码',
+          name: 'password',
+          type: 'password',
+          required: true,
+          minLength: 8,
+        },
       ];
 
       // 2. Recognize fields

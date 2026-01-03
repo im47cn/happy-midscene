@@ -3,23 +3,23 @@
  * Allows editing assertion parameters and creating custom assertions
  */
 
-import { useState, useEffect } from 'react';
 import {
-  Modal,
+  Button,
+  Divider,
   Form,
   Input,
-  Select,
   InputNumber,
-  Button,
+  Modal,
+  Select,
   Space,
   Typography,
-  Divider,
 } from 'antd';
+import { useEffect, useState } from 'react';
 import type {
-  AssertionRecommendation,
-  AssertionType,
   AssertionOperator,
   AssertionParams,
+  AssertionRecommendation,
+  AssertionType,
 } from '../../types/assertion';
 import { ASSERTION_TYPE_LABELS } from '../../types/assertion';
 
@@ -174,7 +174,10 @@ function generateYaml(type: AssertionType, params: AssertionParams): string {
 /**
  * Generate description from form values
  */
-function generateDescription(type: AssertionType, params: AssertionParams): string {
+function generateDescription(
+  type: AssertionType,
+  params: AssertionParams,
+): string {
   const typeLabel = ASSERTION_TYPE_LABELS[type] || type;
   const target = params.target || params.expectedValue || '';
 
@@ -239,9 +242,11 @@ export function AssertionEditor({
       const newRecommendation: AssertionRecommendation = {
         id: recommendation?.id || generateId(),
         type: values.type,
-        description: values.description || generateDescription(values.type, params),
+        description:
+          values.description || generateDescription(values.type, params),
         confidence: recommendation?.confidence || 100,
-        reason: mode === 'create' ? '用户自定义断言' : recommendation?.reason || '',
+        reason:
+          mode === 'create' ? '用户自定义断言' : recommendation?.reason || '',
         parameters: params,
         yamlOutput: generateYaml(values.type, params),
         source: 'rule',
@@ -263,9 +268,11 @@ export function AssertionEditor({
     'count_equals',
     'attribute_equals',
   ].includes(selectedType);
-  const showOperator = ['text_contains', 'text_equals', 'value_equals'].includes(
-    selectedType
-  );
+  const showOperator = [
+    'text_contains',
+    'text_equals',
+    'value_equals',
+  ].includes(selectedType);
 
   return (
     <Modal
@@ -340,14 +347,16 @@ export function AssertionEditor({
         )}
 
         <Form.Item name="timeout" label="超时时间 (毫秒)">
-          <InputNumber min={1000} max={30000} step={1000} style={{ width: '100%' }} />
+          <InputNumber
+            min={1000}
+            max={30000}
+            step={1000}
+            style={{ width: '100%' }}
+          />
         </Form.Item>
 
         <Form.Item name="description" label="断言描述">
-          <TextArea
-            rows={2}
-            placeholder="自定义断言描述（可选）"
-          />
+          <TextArea rows={2} placeholder="自定义断言描述（可选）" />
         </Form.Item>
 
         <Divider>预览</Divider>

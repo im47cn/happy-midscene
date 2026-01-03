@@ -3,11 +3,16 @@
  */
 
 import { create } from 'zustand';
-import type { GeneratorState, ViewMode, CommitOptions } from './types';
-import type { TestCase, ParseResult, ExecutionResult, ExecutionStatus } from './types';
-import type { GitLabProject, GitLabBranch } from './services/gitlabClient';
-import { parseMarkdown } from './services/markdownParser';
+import type { GitLabBranch, GitLabProject } from './services/gitlabClient';
 import { gitlabClient } from './services/gitlabClient';
+import { parseMarkdown } from './services/markdownParser';
+import type { CommitOptions, GeneratorState, ViewMode } from './types';
+import type {
+  ExecutionResult,
+  ExecutionStatus,
+  ParseResult,
+  TestCase,
+} from './types';
 
 interface GeneratorStore extends GeneratorState {
   // Input actions
@@ -22,7 +27,10 @@ interface GeneratorStore extends GeneratorState {
   setCurrentStepIndex: (index: number) => void;
   addExecutionResult: (result: ExecutionResult) => void;
   clearExecutionResults: () => void;
-  updateStepStatus: (stepId: string, status: 'pending' | 'running' | 'success' | 'failed' | 'skipped') => void;
+  updateStepStatus: (
+    stepId: string,
+    status: 'pending' | 'running' | 'success' | 'failed' | 'skipped',
+  ) => void;
 
   // Output actions
   setGeneratedYaml: (yaml: string) => void;
@@ -86,7 +94,8 @@ export const useGeneratorStore = create<GeneratorStore>((set, get) => ({
     const result = parseMarkdown(markdownInput);
     set({
       parseResult: result,
-      error: result.parseErrors.length > 0 ? result.parseErrors.join('\n') : null,
+      error:
+        result.parseErrors.length > 0 ? result.parseErrors.join('\n') : null,
     });
   },
 
@@ -115,7 +124,7 @@ export const useGeneratorStore = create<GeneratorStore>((set, get) => ({
       const updatedCases = state.parseResult.cases.map((testCase) => ({
         ...testCase,
         steps: testCase.steps.map((step) =>
-          step.id === stepId ? { ...step, status } : step
+          step.id === stepId ? { ...step, status } : step,
         ),
       }));
 
@@ -140,7 +149,10 @@ export const useGeneratorStore = create<GeneratorStore>((set, get) => ({
   },
 
   setSelectedProject: (project) => {
-    set({ selectedProject: project, selectedBranch: project?.default_branch || '' });
+    set({
+      selectedProject: project,
+      selectedBranch: project?.default_branch || '',
+    });
   },
 
   setSelectedBranch: (branch) => set({ selectedBranch: branch }),

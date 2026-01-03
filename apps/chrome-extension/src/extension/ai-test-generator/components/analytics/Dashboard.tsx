@@ -3,39 +3,43 @@
  * Main dashboard view for execution analytics
  */
 
-import { useEffect, useState, useCallback } from 'react';
-import {
-  Typography,
-  Button,
-  Space,
-  Radio,
-  DatePicker,
-  message,
-  Tooltip,
-  Tabs,
-  Badge,
-} from 'antd';
 import {
   ArrowLeftOutlined,
-  ReloadOutlined,
   BarChartOutlined,
-  UnorderedListOutlined,
-  SettingOutlined,
   BellOutlined,
+  ReloadOutlined,
+  SettingOutlined,
+  UnorderedListOutlined,
 } from '@ant-design/icons';
+import {
+  Badge,
+  Button,
+  DatePicker,
+  Radio,
+  Space,
+  Tabs,
+  Tooltip,
+  Typography,
+  message,
+} from 'antd';
 import type { Dayjs } from 'dayjs';
-import { KPICard, HealthScoreCard } from './KPICard';
-import { TrendChart, PassRateChart, DurationChart } from './TrendChart';
-import { FailureTypePie, HotspotsList, FailurePatterns } from './FailureCharts';
-import { CaseList, CaseSummary } from './CaseList';
-import { AlertSettings } from './AlertSettings';
-import { analysisEngine, failureAnalyzer, alertManager } from '../../services/analytics';
-import type {
-  TimeRange,
-  DashboardOverview,
-  CaseStats,
-} from '../../types/analytics';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  alertManager,
+  analysisEngine,
+  failureAnalyzer,
+} from '../../services/analytics';
 import type { FailurePattern } from '../../services/analytics/failureAnalyzer';
+import type {
+  CaseStats,
+  DashboardOverview,
+  TimeRange,
+} from '../../types/analytics';
+import { AlertSettings } from './AlertSettings';
+import { CaseList, CaseSummary } from './CaseList';
+import { FailurePatterns, FailureTypePie, HotspotsList } from './FailureCharts';
+import { HealthScoreCard, KPICard } from './KPICard';
+import { DurationChart, PassRateChart, TrendChart } from './TrendChart';
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
@@ -68,12 +72,13 @@ export function Dashboard({ onBack, onSettings }: DashboardProps) {
             }
           : undefined;
 
-      const [overviewData, cases, failurePatterns, alertCount] = await Promise.all([
-        analysisEngine.getDashboardOverview(timeRange, dateRange),
-        analysisEngine.getCaseStatsSorted('lastRun', false),
-        failureAnalyzer.detectPatterns(),
-        alertManager.getUnacknowledgedCount(),
-      ]);
+      const [overviewData, cases, failurePatterns, alertCount] =
+        await Promise.all([
+          analysisEngine.getDashboardOverview(timeRange, dateRange),
+          analysisEngine.getCaseStatsSorted('lastRun', false),
+          failureAnalyzer.detectPatterns(),
+          alertManager.getUnacknowledgedCount(),
+        ]);
 
       setOverview(overviewData);
       setCaseStats(cases);
@@ -99,7 +104,7 @@ export function Dashboard({ onBack, onSettings }: DashboardProps) {
   };
 
   const handleCustomRangeChange = (
-    dates: [Dayjs | null, Dayjs | null] | null
+    dates: [Dayjs | null, Dayjs | null] | null,
   ) => {
     if (dates && dates[0] && dates[1]) {
       setCustomRange([dates[0], dates[1]]);
@@ -309,11 +314,7 @@ export function Dashboard({ onBack, onSettings }: DashboardProps) {
     <div className="analytics-dashboard">
       <div className="dashboard-header">
         <div className="header-left">
-          <Button
-            type="text"
-            icon={<ArrowLeftOutlined />}
-            onClick={onBack}
-          >
+          <Button type="text" icon={<ArrowLeftOutlined />} onClick={onBack}>
             返回
           </Button>
           <Title level={5} style={{ margin: 0 }}>

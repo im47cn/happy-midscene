@@ -3,10 +3,10 @@
  * Tests for analytics computations and insights
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
-  DailyStats,
   CaseStats,
+  DailyStats,
   ExecutionRecord,
 } from '../../../types/analytics';
 
@@ -104,7 +104,9 @@ describe('AnalysisEngine', () => {
       const dailyStats = [createDailyStats()];
       const caseStats = [createCaseStats()];
 
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(dailyStats);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(
+        dailyStats,
+      );
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
       vi.mocked(analyticsStorage.getFailedExecutions).mockResolvedValue([]);
 
@@ -120,11 +122,21 @@ describe('AnalysisEngine', () => {
 
     it('should aggregate stats from multiple days', async () => {
       const dailyStats = [
-        createDailyStats({ date: '2024-01-14', totalExecutions: 50, passed: 45 }),
-        createDailyStats({ date: '2024-01-15', totalExecutions: 50, passed: 40 }),
+        createDailyStats({
+          date: '2024-01-14',
+          totalExecutions: 50,
+          passed: 45,
+        }),
+        createDailyStats({
+          date: '2024-01-15',
+          totalExecutions: 50,
+          passed: 40,
+        }),
       ];
 
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(dailyStats);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(
+        dailyStats,
+      );
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue([]);
       vi.mocked(analyticsStorage.getFailedExecutions).mockResolvedValue([]);
 
@@ -137,7 +149,7 @@ describe('AnalysisEngine', () => {
     it('should categorize cases correctly', async () => {
       const caseStats = [
         createCaseStats({ stabilityScore: 90, isFlaky: false }), // stable
-        createCaseStats({ stabilityScore: 60, isFlaky: true }),  // flaky
+        createCaseStats({ stabilityScore: 60, isFlaky: true }), // flaky
         createCaseStats({ stabilityScore: 40, isFlaky: false }), // unstable
         createCaseStats({ stabilityScore: 85, isFlaky: false }), // stable
       ];
@@ -178,7 +190,9 @@ describe('AnalysisEngine', () => {
         }),
       ];
 
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(dailyStats);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(
+        dailyStats,
+      );
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue([]);
       vi.mocked(analyticsStorage.getFailedExecutions).mockResolvedValue([]);
 
@@ -193,37 +207,43 @@ describe('AnalysisEngine', () => {
 
   describe('calculateHealthScore', () => {
     it('should return high score for high pass rate and stability', async () => {
-      const dailyStats = [{
-        date: '2024-01-15',
-        totalExecutions: 100,
-        passed: 95,
-        failed: 5,
-        skipped: 0,
-        error: 0,
-        avgDuration: 20000,
-        failuresByType: {
-          locator_failed: 3,
-          assertion_failed: 2,
-          timeout: 0,
-          network_error: 0,
-          script_error: 0,
-          unknown: 0,
+      const dailyStats = [
+        {
+          date: '2024-01-15',
+          totalExecutions: 100,
+          passed: 95,
+          failed: 5,
+          skipped: 0,
+          error: 0,
+          avgDuration: 20000,
+          failuresByType: {
+            locator_failed: 3,
+            assertion_failed: 2,
+            timeout: 0,
+            network_error: 0,
+            script_error: 0,
+            unknown: 0,
+          },
         },
-      }];
+      ];
 
-      const caseStats = [{
-        caseId: 'case-1',
-        caseName: 'Test',
-        totalRuns: 20,
-        passRate: 95,
-        avgDuration: 20000,
-        lastRun: Date.now(),
-        stabilityScore: 92,
-        isFlaky: false,
-        recentResults: ['passed', 'passed', 'passed', 'passed', 'failed'],
-      }];
+      const caseStats = [
+        {
+          caseId: 'case-1',
+          caseName: 'Test',
+          totalRuns: 20,
+          passRate: 95,
+          avgDuration: 20000,
+          lastRun: Date.now(),
+          stabilityScore: 92,
+          isFlaky: false,
+          recentResults: ['passed', 'passed', 'passed', 'passed', 'failed'],
+        },
+      ];
 
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(dailyStats);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(
+        dailyStats,
+      );
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
       const score = await analysisEngine.calculateHealthScore();
@@ -234,37 +254,43 @@ describe('AnalysisEngine', () => {
     });
 
     it('should return low score for low pass rate', async () => {
-      const dailyStats = [{
-        date: '2024-01-15',
-        totalExecutions: 100,
-        passed: 30,
-        failed: 70,
-        skipped: 0,
-        error: 0,
-        avgDuration: 20000,
-        failuresByType: {
-          locator_failed: 40,
-          assertion_failed: 20,
-          timeout: 10,
-          network_error: 0,
-          script_error: 0,
-          unknown: 0,
+      const dailyStats = [
+        {
+          date: '2024-01-15',
+          totalExecutions: 100,
+          passed: 30,
+          failed: 70,
+          skipped: 0,
+          error: 0,
+          avgDuration: 20000,
+          failuresByType: {
+            locator_failed: 40,
+            assertion_failed: 20,
+            timeout: 10,
+            network_error: 0,
+            script_error: 0,
+            unknown: 0,
+          },
         },
-      }];
+      ];
 
-      const caseStats = [{
-        caseId: 'case-1',
-        caseName: 'Test',
-        totalRuns: 20,
-        passRate: 30,
-        avgDuration: 20000,
-        lastRun: Date.now(),
-        stabilityScore: 35,
-        isFlaky: true,
-        recentResults: ['failed', 'passed', 'failed', 'failed', 'passed'],
-      }];
+      const caseStats = [
+        {
+          caseId: 'case-1',
+          caseName: 'Test',
+          totalRuns: 20,
+          passRate: 30,
+          avgDuration: 20000,
+          lastRun: Date.now(),
+          stabilityScore: 35,
+          isFlaky: true,
+          recentResults: ['failed', 'passed', 'failed', 'failed', 'passed'],
+        },
+      ];
 
-      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(dailyStats);
+      vi.mocked(analyticsStorage.getDailyStatsRange).mockResolvedValue(
+        dailyStats,
+      );
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
       const score = await analysisEngine.calculateHealthScore();
@@ -305,11 +331,27 @@ describe('AnalysisEngine', () => {
           duration: 5000,
           status: 'failed',
           steps: [
-            { index: 0, description: 'Click login button', status: 'passed', duration: 1000, retryCount: 0 },
-            { index: 1, description: 'Enter username', status: 'failed', duration: 1000, retryCount: 0 },
+            {
+              index: 0,
+              description: 'Click login button',
+              status: 'passed',
+              duration: 1000,
+              retryCount: 0,
+            },
+            {
+              index: 1,
+              description: 'Enter username',
+              status: 'failed',
+              duration: 1000,
+              retryCount: 0,
+            },
           ],
           failure: { type: 'locator_failed', message: 'Failed', stepIndex: 1 },
-          environment: { browser: 'Chrome', viewport: { width: 1920, height: 1080 }, url: 'https://example.com' },
+          environment: {
+            browser: 'Chrome',
+            viewport: { width: 1920, height: 1080 },
+            url: 'https://example.com',
+          },
         },
         {
           id: 'exec-2',
@@ -320,10 +362,20 @@ describe('AnalysisEngine', () => {
           duration: 5000,
           status: 'failed',
           steps: [
-            { index: 0, description: 'Enter username', status: 'failed', duration: 1000, retryCount: 0 },
+            {
+              index: 0,
+              description: 'Enter username',
+              status: 'failed',
+              duration: 1000,
+              retryCount: 0,
+            },
           ],
           failure: { type: 'locator_failed', message: 'Failed', stepIndex: 0 },
-          environment: { browser: 'Chrome', viewport: { width: 1920, height: 1080 }, url: 'https://example.com' },
+          environment: {
+            browser: 'Chrome',
+            viewport: { width: 1920, height: 1080 },
+            url: 'https://example.com',
+          },
         },
         {
           id: 'exec-3',
@@ -334,14 +386,30 @@ describe('AnalysisEngine', () => {
           duration: 5000,
           status: 'failed',
           steps: [
-            { index: 0, description: 'Submit form', status: 'failed', duration: 1000, retryCount: 0 },
+            {
+              index: 0,
+              description: 'Submit form',
+              status: 'failed',
+              duration: 1000,
+              retryCount: 0,
+            },
           ],
-          failure: { type: 'assertion_failed', message: 'Failed', stepIndex: 0 },
-          environment: { browser: 'Chrome', viewport: { width: 1920, height: 1080 }, url: 'https://example.com' },
+          failure: {
+            type: 'assertion_failed',
+            message: 'Failed',
+            stepIndex: 0,
+          },
+          environment: {
+            browser: 'Chrome',
+            viewport: { width: 1920, height: 1080 },
+            url: 'https://example.com',
+          },
         },
       ];
 
-      vi.mocked(analyticsStorage.getFailedExecutions).mockResolvedValue(failures);
+      vi.mocked(analyticsStorage.getFailedExecutions).mockResolvedValue(
+        failures,
+      );
 
       const hotspots = await analysisEngine.analyzeFailureHotspots();
 
@@ -352,20 +420,41 @@ describe('AnalysisEngine', () => {
     });
 
     it('should respect limit parameter', async () => {
-      const failures: ExecutionRecord[] = Array.from({ length: 20 }, (_, i) => ({
-        id: `exec-${i}`,
-        caseId: `case-${i}`,
-        caseName: `Test ${i}`,
-        startTime: Date.now(),
-        endTime: Date.now(),
-        duration: 5000,
-        status: 'failed' as const,
-        steps: [{ index: 0, description: `Step ${i}`, status: 'failed' as const, duration: 1000, retryCount: 0 }],
-        failure: { type: 'locator_failed' as const, message: 'Failed', stepIndex: 0 },
-        environment: { browser: 'Chrome', viewport: { width: 1920, height: 1080 }, url: 'https://example.com' },
-      }));
+      const failures: ExecutionRecord[] = Array.from(
+        { length: 20 },
+        (_, i) => ({
+          id: `exec-${i}`,
+          caseId: `case-${i}`,
+          caseName: `Test ${i}`,
+          startTime: Date.now(),
+          endTime: Date.now(),
+          duration: 5000,
+          status: 'failed' as const,
+          steps: [
+            {
+              index: 0,
+              description: `Step ${i}`,
+              status: 'failed' as const,
+              duration: 1000,
+              retryCount: 0,
+            },
+          ],
+          failure: {
+            type: 'locator_failed' as const,
+            message: 'Failed',
+            stepIndex: 0,
+          },
+          environment: {
+            browser: 'Chrome',
+            viewport: { width: 1920, height: 1080 },
+            url: 'https://example.com',
+          },
+        }),
+      );
 
-      vi.mocked(analyticsStorage.getFailedExecutions).mockResolvedValue(failures);
+      vi.mocked(analyticsStorage.getFailedExecutions).mockResolvedValue(
+        failures,
+      );
 
       const hotspots = await analysisEngine.analyzeFailureHotspots(5);
 
@@ -436,14 +525,20 @@ describe('AnalysisEngine', () => {
     });
 
     it('should sort by stability', async () => {
-      const sorted = await analysisEngine.getCaseStatsSorted('stability', false);
+      const sorted = await analysisEngine.getCaseStatsSorted(
+        'stability',
+        false,
+      );
 
       expect(sorted[0].stabilityScore).toBe(90);
       expect(sorted[2].stabilityScore).toBe(55);
     });
 
     it('should sort by totalRuns', async () => {
-      const sorted = await analysisEngine.getCaseStatsSorted('totalRuns', false);
+      const sorted = await analysisEngine.getCaseStatsSorted(
+        'totalRuns',
+        false,
+      );
 
       expect(sorted[0].totalRuns).toBe(50);
       expect(sorted[2].totalRuns).toBe(20);

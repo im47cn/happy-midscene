@@ -79,7 +79,12 @@ export interface FieldDefinition {
 /**
  * Generator configuration types
  */
-export type GeneratorType = 'pattern' | 'faker' | 'pool' | 'custom' | 'function';
+export type GeneratorType =
+  | 'pattern'
+  | 'faker'
+  | 'pool'
+  | 'custom'
+  | 'function';
 
 /**
  * Generator configuration
@@ -274,7 +279,7 @@ export interface IDataMasker {
   mask(value: unknown, semanticType: SemanticType): string;
   maskRecord(
     record: Record<string, unknown>,
-    fieldTypes: Record<string, SemanticType>
+    fieldTypes: Record<string, SemanticType>,
   ): Record<string, string>;
   isSensitive(semanticType: SemanticType): boolean;
 }
@@ -283,12 +288,23 @@ export interface IDataMasker {
  * Interface for template manager
  */
 export interface ITemplateManager {
-  create(template: Omit<DataTemplate, 'id' | 'createdAt' | 'updatedAt' | 'usageCount'>): Promise<DataTemplate>;
-  update(id: string, updates: Partial<DataTemplate>): Promise<DataTemplate | null>;
+  create(
+    template: Omit<
+      DataTemplate,
+      'id' | 'createdAt' | 'updatedAt' | 'usageCount'
+    >,
+  ): Promise<DataTemplate>;
+  update(
+    id: string,
+    updates: Partial<DataTemplate>,
+  ): Promise<DataTemplate | null>;
   delete(id: string): Promise<boolean>;
   get(id: string): Promise<DataTemplate | null>;
   list(): Promise<DataTemplate[]>;
-  applyTemplate(templateId: string, variables?: Record<string, unknown>): Promise<Record<string, unknown>>;
+  applyTemplate(
+    templateId: string,
+    variables?: Record<string, unknown>,
+  ): Promise<Record<string, unknown>>;
 }
 
 /**

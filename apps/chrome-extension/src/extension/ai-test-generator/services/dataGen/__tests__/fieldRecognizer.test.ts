@@ -2,13 +2,13 @@
  * Field Recognizer Tests
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import {
   FieldRecognizer,
-  fieldRecognizer,
+  type RawFieldInfo,
   createFieldDefinition,
   createFormFields,
-  type RawFieldInfo,
+  fieldRecognizer,
 } from '../fieldRecognizer';
 
 describe('FieldRecognizer', () => {
@@ -82,7 +82,11 @@ describe('FieldRecognizer', () => {
       };
 
       const result = recognizer.recognizeField(rawInfo);
-      expect(result.field.constraints.options).toEqual(['北京', '上海', '广州']);
+      expect(result.field.constraints.options).toEqual([
+        '北京',
+        '上海',
+        '广州',
+      ]);
     });
 
     it('should generate ID if not provided', () => {
@@ -131,7 +135,9 @@ describe('FieldRecognizer', () => {
 
       const results = recognizer.recognizeFields(rawInfoList);
       for (let i = 1; i < results.length; i++) {
-        expect(results[i - 1].confidence).toBeGreaterThanOrEqual(results[i].confidence);
+        expect(results[i - 1].confidence).toBeGreaterThanOrEqual(
+          results[i].confidence,
+        );
       }
     });
   });
@@ -152,7 +158,9 @@ describe('FieldRecognizer', () => {
     });
 
     it('should infer from text when HTML type not provided', () => {
-      expect(recognizer.recognizeFieldType(undefined, '详细描述')).toBe('textarea');
+      expect(recognizer.recognizeFieldType(undefined, '详细描述')).toBe(
+        'textarea',
+      );
     });
   });
 

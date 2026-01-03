@@ -3,7 +3,7 @@
  * Tests for self-healing retry mechanism with coordinate-based actions
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Since inferActionType and extractInputValue are private methods,
 // we test them through the exported inferActionType function and
@@ -29,10 +29,7 @@ function inferActionType(stepText: string): 'click' | 'input' | 'other' {
   }
 
   // Click action patterns
-  const clickPatterns = [
-    /点击|点选|单击|按下|触击/,
-    /click|tap|press|select/,
-  ];
+  const clickPatterns = [/点击|点选|单击|按下|触击/, /click|tap|press|select/];
   for (const pattern of clickPatterns) {
     if (pattern.test(lowerText)) {
       return 'click';
@@ -49,11 +46,11 @@ function inferActionType(stepText: string): 'click' | 'input' | 'other' {
 function extractInputValue(stepText: string): string | null {
   // Match quoted strings
   const quotePatterns = [
-    /"([^"]+)"/,          // Double quotes
-    /'([^']+)'/,          // Single quotes
-    /「([^」]+)」/,        // Chinese quotes
-    /『([^』]+)』/,        // Japanese quotes
-    /"([^"]+)"/,          // Smart quotes
+    /"([^"]+)"/, // Double quotes
+    /'([^']+)'/, // Single quotes
+    /「([^」]+)」/, // Chinese quotes
+    /『([^』]+)』/, // Japanese quotes
+    /"([^"]+)"/, // Smart quotes
   ];
 
   for (const pattern of quotePatterns) {
@@ -153,7 +150,9 @@ describe('extractInputValue', () => {
   describe('quoted values', () => {
     it('should extract double-quoted values', () => {
       expect(extractInputValue('输入"admin"')).toBe('admin');
-      expect(extractInputValue('在用户名框输入"test@example.com"')).toBe('test@example.com');
+      expect(extractInputValue('在用户名框输入"test@example.com"')).toBe(
+        'test@example.com',
+      );
     });
 
     it('should extract single-quoted values', () => {
@@ -181,7 +180,9 @@ describe('extractInputValue', () => {
     it('should extract value after English input keywords', () => {
       expect(extractInputValue('input admin')).toBe('admin');
       expect(extractInputValue('type: password')).toBe('password');
-      expect(extractInputValue('fill test@example.com')).toBe('test@example.com');
+      expect(extractInputValue('fill test@example.com')).toBe(
+        'test@example.com',
+      );
     });
 
     it('should return null for text without extractable value', () => {

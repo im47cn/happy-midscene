@@ -7,8 +7,8 @@ import type {
   ActionContext,
   AnalysisResult,
   AssertionType,
-  VisualChange,
   HIGH_VALUE_INTENTS,
+  VisualChange,
 } from '../../types/assertion';
 
 /**
@@ -203,7 +203,9 @@ function analyzeText(text: string): {
 /**
  * Determine assertion types from visual changes
  */
-function getAssertionTypesFromChanges(changes: VisualChange[]): AssertionType[] {
+function getAssertionTypesFromChanges(
+  changes: VisualChange[],
+): AssertionType[] {
   const types: Set<AssertionType> = new Set();
 
   for (const change of changes) {
@@ -249,12 +251,12 @@ function getAssertionTypesFromChanges(changes: VisualChange[]): AssertionType[] 
 function calculateConfidence(
   intentConfidence: number,
   changes: VisualChange[],
-  urlChanged: boolean
+  urlChanged: boolean,
 ): number {
   let confidence = intentConfidence;
 
   // Boost for significant changes
-  const significantChanges = changes.filter(c => c.confidence >= 0.7);
+  const significantChanges = changes.filter((c) => c.confidence >= 0.7);
   confidence += significantChanges.length * 5;
 
   // Boost for URL change
@@ -298,14 +300,17 @@ class IntentInferrer {
 
     // Determine if assertion is needed
     const isHighValueIntent = HIGH_VALUE_INTENT_SET.has(textAnalysis.intent);
-    const hasSignificantChanges = pageState.visibleChanges.some(c => c.confidence >= 0.7);
-    const needsAssertion = isHighValueIntent || hasSignificantChanges || urlChanged;
+    const hasSignificantChanges = pageState.visibleChanges.some(
+      (c) => c.confidence >= 0.7,
+    );
+    const needsAssertion =
+      isHighValueIntent || hasSignificantChanges || urlChanged;
 
     // Calculate confidence
     const confidence = calculateConfidence(
       textAnalysis.confidence,
       pageState.visibleChanges,
-      urlChanged
+      urlChanged,
     );
 
     // Determine suggested target
@@ -329,7 +334,7 @@ class IntentInferrer {
 
     // If there are visible changes, use the most confident one
     const sortedChanges = [...pageState.visibleChanges].sort(
-      (a, b) => b.confidence - a.confidence
+      (a, b) => b.confidence - a.confidence,
     );
 
     if (sortedChanges.length > 0 && sortedChanges[0].type === 'appeared') {
@@ -351,7 +356,7 @@ class IntentInferrer {
    * Get suggested assertion types for an intent
    */
   getSuggestedAssertionTypes(intent: string): AssertionType[] {
-    const pattern = INTENT_PATTERNS.find(p => p.intent === intent);
+    const pattern = INTENT_PATTERNS.find((p) => p.intent === intent);
     return pattern?.assertionTypes || ['element_visible'];
   }
 

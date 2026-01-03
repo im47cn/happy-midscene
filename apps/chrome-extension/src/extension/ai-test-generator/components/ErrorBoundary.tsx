@@ -3,9 +3,9 @@
  * Catches JavaScript errors in child components and displays fallback UI
  */
 
+import { BugOutlined, CopyOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Button, Collapse, Result, Space, Typography } from 'antd';
 import { Component, type ReactNode } from 'react';
-import { Button, Result, Typography, Space, Collapse } from 'antd';
-import { ReloadOutlined, BugOutlined, CopyOutlined } from '@ant-design/icons';
 
 const { Text, Paragraph } = Typography;
 
@@ -81,10 +81,7 @@ Component Stack: ${errorInfo?.componentStack || 'No component stack'}
                 >
                   重置组件
                 </Button>
-                <Button
-                  icon={<CopyOutlined />}
-                  onClick={this.handleCopyError}
-                >
+                <Button icon={<CopyOutlined />} onClick={this.handleCopyError}>
                   复制错误信息
                 </Button>
               </Space>
@@ -95,11 +92,7 @@ Component Stack: ${errorInfo?.componentStack || 'No component stack'}
               items={[
                 {
                   key: 'error',
-                  label: (
-                    <Text type="secondary">
-                      查看错误详情
-                    </Text>
-                  ),
+                  label: <Text type="secondary">查看错误详情</Text>,
                   children: (
                     <div className="error-details">
                       <Paragraph>
@@ -111,9 +104,7 @@ Component Stack: ${errorInfo?.componentStack || 'No component stack'}
                       {error?.stack && (
                         <Paragraph>
                           <Text strong>调用栈:</Text>
-                          <pre className="error-stack">
-                            {error.stack}
-                          </pre>
+                          <pre className="error-stack">{error.stack}</pre>
                         </Paragraph>
                       )}
 
@@ -147,7 +138,10 @@ interface ErrorFallbackProps {
   resetErrorBoundary: () => void;
 }
 
-export function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
+export function ErrorFallback({
+  error,
+  resetErrorBoundary,
+}: ErrorFallbackProps) {
   return (
     <Result
       status="error"

@@ -3,8 +3,12 @@
  * Allows users to paste or upload markdown requirements
  */
 
-import { UploadOutlined, FileTextOutlined, ClearOutlined } from '@ant-design/icons';
-import { Button, Input, Upload, Space, Typography, Alert, message } from 'antd';
+import {
+  ClearOutlined,
+  FileTextOutlined,
+  UploadOutlined,
+} from '@ant-design/icons';
+import { Alert, Button, Input, Space, Typography, Upload, message } from 'antd';
 import type { UploadProps } from 'antd';
 import { useGeneratorStore } from '../store';
 
@@ -97,7 +101,8 @@ export function MarkdownInput() {
 
       <div className="input-hint">
         <Text type="secondary">
-          使用 Markdown 格式描述测试用例：# 或 ## 作为用例名称，数字列表作为测试步骤
+          使用 Markdown 格式描述测试用例：# 或 ##
+          作为用例名称，数字列表作为测试步骤
         </Text>
       </div>
 

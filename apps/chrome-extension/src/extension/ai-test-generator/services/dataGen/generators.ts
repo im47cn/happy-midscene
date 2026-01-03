@@ -3,12 +3,15 @@
  * Provides data generation functions for different semantic types
  */
 
-import type { SemanticType, FieldConstraints } from '../../types/dataGen';
+import type { FieldConstraints, SemanticType } from '../../types/dataGen';
 
 /**
  * Generator function type
  */
-export type GeneratorFn = (constraints?: FieldConstraints, locale?: string) => unknown;
+export type GeneratorFn = (
+  constraints?: FieldConstraints,
+  locale?: string,
+) => unknown;
 
 /**
  * Random utilities
@@ -19,8 +22,14 @@ const random = {
 
   pick: <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)],
 
-  string: (length: number, chars = 'abcdefghijklmnopqrstuvwxyz0123456789'): string =>
-    Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join(''),
+  string: (
+    length: number,
+    chars = 'abcdefghijklmnopqrstuvwxyz0123456789',
+  ): string =>
+    Array.from(
+      { length },
+      () => chars[Math.floor(Math.random() * chars.length)],
+    ).join(''),
 
   digits: (length: number): string =>
     Array.from({ length }, () => Math.floor(Math.random() * 10)).join(''),
@@ -29,47 +38,179 @@ const random = {
 /**
  * Chinese name data pools
  */
-const CN_SURNAMES = ['张', '王', '李', '赵', '陈', '刘', '杨', '黄', '周', '吴', '徐', '孙', '马', '朱', '胡'];
-const CN_GIVEN_NAMES = ['伟', '芳', '娜', '敏', '静', '丽', '强', '磊', '军', '洋', '勇', '艳', '杰', '涛', '明'];
+const CN_SURNAMES = [
+  '张',
+  '王',
+  '李',
+  '赵',
+  '陈',
+  '刘',
+  '杨',
+  '黄',
+  '周',
+  '吴',
+  '徐',
+  '孙',
+  '马',
+  '朱',
+  '胡',
+];
+const CN_GIVEN_NAMES = [
+  '伟',
+  '芳',
+  '娜',
+  '敏',
+  '静',
+  '丽',
+  '强',
+  '磊',
+  '军',
+  '洋',
+  '勇',
+  '艳',
+  '杰',
+  '涛',
+  '明',
+];
 
 /**
  * Chinese mobile prefixes (valid carriers)
  */
 const CN_MOBILE_PREFIXES = [
-  '130', '131', '132', '133', '134', '135', '136', '137', '138', '139',
-  '150', '151', '152', '153', '155', '156', '157', '158', '159',
-  '170', '171', '172', '173', '175', '176', '177', '178',
-  '180', '181', '182', '183', '184', '185', '186', '187', '188', '189',
-  '191', '193', '195', '196', '197', '198', '199',
+  '130',
+  '131',
+  '132',
+  '133',
+  '134',
+  '135',
+  '136',
+  '137',
+  '138',
+  '139',
+  '150',
+  '151',
+  '152',
+  '153',
+  '155',
+  '156',
+  '157',
+  '158',
+  '159',
+  '170',
+  '171',
+  '172',
+  '173',
+  '175',
+  '176',
+  '177',
+  '178',
+  '180',
+  '181',
+  '182',
+  '183',
+  '184',
+  '185',
+  '186',
+  '187',
+  '188',
+  '189',
+  '191',
+  '193',
+  '195',
+  '196',
+  '197',
+  '198',
+  '199',
 ];
 
 /**
  * Chinese provinces for ID card
  */
 const CN_PROVINCES: Record<string, string> = {
-  '11': '北京', '12': '天津', '13': '河北', '14': '山西', '15': '内蒙古',
-  '21': '辽宁', '22': '吉林', '23': '黑龙江',
-  '31': '上海', '32': '江苏', '33': '浙江', '34': '安徽', '35': '福建', '36': '江西', '37': '山东',
-  '41': '河南', '42': '湖北', '43': '湖南', '44': '广东', '45': '广西', '46': '海南',
-  '50': '重庆', '51': '四川', '52': '贵州', '53': '云南', '54': '西藏',
-  '61': '陕西', '62': '甘肃', '63': '青海', '64': '宁夏', '65': '新疆',
+  '11': '北京',
+  '12': '天津',
+  '13': '河北',
+  '14': '山西',
+  '15': '内蒙古',
+  '21': '辽宁',
+  '22': '吉林',
+  '23': '黑龙江',
+  '31': '上海',
+  '32': '江苏',
+  '33': '浙江',
+  '34': '安徽',
+  '35': '福建',
+  '36': '江西',
+  '37': '山东',
+  '41': '河南',
+  '42': '湖北',
+  '43': '湖南',
+  '44': '广东',
+  '45': '广西',
+  '46': '海南',
+  '50': '重庆',
+  '51': '四川',
+  '52': '贵州',
+  '53': '云南',
+  '54': '西藏',
+  '61': '陕西',
+  '62': '甘肃',
+  '63': '青海',
+  '64': '宁夏',
+  '65': '新疆',
 };
 
 /**
  * Email domains
  */
-const EMAIL_DOMAINS = ['gmail.com', 'qq.com', '163.com', 'outlook.com', 'hotmail.com', 'example.com'];
+const EMAIL_DOMAINS = [
+  'gmail.com',
+  'qq.com',
+  '163.com',
+  'outlook.com',
+  'hotmail.com',
+  'example.com',
+];
 
 /**
  * Chinese cities
  */
-const CN_CITIES = ['北京市', '上海市', '广州市', '深圳市', '杭州市', '成都市', '武汉市', '南京市', '西安市', '重庆市'];
+const CN_CITIES = [
+  '北京市',
+  '上海市',
+  '广州市',
+  '深圳市',
+  '杭州市',
+  '成都市',
+  '武汉市',
+  '南京市',
+  '西安市',
+  '重庆市',
+];
 
 /**
  * Chinese addresses
  */
-const CN_DISTRICTS = ['朝阳区', '海淀区', '浦东新区', '南山区', '天河区', '福田区', '余杭区', '锦江区'];
-const CN_STREETS = ['建国路', '中关村大街', '南京路', '深南大道', '天府大道', '解放路', '人民路', '长安街'];
+const CN_DISTRICTS = [
+  '朝阳区',
+  '海淀区',
+  '浦东新区',
+  '南山区',
+  '天河区',
+  '福田区',
+  '余杭区',
+  '锦江区',
+];
+const CN_STREETS = [
+  '建国路',
+  '中关村大街',
+  '南京路',
+  '深南大道',
+  '天府大道',
+  '解放路',
+  '人民路',
+  '长安街',
+];
 
 /**
  * Generate Chinese mobile phone number
@@ -94,7 +235,9 @@ export function generateEmail(constraints?: FieldConstraints): string {
  */
 export function generateRealName(): string {
   const surname = random.pick(CN_SURNAMES);
-  const givenName = random.pick(CN_GIVEN_NAMES) + (Math.random() > 0.5 ? random.pick(CN_GIVEN_NAMES) : '');
+  const givenName =
+    random.pick(CN_GIVEN_NAMES) +
+    (Math.random() > 0.5 ? random.pick(CN_GIVEN_NAMES) : '');
   return surname + givenName;
 }
 
@@ -112,8 +255,26 @@ export function generateUsername(constraints?: FieldConstraints): string {
  * Generate nickname
  */
 export function generateNickname(): string {
-  const prefixes = ['快乐', '阳光', '微笑', '幸福', '可爱', '温暖', '自由', '梦想'];
-  const suffixes = ['小王子', '小公主', '达人', '少年', '青年', '宝贝', '天使', '精灵'];
+  const prefixes = [
+    '快乐',
+    '阳光',
+    '微笑',
+    '幸福',
+    '可爱',
+    '温暖',
+    '自由',
+    '梦想',
+  ];
+  const suffixes = [
+    '小王子',
+    '小公主',
+    '达人',
+    '少年',
+    '青年',
+    '宝贝',
+    '天使',
+    '精灵',
+  ];
   return random.pick(prefixes) + random.pick(suffixes);
 }
 
@@ -132,14 +293,21 @@ export function generatePassword(constraints?: FieldConstraints): string {
   const special = '@#$%&*!';
 
   // Start with one of each required type
-  let password = random.pick([...upper]) + random.pick([...lower]) + random.pick([...digits]) + random.pick([...special]);
+  let password =
+    random.pick([...upper]) +
+    random.pick([...lower]) +
+    random.pick([...digits]) +
+    random.pick([...special]);
 
   // Fill the rest
   const allChars = upper + lower + digits + special;
   password += random.string(length - 4, allChars);
 
   // Shuffle
-  return password.split('').sort(() => Math.random() - 0.5).join('');
+  return password
+    .split('')
+    .sort(() => Math.random() - 0.5)
+    .join('');
 }
 
 /**
@@ -151,7 +319,7 @@ function calculateIdCardChecksum(id17: string): string {
 
   let sum = 0;
   for (let i = 0; i < 17; i++) {
-    sum += parseInt(id17[i], 10) * weights[i];
+    sum += Number.parseInt(id17[i], 10) * weights[i];
   }
 
   return checksumChars[sum % 11];
@@ -205,13 +373,13 @@ export function generateBankCard(): string {
 
   const bin = random.pick(bankBins);
   const accountLength = random.pick([10, 11, 12, 13]); // Total 16-19 digits
-  let account = bin + random.digits(accountLength - 1);
+  const account = bin + random.digits(accountLength - 1);
 
   // Calculate Luhn checksum
   let sum = 0;
   let isEven = false;
   for (let i = account.length - 1; i >= 0; i--) {
-    let digit = parseInt(account[i], 10);
+    let digit = Number.parseInt(account[i], 10);
     if (isEven) {
       digit *= 2;
       if (digit > 9) digit -= 9;
@@ -336,7 +504,12 @@ export function generateCompany(): string {
   const middles = ['科技', '信息', '网络', '数据', '智能'];
   const suffixes = ['有限公司', '股份有限公司', '集团有限公司'];
 
-  return random.pick(prefixes) + random.string(2, '华盛达联创新') + random.pick(middles) + random.pick(suffixes);
+  return (
+    random.pick(prefixes) +
+    random.string(2, '华盛达联创新') +
+    random.pick(middles) +
+    random.pick(suffixes)
+  );
 }
 
 /**
@@ -344,8 +517,16 @@ export function generateCompany(): string {
  */
 export function generateJobTitle(): string {
   const titles = [
-    '软件工程师', '产品经理', '设计师', '测试工程师', '项目经理',
-    '前端开发工程师', '后端开发工程师', '运维工程师', '数据分析师', '架构师',
+    '软件工程师',
+    '产品经理',
+    '设计师',
+    '测试工程师',
+    '项目经理',
+    '前端开发工程师',
+    '后端开发工程师',
+    '运维工程师',
+    '数据分析师',
+    '架构师',
   ];
   return random.pick(titles);
 }
@@ -403,7 +584,7 @@ export const generators: Record<SemanticType, GeneratorFn> = {
 export function generateForSemanticType(
   semanticType: SemanticType,
   constraints?: FieldConstraints,
-  locale?: string
+  locale?: string,
 ): unknown {
   const generator = generators[semanticType];
   if (!generator) {

@@ -2,14 +2,14 @@
  * Semantic Parser Tests
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-  parseSemanticType,
-  parseSemanticTypeWithConfidence,
-  parseFieldType,
+  addSemanticKeywords,
   extractConstraints,
   getSemanticKeywords,
-  addSemanticKeywords,
+  parseFieldType,
+  parseSemanticType,
+  parseSemanticTypeWithConfidence,
 } from '../semanticParser';
 
 describe('SemanticParser', () => {
@@ -113,7 +113,9 @@ describe('SemanticParser', () => {
 
     it('should infer from placeholder', () => {
       expect(parseFieldType(undefined, undefined, '请输入邮箱')).toBe('email');
-      expect(parseFieldType(undefined, undefined, 'Enter password')).toBe('password');
+      expect(parseFieldType(undefined, undefined, 'Enter password')).toBe(
+        'password',
+      );
     });
 
     it('should default to text for unknown types', () => {

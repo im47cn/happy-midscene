@@ -3,23 +3,27 @@
  * Entry point for the AI-powered test generation feature
  */
 
-import { useEffect, useState, useCallback } from 'react';
-import { message, Tooltip } from 'antd';
-import { KeyOutlined, HistoryOutlined, BarChartOutlined } from '@ant-design/icons';
-import { useGeneratorStore } from './store';
 import {
-  MarkdownInput,
-  TestCasePreview,
-  ExecutionView,
+  BarChartOutlined,
+  HistoryOutlined,
+  KeyOutlined,
+} from '@ant-design/icons';
+import { Tooltip, message } from 'antd';
+import { useCallback, useEffect, useState } from 'react';
+import {
   CommitView,
-  GitLabStatus,
-  ShortcutsHelp,
-  HistoryView,
-  ErrorBoundary,
   DeviceSelectorCompact,
+  ErrorBoundary,
+  ExecutionView,
+  GitLabStatus,
+  HistoryView,
+  MarkdownInput,
+  ShortcutsHelp,
+  TestCasePreview,
 } from './components';
 import { Dashboard } from './components/analytics';
 import { useKeyboardShortcuts } from './hooks';
+import { useGeneratorStore } from './store';
 import './styles.less';
 
 export function AITestGenerator() {

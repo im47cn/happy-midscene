@@ -6,9 +6,9 @@
 import type {
   ActionContext,
   ActionType,
+  BoundingBox,
   ElementInfo,
   PageState,
-  BoundingBox,
 } from '../../types/assertion';
 
 /**
@@ -52,15 +52,22 @@ function inferActionType(text: string): ActionType {
 /**
  * Extract target element description from step text
  */
-function extractTargetDescription(text: string, actionType: ActionType): string {
+function extractTargetDescription(
+  text: string,
+  actionType: ActionType,
+): string {
   // Remove action keywords to get target
   const patterns: Record<string, RegExp> = {
-    click: /(?:点击|单击|按下|click|tap|press|选择|select)\s*(?:"|'|「|【)?([^"'」】\n]+)/i,
-    input: /(?:输入|填写|键入|type|input|enter|fill)\s*(?:"|'|「|【)?([^"'」】\n]+)/i,
-    navigate: /(?:打开|访问|跳转到?|go to|navigate to?|open|visit)\s*(?:"|'|「|【)?([^"'」】\n]+)/i,
+    click:
+      /(?:点击|单击|按下|click|tap|press|选择|select)\s*(?:"|'|「|【)?([^"'」】\n]+)/i,
+    input:
+      /(?:输入|填写|键入|type|input|enter|fill)\s*(?:"|'|「|【)?([^"'」】\n]+)/i,
+    navigate:
+      /(?:打开|访问|跳转到?|go to|navigate to?|open|visit)\s*(?:"|'|「|【)?([^"'」】\n]+)/i,
     select: /(?:选择|下拉|dropdown|select)\s*(?:"|'|「|【)?([^"'」】\n]+)/i,
     wait: /(?:等待|wait for?|sleep|delay)\s*(?:"|'|「|【)?([^"'」】\n]+)/i,
-    assert: /(?:验证|确认|检查|断言|verify|assert|check|should|expect)\s*(?:"|'|「|【)?([^"'」】\n]+)/i,
+    assert:
+      /(?:验证|确认|检查|断言|verify|assert|check|should|expect)\s*(?:"|'|「|【)?([^"'」】\n]+)/i,
   };
 
   const pattern = patterns[actionType];
@@ -100,7 +107,7 @@ function extractInputValue(text: string): string | undefined {
 function inferActionIntent(
   actionType: ActionType,
   targetDesc: string,
-  value?: string
+  value?: string,
 ): string {
   const lowerTarget = targetDesc.toLowerCase();
 
@@ -195,8 +202,8 @@ function inferExpectedOutcome(intent: string): string {
  */
 class ContextCollector {
   private currentContext: Partial<ActionContext> | null = null;
-  private beforeUrl: string = '';
-  private beforeTitle: string = '';
+  private beforeUrl = '';
+  private beforeTitle = '';
 
   /**
    * Start collecting context before action execution
@@ -275,7 +282,7 @@ class ContextCollector {
     stepText: string,
     beforeUrl: string,
     afterUrl: string,
-    elementInfo?: Partial<ElementInfo>
+    elementInfo?: Partial<ElementInfo>,
   ): ActionContext {
     const actionType = inferActionType(stepText);
     const targetDesc = extractTargetDescription(stepText, actionType);
@@ -309,7 +316,9 @@ class ContextCollector {
   /**
    * Add visual change to current context
    */
-  addVisualChange(change: ActionContext['pageState']['visibleChanges'][0]): void {
+  addVisualChange(
+    change: ActionContext['pageState']['visibleChanges'][0],
+  ): void {
     if (this.currentContext?.pageState) {
       this.currentContext.pageState.visibleChanges.push(change);
     }

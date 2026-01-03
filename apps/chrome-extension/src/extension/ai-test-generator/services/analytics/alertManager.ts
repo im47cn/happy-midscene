@@ -4,10 +4,10 @@
  */
 
 import type {
-  AlertRule,
-  AlertEvent,
   AlertCondition,
   AlertConditionType,
+  AlertEvent,
+  AlertRule,
   ExecutionRecord,
   NotificationChannel,
 } from '../../types/analytics';
@@ -66,7 +66,7 @@ class AlertManager {
    * Create a new alert rule
    */
   async createRule(
-    rule: Omit<AlertRule, 'id' | 'createdAt'>
+    rule: Omit<AlertRule, 'id' | 'createdAt'>,
   ): Promise<AlertRule> {
     const newRule: AlertRule = {
       ...rule,
@@ -136,7 +136,7 @@ class AlertManager {
    */
   private async evaluateCondition(
     condition: AlertCondition,
-    record: ExecutionRecord
+    record: ExecutionRecord,
   ): Promise<{ triggered: boolean; currentValue: number }> {
     switch (condition.type) {
       case 'pass_rate':
@@ -160,7 +160,7 @@ class AlertManager {
    * Evaluate pass rate condition
    */
   private async evaluatePassRate(
-    condition: AlertCondition
+    condition: AlertCondition,
   ): Promise<{ triggered: boolean; currentValue: number }> {
     const timeWindow = condition.timeWindow || 60;
     const startTime = Date.now() - timeWindow * 60 * 1000;
@@ -168,7 +168,7 @@ class AlertManager {
 
     const executions = await analyticsStorage.getExecutionsByTimeRange(
       startTime,
-      endTime
+      endTime,
     );
 
     if (executions.length === 0) {
@@ -189,14 +189,14 @@ class AlertManager {
    */
   private async evaluateConsecutiveFailures(
     condition: AlertCondition,
-    record: ExecutionRecord
+    record: ExecutionRecord,
   ): Promise<{ triggered: boolean; currentValue: number }> {
     if (record.status === 'passed') {
       return { triggered: false, currentValue: 0 };
     }
 
     const caseExecutions = await analyticsStorage.getExecutionsByCaseId(
-      record.caseId
+      record.caseId,
     );
 
     // Count consecutive failures from most recent
@@ -220,7 +220,7 @@ class AlertManager {
    */
   private async evaluateDuration(
     condition: AlertCondition,
-    record: ExecutionRecord
+    record: ExecutionRecord,
   ): Promise<{ triggered: boolean; currentValue: number }> {
     const caseStats = await analyticsStorage.getCaseStats(record.caseId);
 
@@ -243,7 +243,7 @@ class AlertManager {
    */
   private async evaluateFlakyDetected(
     condition: AlertCondition,
-    record: ExecutionRecord
+    record: ExecutionRecord,
   ): Promise<{ triggered: boolean; currentValue: number }> {
     const caseStats = await analyticsStorage.getCaseStats(record.caseId);
 
@@ -275,7 +275,7 @@ class AlertManager {
    */
   private async createAlertEvent(
     rule: AlertRule,
-    currentValue: number
+    currentValue: number,
   ): Promise<AlertEvent> {
     const message = this.generateAlertMessage(rule, currentValue);
 
@@ -321,7 +321,7 @@ class AlertManager {
    */
   private async sendNotifications(
     rule: AlertRule,
-    event: AlertEvent
+    event: AlertEvent,
   ): Promise<void> {
     const { channels } = rule.notification;
 
@@ -336,7 +336,7 @@ class AlertManager {
             if (rule.notification.webhookUrl) {
               await this.sendWebhookNotification(
                 rule.notification.webhookUrl,
-                event
+                event,
               );
             }
             break;
@@ -378,7 +378,7 @@ class AlertManager {
    */
   private async sendWebhookNotification(
     url: string,
-    event: AlertEvent
+    event: AlertEvent,
   ): Promise<void> {
     try {
       await fetch(url, {
@@ -406,7 +406,7 @@ class AlertManager {
   /**
    * Get recent alert events
    */
-  async getRecentEvents(limit: number = 20): Promise<AlertEvent[]> {
+  async getRecentEvents(limit = 20): Promise<AlertEvent[]> {
     return analyticsStorage.getRecentAlertEvents(limit);
   }
 

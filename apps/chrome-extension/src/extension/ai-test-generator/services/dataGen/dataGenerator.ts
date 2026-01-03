@@ -4,18 +4,18 @@
  */
 
 import type {
-  FieldDefinition,
-  GenerateOptions,
-  GeneratedData,
-  FormGenerationResult,
   BoundaryTestCase,
   DataGenConfig,
+  FieldDefinition,
+  FormGenerationResult,
+  GenerateOptions,
+  GeneratedData,
   IDataGenerator,
 } from '../../types/dataGen';
 import { DEFAULT_DATA_GEN_CONFIG } from '../../types/dataGen';
-import { generateForSemanticType } from './generators';
 import { generateBoundaryTestCases } from './boundaryEngine';
-import { maskValue, isSensitiveType } from './dataMasker';
+import { isSensitiveType, maskValue } from './dataMasker';
+import { generateForSemanticType } from './generators';
 
 /**
  * Data Generator implementation
@@ -46,7 +46,7 @@ export class DataGenerator implements IDataGenerator {
    */
   async generate(
     field: FieldDefinition,
-    options: GenerateOptions = {}
+    options: GenerateOptions = {},
   ): Promise<unknown> {
     if (!this.config.enabled) {
       return null;
@@ -59,7 +59,7 @@ export class DataGenerator implements IDataGenerator {
       const value = generateForSemanticType(
         field.semanticType,
         field.constraints,
-        locale
+        locale,
       );
 
       return value;
@@ -73,7 +73,7 @@ export class DataGenerator implements IDataGenerator {
    * Generate data for multiple fields (form)
    */
   async generateForForm(
-    fields: FieldDefinition[]
+    fields: FieldDefinition[],
   ): Promise<FormGenerationResult> {
     const result: Record<string, GeneratedData> = {};
     const timestamp = Date.now();
@@ -111,7 +111,7 @@ export class DataGenerator implements IDataGenerator {
    * Generate boundary test cases for a field
    */
   async generateBoundaryValues(
-    field: FieldDefinition
+    field: FieldDefinition,
   ): Promise<BoundaryTestCase[]> {
     if (!this.config.generateBoundaryValues) {
       return [];
@@ -125,7 +125,7 @@ export class DataGenerator implements IDataGenerator {
    */
   async generateVariations(
     field: FieldDefinition,
-    count: number = 5
+    count = 5,
   ): Promise<unknown[]> {
     const variations: unknown[] = [];
 

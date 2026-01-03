@@ -2,12 +2,17 @@
  * Boundary Engine Tests
  */
 
-import { describe, it, expect } from 'vitest';
-import { generateBoundaryTestCases, analyzeBoundaryCoverage } from '../boundaryEngine';
+import { describe, expect, it } from 'vitest';
 import type { FieldDefinition } from '../../../types/dataGen';
+import {
+  analyzeBoundaryCoverage,
+  generateBoundaryTestCases,
+} from '../boundaryEngine';
 
 describe('BoundaryEngine', () => {
-  const createField = (overrides: Partial<FieldDefinition> = {}): FieldDefinition => ({
+  const createField = (
+    overrides: Partial<FieldDefinition> = {},
+  ): FieldDefinition => ({
     id: 'test-field',
     name: 'testField',
     label: 'Test Field',
@@ -25,7 +30,7 @@ describe('BoundaryEngine', () => {
       const field = createField({ constraints: { required: true } });
       const cases = generateBoundaryTestCases(field);
 
-      const emptyCase = cases.find(c => c.category === 'empty');
+      const emptyCase = cases.find((c) => c.category === 'empty');
       expect(emptyCase).toBeDefined();
       expect(emptyCase?.expectedResult).toBe('invalid');
     });
@@ -34,7 +39,7 @@ describe('BoundaryEngine', () => {
       const field = createField({ constraints: { required: false } });
       const cases = generateBoundaryTestCases(field);
 
-      const emptyCase = cases.find(c => c.category === 'empty');
+      const emptyCase = cases.find((c) => c.category === 'empty');
       expect(emptyCase).toBeDefined();
       expect(emptyCase?.expectedResult).toBe('valid');
     });
@@ -46,10 +51,10 @@ describe('BoundaryEngine', () => {
       const cases = generateBoundaryTestCases(field);
 
       // Should have min, max, boundary-1, boundary+1 cases
-      expect(cases.some(c => c.category === 'min')).toBe(true);
-      expect(cases.some(c => c.category === 'max')).toBe(true);
-      expect(cases.some(c => c.category === 'boundary-1')).toBe(true);
-      expect(cases.some(c => c.category === 'boundary+1')).toBe(true);
+      expect(cases.some((c) => c.category === 'min')).toBe(true);
+      expect(cases.some((c) => c.category === 'max')).toBe(true);
+      expect(cases.some((c) => c.category === 'boundary-1')).toBe(true);
+      expect(cases.some((c) => c.category === 'boundary+1')).toBe(true);
     });
 
     it('should generate value boundary cases for numeric fields', () => {
@@ -60,17 +65,17 @@ describe('BoundaryEngine', () => {
       });
       const cases = generateBoundaryTestCases(field);
 
-      const minCase = cases.find(c => c.name.includes('最小值'));
+      const minCase = cases.find((c) => c.name.includes('最小值'));
       expect(minCase).toBeDefined();
       expect(minCase?.value).toBe(1);
       expect(minCase?.expectedResult).toBe('valid');
 
-      const maxCase = cases.find(c => c.name.includes('最大值'));
+      const maxCase = cases.find((c) => c.name.includes('最大值'));
       expect(maxCase).toBeDefined();
       expect(maxCase?.value).toBe(100);
       expect(maxCase?.expectedResult).toBe('valid');
 
-      const belowMinCase = cases.find(c => c.name.includes('低于最小值'));
+      const belowMinCase = cases.find((c) => c.name.includes('低于最小值'));
       expect(belowMinCase).toBeDefined();
       expect(belowMinCase?.value).toBe(0);
       expect(belowMinCase?.expectedResult).toBe('invalid');
@@ -84,8 +89,8 @@ describe('BoundaryEngine', () => {
       });
       const cases = generateBoundaryTestCases(field);
 
-      expect(cases.some(c => c.name.includes('无效邮箱格式'))).toBe(true);
-      expect(cases.some(c => c.name.includes('邮箱缺少域名'))).toBe(true);
+      expect(cases.some((c) => c.name.includes('无效邮箱格式'))).toBe(true);
+      expect(cases.some((c) => c.name.includes('邮箱缺少域名'))).toBe(true);
     });
 
     it('should generate special cases for mobile phone field', () => {
@@ -96,8 +101,8 @@ describe('BoundaryEngine', () => {
       });
       const cases = generateBoundaryTestCases(field);
 
-      expect(cases.some(c => c.name.includes('无效手机号前缀'))).toBe(true);
-      expect(cases.some(c => c.name.includes('手机号位数不足'))).toBe(true);
+      expect(cases.some((c) => c.name.includes('无效手机号前缀'))).toBe(true);
+      expect(cases.some((c) => c.name.includes('手机号位数不足'))).toBe(true);
     });
 
     it('should generate special cases for ID card field', () => {
@@ -107,8 +112,8 @@ describe('BoundaryEngine', () => {
       });
       const cases = generateBoundaryTestCases(field);
 
-      expect(cases.some(c => c.name.includes('身份证位数不足'))).toBe(true);
-      expect(cases.some(c => c.name.includes('身份证校验位错误'))).toBe(true);
+      expect(cases.some((c) => c.name.includes('身份证位数不足'))).toBe(true);
+      expect(cases.some((c) => c.name.includes('身份证校验位错误'))).toBe(true);
     });
 
     it('should generate special cases for password field', () => {
@@ -119,15 +124,15 @@ describe('BoundaryEngine', () => {
       });
       const cases = generateBoundaryTestCases(field);
 
-      expect(cases.some(c => c.name.includes('纯数字密码'))).toBe(true);
-      expect(cases.some(c => c.name.includes('弱密码'))).toBe(true);
+      expect(cases.some((c) => c.name.includes('纯数字密码'))).toBe(true);
+      expect(cases.some((c) => c.name.includes('弱密码'))).toBe(true);
     });
 
     it('should generate SQL injection test case', () => {
       const field = createField();
       const cases = generateBoundaryTestCases(field);
 
-      const sqlCase = cases.find(c => c.name.includes('SQL注入'));
+      const sqlCase = cases.find((c) => c.name.includes('SQL注入'));
       expect(sqlCase).toBeDefined();
       expect(sqlCase?.expectedResult).toBe('invalid');
     });
@@ -136,7 +141,7 @@ describe('BoundaryEngine', () => {
       const field = createField();
       const cases = generateBoundaryTestCases(field);
 
-      const xssCase = cases.find(c => c.name.includes('XSS'));
+      const xssCase = cases.find((c) => c.name.includes('XSS'));
       expect(xssCase).toBeDefined();
       expect(xssCase?.expectedResult).toBe('invalid');
     });
@@ -145,7 +150,7 @@ describe('BoundaryEngine', () => {
       const field = createField();
       const cases = generateBoundaryTestCases(field);
 
-      const spaceCase = cases.find(c => c.name.includes('仅空格'));
+      const spaceCase = cases.find((c) => c.name.includes('仅空格'));
       expect(spaceCase).toBeDefined();
     });
 
@@ -153,7 +158,7 @@ describe('BoundaryEngine', () => {
       const field = createField();
       const cases = generateBoundaryTestCases(field);
 
-      const unicodeCase = cases.find(c => c.name.includes('Unicode'));
+      const unicodeCase = cases.find((c) => c.name.includes('Unicode'));
       expect(unicodeCase).toBeDefined();
       expect(unicodeCase?.expectedResult).toBe('valid');
     });
@@ -168,7 +173,9 @@ describe('BoundaryEngine', () => {
       const coverage = analyzeBoundaryCoverage(field, cases);
 
       expect(coverage.totalCases).toBe(cases.length);
-      expect(coverage.validCases + coverage.invalidCases).toBe(coverage.totalCases);
+      expect(coverage.validCases + coverage.invalidCases).toBe(
+        coverage.totalCases,
+      );
       expect(Object.keys(coverage.categories).length).toBeGreaterThan(0);
     });
 

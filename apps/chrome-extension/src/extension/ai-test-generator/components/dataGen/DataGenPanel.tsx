@@ -3,37 +3,37 @@
  * Provides UI for generating and managing test data
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Card,
+  CopyOutlined,
+  DatabaseOutlined,
+  EyeInvisibleOutlined,
+  EyeOutlined,
+  FileTextOutlined,
+  ReloadOutlined,
+  ThunderboltOutlined,
+} from '@ant-design/icons';
+import {
+  Badge,
   Button,
-  Select,
+  Card,
+  Collapse,
+  Divider,
   Input,
+  Select,
+  Space,
   Table,
   Tag,
-  Space,
   Tooltip,
-  message,
-  Collapse,
   Typography,
-  Badge,
-  Divider,
+  message,
 } from 'antd';
-import {
-  ThunderboltOutlined,
-  CopyOutlined,
-  ReloadOutlined,
-  EyeOutlined,
-  EyeInvisibleOutlined,
-  DatabaseOutlined,
-  FileTextOutlined,
-} from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import type { SemanticType, FieldDefinition } from '../../types/dataGen';
+import React, { useState, useEffect, useCallback } from 'react';
 import { dataGenerator } from '../../services/dataGen/dataGenerator';
 import { dataMasker, isSensitiveType } from '../../services/dataGen/dataMasker';
-import { templateManager } from '../../services/dataGen/templateManager';
 import { createFormFields } from '../../services/dataGen/fieldRecognizer';
+import { templateManager } from '../../services/dataGen/templateManager';
+import type { FieldDefinition, SemanticType } from '../../types/dataGen';
 
 const { Text } = Typography;
 const { Panel } = Collapse;
@@ -42,7 +42,11 @@ const { Option } = Select;
 /**
  * Semantic type options with labels
  */
-const SEMANTIC_TYPE_OPTIONS: Array<{ value: SemanticType; label: string; category: string }> = [
+const SEMANTIC_TYPE_OPTIONS: Array<{
+  value: SemanticType;
+  label: string;
+  category: string;
+}> = [
   // Personal
   { value: 'username', label: '用户名', category: '个人信息' },
   { value: 'realname', label: '真实姓名', category: '个人信息' },
@@ -94,12 +98,18 @@ interface DataGenPanelProps {
 /**
  * Data Generation Panel Component
  */
-export function DataGenPanel({ onInsertValue, compact = false }: DataGenPanelProps) {
-  const [selectedType, setSelectedType] = useState<SemanticType>('mobile_phone');
+export function DataGenPanel({
+  onInsertValue,
+  compact = false,
+}: DataGenPanelProps) {
+  const [selectedType, setSelectedType] =
+    useState<SemanticType>('mobile_phone');
   const [generatedData, setGeneratedData] = useState<GeneratedItem[]>([]);
   const [showMasked, setShowMasked] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
-  const [templates, setTemplates] = useState<Array<{ id: string; name: string }>>([]);
+  const [templates, setTemplates] = useState<
+    Array<{ id: string; name: string }>
+  >([]);
 
   // Load templates on mount
   useEffect(() => {
@@ -120,7 +130,9 @@ export function DataGenPanel({ onInsertValue, compact = false }: DataGenPanelPro
   const generateSingle = useCallback(async () => {
     setLoading(true);
     try {
-      const label = SEMANTIC_TYPE_OPTIONS.find((o) => o.value === selectedType)?.label || selectedType;
+      const label =
+        SEMANTIC_TYPE_OPTIONS.find((o) => o.value === selectedType)?.label ||
+        selectedType;
       const field: FieldDefinition = {
         id: `gen_${Date.now()}`,
         name: selectedType,
@@ -167,7 +179,8 @@ export function DataGenPanel({ onInsertValue, compact = false }: DataGenPanelPro
         for (const field of template.fields) {
           const value = data[field.fieldId];
           if (value !== undefined) {
-            const semanticType = (field.generatorId as SemanticType) || 'custom';
+            const semanticType =
+              (field.generatorId as SemanticType) || 'custom';
             const valueStr = String(value);
             const maskedValue = dataMasker.mask(value, semanticType);
 
@@ -194,40 +207,45 @@ export function DataGenPanel({ onInsertValue, compact = false }: DataGenPanelPro
   }, []);
 
   // Generate preset form
-  const generatePresetForm = useCallback(async (formType: 'login' | 'register' | 'profile' | 'payment') => {
-    setLoading(true);
-    try {
-      const fields = createFormFields(formType);
-      const result = await dataGenerator.generateForForm(fields);
+  const generatePresetForm = useCallback(
+    async (formType: 'login' | 'register' | 'profile' | 'payment') => {
+      setLoading(true);
+      try {
+        const fields = createFormFields(formType);
+        const result = await dataGenerator.generateForForm(fields);
 
-      const newItems: GeneratedItem[] = [];
+        const newItems: GeneratedItem[] = [];
 
-      for (const field of fields) {
-        const genData = result.fields[field.id];
-        if (genData) {
-          const valueStr = String(genData.value);
-          const maskedValue = genData.maskedValue || dataMasker.mask(genData.value, field.semanticType);
+        for (const field of fields) {
+          const genData = result.fields[field.id];
+          if (genData) {
+            const valueStr = String(genData.value);
+            const maskedValue =
+              genData.maskedValue ||
+              dataMasker.mask(genData.value, field.semanticType);
 
-          newItems.push({
-            key: `${Date.now()}_${field.id}`,
-            semanticType: field.semanticType,
-            label: field.label,
-            value: valueStr,
-            maskedValue,
-            isSensitive: isSensitiveType(field.semanticType),
-          });
+            newItems.push({
+              key: `${Date.now()}_${field.id}`,
+              semanticType: field.semanticType,
+              label: field.label,
+              value: valueStr,
+              maskedValue,
+              isSensitive: isSensitiveType(field.semanticType),
+            });
+          }
         }
-      }
 
-      setGeneratedData((prev) => [...newItems, ...prev].slice(0, 20));
-      message.success(`${formType} 表单生成成功`);
-    } catch (error) {
-      message.error('表单生成失败');
-      console.error('Form generate error:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+        setGeneratedData((prev) => [...newItems, ...prev].slice(0, 20));
+        message.success(`${formType} 表单生成成功`);
+      } catch (error) {
+        message.error('表单生成失败');
+        console.error('Form generate error:', error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   // Toggle mask visibility
   const toggleMask = (key: string) => {
@@ -264,13 +282,17 @@ export function DataGenPanel({ onInsertValue, compact = false }: DataGenPanelPro
       dataIndex: 'value',
       key: 'value',
       render: (value: string, record) => {
-        const displayValue = record.isSensitive && !showMasked[record.key]
-          ? record.maskedValue
-          : value;
+        const displayValue =
+          record.isSensitive && !showMasked[record.key]
+            ? record.maskedValue
+            : value;
 
         return (
           <Space>
-            <Text copyable={{ text: value }} style={{ fontFamily: 'monospace' }}>
+            <Text
+              copyable={{ text: value }}
+              style={{ fontFamily: 'monospace' }}
+            >
               {displayValue}
             </Text>
             {record.isSensitive && (
@@ -278,7 +300,13 @@ export function DataGenPanel({ onInsertValue, compact = false }: DataGenPanelPro
                 <Button
                   type="text"
                   size="small"
-                  icon={showMasked[record.key] ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                  icon={
+                    showMasked[record.key] ? (
+                      <EyeInvisibleOutlined />
+                    ) : (
+                      <EyeOutlined />
+                    )
+                  }
                   onClick={() => toggleMask(record.key)}
                 />
               </Tooltip>
@@ -349,7 +377,9 @@ export function DataGenPanel({ onInsertValue, compact = false }: DataGenPanelPro
           <div style={{ marginTop: 8 }}>
             <Text strong>最新: </Text>
             <Text code copyable>
-              {generatedData[0].isSensitive ? generatedData[0].maskedValue : generatedData[0].value}
+              {generatedData[0].isSensitive
+                ? generatedData[0].maskedValue
+                : generatedData[0].value}
             </Text>
           </div>
         )}
@@ -381,11 +411,14 @@ export function DataGenPanel({ onInsertValue, compact = false }: DataGenPanelPro
               optionFilterProp="children"
             >
               {Object.entries(
-                SEMANTIC_TYPE_OPTIONS.reduce((acc, opt) => {
-                  if (!acc[opt.category]) acc[opt.category] = [];
-                  acc[opt.category].push(opt);
-                  return acc;
-                }, {} as Record<string, typeof SEMANTIC_TYPE_OPTIONS>)
+                SEMANTIC_TYPE_OPTIONS.reduce(
+                  (acc, opt) => {
+                    if (!acc[opt.category]) acc[opt.category] = [];
+                    acc[opt.category].push(opt);
+                    return acc;
+                  },
+                  {} as Record<string, typeof SEMANTIC_TYPE_OPTIONS>,
+                ),
               ).map(([category, options]) => (
                 <Select.OptGroup key={category} label={category}>
                   {options.map((opt) => (
@@ -410,16 +443,28 @@ export function DataGenPanel({ onInsertValue, compact = false }: DataGenPanelPro
         {/* Preset Forms */}
         <Panel header="预设表单" key="forms">
           <Space wrap>
-            <Button onClick={() => generatePresetForm('login')} loading={loading}>
+            <Button
+              onClick={() => generatePresetForm('login')}
+              loading={loading}
+            >
               登录表单
             </Button>
-            <Button onClick={() => generatePresetForm('register')} loading={loading}>
+            <Button
+              onClick={() => generatePresetForm('register')}
+              loading={loading}
+            >
               注册表单
             </Button>
-            <Button onClick={() => generatePresetForm('profile')} loading={loading}>
+            <Button
+              onClick={() => generatePresetForm('profile')}
+              loading={loading}
+            >
               个人信息
             </Button>
-            <Button onClick={() => generatePresetForm('payment')} loading={loading}>
+            <Button
+              onClick={() => generatePresetForm('payment')}
+              loading={loading}
+            >
               支付表单
             </Button>
           </Space>

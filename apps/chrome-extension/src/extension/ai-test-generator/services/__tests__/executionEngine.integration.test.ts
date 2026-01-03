@@ -3,11 +3,11 @@
  * Tests the interaction between ExecutionEngine, Healing, and Analytics systems
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ExecutionEngine } from '../executionEngine';
-import type { TestCase, TaskStep } from '../markdownParser';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ExecutionRecord } from '../../types/analytics';
 import type { HealingResult, SemanticFingerprint } from '../../types/healing';
+import { ExecutionEngine } from '../executionEngine';
+import type { TaskStep, TestCase } from '../markdownParser';
 
 // Mock healing storage
 vi.mock('../healing/storage', () => ({
@@ -43,8 +43,8 @@ vi.mock('../analytics/analyticsStorage', () => ({
   },
 }));
 
-import { healingStorage } from '../healing/storage';
 import { analyticsStorage } from '../analytics/analyticsStorage';
+import { healingStorage } from '../healing/storage';
 
 describe('ExecutionEngine Integration', () => {
   let mockAgent: any;
@@ -67,19 +67,23 @@ describe('ExecutionEngine Integration', () => {
     aiAct: vi.fn().mockResolvedValue(undefined),
     page: createMockPage(),
     dump: {
-      executions: [{
-        tasks: [{
-          type: 'Planning',
-          subType: 'Locate',
-          output: {
-            element: {
-              center: [100, 100] as [number, number],
-              rect: { left: 50, top: 75, width: 100, height: 50 },
-              description: 'Login button',
+      executions: [
+        {
+          tasks: [
+            {
+              type: 'Planning',
+              subType: 'Locate',
+              output: {
+                element: {
+                  center: [100, 100] as [number, number],
+                  rect: { left: 50, top: 75, width: 100, height: 50 },
+                  description: 'Login button',
+                },
+              },
             },
-          },
-        }],
-      }],
+          ],
+        },
+      ],
     },
     describeElementAtPoint: vi.fn().mockResolvedValue({
       prompt: 'A blue login button',
@@ -118,9 +122,7 @@ describe('ExecutionEngine Integration', () => {
 
   describe('Execution with Self-Healing', () => {
     it('should collect fingerprint after successful step execution', async () => {
-      const testCase = createTestCase([
-        { originalText: '点击登录按钮' },
-      ]);
+      const testCase = createTestCase([{ originalText: '点击登录按钮' }]);
 
       engine.setSelfHealingConfig({ enabled: true });
 
@@ -131,7 +133,9 @@ describe('ExecutionEngine Integration', () => {
     });
 
     it('should attempt healing when element not found', async () => {
-      const elementNotFoundError = new Error('Element not found: 无法找到目标元素');
+      const elementNotFoundError = new Error(
+        'Element not found: 无法找到目标元素',
+      );
       mockAgent.aiAct.mockRejectedValueOnce(elementNotFoundError);
 
       // Setup existing fingerprint
@@ -159,20 +163,25 @@ describe('ExecutionEngine Integration', () => {
         result: {
           success: true,
           healingId: 'healing-1',
-          element: { center: [100, 100] as [number, number], rect: { left: 50, top: 75, width: 100, height: 50 } },
+          element: {
+            center: [100, 100] as [number, number],
+            rect: { left: 50, top: 75, width: 100, height: 50 },
+          },
           strategy: 'normal',
           attemptsCount: 1,
           confidence: 80,
-          confidenceFactors: { distanceScore: 90, sizeScore: 85, strategyScore: 100 },
+          confidenceFactors: {
+            distanceScore: 90,
+            sizeScore: 85,
+            strategyScore: 100,
+          },
           timeCost: 500,
         },
         userConfirmed: false,
         fingerprintUpdated: false,
       });
 
-      const testCase = createTestCase([
-        { originalText: '点击登录按钮' },
-      ]);
+      const testCase = createTestCase([{ originalText: '点击登录按钮' }]);
 
       engine.setSelfHealingConfig({
         enabled: true,
@@ -194,9 +203,7 @@ describe('ExecutionEngine Integration', () => {
       const elementNotFoundError = new Error('Element not found');
       mockAgent.aiAct.mockRejectedValue(elementNotFoundError);
 
-      const testCase = createTestCase([
-        { originalText: '点击登录按钮' },
-      ]);
+      const testCase = createTestCase([{ originalText: '点击登录按钮' }]);
 
       engine.setSelfHealingConfig({ enabled: false });
 
@@ -236,9 +243,7 @@ describe('ExecutionEngine Integration', () => {
     });
 
     it('should record failed execution with failure details', async () => {
-      const testCase = createTestCase([
-        { originalText: '点击登录按钮' },
-      ]);
+      const testCase = createTestCase([{ originalText: '点击登录按钮' }]);
 
       const error = new Error('Click failed: 元素被遮挡');
       mockAgent.aiAct.mockRejectedValue(error);
@@ -285,20 +290,25 @@ describe('ExecutionEngine Integration', () => {
         result: {
           success: true,
           healingId: 'healing-1',
-          element: { center: [100, 100] as [number, number], rect: { left: 50, top: 75, width: 100, height: 50 } },
+          element: {
+            center: [100, 100] as [number, number],
+            rect: { left: 50, top: 75, width: 100, height: 50 },
+          },
           strategy: 'normal',
           attemptsCount: 1,
           confidence: 80,
-          confidenceFactors: { distanceScore: 90, sizeScore: 85, strategyScore: 100 },
+          confidenceFactors: {
+            distanceScore: 90,
+            sizeScore: 85,
+            strategyScore: 100,
+          },
           timeCost: 500,
         },
         userConfirmed: false,
         fingerprintUpdated: false,
       });
 
-      const testCase = createTestCase([
-        { originalText: '点击登录按钮' },
-      ]);
+      const testCase = createTestCase([{ originalText: '点击登录按钮' }]);
 
       engine.setSelfHealingConfig({
         enabled: true,
@@ -383,11 +393,11 @@ describe('ExecutionEngine Integration', () => {
     });
 
     it('should generate YAML with ai actions', async () => {
-      const testCase = createTestCase([
-        { originalText: '点击登录按钮' },
-      ]);
+      const testCase = createTestCase([{ originalText: '点击登录按钮' }]);
 
-      const result = await engine.executeTestCase(testCase, { url: 'https://example.com' });
+      const result = await engine.executeTestCase(testCase, {
+        url: 'https://example.com',
+      });
 
       expect(result.yamlContent).toContain('ai:');
     });
@@ -395,9 +405,7 @@ describe('ExecutionEngine Integration', () => {
 
   describe('Device Emulation Integration', () => {
     it('should apply device emulation via CDP', async () => {
-      const testCase = createTestCase([
-        { originalText: '点击登录按钮' },
-      ]);
+      const testCase = createTestCase([{ originalText: '点击登录按钮' }]);
 
       await engine.executeTestCase(testCase, {
         url: 'https://example.com',
@@ -419,21 +427,19 @@ describe('ExecutionEngine Integration', () => {
           width: 390,
           height: 844,
           mobile: true,
-        })
+        }),
       );
 
       expect(mockAgent.page.sendCommandToDebugger).toHaveBeenCalledWith(
         'Emulation.setUserAgentOverride',
         expect.objectContaining({
           userAgent: expect.stringContaining('iPhone'),
-        })
+        }),
       );
     });
 
     it('should clear device emulation after execution', async () => {
-      const testCase = createTestCase([
-        { originalText: '点击登录按钮' },
-      ]);
+      const testCase = createTestCase([{ originalText: '点击登录按钮' }]);
 
       await engine.executeTestCase(testCase, {
         url: 'https://example.com',
@@ -451,7 +457,7 @@ describe('ExecutionEngine Integration', () => {
       // Verify cleanup was called
       expect(mockAgent.page.sendCommandToDebugger).toHaveBeenCalledWith(
         'Emulation.clearDeviceMetricsOverride',
-        {}
+        {},
       );
     });
   });
@@ -489,9 +495,7 @@ describe('ExecutionEngine Integration', () => {
 
       mockAgent.aiAct.mockRejectedValue(new Error('Test error'));
 
-      const testCase = createTestCase([
-        { originalText: '点击登录按钮' },
-      ]);
+      const testCase = createTestCase([{ originalText: '点击登录按钮' }]);
 
       await engine.executeTestCase(testCase, { url: 'https://example.com' });
 
@@ -513,9 +517,7 @@ describe('ExecutionEngine Integration', () => {
         },
       });
 
-      const testCase = createTestCase([
-        { originalText: '点击登录按钮' },
-      ]);
+      const testCase = createTestCase([{ originalText: '点击登录按钮' }]);
 
       await engine.executeTestCase(testCase, { url: 'https://example.com' });
 
@@ -534,9 +536,7 @@ describe('ExecutionEngine Integration', () => {
         },
       });
 
-      const testCase = createTestCase([
-        { originalText: '点击登录按钮' },
-      ]);
+      const testCase = createTestCase([{ originalText: '点击登录按钮' }]);
 
       await engine.executeTestCase(testCase, { url: 'https://example.com' });
 

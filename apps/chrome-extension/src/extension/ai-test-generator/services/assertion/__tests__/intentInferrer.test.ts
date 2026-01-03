@@ -2,9 +2,9 @@
  * Intent Inferrer Tests
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { IntentInferrer } from '../intentInferrer';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { ActionContext } from '../../../types/assertion';
+import { IntentInferrer } from '../intentInferrer';
 
 describe('IntentInferrer', () => {
   let inferrer: IntentInferrer;
@@ -13,7 +13,9 @@ describe('IntentInferrer', () => {
     inferrer = new IntentInferrer();
   });
 
-  const createContext = (overrides: Partial<ActionContext> = {}): ActionContext => ({
+  const createContext = (
+    overrides: Partial<ActionContext> = {},
+  ): ActionContext => ({
     action: {
       type: 'click',
       target: { text: '按钮' },

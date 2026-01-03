@@ -4,10 +4,10 @@
  */
 
 import type {
-  SemanticType,
+  IDataMasker,
   MaskingRule,
   MaskingStrategy,
-  IDataMasker,
+  SemanticType,
 } from '../../types/dataGen';
 import { SENSITIVE_TYPES } from '../../types/dataGen';
 
@@ -169,7 +169,7 @@ function hashMask(value: string): string {
   let hash = 0;
   for (let i = 0; i < value.length; i++) {
     const char = value.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
   return `hash_${Math.abs(hash).toString(16).padStart(8, '0')}`;
@@ -179,7 +179,9 @@ function hashMask(value: string): string {
  * Substitute masking - replace with fixed pattern
  */
 function substituteMask(value: string, replacement: string): string {
-  return replacement.repeat(Math.ceil(value.length / replacement.length)).slice(0, value.length);
+  return replacement
+    .repeat(Math.ceil(value.length / replacement.length))
+    .slice(0, value.length);
 }
 
 /**
@@ -239,7 +241,7 @@ export class DataMasker implements IDataMasker {
    */
   maskRecord(
     record: Record<string, unknown>,
-    fieldTypes: Record<string, SemanticType>
+    fieldTypes: Record<string, SemanticType>,
   ): Record<string, string> {
     const result: Record<string, string> = {};
 

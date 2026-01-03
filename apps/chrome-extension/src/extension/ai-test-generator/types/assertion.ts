@@ -6,7 +6,15 @@
 /**
  * Action types for context analysis
  */
-export type ActionType = 'click' | 'input' | 'select' | 'scroll' | 'navigate' | 'wait' | 'assert' | 'ai';
+export type ActionType =
+  | 'click'
+  | 'input'
+  | 'select'
+  | 'scroll'
+  | 'navigate'
+  | 'wait'
+  | 'assert'
+  | 'ai';
 
 /**
  * Assertion types supported by the system
@@ -30,7 +38,14 @@ export type AssertionType =
 /**
  * Assertion parameter operators
  */
-export type AssertionOperator = 'equals' | 'contains' | 'matches' | 'gt' | 'lt' | 'gte' | 'lte';
+export type AssertionOperator =
+  | 'equals'
+  | 'contains'
+  | 'matches'
+  | 'gt'
+  | 'lt'
+  | 'gte'
+  | 'lte';
 
 /**
  * Bounding box for element location
@@ -189,7 +204,10 @@ export interface AssertionStrategy {
   name: string;
   priority: number;
   applies(context: ActionContext, analysis: AnalysisResult): boolean;
-  generate(context: ActionContext, analysis: AnalysisResult): Promise<AssertionRecommendation[]>;
+  generate(
+    context: ActionContext,
+    analysis: AnalysisResult,
+  ): Promise<AssertionRecommendation[]>;
 }
 
 /**

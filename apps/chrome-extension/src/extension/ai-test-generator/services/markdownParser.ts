@@ -60,7 +60,8 @@ function extractParams(text: string): PotentialParam[] {
   }
 
   // Numbers with optional decimal and units
-  const numberPattern = /\b(\d+(?:\.\d+)?)\s*(元|￥|\$|%|个|次|秒|分钟|小时)?\b/g;
+  const numberPattern =
+    /\b(\d+(?:\.\d+)?)\s*(元|￥|\$|%|个|次|秒|分钟|小时)?\b/g;
   while ((match = numberPattern.exec(text)) !== null) {
     // Skip if already captured in quotes
     if (!params.some((p) => p.source.includes(match![0]))) {
@@ -91,7 +92,7 @@ function extractParams(text: string): PotentialParam[] {
 function parseTestCase(
   name: string,
   lines: string[],
-  startIndex: number
+  startIndex: number,
 ): TestCase {
   const steps: TaskStep[] = [];
   const allParams: PotentialParam[] = [];
@@ -176,7 +177,11 @@ export function parseMarkdown(markdown: string): ParseResult {
     if (headingMatch) {
       // Save previous case if exists
       if (currentCaseName !== null) {
-        const testCase = parseTestCase(currentCaseName, lines, currentCaseStartLine);
+        const testCase = parseTestCase(
+          currentCaseName,
+          lines,
+          currentCaseStartLine,
+        );
         if (testCase.steps.length > 0) {
           cases.push(testCase);
         } else {
@@ -191,7 +196,11 @@ export function parseMarkdown(markdown: string): ParseResult {
 
   // Don't forget the last case
   if (currentCaseName !== null) {
-    const testCase = parseTestCase(currentCaseName, lines, currentCaseStartLine);
+    const testCase = parseTestCase(
+      currentCaseName,
+      lines,
+      currentCaseStartLine,
+    );
     if (testCase.steps.length > 0) {
       cases.push(testCase);
     } else {
@@ -237,7 +246,9 @@ export function parseMarkdown(markdown: string): ParseResult {
   }
 
   if (cases.length === 0) {
-    parseErrors.push('No test cases found. Please use headings (#) for case names and numbered lists for steps.');
+    parseErrors.push(
+      'No test cases found. Please use headings (#) for case names and numbered lists for steps.',
+    );
   }
 
   return {
@@ -250,7 +261,10 @@ export function parseMarkdown(markdown: string): ParseResult {
 /**
  * Validate markdown format
  */
-export function validateMarkdown(markdown: string): { valid: boolean; errors: string[] } {
+export function validateMarkdown(markdown: string): {
+  valid: boolean;
+  errors: string[];
+} {
   const errors: string[] = [];
 
   if (!markdown.trim()) {

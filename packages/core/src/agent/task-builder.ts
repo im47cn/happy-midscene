@@ -33,6 +33,15 @@ import {
 const debug = getDebug('agent:task-builder');
 
 /**
+ * Action type aliases to handle AI model variations
+ * AI models may return 'Click' instead of 'Tap' due to training data
+ */
+const ACTION_TYPE_ALIASES: Record<string, string> = {
+  Click: 'Tap',
+  click: 'Tap',
+};
+
+/**
  * Check if a cache object is non-empty
  */
 function hasNonEmptyCache(cache: unknown): boolean {
@@ -204,7 +213,9 @@ export class TaskBuilder {
   ): Promise<void> {
     const planType = plan.type;
     const actionSpace = this.actionSpace;
-    const action = actionSpace.find((item) => item.name === planType);
+    // Normalize action type using aliases (e.g., 'Click' -> 'Tap')
+    const normalizedPlanType = ACTION_TYPE_ALIASES[planType] || planType;
+    const action = actionSpace.find((item) => item.name === normalizedPlanType);
     const param = plan.param;
 
     if (!action) {

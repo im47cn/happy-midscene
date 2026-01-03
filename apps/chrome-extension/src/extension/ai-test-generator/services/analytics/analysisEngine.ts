@@ -4,15 +4,15 @@
  */
 
 import type {
-  DailyStats,
   CaseStats,
-  HealthScore,
-  Hotspot,
+  DEFAULT_FAILURES_BY_TYPE,
+  DailyStats,
   DashboardOverview,
-  TimeRange,
   DateRange,
   FailureType,
-  DEFAULT_FAILURES_BY_TYPE,
+  HealthScore,
+  Hotspot,
+  TimeRange,
 } from '../../types/analytics';
 import { analyticsStorage } from './analyticsStorage';
 
@@ -22,7 +22,7 @@ class AnalysisEngine {
    */
   async getDashboardOverview(
     timeRange: TimeRange,
-    customRange?: DateRange
+    customRange?: DateRange,
   ): Promise<DashboardOverview> {
     const { startDate, endDate } = this.getDateRange(timeRange, customRange);
     const startTime = new Date(startDate).getTime();
@@ -31,7 +31,7 @@ class AnalysisEngine {
     // Get daily stats for the range
     const dailyStats = await analyticsStorage.getDailyStatsRange(
       startDate,
-      endDate
+      endDate,
     );
 
     // Get all case stats
@@ -40,7 +40,7 @@ class AnalysisEngine {
     // Calculate KPIs
     const totalExecutions = dailyStats.reduce(
       (sum, d) => sum + d.totalExecutions,
-      0
+      0,
     );
     const totalPassed = dailyStats.reduce((sum, d) => sum + d.passed, 0);
     const passRate =
@@ -52,11 +52,11 @@ class AnalysisEngine {
     // Calculate trends (compare with previous period)
     const passRateTrend = await this.calculatePassRateTrend(
       timeRange,
-      passRate
+      passRate,
     );
     const avgDurationTrend = await this.calculateDurationTrend(
       timeRange,
-      avgDuration
+      avgDuration,
     );
 
     // Get health score
@@ -70,11 +70,11 @@ class AnalysisEngine {
 
     // Categorize cases
     const stableCases = caseStats.filter(
-      (c) => c.stabilityScore >= 80 && !c.isFlaky
+      (c) => c.stabilityScore >= 80 && !c.isFlaky,
     ).length;
     const flakyCases = caseStats.filter((c) => c.isFlaky).length;
     const unstableCases = caseStats.filter(
-      (c) => c.stabilityScore < 50 && !c.isFlaky
+      (c) => c.stabilityScore < 50 && !c.isFlaky,
     ).length;
 
     return {
@@ -105,7 +105,7 @@ class AnalysisEngine {
 
     const dailyStats = await analyticsStorage.getDailyStatsRange(
       startDate,
-      endDate
+      endDate,
     );
     const caseStats = await analyticsStorage.getAllCaseStats();
 
@@ -126,7 +126,7 @@ class AnalysisEngine {
     const targetDuration = 30000; // 30 seconds
     const performanceScore = Math.max(
       0,
-      100 - ((avgDuration - targetDuration) / targetDuration) * 50
+      100 - ((avgDuration - targetDuration) / targetDuration) * 50,
     );
 
     // Coverage component (placeholder, could be based on actual coverage data)
@@ -137,7 +137,7 @@ class AnalysisEngine {
       passRateScore * 0.4 +
         avgStability * 0.35 +
         Math.min(100, performanceScore) * 0.15 +
-        coverageScore * 0.1
+        coverageScore * 0.1,
     );
 
     // Determine trend
@@ -158,7 +158,7 @@ class AnalysisEngine {
   /**
    * Analyze failure hotspots
    */
-  async analyzeFailureHotspots(limit: number = 10): Promise<Hotspot[]> {
+  async analyzeFailureHotspots(limit = 10): Promise<Hotspot[]> {
     const failures = await analyticsStorage.getFailedExecutions(1000);
 
     if (failures.length === 0) {
@@ -216,7 +216,7 @@ class AnalysisEngine {
    */
   async getCaseStatsSorted(
     sortBy: 'passRate' | 'stability' | 'lastRun' | 'totalRuns' = 'lastRun',
-    ascending: boolean = false
+    ascending = false,
   ): Promise<CaseStats[]> {
     const cases = await analyticsStorage.getAllCaseStats();
 
@@ -248,7 +248,7 @@ class AnalysisEngine {
    */
   getDateRange(
     timeRange: TimeRange,
-    customRange?: DateRange
+    customRange?: DateRange,
   ): { startDate: string; endDate: string } {
     const now = new Date();
     const endDate = this.formatDate(now);
@@ -284,7 +284,7 @@ class AnalysisEngine {
    */
   private async calculatePassRateTrend(
     timeRange: TimeRange,
-    currentPassRate: number
+    currentPassRate: number,
   ): Promise<number> {
     const { startDate, endDate } = this.getDateRange(timeRange);
     const daysDiff =
@@ -299,7 +299,7 @@ class AnalysisEngine {
 
     const prevStats = await analyticsStorage.getDailyStatsRange(
       this.formatDate(prevStartDate),
-      this.formatDate(prevEndDate)
+      this.formatDate(prevEndDate),
     );
 
     const prevTotal = prevStats.reduce((s, d) => s + d.totalExecutions, 0);
@@ -314,7 +314,7 @@ class AnalysisEngine {
    */
   private async calculateDurationTrend(
     timeRange: TimeRange,
-    currentDuration: number
+    currentDuration: number,
   ): Promise<number> {
     const { startDate, endDate } = this.getDateRange(timeRange);
     const daysDiff =
@@ -329,7 +329,7 @@ class AnalysisEngine {
 
     const prevStats = await analyticsStorage.getDailyStatsRange(
       this.formatDate(prevStartDate),
-      this.formatDate(prevEndDate)
+      this.formatDate(prevEndDate),
     );
 
     const prevDuration = this.calculateWeightedAvgDuration(prevStats);
@@ -344,7 +344,7 @@ class AnalysisEngine {
    * Calculate health trend
    */
   private async calculateHealthTrend(
-    currentScore: number
+    currentScore: number,
   ): Promise<'improving' | 'stable' | 'declining'> {
     // Compare with 7 days ago
     const prevEndDate = new Date();
@@ -354,7 +354,7 @@ class AnalysisEngine {
 
     const prevStats = await analyticsStorage.getDailyStatsRange(
       this.formatDate(prevStartDate),
-      this.formatDate(prevEndDate)
+      this.formatDate(prevEndDate),
     );
 
     const prevTotal = prevStats.reduce((s, d) => s + d.totalExecutions, 0);
@@ -377,7 +377,7 @@ class AnalysisEngine {
 
     const weightedSum = dailyStats.reduce(
       (s, d) => s + d.avgDuration * d.totalExecutions,
-      0
+      0,
     );
     return weightedSum / totalExec;
   }
@@ -386,7 +386,7 @@ class AnalysisEngine {
    * Aggregate failure types from daily stats
    */
   private aggregateFailuresByType(
-    dailyStats: DailyStats[]
+    dailyStats: DailyStats[],
   ): Record<FailureType, number> {
     const result: Record<FailureType, number> = {
       locator_failed: 0,

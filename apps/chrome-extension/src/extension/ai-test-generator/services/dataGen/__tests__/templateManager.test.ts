@@ -2,7 +2,7 @@
  * Template Manager Tests
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TemplateManager } from '../templateManager';
 
 // Mock localStorage
@@ -38,7 +38,7 @@ describe('TemplateManager', () => {
       const templates = await manager.list();
 
       expect(templates.length).toBeGreaterThan(0);
-      expect(templates.some(t => t.category === 'system')).toBe(true);
+      expect(templates.some((t) => t.category === 'system')).toBe(true);
     });
 
     it('should only initialize once', async () => {
@@ -61,7 +61,12 @@ describe('TemplateManager', () => {
         description: 'Test description',
         category: 'user',
         fields: [
-          { fieldId: 'email', fieldName: '邮箱', generationType: 'random', generatorId: 'email' },
+          {
+            fieldId: 'email',
+            fieldName: '邮箱',
+            generationType: 'random',
+            generatorId: 'email',
+          },
         ],
         variables: {},
       });
@@ -89,8 +94,8 @@ describe('TemplateManager', () => {
       const userTemplates = await manager.getByCategory('user');
       const systemTemplates = await manager.getByCategory('system');
 
-      expect(userTemplates.every(t => t.category === 'user')).toBe(true);
-      expect(systemTemplates.every(t => t.category === 'system')).toBe(true);
+      expect(userTemplates.every((t) => t.category === 'user')).toBe(true);
+      expect(systemTemplates.every((t) => t.category === 'system')).toBe(true);
     });
   });
 
@@ -120,7 +125,7 @@ describe('TemplateManager', () => {
       const systemTemplates = await manager.getByCategory('system');
       if (systemTemplates.length > 0) {
         await expect(
-          manager.update(systemTemplates[0].id, { name: 'Modified' })
+          manager.update(systemTemplates[0].id, { name: 'Modified' }),
         ).rejects.toThrow('Cannot modify system templates');
       }
     });
@@ -151,7 +156,7 @@ describe('TemplateManager', () => {
       const systemTemplates = await manager.getByCategory('system');
       if (systemTemplates.length > 0) {
         await expect(manager.delete(systemTemplates[0].id)).rejects.toThrow(
-          'Cannot delete system templates'
+          'Cannot delete system templates',
         );
       }
     });
@@ -166,9 +171,24 @@ describe('TemplateManager', () => {
         description: 'Description',
         category: 'user',
         fields: [
-          { fieldId: 'phone', fieldName: '手机号', generationType: 'random', generatorId: 'mobile_phone' },
-          { fieldId: 'password', fieldName: '密码', generationType: 'fixed', fixedValue: 'Test@123' },
-          { fieldId: 'username', fieldName: '用户名', generationType: 'variable', variableName: 'testUser' },
+          {
+            fieldId: 'phone',
+            fieldName: '手机号',
+            generationType: 'random',
+            generatorId: 'mobile_phone',
+          },
+          {
+            fieldId: 'password',
+            fieldName: '密码',
+            generationType: 'fixed',
+            fixedValue: 'Test@123',
+          },
+          {
+            fieldId: 'username',
+            fieldName: '用户名',
+            generationType: 'variable',
+            variableName: 'testUser',
+          },
         ],
         variables: { testUser: 'defaultUser' },
       });
@@ -188,12 +208,19 @@ describe('TemplateManager', () => {
         description: 'Description',
         category: 'user',
         fields: [
-          { fieldId: 'name', fieldName: '名称', generationType: 'variable', variableName: 'userName' },
+          {
+            fieldId: 'name',
+            fieldName: '名称',
+            generationType: 'variable',
+            variableName: 'userName',
+          },
         ],
         variables: { userName: 'default' },
       });
 
-      const data = await manager.applyTemplate(template.id, { userName: 'override' });
+      const data = await manager.applyTemplate(template.id, {
+        userName: 'override',
+      });
 
       expect(data.name).toBe('override');
     });
@@ -244,8 +271,8 @@ describe('TemplateManager', () => {
       await manager.applyTemplate(t2.id);
 
       const popular = await manager.getPopular(10);
-      const t1Index = popular.findIndex(t => t.id === t1.id);
-      const t2Index = popular.findIndex(t => t.id === t2.id);
+      const t1Index = popular.findIndex((t) => t.id === t1.id);
+      const t2Index = popular.findIndex((t) => t.id === t2.id);
 
       expect(t1Index).toBeLessThan(t2Index);
     });
@@ -274,14 +301,14 @@ describe('TemplateManager', () => {
       expect(imported).toBeGreaterThan(0);
 
       const templates = await newManager.getByCategory('user');
-      expect(templates.some(t => t.name === 'Export Test')).toBe(true);
+      expect(templates.some((t) => t.name === 'Export Test')).toBe(true);
     });
 
     it('should reject invalid JSON', async () => {
       await manager.init();
 
       await expect(manager.importTemplates('invalid json')).rejects.toThrow(
-        'Invalid template JSON format'
+        'Invalid template JSON format',
       );
     });
   });

@@ -1,1 +1,6 @@
-export { useKeyboardShortcuts, getShortcutText, getAllShortcuts, SHORTCUTS } from './useKeyboardShortcuts';
+export {
+  useKeyboardShortcuts,
+  getShortcutText,
+  getAllShortcuts,
+  SHORTCUTS,
+} from './useKeyboardShortcuts';

@@ -4,13 +4,13 @@
  */
 
 import type {
-  ExecutionRecord,
-  DailyStats,
-  CaseStats,
-  AlertRule,
   AlertEvent,
-  Report,
+  AlertRule,
+  CaseStats,
   DEFAULT_FAILURES_BY_TYPE,
+  DailyStats,
+  ExecutionRecord,
+  Report,
 } from '../../types/analytics';
 
 const DB_NAME = 'midscene-analytics';
@@ -153,7 +153,7 @@ class AnalyticsStorage {
 
   async getExecutionsByTimeRange(
     startTime: number,
-    endTime: number
+    endTime: number,
   ): Promise<ExecutionRecord[]> {
     const db = await this.ensureDB();
     return new Promise((resolve, reject) => {
@@ -176,13 +176,13 @@ class AnalyticsStorage {
       const request = index.getAll(caseId);
       request.onsuccess = () =>
         resolve(
-          (request.result || []).sort((a, b) => b.startTime - a.startTime)
+          (request.result || []).sort((a, b) => b.startTime - a.startTime),
         );
       request.onerror = () => reject(request.error);
     });
   }
 
-  async getRecentExecutions(limit: number = 100): Promise<ExecutionRecord[]> {
+  async getRecentExecutions(limit = 100): Promise<ExecutionRecord[]> {
     const db = await this.ensureDB();
     return new Promise((resolve, reject) => {
       const tx = db.transaction([STORES.EXECUTIONS], 'readonly');
@@ -204,7 +204,7 @@ class AnalyticsStorage {
     });
   }
 
-  async getFailedExecutions(limit: number = 1000): Promise<ExecutionRecord[]> {
+  async getFailedExecutions(limit = 1000): Promise<ExecutionRecord[]> {
     const db = await this.ensureDB();
     return new Promise((resolve, reject) => {
       const tx = db.transaction([STORES.EXECUTIONS], 'readonly');
@@ -253,7 +253,7 @@ class AnalyticsStorage {
 
   async getDailyStatsRange(
     startDate: string,
-    endDate: string
+    endDate: string,
   ): Promise<DailyStats[]> {
     const db = await this.ensureDB();
     return new Promise((resolve, reject) => {
@@ -262,7 +262,9 @@ class AnalyticsStorage {
       const range = IDBKeyRange.bound(startDate, endDate);
       const request = store.getAll(range);
       request.onsuccess = () =>
-        resolve((request.result || []).sort((a, b) => a.date.localeCompare(b.date)));
+        resolve(
+          (request.result || []).sort((a, b) => a.date.localeCompare(b.date)),
+        );
       request.onerror = () => reject(request.error);
     });
   }
@@ -389,7 +391,7 @@ class AnalyticsStorage {
     });
   }
 
-  async getRecentAlertEvents(limit: number = 50): Promise<AlertEvent[]> {
+  async getRecentAlertEvents(limit = 50): Promise<AlertEvent[]> {
     const db = await this.ensureDB();
     return new Promise((resolve, reject) => {
       const tx = db.transaction([STORES.ALERT_EVENTS], 'readonly');
@@ -457,7 +459,7 @@ class AnalyticsStorage {
     });
   }
 
-  async getRecentReports(limit: number = 20): Promise<Report[]> {
+  async getRecentReports(limit = 20): Promise<Report[]> {
     const db = await this.ensureDB();
     return new Promise((resolve, reject) => {
       const tx = db.transaction([STORES.REPORTS], 'readonly');
@@ -482,8 +484,7 @@ class AnalyticsStorage {
   // ============ Cleanup ============
 
   async cleanupOldData(): Promise<{ deleted: number }> {
-    const cutoffTime =
-      Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000;
+    const cutoffTime = Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000;
     const cutoffDate = this.formatDate(cutoffTime);
     let deleted = 0;
 

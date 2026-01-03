@@ -4,7 +4,7 @@
  */
 
 import { KeyOutlined } from '@ant-design/icons';
-import { Modal, Typography, Space, Tag, Divider } from 'antd';
+import { Divider, Modal, Space, Tag, Typography } from 'antd';
 import { getAllShortcuts } from '../hooks';
 
 const { Text, Title } = Typography;
@@ -22,19 +22,19 @@ export function ShortcutsHelp({ visible, onClose }: ShortcutsHelpProps) {
     {
       title: '导航',
       shortcuts: shortcuts.filter((s) =>
-        ['解析需求', '开始执行', '返回上一视图'].includes(s.description)
+        ['解析需求', '开始执行', '返回上一视图'].includes(s.description),
       ),
     },
     {
       title: '执行控制',
       shortcuts: shortcuts.filter((s) =>
-        ['暂停执行', '继续执行', '停止执行', '下一步'].includes(s.description)
+        ['暂停执行', '继续执行', '停止执行', '下一步'].includes(s.description),
       ),
     },
     {
       title: '操作',
       shortcuts: shortcuts.filter((s) =>
-        ['复制 YAML', '保存/提交', '显示快捷键帮助'].includes(s.description)
+        ['复制 YAML', '保存/提交', '显示快捷键帮助'].includes(s.description),
       ),
     },
   ];

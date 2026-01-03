@@ -4,12 +4,12 @@
  */
 
 import type {
-  ExecutionRecord,
-  DailyStats,
   CaseStats,
+  DEFAULT_FAILURES_BY_TYPE,
+  DailyStats,
+  ExecutionRecord,
   FailureType,
   StepRecord,
-  DEFAULT_FAILURES_BY_TYPE,
 } from '../../types/analytics';
 import { analyticsStorage } from './analyticsStorage';
 
@@ -91,15 +91,16 @@ class DataCollector {
       stats.lastRun = record.startTime;
 
       // Update recent results
-      const result: 'passed' | 'failed' = record.status === 'passed' ? 'passed' : 'failed';
+      const result: 'passed' | 'failed' =
+        record.status === 'passed' ? 'passed' : 'failed';
       stats.recentResults = [result, ...stats.recentResults].slice(
         0,
-        RECENT_RESULTS_LIMIT
+        RECENT_RESULTS_LIMIT,
       ) as ('passed' | 'failed')[];
 
       // Recalculate pass rate
       const passCount = stats.recentResults.filter(
-        (r) => r === 'passed'
+        (r) => r === 'passed',
       ).length;
       stats.passRate = (passCount / stats.recentResults.length) * 100;
 
@@ -155,7 +156,7 @@ class DataCollector {
 
     // Combine with pass rate
     stats.stabilityScore = Math.round(
-      stats.passRate * 0.6 + consistencyScore * 0.4
+      stats.passRate * 0.6 + consistencyScore * 0.4,
     );
 
     // Determine if flaky
@@ -177,21 +178,18 @@ class DataCollector {
     caseName: string,
     steps: StepRecord[],
     environment: ExecutionRecord['environment'],
-    healing?: ExecutionRecord['healing']
+    healing?: ExecutionRecord['healing'],
   ): ExecutionRecord {
     const now = Date.now();
-    const startTime = steps.length > 0 ? now - this.calculateTotalDuration(steps) : now;
+    const startTime =
+      steps.length > 0 ? now - this.calculateTotalDuration(steps) : now;
 
     // Determine overall status
     const failedStep = steps.find((s) => s.status === 'failed');
     const allPassed = steps.every(
-      (s) => s.status === 'passed' || s.status === 'skipped'
+      (s) => s.status === 'passed' || s.status === 'skipped',
     );
-    const status = failedStep
-      ? 'failed'
-      : allPassed
-        ? 'passed'
-        : 'error';
+    const status = failedStep ? 'failed' : allPassed ? 'passed' : 'error';
 
     // Build failure info if any
     let failure: ExecutionRecord['failure'] | undefined;
@@ -281,7 +279,7 @@ class DataCollector {
    */
   async getExecutionStats(
     startTime: number,
-    endTime: number
+    endTime: number,
   ): Promise<{
     total: number;
     passed: number;
@@ -291,7 +289,7 @@ class DataCollector {
   }> {
     const executions = await analyticsStorage.getExecutionsByTimeRange(
       startTime,
-      endTime
+      endTime,
     );
 
     if (executions.length === 0) {
@@ -306,7 +304,7 @@ class DataCollector {
 
     const passed = executions.filter((e) => e.status === 'passed').length;
     const failed = executions.filter(
-      (e) => e.status === 'failed' || e.status === 'error'
+      (e) => e.status === 'failed' || e.status === 'error',
     ).length;
     const totalDuration = executions.reduce((sum, e) => sum + e.duration, 0);
 

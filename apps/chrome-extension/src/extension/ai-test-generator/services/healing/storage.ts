@@ -4,10 +4,10 @@
  */
 
 import type {
-  SemanticFingerprint,
   HealingHistoryEntry,
   IFingerprintStorage,
   IHealingHistoryStorage,
+  SemanticFingerprint,
 } from '../../types/healing';
 
 const DB_NAME = 'midscene-self-healing';
@@ -53,7 +53,9 @@ class HealingStorage implements IFingerprintStorage, IHealingHistoryStorage {
 
         // Fingerprints store
         if (!db.objectStoreNames.contains(FINGERPRINT_STORE)) {
-          const store = db.createObjectStore(FINGERPRINT_STORE, { keyPath: 'id' });
+          const store = db.createObjectStore(FINGERPRINT_STORE, {
+            keyPath: 'id',
+          });
           store.createIndex('stepId', 'stepId', { unique: true });
           store.createIndex('updatedAt', 'updatedAt', { unique: false });
         }
@@ -347,7 +349,9 @@ class HealingStorage implements IFingerprintStorage, IHealingHistoryStorage {
   /**
    * Get a history entry by healingId
    */
-  async getHistoryByHealingId(healingId: string): Promise<HealingHistoryEntry | null> {
+  async getHistoryByHealingId(
+    healingId: string,
+  ): Promise<HealingHistoryEntry | null> {
     try {
       const allHistory = await this.getAllHistory();
       return allHistory.find((h) => h.result.healingId === healingId) || null;

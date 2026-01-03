@@ -2,10 +2,22 @@
  * Types for AI Test Generator
  */
 
-import type { TestCase, TaskStep, ParseResult } from './services/markdownParser';
-import type { GitLabProject, GitLabBranch, GitLabCommitResult } from './services/gitlabClient';
-import type { ExecutionResult, ExecutionStatus, ExecutionContext } from './services/executionEngine';
 import type { DevicePreset } from './config/devicePresets';
+import type {
+  ExecutionContext,
+  ExecutionResult,
+  ExecutionStatus,
+} from './services/executionEngine';
+import type {
+  GitLabBranch,
+  GitLabCommitResult,
+  GitLabProject,
+} from './services/gitlabClient';
+import type {
+  ParseResult,
+  TaskStep,
+  TestCase,
+} from './services/markdownParser';
 
 export type {
   TestCase,
@@ -20,7 +32,13 @@ export type {
   DevicePreset,
 };
 
-export type ViewMode = 'input' | 'preview' | 'execute' | 'commit' | 'history' | 'analytics';
+export type ViewMode =
+  | 'input'
+  | 'preview'
+  | 'execute'
+  | 'commit'
+  | 'history'
+  | 'analytics';
 
 export interface GeneratorState {
   // Input state

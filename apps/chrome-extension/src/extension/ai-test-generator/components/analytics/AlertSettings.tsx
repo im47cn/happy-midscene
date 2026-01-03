@@ -3,42 +3,42 @@
  * Manages alert rules and notification preferences
  */
 
-import { useEffect, useState, useCallback } from 'react';
 import {
-  Card,
-  List,
-  Switch,
+  BellOutlined,
+  CheckCircleOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  ExclamationCircleOutlined,
+  PlusOutlined,
+  SettingOutlined,
+} from '@ant-design/icons';
+import {
+  Badge,
   Button,
-  Space,
-  Modal,
+  Card,
+  Collapse,
+  Empty,
   Form,
   Input,
   InputNumber,
+  List,
+  Modal,
+  Popconfirm,
   Select,
+  Space,
+  Switch,
   Tag,
   Tooltip,
-  Empty,
   message,
-  Popconfirm,
-  Badge,
-  Collapse,
 } from 'antd';
-import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  BellOutlined,
-  CheckCircleOutlined,
-  ExclamationCircleOutlined,
-  SettingOutlined,
-} from '@ant-design/icons';
+import { useCallback, useEffect, useState } from 'react';
+import { alertManager } from '../../services/analytics';
 import type {
-  AlertRule,
-  AlertEvent,
   AlertConditionType,
+  AlertEvent,
+  AlertRule,
   NotificationChannel,
 } from '../../types/analytics';
-import { alertManager } from '../../services/analytics';
 
 const { Option } = Select;
 
@@ -112,7 +112,7 @@ export function AlertSettings({ onBack }: AlertSettingsProps) {
     try {
       await alertManager.updateRule({ ...rule, enabled });
       setRules((prev) =>
-        prev.map((r) => (r.id === rule.id ? { ...r, enabled } : r))
+        prev.map((r) => (r.id === rule.id ? { ...r, enabled } : r)),
       );
       message.success(enabled ? '规则已启用' : '规则已禁用');
     } catch (error) {
@@ -177,7 +177,7 @@ export function AlertSettings({ onBack }: AlertSettingsProps) {
         };
         await alertManager.updateRule(updatedRule);
         setRules((prev) =>
-          prev.map((r) => (r.id === editingRule.id ? updatedRule : r))
+          prev.map((r) => (r.id === editingRule.id ? updatedRule : r)),
         );
         message.success('规则已更新');
       } else {
@@ -198,7 +198,7 @@ export function AlertSettings({ onBack }: AlertSettingsProps) {
     try {
       await alertManager.acknowledgeEvent(eventId);
       setEvents((prev) =>
-        prev.map((e) => (e.id === eventId ? { ...e, acknowledged: true } : e))
+        prev.map((e) => (e.id === eventId ? { ...e, acknowledged: true } : e)),
       );
     } catch (error) {
       message.error('操作失败');
@@ -206,9 +206,7 @@ export function AlertSettings({ onBack }: AlertSettingsProps) {
   };
 
   const getConditionLabel = (type: AlertConditionType): string => {
-    return (
-      CONDITION_TYPE_OPTIONS.find((o) => o.value === type)?.label || type
-    );
+    return CONDITION_TYPE_OPTIONS.find((o) => o.value === type)?.label || type;
   };
 
   const getThresholdUnit = (type: AlertConditionType): string => {
@@ -286,13 +284,13 @@ export function AlertSettings({ onBack }: AlertSettingsProps) {
                       <div className="rule-info">
                         <Switch
                           checked={rule.enabled}
-                          onChange={(checked) => handleToggleRule(rule, checked)}
+                          onChange={(checked) =>
+                            handleToggleRule(rule, checked)
+                          }
                           size="small"
                         />
                         <span className="rule-name">{rule.name}</span>
-                        {!rule.enabled && (
-                          <Tag color="default">已禁用</Tag>
-                        )}
+                        {!rule.enabled && <Tag color="default">已禁用</Tag>}
                       </div>
                       <Space size="small">
                         <Tooltip title="编辑">
@@ -485,9 +483,7 @@ export function AlertSettings({ onBack }: AlertSettingsProps) {
 
           <Form.Item
             noStyle
-            shouldUpdate={(prev, curr) =>
-              prev.channels !== curr.channels
-            }
+            shouldUpdate={(prev, curr) => prev.channels !== curr.channels}
           >
             {({ getFieldValue }) =>
               getFieldValue('channels')?.includes('webhook') && (
