@@ -7,3 +7,4 @@ export * from './healing';
 export * from './assertion';
 export * from './dataGen';
 export * from './optimization';
+export * from './multiDevice';

@@ -29,6 +29,7 @@ import { useKeyboardShortcuts } from './hooks';
 import { MarketplaceHome } from './marketplace';
 import { useGeneratorStore } from './store';
 import './styles.less';
+import { useI18n } from '../../i18n';
 
 export function AITestGenerator() {
   const {
@@ -44,6 +45,7 @@ export function AITestGenerator() {
     setSelectedDeviceId,
   } = useGeneratorStore();
 
+  const { t } = useI18n();
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
 
   useEffect(() => {
@@ -58,10 +60,10 @@ export function AITestGenerator() {
       const result = useGeneratorStore.getState().parseResult;
       if (result?.cases.length) {
         setCurrentView('preview');
-        message.success('解析成功');
+        message.success(t('parseSuccess'));
       }
     }
-  }, [currentView, markdownInput, parseInput, setCurrentView]);
+  }, [currentView, markdownInput, parseInput, setCurrentView, t]);
 
   const handleRun = useCallback(() => {
     if (currentView === 'preview' && parseResult?.cases.length) {
@@ -86,9 +88,9 @@ export function AITestGenerator() {
   const handleCopyYaml = useCallback(() => {
     if (currentView === 'commit' && generatedYaml) {
       navigator.clipboard.writeText(generatedYaml);
-      message.success('YAML 已复制到剪贴板');
+      message.success(t('copyYaml'));
     }
-  }, [currentView, generatedYaml]);
+  }, [currentView, generatedYaml, t]);
 
   const handleHelp = useCallback(() => {
     setShowShortcutsHelp(true);
@@ -143,9 +145,9 @@ export function AITestGenerator() {
         `# Applied Template\n\n\`\`\`yaml\n${yaml}\n\`\`\`\n`
       );
       setCurrentView('input');
-      message.success('Template applied! You can now modify and run it.');
+      message.success(t('templateApplied') + '! You can now modify and run it.');
     },
-    [setCurrentView]
+    [setCurrentView, t]
   );
 
   const renderContent = () => {
@@ -178,7 +180,7 @@ export function AITestGenerator() {
                   background: '#fff',
                 }}
               >
-                返回
+                {t('back')}
               </button>
             </div>
           </div>
@@ -205,31 +207,31 @@ export function AITestGenerator() {
             onChange={setSelectedDeviceId}
             disabled={executionStatus === 'running'}
           />
-          <Tooltip title="执行历史">
+          <Tooltip title={t('executionHistory')}>
             <HistoryOutlined
               className="shortcuts-help-icon"
               onClick={handleOpenHistory}
             />
           </Tooltip>
-          <Tooltip title="分析仪表板">
+          <Tooltip title={t('analyticsDashboard')}>
             <BarChartOutlined
               className="shortcuts-help-icon"
               onClick={handleOpenAnalytics}
             />
           </Tooltip>
-          <Tooltip title="脱敏设置">
+          <Tooltip title={t('maskingSettings')}>
             <SafetyCertificateOutlined
               className="shortcuts-help-icon"
               onClick={handleOpenSettings}
             />
           </Tooltip>
-          <Tooltip title="模板市场">
+          <Tooltip title={t('templateMarket')}>
             <ShopOutlined
               className="shortcuts-help-icon"
               onClick={handleOpenMarketplace}
             />
           </Tooltip>
-          <Tooltip title="快捷键帮助 (?)">
+          <Tooltip title={t('shortcutsHelp') + ' (?)'}>
             <KeyOutlined
               className="shortcuts-help-icon"
               onClick={() => setShowShortcutsHelp(true)}

@@ -42,6 +42,12 @@ export {
   BrowserSession,
   type BrowserSessionConfig,
   createBrowserSession,
+  AndroidSession,
+  type AndroidSessionConfig,
+  createAndroidSession,
+  iOSSession,
+  type iOSSessionConfig,
+  createiOSSession,
 } from './sessions';
 
 // Orchestrator
@@ -114,3 +120,20 @@ export {
   type DevicePreset,
   type TestScenario,
 } from './devicePresets';
+
+// Performance Utilities
+export {
+  createScreenshotCompressor,
+  createMessageBatcher,
+  createMemoryPool,
+  createPerformanceMonitor,
+  ScreenshotCompressor,
+  MessageBatcher,
+  MemoryPool,
+  PerformanceMonitor,
+  type CompressionConfig,
+  type CompressionResult,
+  type BatchConfig,
+  type MemoryStats,
+  DEFAULT_COMPRESSION_CONFIG,
+} from './performance';
