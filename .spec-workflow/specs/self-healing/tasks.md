@@ -134,8 +134,8 @@ const element = lastLocate?.output?.element;  // { center, rect, description }
   - 显示自愈加载提示
   - 显示自愈成功消息
 
-### 4.3 统计面板 [可选]
-- [ ] **自愈统计面板** (`components/HealingStatistics.tsx`)
+### 4.3 统计面板 ✅
+- [x] **自愈统计面板** (`components/HealingStatistics.tsx`)
   - 成功率展示
   - 高频自愈元素列表
   - 策略使用统计
