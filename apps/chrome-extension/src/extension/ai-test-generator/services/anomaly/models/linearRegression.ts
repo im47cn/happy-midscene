@@ -88,7 +88,7 @@ export function fitLinearRegression(data: DataPoint[]): LinearRegressionModel {
   const standardError = n > 2 ? Math.sqrt(ssRes / (n - 2)) : 0;
 
   return {
-    slope: slope / 3600, // Convert back to per-millisecond
+    slope: slope / 3600000, // Convert back to per-millisecond (slope is per-hour, so divide by ms in hour)
     intercept,
     r2: Math.max(0, Math.min(1, r2)),
     standardError,
@@ -97,19 +97,22 @@ export function fitLinearRegression(data: DataPoint[]): LinearRegressionModel {
 
 /**
  * Predict future values using a linear model
+ * Note: baseTimestamp should be the last data point timestamp,
+ * and model assumes time 0 at the first data point
  */
 export function predictLinear(
   model: LinearRegressionModel,
   baseTimestamp: number,
   horizonMs: number,
-  steps: number = 10
+  steps: number = 10,
+  minTimestamp: number = 0
 ): LinearPrediction[] {
   const predictions: LinearPrediction[] = [];
   const stepSize = horizonMs / steps;
 
   for (let i = 1; i <= steps; i++) {
     const timestamp = baseTimestamp + i * stepSize;
-    const deltaMs = timestamp - baseTimestamp;
+    const deltaMs = timestamp - minTimestamp; // Time from start of data, not from baseTimestamp
     const value = model.intercept + model.slope * deltaMs;
 
     predictions.push({
@@ -132,10 +135,10 @@ export function linearRegressionPredict(
 ): RegressionResult {
   const model = fitLinearRegression(data);
   const baseTimestamp = Math.max(...data.map((d) => d.timestamp));
-  const predictions = predictLinear(model, baseTimestamp, horizonMs, steps);
+  const minTimestamp = Math.min(...data.map((d) => d.timestamp));
+  const predictions = predictLinear(model, baseTimestamp, horizonMs, steps, minTimestamp);
 
   // Calculate residuals for the training data
-  const minTimestamp = Math.min(...data.map((d) => d.timestamp));
   const residuals = data.map((d) => {
     const predicted = model.intercept + model.slope * (d.timestamp - minTimestamp);
     return d.value - predicted;
