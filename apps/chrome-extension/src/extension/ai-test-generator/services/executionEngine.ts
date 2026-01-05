@@ -17,6 +17,7 @@ import {
   logMasker,
   maskerEngine,
 } from './masking';
+import { screenshotStorage } from './screenshotStorage';
 
 export interface DeviceEmulationConfig {
   deviceId: string;
@@ -294,6 +295,8 @@ export class ExecutionEngine {
   private selfHealingConfig: SelfHealingConfig;
   private maskingConfig: MaskingConfig;
   private isLogMaskingActive = false;
+  private screenshotStorageEnabled = true;
+  private currentTestCaseId?: string;
 
   constructor(
     private getAgent: (forceSameTabNavigation?: boolean) => any,
@@ -340,6 +343,20 @@ export class ExecutionEngine {
    */
   getMaskingConfig(): MaskingConfig {
     return { ...this.maskingConfig };
+  }
+
+  /**
+   * Enable or disable screenshot storage
+   */
+  setScreenshotStorageEnabled(enabled: boolean): void {
+    this.screenshotStorageEnabled = enabled;
+  }
+
+  /**
+   * Check if screenshot storage is enabled
+   */
+  isScreenshotStorageEnabled(): boolean {
+    return this.screenshotStorageEnabled;
   }
 
   /**
@@ -735,6 +752,17 @@ export class ExecutionEngine {
       // Use Midscene's AI action
       await this.agent.aiAct(step.originalText);
 
+      // Extract element info for highlighting
+      const elementInfo = this.extractElementFromDump();
+      if (elementInfo && this.callbacks.onHighlight) {
+        this.callbacks.onHighlight({
+          x: elementInfo.center[0],
+          y: elementInfo.center[1],
+          width: elementInfo.rect.width || 0,
+          height: elementInfo.rect.height || 0,
+        });
+      }
+
       // Success: try to collect fingerprint for future healing
       if (this.selfHealingConfig.enabled) {
         const elementInfo = this.extractElementFromDump();
@@ -754,6 +782,21 @@ export class ExecutionEngine {
 
       // Take screenshot after successful step (with masking)
       const screenshot = await this.takeScreenshot(true);
+
+      // Save screenshot to storage if enabled
+      if (this.screenshotStorageEnabled && screenshot) {
+        try {
+          await screenshotStorage.store(screenshot, {
+            testCaseId: this.currentTestCaseId,
+            stepId: step.id,
+            stepIndex: this.currentStepIndex,
+            stepDescription: step.originalText,
+            status: 'success',
+          });
+        } catch (storageError) {
+          console.debug('Failed to store screenshot:', storageError);
+        }
+      }
 
       const result: ExecutionResult = {
         stepId: step.id,
@@ -780,6 +823,22 @@ export class ExecutionEngine {
 
       // Take screenshot even on failure (with masking)
       const screenshot = await this.takeScreenshot(true);
+
+      // Save screenshot to storage if enabled
+      if (this.screenshotStorageEnabled && screenshot) {
+        try {
+          await screenshotStorage.store(screenshot, {
+            testCaseId: this.currentTestCaseId,
+            stepId: step.id,
+            stepIndex: this.currentStepIndex,
+            stepDescription: step.originalText,
+            status: 'failed',
+            errorMessage: errorDetails.message,
+          });
+        } catch (storageError) {
+          console.debug('Failed to store screenshot:', storageError);
+        }
+      }
 
       return {
         stepId: step.id,
@@ -966,6 +1025,7 @@ export class ExecutionEngine {
     this.currentStepIndex = 0;
     this.executionResults = [];
     this.isPaused = false;
+    this.currentTestCaseId = testCase.id;
 
     const executionStartTime = Date.now();
 
