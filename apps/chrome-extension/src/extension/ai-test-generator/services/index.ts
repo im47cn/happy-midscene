@@ -8,3 +8,6 @@ export * from './recommendation';
 
 // Multi-device collaborative testing
 export * from './multiDevice';
+
+// Adaptive test generation
+export * from './adaptive';
