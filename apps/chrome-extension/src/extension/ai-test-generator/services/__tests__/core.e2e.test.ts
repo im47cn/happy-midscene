@@ -19,9 +19,9 @@ import {
   clampBoxToViewport,
   findInteractableElementNear,
   type ElementBox,
-} from '../../../utils/elementUtils';
-import { perfMonitor } from '../../../utils/performance';
-import { setLocale, t, detectBrowserLocale, initLocale } from '../../../utils/i18n';
+} from '../../../../utils/elementUtils';
+import { perfMonitor } from '../../../../utils/performance';
+import { setLocale, t, detectBrowserLocale, initLocale } from '../../../../utils/i18n';
 import { screenshotStorage } from '../screenshotStorage';
 import type { ExecutionEngine, TaskStep, TestCase } from '../executionEngine';
 import type { ExecutionCallbacks, ExecutionResult } from '../executionEngine';
