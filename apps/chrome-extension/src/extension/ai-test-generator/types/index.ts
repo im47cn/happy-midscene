@@ -9,3 +9,4 @@ export * from './dataGen';
 export * from './optimization';
 export * from './multiDevice';
 export * from './adaptive';
+export * from './designer';

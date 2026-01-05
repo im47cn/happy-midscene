@@ -127,7 +127,7 @@ export interface VariableOperation {
  * 动作接口
  */
 export interface Action {
-  type: 'click' | 'input' | 'assert' | 'wait' | 'navigate' | 'scroll' | 'hover';
+  type: 'click' | 'input' | 'assert' | 'wait' | 'navigate' | 'scroll' | 'hover' | 'drag';
   target: string;
   value?: string;
 }
