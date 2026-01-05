@@ -5,24 +5,24 @@
 
 import {
   AppstoreOutlined,
-  ArrowLeftOutlined,
   FireOutlined,
   HistoryOutlined,
   HeartOutlined,
   RocketOutlined,
 } from '@ant-design/icons';
 import {
-  Button,
   Col,
   Row,
   Segmented,
+  Space,
   Typography,
 } from 'antd';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useI18n } from '../../../../i18n';
-import { marketplaceAPI, templateStorage } from '../services';
+import { githubAuth, marketplaceAPI, templateStorage } from '../services';
 import type {
+  AuthState,
   CategoryInfo,
   LocalTemplate,
   SearchQuery,
@@ -30,12 +30,14 @@ import type {
   TemplateCategory,
   TemplateSummary,
 } from '../types';
+import { AuthButton } from './AuthButton';
 import { CategoryNav } from './CategoryNav';
 import { MarketplaceErrorBoundary } from './ErrorBoundary';
 import { EmptyState, LoadingState } from './StateDisplay';
 import { TemplateCard } from './TemplateCard';
 import { TemplateDetail } from './TemplateDetail';
 import { TemplateSearch } from './TemplateSearch';
+import { UserProfile } from './UserProfile';
 
 const { Title } = Typography;
 
@@ -60,6 +62,7 @@ export const MarketplaceHome: React.FC<MarketplaceHomeProps> = ({
   const [detailLoading, setDetailLoading] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [localTemplates, setLocalTemplates] = useState<LocalTemplate[]>([]);
+  const [authState, setAuthState] = useState<AuthState>(githubAuth.getAuthState());
 
   // Load initial data
   useEffect(() => {
@@ -217,6 +220,20 @@ export const MarketplaceHome: React.FC<MarketplaceHomeProps> = ({
     setSelectedTemplate(null);
   }, [onApplyTemplate]);
 
+  const handleAuthChange = useCallback((state: AuthState) => {
+    setAuthState(state);
+  }, []);
+
+  const handlePublish = useCallback(() => {
+    // TODO: Navigate to publish page
+    console.log('Navigate to publish page');
+  }, []);
+
+  const handleMyTemplates = useCallback(() => {
+    // TODO: Navigate to my templates
+    console.log('Navigate to my templates');
+  }, []);
+
   // Show template detail
   if (selectedTemplate) {
     return (
@@ -232,10 +249,21 @@ export const MarketplaceHome: React.FC<MarketplaceHomeProps> = ({
   return (
     <div className="marketplace-home" style={{ padding: '0 8px' }}>
       {/* Header */}
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Title level={4} style={{ margin: 0 }}>
           {t('templateMarketplace')}
         </Title>
+        <Space>
+          {authState.isAuthenticated ? (
+            <UserProfile
+              onPublish={handlePublish}
+              onMyTemplates={handleMyTemplates}
+              compact
+            />
+          ) : (
+            <AuthButton onAuthChange={handleAuthChange} size="small" />
+          )}
+        </Space>
       </div>
 
       {/* Search */}

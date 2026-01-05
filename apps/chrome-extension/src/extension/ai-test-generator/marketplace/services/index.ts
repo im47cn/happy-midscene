@@ -5,6 +5,8 @@ export { templateAuditor, TemplateAuditor } from './templateAuditor';
 export { ratingSystem, RatingSystem } from './ratingSystem';
 export { offlineManager, OfflineManager } from './offlineManager';
 export { offlineSupport, OfflineSupport } from './offlineSupport';
+export { githubAuth, GitHubAuth } from './githubAuth';
+export { githubClient, GitHubClient, GitHubAPIError } from './githubClient';
 export {
   debounce,
   throttle,

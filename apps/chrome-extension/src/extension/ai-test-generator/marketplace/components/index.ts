@@ -11,6 +11,8 @@ export { ApplyWizard } from './ApplyWizard';
 export { VersionSelector } from './VersionSelector';
 export { PublishForm } from './PublishForm';
 export { PublishPreview } from './PublishPreview';
+export { AuthButton } from './AuthButton';
+export { UserProfile } from './UserProfile';
 export { MarketplaceErrorBoundary, withErrorBoundary } from './ErrorBoundary';
 export {
   LoadingState,

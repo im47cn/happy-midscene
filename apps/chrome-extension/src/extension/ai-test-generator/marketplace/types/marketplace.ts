@@ -382,3 +382,176 @@ export interface IRatingSystem {
   getUserReview(templateId: string, userId: string): Promise<TemplateReview | null>;
   getReviewStats(templateId: string): Promise<{ average: number; count: number; distribution: Record<number, number> }>;
 }
+
+// ============================================
+// Collaborative Marketplace Types
+// ============================================
+
+/**
+ * GitHub user information
+ */
+export interface GitHubUser {
+  id: number;
+  login: string;
+  avatar_url: string;
+  name: string | null;
+  email: string | null;
+  html_url: string;
+}
+
+/**
+ * Authentication state
+ */
+export interface AuthState {
+  isAuthenticated: boolean;
+  user: GitHubUser | null;
+  accessToken: string | null;
+  expiresAt: number | null;
+}
+
+/**
+ * OAuth configuration
+ */
+export interface OAuthConfig {
+  clientId: string;
+  redirectUri: string;
+  scopes: string[];
+}
+
+/**
+ * Publish result
+ */
+export interface PublishResult {
+  success: boolean;
+  templateId?: string;
+  gistId?: string;
+  gistUrl?: string;
+  message: string;
+  errors?: string[];
+}
+
+/**
+ * Review input for submission
+ */
+export interface ReviewInput {
+  rating: 1 | 2 | 3 | 4 | 5;
+  comment: string;
+  version?: string;
+}
+
+/**
+ * GitHub Gist file structure
+ */
+export interface GistFile {
+  filename: string;
+  content: string;
+  type?: string;
+  language?: string;
+}
+
+/**
+ * GitHub Gist
+ */
+export interface Gist {
+  id: string;
+  html_url: string;
+  description: string;
+  public: boolean;
+  files: Record<string, GistFile>;
+  owner: GitHubUser;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Template index entry (stored in GitHub Issue)
+ */
+export interface TemplateIndexEntry {
+  id: string;
+  gistId: string;
+  gistUrl: string;
+  name: string;
+  slug: string;
+  shortDescription: string;
+  category: TemplateCategory;
+  platforms: PlatformType[];
+  version: string;
+  publisher: Pick<Publisher, 'id' | 'name' | 'verified'>;
+  stats: TemplateStats;
+  featured?: boolean;
+  verified?: boolean;
+  publishedAt: number;
+  updatedAt: number;
+}
+
+/**
+ * Template index (master index in GitHub Issue)
+ */
+export interface TemplateIndex {
+  version: string;
+  updatedAt: number;
+  templates: TemplateIndexEntry[];
+  categories: CategoryInfo[];
+}
+
+/**
+ * Sync queue item for offline operations
+ */
+export interface SyncQueueItem {
+  id: string;
+  action: 'publish' | 'review' | 'favorite' | 'download';
+  data: unknown;
+  timestamp: number;
+  retryCount: number;
+  status: 'pending' | 'syncing' | 'failed';
+}
+
+/**
+ * Extended marketplace API interface for collaborative features
+ */
+export interface ICollaborativeMarketplaceAPI extends IMarketplaceAPI {
+  // Authentication
+  login(): Promise<AuthState>;
+  logout(): Promise<void>;
+  getCurrentUser(): Promise<GitHubUser | null>;
+  isAuthenticated(): boolean;
+
+  // Publishing
+  publishTemplate(draft: TemplateDraft): Promise<PublishResult>;
+  updateTemplate(id: string, draft: TemplateDraft): Promise<PublishResult>;
+  deleteTemplate(id: string): Promise<void>;
+
+  // Collaborative reviews
+  submitReview(templateId: string, review: ReviewInput): Promise<TemplateReview>;
+  updateReview(reviewId: string, review: ReviewInput): Promise<TemplateReview>;
+  deleteReview(reviewId: string): Promise<void>;
+
+  // Statistics
+  recordDownload(templateId: string): Promise<void>;
+  toggleFavorite(templateId: string): Promise<boolean>;
+
+  // User content
+  getMyTemplates(): Promise<Template[]>;
+  getMyReviews(): Promise<TemplateReview[]>;
+  getMyFavorites(): Promise<TemplateSummary[]>;
+}
+
+/**
+ * GitHub API configuration
+ */
+export interface GitHubAPIConfig {
+  clientId: string;
+  templateRepo: string;
+  indexIssueNumber: number;
+  apiBaseUrl: string;
+}
+
+/**
+ * Default GitHub API configuration
+ */
+export const DEFAULT_GITHUB_API_CONFIG: GitHubAPIConfig = {
+  clientId: '', // To be configured
+  templateRepo: 'midscene/templates',
+  indexIssueNumber: 1,
+  apiBaseUrl: 'https://api.github.com',
+};

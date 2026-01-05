@@ -220,6 +220,10 @@ export const translations = {
     confirmClearAllHistory: '确定清空所有历史记录？',
     noExecutionHistory: '暂无执行历史',
     partialSuccess: '部分成功',
+    cancelled: '已取消',
+    duration: '耗时',
+    testCases: '测试用例',
+    refresh: '刷新',
 
     // AI 测试生成器 - 快捷键
     shortcuts: '快捷键',
@@ -316,6 +320,22 @@ export const translations = {
     statusFailed: '失败',
     statusSkipped: '已跳过',
     statusStopped: '已停止',
+
+    // AI 测试生成器 - GitHub 认证
+    loginWithGitHub: '使用 GitHub 登录',
+    logout: '退出登录',
+    loggingIn: '登录中...',
+    loginSuccess: '登录成功',
+    loginFailed: '登录失败',
+    loginCancelled: '登录已取消',
+    logoutSuccess: '已退出登录',
+    welcomeUser: '欢迎，{name}',
+    viewProfile: '查看个人资料',
+    myTemplates: '我的模板',
+    publishTemplate: '发布模板',
+    authRequired: '需要登录',
+    authRequiredDesc: '请使用 GitHub 登录以使用此功能',
+    notLoggedIn: '未登录',
   },
   en: {
     // 模式名称
@@ -629,6 +649,22 @@ export const translations = {
     statusFailed: 'Failed',
     statusSkipped: 'Skipped',
     statusStopped: 'Stopped',
+
+    // AI 测试生成器 - GitHub 认证
+    loginWithGitHub: 'Login with GitHub',
+    logout: 'Logout',
+    loggingIn: 'Logging in...',
+    loginSuccess: 'Login successful',
+    loginFailed: 'Login failed',
+    loginCancelled: 'Login cancelled',
+    logoutSuccess: 'Logged out',
+    welcomeUser: 'Welcome, {name}',
+    viewProfile: 'View Profile',
+    myTemplates: 'My Templates',
+    publishTemplate: 'Publish Template',
+    authRequired: 'Authentication Required',
+    authRequiredDesc: 'Please login with GitHub to use this feature',
+    notLoggedIn: 'Not logged in',
   },
 } as const;
 
