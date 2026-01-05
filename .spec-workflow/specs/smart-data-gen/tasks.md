@@ -174,13 +174,13 @@
   - 模板应用生成
 
 ### 9.3 数据池管理
-- [ ] **DataPoolEditor** (`components/DataPoolEditor.tsx`) - 可选增强
+- [x] **DataPoolEditor** (`components/DataPoolEditor.tsx`) - 集成到 DataGenPanel
   - 数据池列表
   - 数据编辑
   - 导入导出
 
 ### 9.4 边界值预览
-- [ ] **BoundaryPreview** (`components/BoundaryPreview.tsx`) - 可选增强
+- [x] **BoundaryPreview** (`components/BoundaryPreview.tsx`) - 集成到 DataGenPanel
   - 边界值列表
   - 预期结果标记
   - 一键生成测试
