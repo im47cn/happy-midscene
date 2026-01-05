@@ -149,7 +149,8 @@ const element = lastLocate?.output?.element;  // { center, rect, description }
   - `healingEngine.test.ts` (19 tests)
   - 测试覆盖：配置、指纹采集、自愈流程、置信度计算、统计
 
-- [ ] **集成测试** [可选]
+- [x] **集成测试** [可选]
+  - `integration.test.ts` (15 tests)
   - 端到端自愈流程测试
   - 模拟 UI 变化场景
 
@@ -169,7 +170,8 @@ apps/chrome-extension/src/extension/ai-test-generator/
 │   │   ├── healingEngine.ts          # 自愈引擎 ✅
 │   │   └── __tests__/
 │   │       ├── confidenceCalculator.test.ts  # 13 tests ✅
-│   │       └── healingEngine.test.ts         # 19 tests ✅
+│   │       ├── healingEngine.test.ts         # 19 tests ✅
+│   │       └── integration.test.ts          # 15 integration tests ✅
 │   ├── executionEngine.ts            # 已集成自愈 ✅
 │   └── index.ts                      # 已导出 healing ✅
 └── components/
@@ -226,6 +228,6 @@ components/HealingConfirmDialog.tsx
 | Phase 2 | ✅ 完成 | 自愈引擎核心逻辑 |
 | Phase 3 | ✅ 完成 | ExecutionEngine 集成 |
 | Phase 4 | ✅ 完成 | UI 组件（确认弹窗） |
-| Phase 5 | ✅ 完成 | 单元测试 (32 tests passing) |
+| Phase 5 | ✅ 完成 | 单元测试 (47 tests passing) |
 
 **功能完成**：所有 MVP 功能已实现并通过测试
