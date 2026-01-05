@@ -12,10 +12,10 @@
 
 ---
 
-## Phase 1: 类型定义与基础设施
+## Phase 1: 类型定义与基础设施 ✅
 
 ### 1.1 类型定义
-- [ ] **类型文件** (`types/dataGen.ts`)
+- [x] **类型文件** (`types/dataGen.ts`)
   - `FieldDefinition` 接口
   - `FieldType` 和 `SemanticType` 类型
   - `FieldConstraints` 接口
@@ -25,7 +25,7 @@
   - `MaskingRule` 接口
 
 ### 1.2 存储层
-- [ ] **数据存储** (`services/dataGen/storage.ts`)
+- [x] **数据存储** (`services/dataGen/storage.ts`)
   - 模板存储
   - 数据池存储
   - 生成规则存储
@@ -54,43 +54,36 @@
 
 ---
 
-## Phase 3: 数据生成器
+## Phase 3: 数据生成器 ✅
 
 ### 3.1 生成器核心
-- [ ] **DataGenerator** (`services/dataGen/dataGenerator.ts`)
+- [x] **DataGenerator** (`services/dataGen/dataGenerator.ts`)
   - `generate(field, options)` 单字段生成
   - `generateForForm(fields)` 表单生成
   - `generateWithVariation(field, variation)` 变体生成
 
 ### 3.2 生成器注册
-- [ ] **GeneratorRegistry** (`services/dataGen/generatorRegistry.ts`)
+- [x] **GeneratorRegistry** (`services/dataGen/generatorRegistry.ts`)
   - 生成器注册机制
   - 生成器查找逻辑
   - 自定义生成器支持
 
 ### 3.3 内置生成器
-- [ ] **内置生成器集** (`services/dataGen/generators/`)
-  - `mobilePhoneGenerator.ts` 手机号生成器
-  - `emailGenerator.ts` 邮箱生成器
-  - `idCardGenerator.ts` 身份证生成器
-  - `bankCardGenerator.ts` 银行卡生成器
-  - `addressGenerator.ts` 地址生成器
-  - `nameGenerator.ts` 姓名生成器
-  - `dateGenerator.ts` 日期生成器
-  - `amountGenerator.ts` 金额生成器
+- [x] **内置生成器集** (`services/dataGen/generators.ts`)
+  - 22 种生成器（手机号/邮箱/身份证/银行卡/地址/姓名/日期/金额等）
 
 ---
 
-## Phase 4: 边界值引擎
+## Phase 4: 边界值引擎 ✅
 
 ### 4.1 边界值分析
-- [ ] **BoundaryEngine** (`services/dataGen/boundaryEngine.ts`)
+- [x] **BoundaryEngine** (`services/dataGen/boundaryEngine.ts`)
   - `analyzeBoundaries(field)` 边界分析
   - `generateBoundaryValues(field)` 边界值生成
   - `generateInvalidValues(field)` 无效值生成
 
 ### 4.2 边界规则
-- [ ] **BoundaryRules** (`services/dataGen/boundaryRules.ts`)
+- [x] **BoundaryRules** (集成在 boundaryEngine.ts)
   - 长度边界规则
   - 数值边界规则
   - 格式边界规则
@@ -98,49 +91,49 @@
 
 ---
 
-## Phase 5: 数据脱敏
+## Phase 5: 数据脱敏 ✅
 
 ### 5.1 脱敏引擎
-- [ ] **DataMasker** (`services/dataGen/dataMasker.ts`)
+- [x] **DataMasker** (`services/dataGen/dataMasker.ts`)
   - `mask(value, semanticType)` 脱敏处理
   - `maskRecord(record)` 记录脱敏
   - `isSensitive(type)` 敏感性判断
 
 ### 5.2 脱敏规则
-- [ ] **MaskingRules** (`services/dataGen/maskingRules.ts`)
+- [x] **MaskingRules** (集成在 dataMasker.ts)
   - 内置脱敏规则
   - 自定义规则支持
   - 规则优先级管理
 
 ---
 
-## Phase 6: 模板管理
+## Phase 6: 模板管理 ✅
 
 ### 6.1 模板管理器
-- [ ] **TemplateManager** (`services/dataGen/templateManager.ts`)
+- [x] **TemplateManager** (`services/dataGen/templateManager.ts`)
   - `create(template)` 创建模板
   - `update(id, updates)` 更新模板
   - `delete(id)` 删除模板
   - `applyTemplate(id, variables)` 应用模板
 
 ### 6.2 变量替换
-- [ ] **VariableResolver** (`services/dataGen/variableResolver.ts`)
+- [x] **VariableResolver** (`services/dataGen/variableResolver.ts`)
   - 变量解析
   - 表达式计算
   - 依赖处理
 
 ---
 
-## Phase 7: 数据池
+## Phase 7: 数据池 ✅
 
 ### 7.1 数据池管理
-- [ ] **DataPoolManager** (`services/dataGen/dataPoolManager.ts`)
+- [x] **DataPoolManager** (`services/dataGen/dataPoolManager.ts`)
   - `getPool(id)` 获取数据池
   - `pick(poolId, strategy)` 选择数据
   - `addPool(pool)` 添加数据池
 
 ### 7.2 内置数据池
-- [ ] **内置数据池** (`services/dataGen/pools/`)
+- [x] **内置数据池** (`services/dataGen/pools/`)
   - `provinces.ts` 省份数据
   - `cities.ts` 城市数据
   - `names.ts` 姓名数据
@@ -194,19 +187,19 @@
 
 ---
 
-## Phase 10: 测试
+## Phase 10: 测试 ✅
 
 ### 10.1 单元测试
-- [ ] `fieldRecognizer.test.ts` - 字段识别测试
-- [ ] `dataGenerator.test.ts` - 数据生成测试
-- [ ] `boundaryEngine.test.ts` - 边界值测试
-- [ ] `dataMasker.test.ts` - 数据脱敏测试
-- [ ] `templateManager.test.ts` - 模板管理测试
+- [x] `fieldRecognizer.test.ts` - 字段识别测试
+- [x] `dataGenerator.test.ts` - 数据生成测试
+- [x] `boundaryEngine.test.ts` - 边界值测试
+- [x] `dataMasker.test.ts` - 数据脱敏测试
+- [x] `templateManager.test.ts` - 模板管理测试
 
 ### 10.2 集成测试
-- [ ] 端到端数据生成流程测试
-- [ ] 执行引擎集成测试
-- [ ] 性能基准测试
+- [x] 端到端数据生成流程测试
+- [x] 执行引擎集成测试
+- [x] 性能基准测试
 
 ---
 
