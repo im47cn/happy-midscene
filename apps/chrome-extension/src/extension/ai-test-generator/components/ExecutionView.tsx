@@ -15,6 +15,7 @@ import {
   ReloadOutlined,
   StopOutlined,
   ThunderboltOutlined,
+  HighlightOutlined,
 } from '@ant-design/icons';
 import {
   ChromeExtensionProxyPage,
@@ -48,7 +49,14 @@ import { useGeneratorStore } from '../store';
 import type { TaskStep, TestCase } from '../types';
 import type { HealingResult } from '../types/healing';
 import { HealingConfirmDialog } from './HealingConfirmDialog';
+import { ElementPicker } from './elementRepair/ElementPicker';
+import { RepairSuggestionPanel } from './elementRepair/RepairSuggestionPanel';
 import { useI18n } from '../../../i18n';
+import type { RepairOptions } from '../types/elementRepair';
+import type { SelectedElement } from '../types/elementRepair';
+import { repairEngine } from '../services/elementRepair';
+import { elementSelector } from '../services/elementRepair';
+import type { RepairResult } from '../types/elementRepair';
 
 const { Text, Title } = Typography;
 
@@ -83,7 +91,7 @@ function DetailedErrorDisplay({
     <div className="detailed-error">
       <div className="error-header">
         <Tag color={errorTypeColors[errorDetails.type]}>
-          {errorTypeLabels[errorDetails.type]}
+          {getErrorTypeLabel(errorDetails.type, (key: string) => key)}
         </Tag>
         <Text type="danger">{errorDetails.details}</Text>
       </div>
@@ -173,6 +181,13 @@ export function ExecutionView() {
     useState<HealingResult | null>(null);
   const [healingStepDescription, setHealingStepDescription] = useState('');
   const healingResolveRef = useRef<((accepted: boolean) => void) | null>(null);
+
+  // Element repair state
+  const [elementPickerVisible, setElementPickerVisible] = useState(false);
+  const [repairPanelVisible, setRepairPanelVisible] = useState(false);
+  const [selectedElement, setSelectedElement] = useState<SelectedElement | null>(null);
+  const [repairOptions, setRepairOptions] = useState<RepairOptions | null>(null);
+  const [activeRepairTab, setActiveRepairTab] = useState<'retry' | 'select'>('retry');
 
   const engineRef = useRef<ExecutionEngine | null>(null);
   const executionStartTimeRef = useRef<number>(0);
@@ -461,6 +476,59 @@ export function ExecutionView() {
     handleHealingReject();
   };
 
+  // Element repair handlers
+  const handleStartElementSelection = () => {
+    setActiveRepairTab('select');
+    setElementPickerVisible(true);
+
+    // Set up repair options based on current failed step
+    if (retryStepId && currentErrorDetails) {
+      const failedStep = currentCase?.steps.find(s => s.id === retryStepId);
+      setRepairOptions({
+        stepId: retryStepId,
+        originalDescription: failedStep?.originalText || retryInstruction,
+        originalSelector: failedStep?.selector,
+        failureReason: currentErrorDetails.details || currentErrorDetails.message,
+        contextSteps: currentCase?.steps.map(s => s.originalText),
+      });
+    }
+  };
+
+  const handleElementSelected = (element: SelectedElement) => {
+    setSelectedElement(element);
+    setElementPickerVisible(false);
+    setRepairPanelVisible(true);
+  };
+
+  const handleCloseElementPicker = () => {
+    setElementPickerVisible(false);
+    elementSelector.stopSelection();
+    setActiveRepairTab('retry');
+  };
+
+  const handleRepairApplied = (result: RepairResult) => {
+    if (result.success && result.appliedRepair) {
+      // Update the retry instruction with the new value
+      setRetryInstruction(result.appliedRepair.newValue);
+      setRepairPanelVisible(false);
+
+      message.success({
+        content: (
+          <span>
+            <CheckCircleOutlined style={{ marginRight: 8 }} />
+            {t('repairAppliedSuccessfully')}
+          </span>
+        ),
+        duration: 3,
+      });
+    }
+  };
+
+  const handleCloseRepairPanel = () => {
+    setRepairPanelVisible(false);
+    setSelectedElement(null);
+  };
+
   const getStatusColor = () => {
     switch (executionStatus) {
       case 'running':
@@ -608,8 +676,13 @@ export function ExecutionView() {
           </Space>
         }
         open={retryModalVisible}
-        onCancel={() => setRetryModalVisible(false)}
-        width={500}
+        onCancel={() => {
+          setRetryModalVisible(false);
+          setActiveRepairTab('retry');
+          setElementPickerVisible(false);
+          setRepairPanelVisible(false);
+        }}
+        width={700}
         footer={[
           <Button key="skip" onClick={handleSkipStep}>
             {t('skipThisStep')}
@@ -631,23 +704,90 @@ export function ExecutionView() {
             </div>
           )}
 
-          <Text strong>{t('modifyAndRetry')}：</Text>
-          <Input.TextArea
-            value={retryInstruction}
-            onChange={(e) => setRetryInstruction(e.target.value)}
-            rows={3}
-            style={{ marginTop: 8 }}
-            placeholder={t('modifyInstructionPlaceholder')}
-          />
+          {/* Tab Navigation for Retry Options */}
+          <div style={{ marginBottom: 16 }}>
+            <Space>
+              <Button
+                type={activeRepairTab === 'retry' ? 'primary' : 'default'}
+                icon={<ReloadOutlined />}
+                onClick={() => setActiveRepairTab('retry')}
+              >
+                {t('modifyInstruction')}
+              </Button>
+              <Button
+                type={activeRepairTab === 'select' ? 'primary' : 'default'}
+                icon={<InfoCircleOutlined />}
+                onClick={handleStartElementSelection}
+              >
+                {t('selectElement')}
+              </Button>
+            </Space>
+          </div>
 
-          {!currentErrorDetails?.suggestion && (
-            <Alert
-              type="info"
-              icon={<BulbOutlined />}
-              message={t('retryHint')}
-              style={{ marginTop: 12 }}
-              showIcon
-            />
+          {/* Retry Tab Content */}
+          {activeRepairTab === 'retry' && (
+            <>
+              <Text strong>{t('modifyAndRetry')}：</Text>
+              <Input.TextArea
+                value={retryInstruction}
+                onChange={(e) => setRetryInstruction(e.target.value)}
+                rows={3}
+                style={{ marginTop: 8 }}
+                placeholder={t('modifyInstructionPlaceholder')}
+              />
+
+              {!currentErrorDetails?.suggestion && (
+                <Alert
+                  type="info"
+                  icon={<BulbOutlined />}
+                  message={t('retryHint')}
+                  style={{ marginTop: 12 }}
+                  showIcon
+                />
+              )}
+            </>
+          )}
+
+          {/* Element Selection Tab Content */}
+          {activeRepairTab === 'select' && (
+            <div style={{ marginTop: 16 }}>
+              <Alert
+                type="info"
+                message={t('elementSelectionHelp')}
+                description={t('elementSelectionHelpDesc')}
+                showIcon
+                style={{ marginBottom: 12 }}
+              />
+
+              {elementPickerVisible && (
+                <ElementPicker
+                  visible={elementPickerVisible}
+                  onElementSelected={handleElementSelected}
+                  onStop={handleCloseElementPicker}
+                />
+              )}
+
+              {repairPanelVisible && selectedElement && repairOptions && (
+                <RepairSuggestionPanel
+                  visible={repairPanelVisible}
+                  selectedElement={selectedElement}
+                  repairOptions={repairOptions}
+                  onRepairApplied={handleRepairApplied}
+                  onClose={handleCloseRepairPanel}
+                />
+              )}
+
+              {!elementPickerVisible && !repairPanelVisible && (
+                <Button
+                  type="primary"
+                  icon={<InfoCircleOutlined />}
+                  onClick={handleStartElementSelection}
+                  block
+                >
+                  {t('startElementSelection')}
+                </Button>
+              )}
+            </div>
           )}
         </div>
       </Modal>

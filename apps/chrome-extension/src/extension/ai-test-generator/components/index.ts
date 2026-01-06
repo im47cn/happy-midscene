@@ -11,3 +11,4 @@ export { HealingConfirmDialog } from './HealingConfirmDialog';
 export { HealingStatistics } from './HealingStatistics';
 export * from './recommendation';
 export * from './anomaly';
+export * from './elementRepair';
