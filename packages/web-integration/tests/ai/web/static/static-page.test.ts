@@ -16,10 +16,10 @@ describe(
   () => {
     let server: PlaygroundServer | null = null;
     
-    afterEach(() => {
+    afterEach(async () => {
       // Clean up server if it exists
       if (server) {
-        server.close();
+        await server.close();
         server = null;
       }
     });

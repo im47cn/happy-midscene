@@ -33,16 +33,27 @@ describe(
         const server = createServer({
           root: pageDir,
         });
+        server.server.on('error', (err: any) => {
+          if (err.code === 'EADDRINUSE') {
+            reject(new Error(`Port ${port} is already in use. Another test may be running or the server wasn't properly closed.`));
+          } else {
+            reject(err);
+          }
+        });
         server.listen(port, '127.0.0.1', () => {
           resolve(server);
         });
-        server.server.on('error', reject);
       });
     });
 
-    afterAll(() => {
+    afterAll(async () => {
       if (localServer?.server) {
-        localServer.server.close();
+        // Ensure server is fully closed before continuing
+        await new Promise<void>((resolve) => {
+          localServer.server.close(() => {
+            resolve();
+          });
+        });
       }
     });
 
