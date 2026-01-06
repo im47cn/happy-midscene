@@ -29,9 +29,17 @@ export type DebugActionType =
 export type FixSuggestionType =
   | 'code_change'
   | 'wait_time'
+  | 'wait'
   | 'locator_change'
   | 'retry'
-  | 'pre_action';
+  | 'pre_action'
+  | 'timeout'
+  | 'assertion'
+  | 'debug'
+  | 'action'
+  | 'navigation'
+  | 'auth'
+  | 'locator';
 
 /**
  * Message in conversation
@@ -84,7 +92,7 @@ export interface ActionResult {
  * Fix suggestion for test failures
  */
 export interface FixSuggestion {
-  id: string;
+  id?: string;
   type: FixSuggestionType;
   description: string;
   confidence: number; // 0-1
@@ -111,21 +119,28 @@ export interface ApplyResult {
  */
 export interface DebugContext {
   // Current state
-  currentScreenshot: string;
-  currentUrl: string;
-  currentStep: TestStepInfo;
+  screenshot?: string;
+  pageState?: {
+    url: string;
+    title?: string;
+  };
+  currentStep?: TestStepInfo;
 
   // Failure information
-  error?: DebugError;
+  lastError?: DebugError;
+  error?: DebugError; // Alias for lastError
 
   // History
-  executionHistory: StepResult[];
-  previousScreenshots: ScreenshotInfo[];
+  executionHistory?: StepResult[];
+  previousScreenshots?: ScreenshotInfo[];
 
   // Page information
   visibleElements?: ElementInfo[];
-  consoleErrors?: ConsoleError[];
+  consoleErrors?: string[];
   networkErrors?: NetworkError[];
+
+  // Failed step info
+  failedStep?: string;
 
   // Test case info
   testCaseId?: string;

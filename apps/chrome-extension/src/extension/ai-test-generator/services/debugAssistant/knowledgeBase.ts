@@ -104,17 +104,20 @@ export class KnowledgeBase {
 
     const scored = Array.from(this.entries.values()).map((entry) => {
       let score = 0;
+      let hasMatch = false;
       const patternLower = entry.pattern.toLowerCase();
 
       // Exact match gets highest score
       if (patternLower.includes(queryLower) || queryLower.includes(patternLower)) {
         score += 10;
+        hasMatch = true;
       }
 
       // Word matches
       for (const word of queryWords) {
         if (patternLower.includes(word)) {
           score += 2;
+          hasMatch = true;
         }
       }
 
@@ -122,19 +125,23 @@ export class KnowledgeBase {
       for (const tag of entry.tags) {
         if (tag.toLowerCase().includes(queryLower) || queryLower.includes(tag.toLowerCase())) {
           score += 3;
+          hasMatch = true;
         }
       }
 
-      // Frequency and success rate boost
-      score += Math.log10(entry.frequency + 1) * 2;
-      score += entry.successRate * 5;
+      // Only add frequency/success/recency boosts if there was at least some match
+      if (hasMatch) {
+        // Frequency and success rate boost
+        score += Math.log10(entry.frequency + 1) * 2;
+        score += entry.successRate * 5;
 
-      // Recency boost
-      const daysSinceUsed = (Date.now() - entry.lastUsedAt) / (1000 * 60 * 60 * 24);
-      if (daysSinceUsed < 7) {
-        score += 2;
-      } else if (daysSinceUsed < 30) {
-        score += 1;
+        // Recency boost
+        const daysSinceUsed = (Date.now() - entry.lastUsedAt) / (1000 * 60 * 60 * 24);
+        if (daysSinceUsed < 7) {
+          score += 2;
+        } else if (daysSinceUsed < 30) {
+          score += 1;
+        }
       }
 
       return { entry, score };
@@ -159,23 +166,49 @@ export class KnowledgeBase {
       const entryLower = entry.pattern.toLowerCase();
       const entryWords = new Set(entryLower.split(/\s+/).filter((w) => w.length > 3));
 
-      // Check word overlap
-      let overlapCount = 0;
-      for (const word of patternWords) {
-        if (entryWords.has(word)) {
-          overlapCount++;
+      // Skip if both patterns are empty after filtering (only short words)
+      if (patternWords.size === 0 && entryWords.size === 0) {
+        // For short patterns, only merge if identical
+        if (entryLower === patternLower) {
+          return entry;
+        }
+        continue;
+      }
+
+      // For single-word patterns, only merge if the words are identical
+      if (patternWords.size === 1 && entryWords.size === 1) {
+        const patternWord = Array.from(patternWords)[0];
+        const entryWord = Array.from(entryWords)[0];
+        if (patternWord === entryWord) {
+          return entry;
+        }
+        continue;
+      }
+
+      // Check word overlap (for multi-word patterns)
+      if (patternWords.size > 0 && entryWords.size > 0) {
+        let overlapCount = 0;
+        for (const word of patternWords) {
+          if (entryWords.has(word)) {
+            overlapCount++;
+          }
+        }
+
+        // If high overlap, consider it similar
+        const overlapRatio = overlapCount / Math.min(patternWords.size, entryWords.size);
+        if (overlapRatio >= 0.75) {
+          return entry;
         }
       }
 
-      // If significant overlap, consider it similar
-      const overlapRatio = overlapCount / Math.min(patternWords.size, entryWords.size);
-      if (overlapRatio >= 0.5) {
-        return entry;
-      }
-
-      // Check if one contains the other
-      if (entryLower.includes(patternLower) || patternLower.includes(entryLower)) {
-        return entry;
+      // Check if one contains the other (only for multi-word patterns)
+      if (patternWords.size > 1 || entryWords.size > 1) {
+        const shorter = patternLower.length < entryLower.length ? patternLower : entryLower;
+        const longer = patternLower.length < entryLower.length ? entryLower : patternLower;
+        // Only consider a match if the shorter is at least 85% of the longer's length
+        if ((shorter.length / longer.length) >= 0.85 && longer.includes(shorter)) {
+          return entry;
+        }
       }
     }
 

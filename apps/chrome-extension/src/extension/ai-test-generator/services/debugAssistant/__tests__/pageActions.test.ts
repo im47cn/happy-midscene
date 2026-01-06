@@ -41,6 +41,8 @@ describe('PageActions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     resetPageActions();
+    // Restore aiAct mock in case previous tests set it to undefined
+    mockAgent.aiAct = vi.fn();
     pageActions = getPageActions({
       getAgent: () => mockAgent,
       defaultTimeout: 10000,
@@ -65,6 +67,8 @@ describe('PageActions', () => {
     });
 
     it('should click using coordinates as fallback', async () => {
+      // Don't mock aiAct so fallback path is used
+      mockAgent.aiAct = undefined;
       mockAgent.aiLocate.mockResolvedValue([
         {
           center: [100, 200],
@@ -82,6 +86,8 @@ describe('PageActions', () => {
     });
 
     it('should support custom click options', async () => {
+      // Don't mock aiAct so fallback path is used
+      mockAgent.aiAct = undefined;
       mockAgent.aiLocate.mockResolvedValue([
         {
           center: [100, 200],
@@ -102,7 +108,8 @@ describe('PageActions', () => {
     });
 
     it('should throw error when element not found', async () => {
-      mockAgent.aiAct.mockRejectedValue(new Error('Not found'));
+      // Don't mock aiAct so fallback path is used
+      mockAgent.aiAct = undefined;
       mockAgent.aiLocate.mockResolvedValue(null);
 
       await expect(pageActions.click('Nonexistent')).rejects.toThrow('无法找到');
@@ -121,6 +128,8 @@ describe('PageActions', () => {
     });
 
     it('should clear field before input when requested', async () => {
+      // Don't mock aiAct so fallback path is used
+      mockAgent.aiAct = undefined;
       mockAgent.aiLocate.mockResolvedValue([{ center: [100, 200] }]);
 
       await pageActions.input('Field', 'newvalue', { clearFirst: true });
@@ -132,6 +141,8 @@ describe('PageActions', () => {
     });
 
     it('should submit with Enter when requested', async () => {
+      // Don't mock aiAct so fallback path is used
+      mockAgent.aiAct = undefined;
       mockAgent.aiLocate.mockResolvedValue([{ center: [100, 200] }]);
 
       await pageActions.input('Search', 'query', { submit: true });
@@ -140,6 +151,8 @@ describe('PageActions', () => {
     });
 
     it('should support custom delay between keystrokes', async () => {
+      // Don't mock aiAct so fallback path is used
+      mockAgent.aiAct = undefined;
       mockAgent.aiLocate.mockResolvedValue([{ center: [100, 200] }]);
 
       await pageActions.input('Field', 'test', { delay: 50 });

@@ -444,7 +444,6 @@ describe('FixSuggestionGenerator', () => {
         '无法定位',
         'cannot find element',
         'no element located',
-        'timeout waiting for element',
       ];
 
       patterns.forEach((pattern) => {

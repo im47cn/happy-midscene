@@ -370,9 +370,10 @@ describe('RegionDetector', () => {
 });
 
 describe('detectScreenshotMaskRegions utility', () => {
-  let detectScreenshotMaskRegions: typeof import(
-    '../regionDetector',
-  ).detectScreenshotMaskRegions;
+  let detectScreenshotMaskRegions: (
+    screenshot: string,
+    selectors?: string[],
+  ) => Promise<Array<{ x: number; y: number; width: number; height: number; type: string }>>;
 
   beforeEach(async () => {
     vi.resetModules();

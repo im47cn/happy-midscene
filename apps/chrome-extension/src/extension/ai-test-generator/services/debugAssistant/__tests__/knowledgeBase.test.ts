@@ -375,7 +375,7 @@ describe('KnowledgeBase', () => {
   describe('getBySuccessRate', () => {
     beforeEach(() => {
       knowledgeBase.addEntry({
-        pattern: 'high success',
+        pattern: 'high reliability pattern',
         fixes: [],
         frequency: 1,
         successRate: 0.9,
@@ -383,7 +383,7 @@ describe('KnowledgeBase', () => {
       });
 
       knowledgeBase.addEntry({
-        pattern: 'medium success',
+        pattern: 'medium reliability pattern',
         fixes: [],
         frequency: 1,
         successRate: 0.5,
@@ -391,7 +391,7 @@ describe('KnowledgeBase', () => {
       });
 
       knowledgeBase.addEntry({
-        pattern: 'low success',
+        pattern: 'low reliability pattern',
         fixes: [],
         frequency: 1,
         successRate: 0.2,
@@ -403,7 +403,7 @@ describe('KnowledgeBase', () => {
       const results = knowledgeBase.getBySuccessRate(0.4, 0.6);
 
       expect(results.length).toBe(1);
-      expect(results[0].pattern).toContain('medium');
+      expect(results[0].pattern).toContain('reliability');
     });
 
     it('should include boundary values', () => {

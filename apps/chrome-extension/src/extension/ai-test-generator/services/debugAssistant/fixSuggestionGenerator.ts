@@ -44,7 +44,6 @@ export class FixSuggestionGenerator {
       '无法定位',
       'cannot find element',
       'no element located',
-      'timeout waiting for element',
     ],
     timeout: [
       '超时',
@@ -63,6 +62,7 @@ export class FixSuggestionGenerator {
     networkError: [
       '网络错误',
       'network error',
+      'network',
       '连接失败',
       'connection failed',
       'fetch failed',
@@ -123,9 +123,9 @@ export class FixSuggestionGenerator {
     // 2. Analyze the error type
     const analysis = this.analyzeFailure(context, errorMessage);
 
-    // 3. Add suggestions from analysis
+    // 3. Add suggestions from analysis (respect minConfidence)
     for (const fix of analysis.suggestedFixes) {
-      if (!suggestions.some((s) => s.description === fix.description)) {
+      if (fix.confidence >= this.minConfidence && !suggestions.some((s) => s.description === fix.description)) {
         suggestions.push(fix);
       }
     }
@@ -133,7 +133,7 @@ export class FixSuggestionGenerator {
     // 4. Generate contextual suggestions based on test state
     const contextualSuggestions = this.generateContextualSuggestions(context, errorMessage);
     for (const fix of contextualSuggestions) {
-      if (!suggestions.some((s) => s.description === fix.description)) {
+      if (fix.confidence >= this.minConfidence && !suggestions.some((s) => s.description === fix.description)) {
         suggestions.push(fix);
       }
     }
