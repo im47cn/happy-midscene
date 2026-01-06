@@ -66,7 +66,13 @@ export {
   loadConfig,
   loadConfigWithValidation,
 } from './configLoader';
-export type { ConfigFormat, ConfigLoadOptions, ConfigMetadata, ConfigLoadResult, ConfigSchema } from './configLoader';
+export type {
+  ConfigFormat,
+  ConfigLoadOptions,
+  ConfigMetadata,
+  ConfigLoadResult,
+  ConfigSchema,
+} from './configLoader';
 
 // Retry mechanism
 export {

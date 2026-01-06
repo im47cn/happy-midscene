@@ -6,10 +6,7 @@
   "description": "Run Midscene tests with smart sharding, parallel execution, and quality gates",
   "helpMarkDown": "Run [Midscene](https://github.com/midscenejs/midscene) tests with CI/CD integration features including test sharding, parallel execution, quality gates, and multi-format reporting.",
   "category": "Test",
-  "visibility": [
-    "Build",
-    "Release"
-  ],
+  "visibility": ["Build", "Release"],
   "author": "Midscene",
   "version": {
     "Major": 1,

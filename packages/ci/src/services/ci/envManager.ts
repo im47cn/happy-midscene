@@ -119,7 +119,9 @@ export class EnvManager {
     }
 
     // Try with prefix first
-    const prefixedKey = this.config.prefix ? `${this.config.prefix}${key}` : key;
+    const prefixedKey = this.config.prefix
+      ? `${this.config.prefix}${key}`
+      : key;
     const result = this.resolve(key, prefixedKey);
 
     // Cache the result
@@ -132,7 +134,9 @@ export class EnvManager {
    * Get environment variable with metadata
    */
   getWithMeta(key: string): EnvValue | undefined {
-    const prefixedKey = this.config.prefix ? `${this.config.prefix}${key}` : key;
+    const prefixedKey = this.config.prefix
+      ? `${this.config.prefix}${key}`
+      : key;
     return this.resolve(key, prefixedKey);
   }
 

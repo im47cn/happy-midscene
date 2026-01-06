@@ -2,15 +2,15 @@
  * Quality Gate Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { CIExecutionResult, QualityGateConfig } from '../../types/ci';
 import {
   evaluateQualityGate,
   evaluateQualityGateWithBaseline,
-  getExitCode,
   formatQualityGateResult,
+  getExitCode,
 } from '../qualityGate';
 import { resetRuleEngine } from '../ruleEngine';
-import type { CIExecutionResult, QualityGateConfig } from '../../types/ci';
 
 describe('QualityGate', () => {
   let mockResults: CIExecutionResult;

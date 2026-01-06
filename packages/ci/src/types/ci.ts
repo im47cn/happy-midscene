@@ -30,7 +30,11 @@ export type ReportFormat = 'junit' | 'json' | 'html' | 'markdown';
 /**
  * Sharding strategy types
  */
-export type ShardStrategy = 'time-based' | 'count-based' | 'hash-based' | 'custom';
+export type ShardStrategy =
+  | 'time-based'
+  | 'count-based'
+  | 'hash-based'
+  | 'custom';
 
 /**
  * Retry strategy types
@@ -40,7 +44,13 @@ export type RetryStrategy = 'fixed' | 'exponential' | 'linear';
 /**
  * Quality gate operator types
  */
-export type QualityGateOperator = 'eq' | 'gt' | 'gte' | 'lt' | 'lte' | 'percentage';
+export type QualityGateOperator =
+  | 'eq'
+  | 'gt'
+  | 'gte'
+  | 'lt'
+  | 'lte'
+  | 'percentage';
 
 /**
  * Notification channel types
@@ -103,7 +113,12 @@ export interface QualityGateRule {
   /** Rule name */
   name: string;
   /** Metric to evaluate */
-  metric: 'pass-rate' | 'critical-tests' | 'new-failures' | 'flaky-tests' | 'duration';
+  metric:
+    | 'pass-rate'
+    | 'critical-tests'
+    | 'new-failures'
+    | 'flaky-tests'
+    | 'duration';
   /** Comparison operator */
   operator: QualityGateOperator;
   /** Threshold value */

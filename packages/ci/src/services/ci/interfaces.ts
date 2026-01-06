@@ -9,10 +9,10 @@ import type {
   CIConfig,
   CIExecutionResult,
   CIPlatform,
-  JUnitTestResults,
   JSONReport,
-  NotificationConfig,
+  JUnitTestResults,
   NotificationChannel,
+  NotificationConfig,
   PlatformMetadata,
   QualityGateConfig,
   QualityGateResult,
@@ -124,10 +124,7 @@ export interface IParallelRunner {
    * @param config CI configuration
    * @returns Array of shard results
    */
-  runParallel(
-    shards: string[][],
-    config: CIConfig,
-  ): Promise<ShardResult[]>;
+  runParallel(shards: string[][], config: CIConfig): Promise<ShardResult[]>;
 
   /**
    * Get optimal parallel worker count
@@ -445,10 +442,7 @@ export interface IRetryManager {
    * @param config Retry configuration
    * @returns Function result
    */
-  executeWithRetry<T>(
-    fn: () => Promise<T>,
-    config: RetryConfig,
-  ): Promise<T>;
+  executeWithRetry<T>(fn: () => Promise<T>, config: RetryConfig): Promise<T>;
 
   /**
    * Retry failed test cases

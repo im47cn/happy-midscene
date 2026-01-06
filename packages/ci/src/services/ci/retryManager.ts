@@ -175,7 +175,9 @@ export class RetryManager {
         break;
 
       case 'exponential':
-        delay = this.config.initialDelay * Math.pow(this.config.multiplier || 2, attempt - 1);
+        delay =
+          this.config.initialDelay *
+          Math.pow(this.config.multiplier || 2, attempt - 1);
         break;
 
       default:
@@ -214,7 +216,9 @@ export class RetryManager {
 /**
  * Create a retry manager with config
  */
-export function createRetryManager(config?: Partial<RetryConfig>): RetryManager {
+export function createRetryManager(
+  config?: Partial<RetryConfig>,
+): RetryManager {
   return new RetryManager(config);
 }
 
@@ -247,20 +251,26 @@ export const RetryConditions = {
   /**
    * Retry on specific error types
    */
-  errorTypes: (...types: Array<{ new (...args: any[]): Error }>): RetryCondition =>
-    (error) => types.some((Type) => error instanceof Type),
+  errorTypes:
+    (...types: Array<{ new (...args: any[]): Error }>): RetryCondition =>
+    (error) =>
+      types.some((Type) => error instanceof Type),
 
   /**
    * Retry on error message pattern
    */
-  messagePattern: (pattern: RegExp): RetryCondition =>
-    (error) => pattern.test(error.message),
+  messagePattern:
+    (pattern: RegExp): RetryCondition =>
+    (error) =>
+      pattern.test(error.message),
 
   /**
    * Retry on network errors
    */
   network: (error: Error) =>
-    /ECONNREFUSED|ECONNRESET|ETIMEDOUT|ENOTFOUND|EAI_AGAIN/i.test(error.message),
+    /ECONNREFUSED|ECONNRESET|ETIMEDOUT|ENOTFOUND|EAI_AGAIN/i.test(
+      error.message,
+    ),
 
   /**
    * Retry on timeout errors
@@ -270,6 +280,8 @@ export const RetryConditions = {
   /**
    * Retry on specific status codes (for HTTP errors)
    */
-  statusCodes: (...codes: number[]): RetryCondition =>
-    (error: any) => codes.includes(error?.status || error?.statusCode),
+  statusCodes:
+    (...codes: number[]): RetryCondition =>
+    (error: any) =>
+      codes.includes(error?.status || error?.statusCode),
 };

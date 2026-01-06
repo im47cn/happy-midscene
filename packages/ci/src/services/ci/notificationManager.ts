@@ -290,7 +290,12 @@ export class NotificationManager {
     const sections: Array<{
       type: string;
       text?: { type: string; text: string };
-      fields?: Array<{ type: string; title: string; value: string; short: boolean }>;
+      fields?: Array<{
+        type: string;
+        title: string;
+        value: string;
+        short: boolean;
+      }>;
     }> = [
       {
         type: 'section',
@@ -335,10 +340,17 @@ export class NotificationManager {
     }
 
     // Add failures
-    if (this.config.template?.includeFailures && data.failures && data.failures.length > 0) {
-      const failureList = data.failures.slice(0, 5).map((f) => {
-        return `• *${f.name}*\n  \`${f.error}\``;
-      }).join('\n');
+    if (
+      this.config.template?.includeFailures &&
+      data.failures &&
+      data.failures.length > 0
+    ) {
+      const failureList = data.failures
+        .slice(0, 5)
+        .map((f) => {
+          return `• *${f.name}*\n  \`${f.error}\``;
+        })
+        .join('\n');
 
       sections.push({
         type: 'section',
@@ -384,7 +396,9 @@ export class NotificationManager {
     config: EmailConfig,
     data: NotificationData,
   ): Promise<NotificationResult> {
-    const subject = this.config.template?.subject || `[${data.project}] ${this.getEventTitle(data.event)}`;
+    const subject =
+      this.config.template?.subject ||
+      `[${data.project}] ${this.getEventTitle(data.event)}`;
     const body = this.formatEmailBody(data);
 
     // Note: This is a basic implementation. In production, use a proper email library
@@ -398,10 +412,12 @@ export class NotificationManager {
         const transporter = nodemailer.createTransport({
           host: config.host,
           port: config.port,
-          auth: config.user ? {
-            user: config.user,
-            pass: config.password,
-          } : undefined,
+          auth: config.user
+            ? {
+                user: config.user,
+                pass: config.password,
+              }
+            : undefined,
         });
 
         const info = await transporter.sendMail({
@@ -434,8 +450,16 @@ export class NotificationManager {
   /**
    * Format email body
    */
-  private formatEmailBody(data: NotificationData): { text: string; html: string } {
-    const statusEmoji = data.status === 'success' ? '✅' : data.status === 'failure' ? '❌' : '⏳';
+  private formatEmailBody(data: NotificationData): {
+    text: string;
+    html: string;
+  } {
+    const statusEmoji =
+      data.status === 'success'
+        ? '✅'
+        : data.status === 'failure'
+          ? '❌'
+          : '⏳';
     const lines: string[] = [
       `${statusEmoji} ${this.getEventTitle(data.event)}`,
       '',
@@ -483,7 +507,9 @@ export class NotificationManager {
         ${data.commit ? `<p><strong>Commit:</strong> ${data.commit.slice(0, 7)}</p>` : ''}
         ${data.buildUrl ? `<p><a href="${data.buildUrl}">View Build</a></p>` : ''}
 
-        ${data.tests ? `
+        ${
+          data.tests
+            ? `
           <h3>Test Results</h3>
           <ul>
             <li>Total: ${data.tests.total}</li>
@@ -492,20 +518,31 @@ export class NotificationManager {
             <li>Skipped: ${data.tests.skipped}</li>
             <li>Duration: ${(data.tests.duration / 1000).toFixed(1)}s</li>
           </ul>
-        ` : ''}
+        `
+            : ''
+        }
 
-        ${data.failures && data.failures.length > 0 ? `
+        ${
+          data.failures && data.failures.length > 0
+            ? `
           <h3>Failures</h3>
           <ul>
-            ${data.failures.slice(0, 10).map(f => `
+            ${data.failures
+              .slice(0, 10)
+              .map(
+                (f) => `
               <li>
                 <strong>${f.name}</strong><br>
                 <code>${f.error}</code>
               </li>
-            `).join('')}
+            `,
+              )
+              .join('')}
           </ul>
           ${data.failures.length > 10 ? `<p>... and ${data.failures.length - 10} more</p>` : ''}
-        ` : ''}
+        `
+            : ''
+        }
       </div>
     `;
 

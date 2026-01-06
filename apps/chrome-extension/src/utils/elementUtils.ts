@@ -41,7 +41,7 @@ export interface HighlightOptions {
  * Extract element box from various rect formats
  */
 export function extractElementBox(
-  rect: Partial<Rect> & { x?: number; y?: number } | null,
+  rect: (Partial<Rect> & { x?: number; y?: number }) | null,
 ): ElementBox | null {
   if (!rect) {
     return null;
@@ -425,7 +425,11 @@ export function findInteractableElementNear(
 /**
  * Compare two element boxes for equality
  */
-export function isSameBox(a: ElementBox, b: ElementBox, tolerance = 5): boolean {
+export function isSameBox(
+  a: ElementBox,
+  b: ElementBox,
+  tolerance = 5,
+): boolean {
   return (
     Math.abs(a.x - b.x) <= tolerance &&
     Math.abs(a.y - b.y) <= tolerance &&

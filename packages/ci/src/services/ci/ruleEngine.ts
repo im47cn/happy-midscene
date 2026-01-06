@@ -11,13 +11,13 @@ import type {
   QualityGateResult,
   QualityGateRuleResult,
 } from '../../types/ci';
-import type { QualityRule, RuleEvaluationResult } from './rules/types';
 import {
   CriticalTestsRule,
   FlakyTestsRule,
   NewFailuresRule,
   PassRateRule,
 } from './rules';
+import type { QualityRule, RuleEvaluationResult } from './rules/types';
 
 const debug = getDebug('ci:rule-engine');
 
@@ -44,7 +44,10 @@ export class RuleEngine {
   /**
    * Register a new rule
    */
-  register(rule: QualityRule, options?: { enabled?: boolean; threshold?: number }): void {
+  register(
+    rule: QualityRule,
+    options?: { enabled?: boolean; threshold?: number },
+  ): void {
     this.rules.set(rule.id, {
       rule,
       enabled: options?.enabled ?? true,
@@ -203,7 +206,10 @@ export class RuleEngine {
       name: ruleConfig.name,
       description: `Custom rule for ${ruleConfig.metric}`,
       blocking: ruleConfig.blocking,
-      evaluate: (results: CIExecutionResult, _threshold: number): RuleEvaluationResult => {
+      evaluate: (
+        results: CIExecutionResult,
+        _threshold: number,
+      ): RuleEvaluationResult => {
         const actual = this.getMetricValue(results, ruleConfig.metric);
         const passed = this.compareValues(
           actual,

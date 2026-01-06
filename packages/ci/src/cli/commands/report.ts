@@ -8,9 +8,9 @@
  * - Markdown
  */
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import type { ReportFormat, CIExecutionResult } from '../../types/ci';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import type { CIExecutionResult, ReportFormat } from '../../types/ci';
 import { loadJSONFile, loadYAMLFile } from '../config-loader';
 import { generateReport } from '../report-generator';
 
@@ -37,7 +37,8 @@ export const reportCommand = {
       .option('format', {
         alias: 'f',
         type: 'string',
-        description: 'Report format(s) (comma-separated): junit, json, html, markdown',
+        description:
+          'Report format(s) (comma-separated): junit, json, html, markdown',
         default: 'json',
         group: 'Output',
       })
@@ -119,7 +120,9 @@ export const reportCommand = {
     }
 
     console.log('');
-    console.log(`Generated ${reportFiles.length} report file(s) in: ${options.output}`);
+    console.log(
+      `Generated ${reportFiles.length} report file(s) in: ${options.output}`,
+    );
     console.log('');
 
     process.exit(0);

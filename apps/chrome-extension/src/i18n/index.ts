@@ -383,7 +383,8 @@ export const translations = {
     repairAppliedSuccessfully: '修复已成功应用',
     selectElement: '选择元素',
     elementSelectionHelp: '元素选择帮助',
-    elementSelectionHelpDesc: '当元素定位失败时，您可以在页面上直接选择正确的元素，系统将自动生成新的选择器。',
+    elementSelectionHelpDesc:
+      '当元素定位失败时，您可以在页面上直接选择正确的元素，系统将自动生成新的选择器。',
     startElementSelection: '开始元素选择',
   },
   en: {
@@ -733,7 +734,8 @@ export const translations = {
     clear: 'Clear',
     clickElementToSelect: 'Click on an element in the page to select it',
     failedToStartSelection: 'Failed to start selection mode',
-    clickStartToSelect: 'Click "Start Selection" then move your mouse over the page to highlight elements',
+    clickStartToSelect:
+      'Click "Start Selection" then move your mouse over the page to highlight elements',
     selectionMode: 'Selection Mode',
     moveMouseToHighlight: 'Move your mouse over the page to highlight elements',
     clickToSelectElement: 'Click to select an element',
@@ -767,7 +769,8 @@ export const translations = {
     repairAppliedSuccessfully: 'Repair applied successfully',
     selectElement: 'Select Element',
     elementSelectionHelp: 'Element Selection Help',
-    elementSelectionHelpDesc: 'When element location fails, you can directly select the correct element on the page, and the system will automatically generate a new selector.',
+    elementSelectionHelpDesc:
+      'When element location fails, you can directly select the correct element on the page, and the system will automatically generate a new selector.',
     startElementSelection: 'Start Element Selection',
   },
 } as const;

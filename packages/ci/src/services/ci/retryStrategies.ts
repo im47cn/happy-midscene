@@ -4,7 +4,7 @@
  * Predefined retry strategies for common scenarios.
  */
 
-import type { RetryConfig, RetryCondition } from './retryManager';
+import type { RetryCondition, RetryConfig } from './retryManager';
 import { RetryConditions } from './retryManager';
 
 /**
@@ -190,8 +190,7 @@ export const TestRetryStrategies: Record<
     multiplier: 2,
     jitter: 0.15,
     retryIf: (error) =>
-      TestRetryConditions.timeout(error) ||
-      RetryConditions.network(error),
+      TestRetryConditions.timeout(error) || RetryConditions.network(error),
   },
 
   /**
@@ -225,14 +224,18 @@ export function retryOnMessagePattern(pattern: RegExp): RetryCondition {
 /**
  * Combine multiple retry conditions (OR logic)
  */
-export function anyRetryCondition(...conditions: RetryCondition[]): RetryCondition {
+export function anyRetryCondition(
+  ...conditions: RetryCondition[]
+): RetryCondition {
   return (error, attempt) => conditions.some((c) => c(error, attempt));
 }
 
 /**
  * Combine multiple retry conditions (AND logic)
  */
-export function allRetryConditions(...conditions: RetryCondition[]): RetryCondition {
+export function allRetryConditions(
+  ...conditions: RetryCondition[]
+): RetryCondition {
   return (error, attempt) => conditions.every((c) => c(error, attempt));
 }
 

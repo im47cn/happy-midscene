@@ -57,7 +57,8 @@ export const testCommand = {
       .option('report', {
         alias: 'r',
         type: 'string',
-        description: 'Report formats (comma-separated): junit, json, html, markdown',
+        description:
+          'Report formats (comma-separated): junit, json, html, markdown',
         group: 'Reporting',
       })
       .option('env', {
@@ -136,9 +137,15 @@ export const testCommand = {
     }
 
     // Parse report formats
-    const reportFormats: ('junit' | 'json' | 'html' | 'markdown')[] = options.report
-      ? (options.report.split(',').map((s) => s.trim()) as ('junit' | 'json' | 'html' | 'markdown')[])
-      : ['json'];
+    const reportFormats: ('junit' | 'json' | 'html' | 'markdown')[] =
+      options.report
+        ? (options.report.split(',').map((s) => s.trim()) as (
+            | 'junit'
+            | 'json'
+            | 'html'
+            | 'markdown'
+          )[])
+        : ['json'];
 
     console.log('\n🧪 Midscene CI Test Runner');
     console.log('='.repeat(40));

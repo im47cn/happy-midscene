@@ -41,7 +41,9 @@ export class JUnitAdapter implements ReportAdapter {
           testCaseXml += `>\n      <skipped message="${message}"/>\n    </testcase>`;
         } else if (test.status === 'failed') {
           const errorMessage = this.escapeXml(test.error || 'Test failed');
-          const errorText = this.escapeXml(test.stackTrace || test.error || 'Test failed');
+          const errorText = this.escapeXml(
+            test.stackTrace || test.error || 'Test failed',
+          );
           testCaseXml += `>\n      <failure message="${errorMessage}" type="AssertionError">${errorText}</failure>\n    </testcase>`;
         } else {
           testCaseXml += ' />';

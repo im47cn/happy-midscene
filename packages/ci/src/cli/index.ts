@@ -5,12 +5,12 @@
  * evaluating quality gates, and generating reports.
  */
 
-import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs';
-import { testCommand } from './commands/test';
+import { hideBin } from 'yargs/helpers';
+import { version } from '../../package.json';
 import { qualityGateCommand } from './commands/qualityGate';
 import { reportCommand } from './commands/report';
-import { version } from '../../package.json';
+import { testCommand } from './commands/test';
 
 const argv = yargs(hideBin(process.argv));
 
@@ -23,8 +23,14 @@ Promise.resolve(
       .example([
         ['$0 test --suite=regression', 'Run regression test suite'],
         ['$0 test --shard=1 --total-shards=4', 'Run shard 1 of 4'],
-        ['$0 quality-gate --config=midscene.config.yml', 'Evaluate quality gate'],
-        ['$0 report --input=results.json --format=junit,html', 'Generate reports'],
+        [
+          '$0 quality-gate --config=midscene.config.yml',
+          'Evaluate quality gate',
+        ],
+        [
+          '$0 report --input=results.json --format=junit,html',
+          'Generate reports',
+        ],
       ])
       .command(testCommand as any)
       .command(qualityGateCommand as any)

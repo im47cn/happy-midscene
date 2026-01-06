@@ -52,7 +52,10 @@ export class PerformanceMonitor {
   /**
    * End timing an operation
    */
-  end(timerId: string, metadata?: Record<string, unknown>): PerformanceMetrics | null {
+  end(
+    timerId: string,
+    metadata?: Record<string, unknown>,
+  ): PerformanceMetrics | null {
     const startTime = this.activeTimers.get(timerId);
     if (!startTime) {
       return null;
@@ -136,7 +139,10 @@ export class PerformanceMonitor {
   /**
    * Check if performance is within thresholds
    */
-  checkThreshold(name: string, duration: number): 'ok' | 'warning' | 'critical' {
+  checkThreshold(
+    name: string,
+    duration: number,
+  ): 'ok' | 'warning' | 'critical' {
     const thresholds = DEFAULT_THRESHOLDS[name];
     if (!thresholds) {
       return 'ok';
@@ -162,12 +168,15 @@ export class PerformanceMonitor {
   /**
    * Get metrics summary
    */
-  getSummary(): Record<string, {
-    count: number;
-    avg: number;
-    max: number;
-    status: 'ok' | 'warning' | 'critical';
-  }> {
+  getSummary(): Record<
+    string,
+    {
+      count: number;
+      avg: number;
+      max: number;
+      status: 'ok' | 'warning' | 'critical';
+    }
+  > {
     const summary: Record<string, any> = {};
 
     for (const metric of this.metrics) {
@@ -181,7 +190,10 @@ export class PerformanceMonitor {
 
       summary[metric.name].count++;
       summary[metric.name].total += metric.duration;
-      summary[metric.name].max = Math.max(summary[metric.name].max, metric.duration);
+      summary[metric.name].max = Math.max(
+        summary[metric.name].max,
+        metric.duration,
+      );
     }
 
     // Calculate averages and check thresholds
@@ -220,8 +232,14 @@ export function measurePerformance<T extends (...args: any[]) => any>(
       const result = fn(...args);
       const metrics = perfMonitor.end(timerId, metadata);
 
-      if (metrics && options?.logThreshold && metrics.duration > options.logThreshold) {
-        console.warn(`[Performance] ${name} took ${metrics.duration.toFixed(2)}ms`);
+      if (
+        metrics &&
+        options?.logThreshold &&
+        metrics.duration > options.logThreshold
+      ) {
+        console.warn(
+          `[Performance] ${name} took ${metrics.duration.toFixed(2)}ms`,
+        );
       }
 
       return result;
@@ -235,7 +253,9 @@ export function measurePerformance<T extends (...args: any[]) => any>(
 /**
  * Async decorator to measure async function performance
  */
-export function measureAsyncPerformance<T extends (...args: any[]) => Promise<any>>(
+export function measureAsyncPerformance<
+  T extends (...args: any[]) => Promise<any>,
+>(
   name: string,
   fn: T,
   options?: {
@@ -251,8 +271,14 @@ export function measureAsyncPerformance<T extends (...args: any[]) => Promise<an
       const result = await fn(...args);
       const metrics = perfMonitor.end(timerId, metadata);
 
-      if (metrics && options?.logThreshold && metrics.duration > options.logThreshold) {
-        console.warn(`[Performance] ${name} took ${metrics.duration.toFixed(2)}ms`);
+      if (
+        metrics &&
+        options?.logThreshold &&
+        metrics.duration > options.logThreshold
+      ) {
+        console.warn(
+          `[Performance] ${name} took ${metrics.duration.toFixed(2)}ms`,
+        );
       }
 
       return result;
@@ -328,9 +354,7 @@ export function memoize<F extends (...args: any[]) => any>(
   const cache = new LRUCache<string, ReturnType<F>>(options?.maxSize || 100);
 
   return ((...args: Parameters<F>) => {
-    const key = options?.keyFn
-      ? options.keyFn(...args)
-      : JSON.stringify(args);
+    const key = options?.keyFn ? options.keyFn(...args) : JSON.stringify(args);
 
     const cached = cache.get(key);
     if (cached !== undefined) {
@@ -380,11 +404,14 @@ export function throttle<T extends (...args: any[]) => any>(
       lastCall = now;
       fn(...args);
     } else if (!timeoutId) {
-      timeoutId = setTimeout(() => {
-        lastCall = Date.now();
-        timeoutId = null;
-        fn(...args);
-      }, interval - (now - lastCall));
+      timeoutId = setTimeout(
+        () => {
+          lastCall = Date.now();
+          timeoutId = null;
+          fn(...args);
+        },
+        interval - (now - lastCall),
+      );
     }
   };
 }
@@ -549,7 +576,9 @@ export function formatMs(ms: number): string {
 /**
  * Get performance entry by name
  */
-export function getPerformanceEntry(name: string): PerformanceEntry | undefined {
+export function getPerformanceEntry(
+  name: string,
+): PerformanceEntry | undefined {
   const entries = performance.getEntriesByName(name);
   return entries[0];
 }
@@ -587,7 +616,11 @@ export function mark(name: string): void {
 /**
  * Create a performance measure
  */
-export function measure(name: string, startMark: string, endMark: string): number {
+export function measure(
+  name: string,
+  startMark: string,
+  endMark: string,
+): number {
   performance.measure(name, startMark, endMark);
   const entry = getPerformanceEntry(name);
   return entry?.duration || 0;

@@ -4,14 +4,14 @@
  * Run tests with sharding, parallel execution, and quality gates in Azure Pipelines.
  */
 
-import * as tl from 'azure-pipelines-task-lib/task';
-import * as path from 'node:path';
 import { mkdirSync } from 'node:fs';
+import * as path from 'node:path';
+import * as tl from 'azure-pipelines-task-lib/task';
 import {
   CIExecutor,
-  generateReports,
-  evaluateQualityGate,
   createArtifactManager,
+  evaluateQualityGate,
+  generateReports,
 } from '../../services/ci';
 
 interface TaskInputs {
@@ -35,20 +35,32 @@ async function runTask(): Promise<void> {
     // Parse inputs
     const inputs: TaskInputs = {
       testPattern: tl.getInput('testPattern', false) || '**/*.test.ts',
-      shardStrategy: (tl.getInput('shardStrategy', false) || 'time-based') as TaskInputs['shardStrategy'],
-      shardCount: parseInt(tl.getInput('shardCount', false) || '2', 10),
-      parallelWorkers: parseInt(tl.getInput('parallelWorkers', false) || '4', 10),
-      reportFormats: tl.getDelimitedInput('reportFormats', ',', false) || ['junit', 'json'],
+      shardStrategy: (tl.getInput('shardStrategy', false) ||
+        'time-based') as TaskInputs['shardStrategy'],
+      shardCount: Number.parseInt(tl.getInput('shardCount', false) || '2', 10),
+      parallelWorkers: Number.parseInt(
+        tl.getInput('parallelWorkers', false) || '4',
+        10,
+      ),
+      reportFormats: tl.getDelimitedInput('reportFormats', ',', false) || [
+        'junit',
+        'json',
+      ],
       outputDir: tl.getInput('outputDir', false) || 'test-results',
       enableQualityGate: tl.getBoolInput('enableQualityGate', false),
-      passRateThreshold: parseFloat(tl.getInput('passRateThreshold', false) || '80'),
+      passRateThreshold: Number.parseFloat(
+        tl.getInput('passRateThreshold', false) || '80',
+      ),
       criticalTests: (tl.getInput('criticalTests', false) || '')
         .split(',')
         .filter((s) => s.length > 0),
       uploadArtifacts: tl.getBoolInput('uploadArtifacts', false),
-      artifactPaths: (tl.getInput('artifactPaths', false) || 'test-results,screenshots,videos').split(','),
+      artifactPaths: (
+        tl.getInput('artifactPaths', false) || 'test-results,screenshots,videos'
+      ).split(','),
       failOnFailure: tl.getBoolInput('failOnFailure', false),
-      packageManager: (tl.getInput('packageManager', false) || 'bun') as TaskInputs['packageManager'],
+      packageManager: (tl.getInput('packageManager', false) ||
+        'bun') as TaskInputs['packageManager'],
     };
 
     // Create output directory
@@ -105,23 +117,31 @@ async function runTask(): Promise<void> {
 
     // Publish test results
     if (inputs.reportFormats.includes('junit')) {
-      tl.command('results.publish', {
-        type: 'JUnit',
-        mergeResults: true,
-        failTaskOnFailedTests: false,
-        testRunTitle: 'Midscene Tests',
-        testResultsFiles: path.join(resolvedOutputDir, 'junit-*.xml'),
-      }, undefined);
+      tl.command(
+        'results.publish',
+        {
+          type: 'JUnit',
+          mergeResults: true,
+          failTaskOnFailedTests: false,
+          testRunTitle: 'Midscene Tests',
+          testResultsFiles: path.join(resolvedOutputDir, 'junit-*.xml'),
+        },
+        undefined,
+      );
     }
 
     // Publish HTML report
     if (inputs.reportFormats.includes('html')) {
       const htmlFile = path.join(resolvedOutputDir, 'report-*.html');
-      tl.command('codecoverage.publish', {
-        codecovutile: 'Html',
-        summaryfile: htmlFile,
-        reportdirectory: resolvedOutputDir,
-      }, undefined);
+      tl.command(
+        'codecoverage.publish',
+        {
+          codecovutile: 'Html',
+          summaryfile: htmlFile,
+          reportdirectory: resolvedOutputDir,
+        },
+        undefined,
+      );
     }
 
     // Quality gate evaluation
@@ -152,7 +172,9 @@ async function runTask(): Promise<void> {
       // Output rule results
       for (const ruleResult of gateResult.ruleResults) {
         const status = ruleResult.passed ? '✅' : '❌';
-        tl.logInfo(`${status} ${ruleResult.ruleName}: ${ruleResult.actual} (expected: ${ruleResult.expected})`);
+        tl.logInfo(
+          `${status} ${ruleResult.ruleName}: ${ruleResult.actual} (expected: ${ruleResult.expected})`,
+        );
       }
 
       if (!gatePassed) {
@@ -186,11 +208,15 @@ async function runTask(): Promise<void> {
 
       // Attach artifacts
       for (const artifactPath of inputs.artifactPaths) {
-        tl.command('artifact.upload', {
-          artifactname: path.basename(artifactPath),
-          containerfolder: inputs.outputDir,
-          localpath: artifactPath,
-        }, undefined);
+        tl.command(
+          'artifact.upload',
+          {
+            artifactname: path.basename(artifactPath),
+            containerfolder: inputs.outputDir,
+            localpath: artifactPath,
+          },
+          undefined,
+        );
       }
 
       tl.endGroup();

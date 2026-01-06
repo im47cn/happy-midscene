@@ -2,16 +2,16 @@
  * Unit tests for element utilities
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  extractElementBox,
-  isValidElementBox,
-  isElementVisible,
-  isElementInteractable,
-  isSameBox,
   clampBoxToViewport,
-  viewportToPageBox,
+  extractElementBox,
+  isElementInteractable,
+  isElementVisible,
+  isSameBox,
+  isValidElementBox,
   pageToViewportBox,
+  viewportToPageBox,
 } from '../elementUtils';
 
 // Mock DOM environment
@@ -21,7 +21,8 @@ describe('elementUtils', () => {
   beforeEach(() => {
     // Create a mock element
     mockElement = document.createElement('div');
-    mockElement.style.cssText = 'position: absolute; left: 100px; top: 200px; width: 300px; height: 150px;';
+    mockElement.style.cssText =
+      'position: absolute; left: 100px; top: 200px; width: 300px; height: 150px;';
     document.body.appendChild(mockElement);
   });
 
@@ -166,7 +167,13 @@ describe('elementUtils', () => {
 
   describe('clampBoxToViewport', () => {
     it('should clamp box that exceeds viewport width', () => {
-      const box = { x: 1800, y: 100, width: 200, height: 100, center: [1900, 150] };
+      const box = {
+        x: 1800,
+        y: 100,
+        width: 200,
+        height: 100,
+        center: [1900, 150],
+      };
       const clamped = clampBoxToViewport(box);
 
       expect(clamped.x).toBeLessThan(window.innerWidth);
@@ -174,7 +181,13 @@ describe('elementUtils', () => {
     });
 
     it('should clamp box that exceeds viewport height', () => {
-      const box = { x: 100, y: 2000, width: 200, height: 100, center: [200, 2050] };
+      const box = {
+        x: 100,
+        y: 2000,
+        width: 200,
+        height: 100,
+        center: [200, 2050],
+      };
       const clamped = clampBoxToViewport(box);
 
       expect(clamped.y).toBeLessThan(window.innerHeight);
@@ -182,7 +195,13 @@ describe('elementUtils', () => {
     });
 
     it('should not modify box within viewport', () => {
-      const box = { x: 100, y: 100, width: 200, height: 150, center: [200, 175] };
+      const box = {
+        x: 100,
+        y: 100,
+        width: 200,
+        height: 150,
+        center: [200, 175],
+      };
       const clamped = clampBoxToViewport(box);
 
       expect(clamped.x).toBe(box.x);
@@ -195,7 +214,13 @@ describe('elementUtils', () => {
       // Set scroll position
       window.scrollTo(100, 200);
 
-      const viewportBox = { x: 50, y: 100, width: 200, height: 150, center: [150, 175] };
+      const viewportBox = {
+        x: 50,
+        y: 100,
+        width: 200,
+        height: 150,
+        center: [150, 175],
+      };
       const pageBox = viewportToPageBox(viewportBox);
 
       expect(pageBox.x).toBe(150); // 50 + 100
@@ -212,7 +237,13 @@ describe('elementUtils', () => {
       // Set scroll position
       window.scrollTo(100, 200);
 
-      const pageBox = { x: 150, y: 300, width: 200, height: 150, center: [250, 375] };
+      const pageBox = {
+        x: 150,
+        y: 300,
+        width: 200,
+        height: 150,
+        center: [250, 375],
+      };
       const viewportBox = pageToViewportBox(pageBox);
 
       expect(viewportBox.x).toBe(50); // 150 - 100

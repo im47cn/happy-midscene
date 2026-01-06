@@ -3,7 +3,15 @@
  * Provides multi-language support for the Chrome extension
  */
 
-export type SupportedLocale = 'en' | 'zh-CN' | 'zh-TW' | 'ja' | 'ko' | 'es' | 'fr' | 'de';
+export type SupportedLocale =
+  | 'en'
+  | 'zh-CN'
+  | 'zh-TW'
+  | 'ja'
+  | 'ko'
+  | 'es'
+  | 'fr'
+  | 'de';
 
 export interface TranslationResources {
   [key: string]: string | TranslationResources;
@@ -58,9 +66,12 @@ const translations: Record<SupportedLocale, TranslationResources> = {
         unknown: 'Unknown error',
       },
       suggestion: {
-        elementNotFound: 'Try: 1. Use more specific description 2. Check if element is visible 3. Wait for page to fully load',
-        timeout: 'Check: 1. Network connection 2. Page loading 3. Element appearance time',
-        actionFailed: 'Check: 1. Element is clickable 2. Not blocked by other elements 3. Page fully loaded',
+        elementNotFound:
+          'Try: 1. Use more specific description 2. Check if element is visible 3. Wait for page to fully load',
+        timeout:
+          'Check: 1. Network connection 2. Page loading 3. Element appearance time',
+        actionFailed:
+          'Check: 1. Element is clickable 2. Not blocked by other elements 3. Page fully loaded',
       },
     },
 
@@ -251,9 +262,12 @@ const translations: Record<SupportedLocale, TranslationResources> = {
         unknown: '未知错误',
       },
       suggestion: {
-        elementNotFound: '请尝试：1. 使用更具体的描述 2. 检查元素是否可见 3. 等待页面完全加载',
-        timeout: '请检查：1. 网络连接是否正常 2. 页面是否正在加载 3. 目标元素是否需要更长时间才能出现',
-        actionFailed: '请检查：1. 元素是否可点击 2. 是否被其他元素遮挡 3. 页面是否完全加载',
+        elementNotFound:
+          '请尝试：1. 使用更具体的描述 2. 检查元素是否可见 3. 等待页面完全加载',
+        timeout:
+          '请检查：1. 网络连接是否正常 2. 页面是否正在加载 3. 目标元素是否需要更长时间才能出现',
+        actionFailed:
+          '请检查：1. 元素是否可点击 2. 是否被其他元素遮挡 3. 页面是否完全加载',
       },
     },
 
@@ -441,9 +455,12 @@ const translations: Record<SupportedLocale, TranslationResources> = {
         unknown: '未知錯誤',
       },
       suggestion: {
-        elementNotFound: '請嘗試：1. 使用更具體的描述 2. 檢查元素是否可見 3. 等待頁面完全加載',
-        timeout: '請檢查：1. 網絡連接是否正常 2. 頁面是否正在加載 3. 目標元素是否需要更長時間才能出現',
-        actionFailed: '請檢查：1. 元素是否可點擊 2. 是否被其他元素遮擋 3. 頁面是否完全加載',
+        elementNotFound:
+          '請嘗試：1. 使用更具體的描述 2. 檢查元素是否可見 3. 等待頁面完全加載',
+        timeout:
+          '請檢查：1. 網絡連接是否正常 2. 頁面是否正在加載 3. 目標元素是否需要更長時間才能出現',
+        actionFailed:
+          '請檢查：1. 元素是否可點擊 2. 是否被其他元素遮擋 3. 頁面是否完全加載',
       },
     },
     aiTestGenerator: {
@@ -613,7 +630,7 @@ const translations: Record<SupportedLocale, TranslationResources> = {
       step: 'Étape',
       steps: 'Étapes',
       results: 'Résultats',
-      screenshot: 'Capture d\'écran',
+      screenshot: "Capture d'écran",
       errorLog: 'Journal des erreurs',
     },
   },
@@ -668,23 +685,23 @@ export function detectBrowserLocale(): SupportedLocale {
 
   // Map browser language codes to our supported locales
   const localeMap: Record<string, SupportedLocale> = {
-    'en': 'en',
+    en: 'en',
     'en-US': 'en',
     'en-GB': 'en',
-    'zh': 'zh-CN',
+    zh: 'zh-CN',
     'zh-CN': 'zh-CN',
     'zh-TW': 'zh-TW',
     'zh-HK': 'zh-TW',
-    'ja': 'ja',
+    ja: 'ja',
     'ja-JP': 'ja',
-    'ko': 'ko',
+    ko: 'ko',
     'ko-KR': 'ko',
-    'es': 'es',
+    es: 'es',
     'es-ES': 'es',
     'es-MX': 'es',
-    'fr': 'fr',
+    fr: 'fr',
     'fr-FR': 'fr',
-    'de': 'de',
+    de: 'de',
     'de-DE': 'de',
   };
 
@@ -771,12 +788,19 @@ export function t(key: string, locale?: SupportedLocale): string {
  * @example
  * t('greeting', { name: 'John' }) // "Hello, John!" if translation is "Hello, {name}!"
  */
-export function tp(key: string, params: Record<string, string | number>, locale?: SupportedLocale): string {
+export function tp(
+  key: string,
+  params: Record<string, string | number>,
+  locale?: SupportedLocale,
+): string {
   let translation = t(key, locale);
 
   // Replace {param} placeholders
   for (const [param, value] of Object.entries(params)) {
-    translation = translation.replace(new RegExp(`\\{${param}\\}`, 'g'), String(value));
+    translation = translation.replace(
+      new RegExp(`\\{${param}\\}`, 'g'),
+      String(value),
+    );
   }
 
   return translation;
@@ -792,7 +816,10 @@ export function getAvailableLocales(): SupportedLocale[] {
 /**
  * Get locale display name
  */
-export function getLocaleName(locale: SupportedLocale, displayLocale?: SupportedLocale): string {
+export function getLocaleName(
+  locale: SupportedLocale,
+  displayLocale?: SupportedLocale,
+): string {
   const names: Record<SupportedLocale, Record<SupportedLocale, string>> = {
     en: {
       en: 'English',

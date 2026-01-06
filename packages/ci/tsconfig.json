@@ -12,8 +12,5 @@
     "declarationDir": "dist/types"
   },
   "include": ["src/**/*"],
-  "references": [
-    { "path": "../core" },
-    { "path": "../shared" }
-  ]
+  "references": [{ "path": "../core" }, { "path": "../shared" }]
 }

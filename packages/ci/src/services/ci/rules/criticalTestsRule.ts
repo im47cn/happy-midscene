@@ -5,8 +5,8 @@
  */
 
 import type { CIExecutionResult } from '../../../types/ci';
-import type { QualityRule, RuleEvaluationResult } from './types';
 import type { TestCaseResult } from '../../../types/ci';
+import type { QualityRule, RuleEvaluationResult } from './types';
 
 /**
  * Critical tests quality gate rule
@@ -34,9 +34,7 @@ export class CriticalTestsRule implements QualityRule {
       actual: `${criticalFailed} failed`,
       expected: '0 failed',
       blocking: this.blocking,
-      error: passed
-        ? undefined
-        : `${criticalFailed} critical test(s) failed`,
+      error: passed ? undefined : `${criticalFailed} critical test(s) failed`,
     };
   }
 }

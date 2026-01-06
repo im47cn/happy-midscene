@@ -2,16 +2,16 @@
  * Unit tests for i18n utility
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   detectBrowserLocale,
-  setLocale,
+  getAvailableLocales,
   getLocale,
+  getLocaleName,
   initLocale,
+  setLocale,
   t,
   tp,
-  getAvailableLocales,
-  getLocaleName,
 } from '../i18n';
 
 // Mock chrome.storage.local
@@ -27,7 +27,10 @@ global.chrome = {
 } as any;
 
 // Mock navigator.language
-const originalLanguage = Object.getOwnPropertyDescriptor(Navigator.prototype, 'language');
+const originalLanguage = Object.getOwnPropertyDescriptor(
+  Navigator.prototype,
+  'language',
+);
 
 describe('i18n', () => {
   beforeEach(() => {
@@ -189,9 +192,7 @@ describe('i18n', () => {
     it('should replace multiple parameters', () => {
       // This tests the parameter replacement logic
       const template = 'Hello, {name}! You have {count} messages.';
-      const result = template
-        .replace('{name}', 'John')
-        .replace('{count}', '5');
+      const result = template.replace('{name}', 'John').replace('{count}', '5');
       expect(result).toBe('Hello, John! You have 5 messages.');
     });
   });

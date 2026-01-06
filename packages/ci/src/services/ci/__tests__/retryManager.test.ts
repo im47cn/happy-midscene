@@ -2,12 +2,12 @@
  * Retry Manager Tests
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  RetryConditions,
   RetryManager,
   createRetryManager,
   retry,
-  RetryConditions,
 } from '../retryManager';
 import type { RetryConfig } from '../retryManager';
 
@@ -54,7 +54,8 @@ describe('RetryManager', () => {
 
     it('should retry on failure', async () => {
       const manager = new RetryManager({ maxAttempts: 3, initialDelay: 10 });
-      const operation = vi.fn()
+      const operation = vi
+        .fn()
         .mockRejectedValueOnce(new Error('fail'))
         .mockResolvedValue('success');
 
@@ -87,7 +88,8 @@ describe('RetryManager', () => {
         retryIf: RetryConditions.network,
       });
 
-      const operation = vi.fn()
+      const operation = vi
+        .fn()
         .mockRejectedValueOnce(networkError)
         .mockRejectedValueOnce(otherError)
         .mockRejectedValueOnce(otherError); // Extra mock in case implementation tries again
@@ -108,7 +110,8 @@ describe('RetryManager', () => {
         onRetry,
       });
 
-      const operation = vi.fn()
+      const operation = vi
+        .fn()
         .mockRejectedValueOnce(new Error('fail'))
         .mockResolvedValue('success');
 
@@ -125,7 +128,8 @@ describe('RetryManager', () => {
         strategy: 'fixed',
       });
 
-      const operation = vi.fn()
+      const operation = vi
+        .fn()
         .mockRejectedValueOnce(new Error('fail'))
         .mockResolvedValue('success');
 
@@ -149,14 +153,18 @@ describe('RetryManager', () => {
 
     it('should retry on sync failure', () => {
       const manager = new RetryManager({ maxAttempts: 3 });
-      const operation = vi.fn()
+      const operation = vi
+        .fn()
         .mockReturnValueOnce('fail1')
         .mockReturnValueOnce('fail2')
         .mockReturnValueOnce('success');
 
       // With sync, we need to throw to trigger retry
-      const throwingOp = vi.fn()
-        .mockImplementationOnce(() => { throw new Error('fail'); })
+      const throwingOp = vi
+        .fn()
+        .mockImplementationOnce(() => {
+          throw new Error('fail');
+        })
         .mockReturnValue('success');
 
       const result = manager.executeSync(throwingOp);
@@ -188,12 +196,15 @@ describe('RetryManager', () => {
       });
 
       const delays: number[] = [];
-      const sleepSpy = vi.spyOn(manager as any, 'sleep').mockImplementation((delay: number) => {
-        delays.push(delay);
-        return Promise.resolve();
-      });
+      const sleepSpy = vi
+        .spyOn(manager as any, 'sleep')
+        .mockImplementation((delay: number) => {
+          delays.push(delay);
+          return Promise.resolve();
+        });
 
-      const operation = vi.fn()
+      const operation = vi
+        .fn()
         .mockRejectedValueOnce(new Error('fail'))
         .mockRejectedValueOnce(new Error('fail'))
         .mockResolvedValue('success');
@@ -214,12 +225,15 @@ describe('RetryManager', () => {
       });
 
       const delays: number[] = [];
-      const sleepSpy = vi.spyOn(manager as any, 'sleep').mockImplementation((delay: number) => {
-        delays.push(delay);
-        return Promise.resolve();
-      });
+      const sleepSpy = vi
+        .spyOn(manager as any, 'sleep')
+        .mockImplementation((delay: number) => {
+          delays.push(delay);
+          return Promise.resolve();
+        });
 
-      const operation = vi.fn()
+      const operation = vi
+        .fn()
         .mockRejectedValueOnce(new Error('fail'))
         .mockRejectedValueOnce(new Error('fail'))
         .mockRejectedValueOnce(new Error('fail'))
@@ -243,12 +257,15 @@ describe('RetryManager', () => {
       });
 
       const delays: number[] = [];
-      const sleepSpy = vi.spyOn(manager as any, 'sleep').mockImplementation((delay: number) => {
-        delays.push(delay);
-        return Promise.resolve();
-      });
+      const sleepSpy = vi
+        .spyOn(manager as any, 'sleep')
+        .mockImplementation((delay: number) => {
+          delays.push(delay);
+          return Promise.resolve();
+        });
 
-      const operation = vi.fn()
+      const operation = vi
+        .fn()
         .mockRejectedValueOnce(new Error('fail'))
         .mockRejectedValueOnce(new Error('fail'))
         .mockRejectedValueOnce(new Error('fail'))
@@ -274,12 +291,15 @@ describe('RetryManager', () => {
       });
 
       const delays: number[] = [];
-      const sleepSpy = vi.spyOn(manager as any, 'sleep').mockImplementation((delay: number) => {
-        delays.push(delay);
-        return Promise.resolve();
-      });
+      const sleepSpy = vi
+        .spyOn(manager as any, 'sleep')
+        .mockImplementation((delay: number) => {
+          delays.push(delay);
+          return Promise.resolve();
+        });
 
-      const operation = vi.fn()
+      const operation = vi
+        .fn()
         .mockRejectedValueOnce(new Error('fail'))
         .mockRejectedValueOnce(new Error('fail'))
         .mockRejectedValueOnce(new Error('fail'))
@@ -304,12 +324,15 @@ describe('RetryManager', () => {
       });
 
       const delays: number[] = [];
-      const sleepSpy = vi.spyOn(manager as any, 'sleep').mockImplementation((delay: number) => {
-        delays.push(delay);
-        return Promise.resolve();
-      });
+      const sleepSpy = vi
+        .spyOn(manager as any, 'sleep')
+        .mockImplementation((delay: number) => {
+          delays.push(delay);
+          return Promise.resolve();
+        });
 
-      const operation = vi.fn()
+      const operation = vi
+        .fn()
         .mockRejectedValueOnce(new Error('fail'))
         .mockResolvedValue('success');
 
@@ -329,7 +352,10 @@ describe('RetryManager', () => {
     });
 
     it('should retry on specific error types', () => {
-      const TypeErrorCondition = RetryConditions.errorTypes(TypeError, SyntaxError);
+      const TypeErrorCondition = RetryConditions.errorTypes(
+        TypeError,
+        SyntaxError,
+      );
 
       expect(TypeErrorCondition(new TypeError('type error'))).toBe(true);
       expect(TypeErrorCondition(new SyntaxError('syntax error'))).toBe(true);
@@ -352,8 +378,12 @@ describe('RetryManager', () => {
     });
 
     it('should detect timeout errors', () => {
-      expect(RetryConditions.timeout(new Error('Operation timeout'))).toBe(true);
-      expect(RetryConditions.timeout(new Error('Request timed out'))).toBe(true);
+      expect(RetryConditions.timeout(new Error('Operation timeout'))).toBe(
+        true,
+      );
+      expect(RetryConditions.timeout(new Error('Request timed out'))).toBe(
+        true,
+      );
       expect(RetryConditions.timeout(new Error('Other error'))).toBe(false);
     });
 
@@ -385,8 +415,9 @@ describe('RetryManager', () => {
     it('should throw after failed retries', async () => {
       const operation = vi.fn().mockRejectedValue(new Error('failed'));
 
-      await expect(retry(operation, { maxAttempts: 2, initialDelay: 10 }))
-        .rejects.toThrow('failed');
+      await expect(
+        retry(operation, { maxAttempts: 2, initialDelay: 10 }),
+      ).rejects.toThrow('failed');
     });
   });
 

@@ -81,7 +81,9 @@ export const BuildTemplates = {
         `✅ Build #${ctx.buildNumber || '?'} passed for ${ctx.project}`,
       ];
       if (ctx.tests) {
-        lines.push(`  Tests: ${ctx.tests.passed}/${ctx.tests.total} passed in ${(ctx.tests.duration / 1000).toFixed(1)}s`);
+        lines.push(
+          `  Tests: ${ctx.tests.passed}/${ctx.tests.total} passed in ${(ctx.tests.duration / 1000).toFixed(1)}s`,
+        );
       }
       return lines.join('\n');
     },
@@ -102,14 +104,30 @@ export const BuildTemplates = {
     slack: (ctx: TemplateContext): Record<string, unknown> => {
       return {
         text: `✅ Build #${ctx.buildNumber || '?'} passed for ${ctx.project}`,
-        attachments: [{
-          color: 'good',
-          fields: ctx.tests ? [
-            { title: 'Total', value: String(ctx.tests.total), short: true },
-            { title: 'Passed', value: String(ctx.tests.passed), short: true },
-            { title: 'Duration', value: `${(ctx.tests.duration / 1000).toFixed(1)}s`, short: true },
-          ] : [],
-        }],
+        attachments: [
+          {
+            color: 'good',
+            fields: ctx.tests
+              ? [
+                  {
+                    title: 'Total',
+                    value: String(ctx.tests.total),
+                    short: true,
+                  },
+                  {
+                    title: 'Passed',
+                    value: String(ctx.tests.passed),
+                    short: true,
+                  },
+                  {
+                    title: 'Duration',
+                    value: `${(ctx.tests.duration / 1000).toFixed(1)}s`,
+                    short: true,
+                  },
+                ]
+              : [],
+          },
+        ],
       };
     },
   } as MessageTemplate,
@@ -123,7 +141,9 @@ export const BuildTemplates = {
         `❌ Build #${ctx.buildNumber || '?'} failed for ${ctx.project}`,
       ];
       if (ctx.tests) {
-        lines.push(`  Tests: ${ctx.tests.passed}/${ctx.tests.total} passed, ${ctx.tests.failed} failed`);
+        lines.push(
+          `  Tests: ${ctx.tests.passed}/${ctx.tests.total} passed, ${ctx.tests.failed} failed`,
+        );
       }
       if (ctx.failures && ctx.failures.length > 0) {
         lines.push('\nFailures:');
@@ -170,24 +190,48 @@ export const BuildTemplates = {
       return html;
     },
     slack: (ctx: TemplateContext): Record<string, unknown> => {
-      const failureText = ctx.failures?.slice(0, 5).map((f) => {
-        return `• *${f.name}*\n  \`${f.error}\``;
-      }).join('\n') || '';
+      const failureText =
+        ctx.failures
+          ?.slice(0, 5)
+          .map((f) => {
+            return `• *${f.name}*\n  \`${f.error}\``;
+          })
+          .join('\n') || '';
 
       return {
         text: `❌ Build #${ctx.buildNumber || '?'} failed for ${ctx.project}`,
-        attachments: [{
-          color: 'danger',
-          fields: ctx.tests ? [
-            { title: 'Total', value: String(ctx.tests.total), short: true },
-            { title: 'Failed', value: String(ctx.tests.failed), short: true },
-          ] : [],
-          ...(failureText ? [{
-            title: 'Failures',
-            value: failureText + (ctx.failures && ctx.failures.length > 5 ? `\n_... and ${ctx.failures.length - 5} more_` : ''),
-            short: false,
-          }] : []),
-        }],
+        attachments: [
+          {
+            color: 'danger',
+            fields: ctx.tests
+              ? [
+                  {
+                    title: 'Total',
+                    value: String(ctx.tests.total),
+                    short: true,
+                  },
+                  {
+                    title: 'Failed',
+                    value: String(ctx.tests.failed),
+                    short: true,
+                  },
+                ]
+              : [],
+            ...(failureText
+              ? [
+                  {
+                    title: 'Failures',
+                    value:
+                      failureText +
+                      (ctx.failures && ctx.failures.length > 5
+                        ? `\n_... and ${ctx.failures.length - 5} more_`
+                        : ''),
+                    short: false,
+                  },
+                ]
+              : []),
+          },
+        ],
       };
     },
   } as MessageTemplate,
@@ -208,10 +252,12 @@ export const BuildTemplates = {
     slack: (ctx: TemplateContext): Record<string, unknown> => {
       return {
         text: `🎉 Build #${ctx.buildNumber || '?'} fixed for ${ctx.project} - back to green!`,
-        attachments: [{
-          color: 'good',
-          text: 'The build is back to green!',
-        }],
+        attachments: [
+          {
+            color: 'good',
+            text: 'The build is back to green!',
+          },
+        ],
       };
     },
   } as MessageTemplate,
@@ -237,10 +283,12 @@ export const QualityGateTemplates = {
     slack: (ctx: TemplateContext): Record<string, unknown> => {
       return {
         text: `✅ Quality gate passed for ${ctx.project}`,
-        attachments: [{
-          color: 'good',
-          text: 'All quality checks passed.',
-        }],
+        attachments: [
+          {
+            color: 'good',
+            text: 'All quality checks passed.',
+          },
+        ],
       };
     },
   } as MessageTemplate,
@@ -261,10 +309,12 @@ export const QualityGateTemplates = {
     slack: (ctx: TemplateContext): Record<string, unknown> => {
       return {
         text: `❌ Quality gate failed for ${ctx.project}`,
-        attachments: [{
-          color: 'danger',
-          text: 'One or more quality checks failed.',
-        }],
+        attachments: [
+          {
+            color: 'danger',
+            text: 'One or more quality checks failed.',
+          },
+        ],
       };
     },
   } as MessageTemplate,
@@ -290,10 +340,12 @@ export const DeploymentTemplates = {
     slack: (ctx: TemplateContext): Record<string, unknown> => {
       return {
         text: `🚀 Deployment started for ${ctx.project}${ctx.branch ? ` to ${ctx.branch}` : ''}`,
-        attachments: [{
-          color: 'warning',
-          text: 'Deployment in progress...',
-        }],
+        attachments: [
+          {
+            color: 'warning',
+            text: 'Deployment in progress...',
+          },
+        ],
       };
     },
   } as MessageTemplate,
@@ -314,10 +366,12 @@ export const DeploymentTemplates = {
     slack: (ctx: TemplateContext): Record<string, unknown> => {
       return {
         text: `✅ Deployment completed for ${ctx.project}${ctx.branch ? ` to ${ctx.branch}` : ''}`,
-        attachments: [{
-          color: 'good',
-          text: 'Deployment successful!',
-        }],
+        attachments: [
+          {
+            color: 'good',
+            text: 'Deployment successful!',
+          },
+        ],
       };
     },
   } as MessageTemplate,
@@ -338,10 +392,12 @@ export const DeploymentTemplates = {
     slack: (ctx: TemplateContext): Record<string, unknown> => {
       return {
         text: `❌ Deployment failed for ${ctx.project}${ctx.branch ? ` to ${ctx.branch}` : ''}`,
-        attachments: [{
-          color: 'danger',
-          text: 'Deployment failed!',
-        }],
+        attachments: [
+          {
+            color: 'danger',
+            text: 'Deployment failed!',
+          },
+        ],
       };
     },
   } as MessageTemplate,
@@ -356,9 +412,7 @@ export const FlakyTestTemplates = {
    */
   detected: {
     text: (ctx: TemplateContext): string => {
-      const lines: string[] = [
-        `⚠️ Flaky tests detected in ${ctx.project}`,
-      ];
+      const lines: string[] = [`⚠️ Flaky tests detected in ${ctx.project}`];
       if (ctx.failures && ctx.failures.length > 0) {
         lines.push('\nFlaky tests:');
         ctx.failures.slice(0, 10).forEach((f) => {
@@ -396,11 +450,13 @@ export const FlakyTestTemplates = {
 
       return {
         text: `⚠️ Flaky tests detected in ${ctx.project}`,
-        attachments: [{
-          color: 'warning',
-          title: 'Flaky Tests',
-          text: testList || 'No specific tests identified',
-        }],
+        attachments: [
+          {
+            color: 'warning',
+            title: 'Flaky Tests',
+            text: testList || 'No specific tests identified',
+          },
+        ],
       };
     },
   } as MessageTemplate,

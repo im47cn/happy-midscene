@@ -7,11 +7,11 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { CIExecutionResult, ReportFormat } from '../../types/ci';
-import type { ReportAdapter } from './formats/types';
-import { JUnitAdapter } from './formats/junitAdapter';
-import { JSONAdapter } from './formats/jsonAdapter';
 import { HTMLAdapter } from './formats/htmlAdapter';
+import { JSONAdapter } from './formats/jsonAdapter';
+import { JUnitAdapter } from './formats/junitAdapter';
 import { MarkdownAdapter } from './formats/markdownAdapter';
+import type { ReportAdapter } from './formats/types';
 
 /**
  * Report generation options
@@ -79,7 +79,13 @@ export function generateReports(
   results: CIExecutionResult,
   options: ReportOptions,
 ): ReportResult {
-  const { outputDir, formats, title, prefix = 'report', timestamp = true } = options;
+  const {
+    outputDir,
+    formats,
+    title,
+    prefix = 'report',
+    timestamp = true,
+  } = options;
 
   // Ensure output directory exists
   mkdirSync(outputDir, { recursive: true });

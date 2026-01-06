@@ -7,9 +7,9 @@
 import { randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { glob } from 'glob';
+import { type ScriptPlayer, parseYamlScript } from '@midscene/core/yaml';
 import { getDebug } from '@midscene/shared/logger';
-import { parseYamlScript, type ScriptPlayer } from '@midscene/core/yaml';
+import { glob } from 'glob';
 import type {
   CIConfig,
   CIExecutionResult,
@@ -20,8 +20,8 @@ import type {
 import type {
   CIExecutorOptions,
   ICIExecutor,
-  IShardManager,
   IParallelRunner,
+  IShardManager,
 } from '../ci/interfaces';
 
 const debug = getDebug('ci:executor');
@@ -95,7 +95,9 @@ export class CIExecutor implements ICIExecutor {
         config.sharding?.strategy || 'count-based',
       );
       filesToRun = shards[shardIndex] || [];
-      debug(`Shard ${options.shard.index}/${options.shard.total}: ${filesToRun.length} files`);
+      debug(
+        `Shard ${options.shard.index}/${options.shard.total}: ${filesToRun.length} files`,
+      );
     }
 
     // Execute tests
@@ -201,9 +203,7 @@ export class CIExecutor implements ICIExecutor {
     });
 
     // Filter to YAML files
-    return files.filter((f) =>
-      /\.(ya?ml|yaml)$/i.test(f),
-    );
+    return files.filter((f) => /\.(ya?ml|yaml)$/i.test(f));
   }
 
   /**

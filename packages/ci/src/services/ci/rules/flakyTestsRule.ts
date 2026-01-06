@@ -52,7 +52,9 @@ export class FlakyTestsRule implements QualityRule {
     const tests = results.tests || results.testCases || [];
     return tests.filter(
       (t: TestCaseResult) =>
-        (t.retryCount !== undefined && t.retryCount > 0 && t.status === 'passed') ||
+        (t.retryCount !== undefined &&
+          t.retryCount > 0 &&
+          t.status === 'passed') ||
         t.status === 'flaky',
     ).length;
   }

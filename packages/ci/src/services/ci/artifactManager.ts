@@ -4,10 +4,10 @@
  * Handles test artifact collection, packaging, and upload.
  */
 
-import { mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
-import { arch, platform } from 'node:os';
 import { createHash } from 'node:crypto';
+import { mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { arch, platform } from 'node:os';
+import { join, relative } from 'node:path';
 import type { ArtifactConfig } from '../../types/ci';
 
 /**

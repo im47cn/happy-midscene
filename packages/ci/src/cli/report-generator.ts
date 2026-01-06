@@ -4,12 +4,12 @@
  * CLI wrapper for the report generation service.
  */
 
-import type { ReportFormat, CIExecutionResult } from '../types/ci';
 import {
-  generateReports,
   generateReportString,
+  generateReports,
   getSupportedFormats,
 } from '../services/ci';
+import type { CIExecutionResult, ReportFormat } from '../types/ci';
 
 /**
  * Generate report in specified format and save to file

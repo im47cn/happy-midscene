@@ -2,9 +2,9 @@
  * Shard Manager Tests
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { ShardManager } from '../shardManager';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { ShardStrategy } from '../../types/ci';
+import { ShardManager } from '../shardManager';
 
 describe('ShardManager', () => {
   const mockTests = [
@@ -71,7 +71,11 @@ describe('ShardManager', () => {
 
     it('should handle more shards than tests', async () => {
       const manager = new ShardManager();
-      const plan = await manager.createShardPlan(mockTests.slice(0, 3), 10, 'count-based');
+      const plan = await manager.createShardPlan(
+        mockTests.slice(0, 3),
+        10,
+        'count-based',
+      );
 
       expect(plan).toHaveLength(10);
       // Only 3 shards should have tests
@@ -142,7 +146,12 @@ describe('ShardManager', () => {
       manager.recordExecutionTime('fast2.spec.ts', 100);
       manager.recordExecutionTime('slow2.spec.ts', 4000);
 
-      const tests = ['slow1.spec.ts', 'fast1.spec.ts', 'fast2.spec.ts', 'slow2.spec.ts'];
+      const tests = [
+        'slow1.spec.ts',
+        'fast1.spec.ts',
+        'fast2.spec.ts',
+        'slow2.spec.ts',
+      ];
       const plan = await manager.createShardPlan(tests, 2, 'time-based');
 
       expect(plan).toHaveLength(2);
@@ -157,17 +166,17 @@ describe('ShardManager', () => {
     it('should throw error for zero shards', async () => {
       const manager = new ShardManager();
 
-      await expect(manager.createShardPlan(mockTests, 0, 'count-based')).rejects.toThrow(
-        'shardCount must be greater than 0',
-      );
+      await expect(
+        manager.createShardPlan(mockTests, 0, 'count-based'),
+      ).rejects.toThrow('shardCount must be greater than 0');
     });
 
     it('should throw error for negative shards', async () => {
       const manager = new ShardManager();
 
-      await expect(manager.createShardPlan(mockTests, -1, 'count-based')).rejects.toThrow(
-        'shardCount must be greater than 0',
-      );
+      await expect(
+        manager.createShardPlan(mockTests, -1, 'count-based'),
+      ).rejects.toThrow('shardCount must be greater than 0');
     });
   });
 

@@ -117,7 +117,9 @@ export class ConfigLoader {
     // Handle extends
     const extended: string[] = [];
     if (config.extends) {
-      const extendsList = Array.isArray(config.extends) ? config.extends : [config.extends];
+      const extendsList = Array.isArray(config.extends)
+        ? config.extends
+        : [config.extends];
       for (const extPath of extendsList) {
         const baseConfig = this.loadExtendsConfig(extPath, configPath);
         config = this.mergeConfigs(baseConfig, config);
@@ -290,7 +292,11 @@ export class ConfigLoader {
       const result = { ...base };
 
       for (const key of Object.keys(override)) {
-        if (key in result && typeof result[key] === 'object' && typeof override[key] === 'object') {
+        if (
+          key in result &&
+          typeof result[key] === 'object' &&
+          typeof override[key] === 'object'
+        ) {
           result[key] = this.mergeConfigs(result[key], override[key]);
         } else {
           result[key] = override[key];
@@ -308,13 +314,16 @@ export class ConfigLoader {
    */
   private substituteEnvVars(config: any): any {
     if (typeof config === 'string') {
-      return config.replace(this.options.envPattern!, (match, name, defaultValue) => {
-        const value = this.envManager.get(name, defaultValue || '');
-        if (!value && !defaultValue && this.options.strict) {
-          throw new Error(`Missing required environment variable: ${name}`);
-        }
-        return value;
-      });
+      return config.replace(
+        this.options.envPattern!,
+        (match, name, defaultValue) => {
+          const value = this.envManager.get(name, defaultValue || '');
+          if (!value && !defaultValue && this.options.strict) {
+            throw new Error(`Missing required environment variable: ${name}`);
+          }
+          return value;
+        },
+      );
     }
 
     if (Array.isArray(config)) {
@@ -335,7 +344,10 @@ export class ConfigLoader {
   /**
    * Validate configuration against schema
    */
-  validate<T>(config: any, schema: ConfigSchema<T>): { valid: boolean; errors: string[] } {
+  validate<T>(
+    config: any,
+    schema: ConfigSchema<T>,
+  ): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
     for (const [key, rule] of Object.entries(schema)) {
@@ -356,7 +368,9 @@ export class ConfigLoader {
         }
 
         if (rule.allowed && !rule.allowed.includes(value)) {
-          errors.push(`Field '${key}' must be one of: ${rule.allowed.join(', ')}`);
+          errors.push(
+            `Field '${key}' must be one of: ${rule.allowed.join(', ')}`,
+          );
         }
       }
     }
@@ -384,7 +398,9 @@ export interface ConfigSchema<T = any> {
 /**
  * Load configuration with options
  */
-export function loadConfig<T = any>(options?: ConfigLoadOptions): ConfigLoadResult<T> {
+export function loadConfig<T = any>(
+  options?: ConfigLoadOptions,
+): ConfigLoadResult<T> {
   const loader = new ConfigLoader(options);
   return loader.load<T>();
 }

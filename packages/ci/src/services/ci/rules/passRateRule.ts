@@ -16,7 +16,10 @@ export class PassRateRule implements QualityRule {
   readonly description = 'Overall test pass rate must meet minimum threshold';
   readonly blocking = true;
 
-  evaluate(results: CIExecutionResult, threshold: number): RuleEvaluationResult {
+  evaluate(
+    results: CIExecutionResult,
+    threshold: number,
+  ): RuleEvaluationResult {
     const passRate = results.passRate ?? 0;
     const passed = passRate >= threshold;
 

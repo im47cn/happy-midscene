@@ -6,12 +6,16 @@
 
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import {
+  evaluateQualityGate,
+  formatQualityGateResult,
+  getExitCode,
+} from '../services/ci/qualityGate';
 import type {
   CIExecutionResult,
   QualityGateConfig,
   QualityGateResult,
 } from '../types/ci';
-import { evaluateQualityGate, formatQualityGateResult, getExitCode } from '../services/ci/qualityGate';
 
 /**
  * Evaluate quality gate from CLI
@@ -29,7 +33,9 @@ export async function evaluateQualityGateFromCLI(options: {
     const resultsData = readFileSync(resultsPath, 'utf-8');
     results = JSON.parse(resultsData) as CIExecutionResult;
   } catch (error) {
-    console.error(`❌ Failed to load results from ${options.resultsPath}: ${error}`);
+    console.error(
+      `❌ Failed to load results from ${options.resultsPath}: ${error}`,
+    );
     process.exit(1);
   }
 

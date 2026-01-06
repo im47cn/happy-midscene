@@ -8,8 +8,8 @@ import { randomUUID } from 'node:crypto';
 import { cpus } from 'node:os';
 import { getDebug } from '@midscene/shared/logger';
 import type { ShardResult } from '../../types/ci';
-import type { IParallelRunner } from '../ci/interfaces';
 import type { CIConfig } from '../../types/ci';
+import type { IParallelRunner } from '../ci/interfaces';
 
 const debug = getDebug('ci:parallel-runner');
 
@@ -66,8 +66,8 @@ export class ParallelRunner implements IParallelRunner {
     const startTime = Date.now();
 
     // Process shards in parallel batches
-    let completedShards = 0;
-    let currentIndex = 0;
+    const completedShards = 0;
+    const currentIndex = 0;
 
     const processShard = async (
       shardIndex: number,
@@ -76,10 +76,16 @@ export class ParallelRunner implements IParallelRunner {
       const shardStartTime = Date.now();
 
       try {
-        debug(`Starting shard ${shardIndex + 1}/${shardCount} with ${files.length} files`);
+        debug(
+          `Starting shard ${shardIndex + 1}/${shardCount} with ${files.length} files`,
+        );
 
         // For now, execute in-process (true parallel execution requires worker setup)
-        const result = await this.executeShardInProcess(files, config, shardIndex);
+        const result = await this.executeShardInProcess(
+          files,
+          config,
+          shardIndex,
+        );
 
         return {
           shardIndex,
@@ -91,7 +97,8 @@ export class ParallelRunner implements IParallelRunner {
           status: result.failed === 0 ? 'passed' : 'failed',
         };
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         debug(`Shard ${shardIndex + 1} failed: ${errorMessage}`);
 
         return {
@@ -164,7 +171,7 @@ export class ParallelRunner implements IParallelRunner {
     const startTime = Date.now();
     let passed = 0;
     let failed = 0;
-    let skipped = 0;
+    const skipped = 0;
 
     // This is a placeholder for actual test execution
     // In a real implementation, this would:

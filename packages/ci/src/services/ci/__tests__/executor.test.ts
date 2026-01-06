@@ -2,11 +2,11 @@
  * CI Executor Tests
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { CIExecutor } from '../executor';
-import { ShardManager } from '../shardManager';
-import { ParallelRunner } from '../parallelRunner';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CIConfig, CIExecutionResult } from '../../types/ci';
+import { CIExecutor } from '../executor';
+import { ParallelRunner } from '../parallelRunner';
+import { ShardManager } from '../shardManager';
 
 describe('CIExecutor', () => {
   let executor: CIExecutor;
@@ -26,11 +26,10 @@ describe('CIExecutor', () => {
     });
 
     it('should accept options', () => {
-      const executorWithOptions = new CIExecutor(
-        shardManager,
-        parallelRunner,
-        { cwd: '/custom/path', verbose: true },
-      );
+      const executorWithOptions = new CIExecutor(shardManager, parallelRunner, {
+        cwd: '/custom/path',
+        verbose: true,
+      });
       expect(executorWithOptions).toBeDefined();
     });
   });

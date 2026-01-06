@@ -4,16 +4,22 @@
  * Runs tests with sharding, parallel execution, and quality gates.
  */
 
-import { core, exec } from '@actions/exec';
-import { getInput, getOutput, setFailed, setOutput, exportVariable } from '@actions/core';
-import { context, getOctokit } from '@actions/github';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
+  exportVariable,
+  getInput,
+  getOutput,
+  setFailed,
+  setOutput,
+} from '@actions/core';
+import { core, exec } from '@actions/exec';
+import { context, getOctokit } from '@actions/github';
+import {
   CIExecutor,
-  generateReports,
-  evaluateQualityGate,
   createArtifactManager,
+  evaluateQualityGate,
+  generateReports,
 } from '../services/ci';
 
 interface ActionInputs {
@@ -33,18 +39,26 @@ interface ActionInputs {
 
 async function parseInputs(): Promise<ActionInputs> {
   return {
-    testPattern: getInput('test-pattern', { required: false }) || '**/*.test.ts',
-    shardStrategy: (getInput('shard-strategy') || 'time-based') as ActionInputs['shardStrategy'],
-    shardCount: parseInt(getInput('shard-count') || '2', 10),
-    parallel: parseInt(getInput('parallel') || '4', 10),
-    reportFormats: (getInput('report-formats') || 'junit,json').split(',').map((s) => s.trim()),
+    testPattern:
+      getInput('test-pattern', { required: false }) || '**/*.test.ts',
+    shardStrategy: (getInput('shard-strategy') ||
+      'time-based') as ActionInputs['shardStrategy'],
+    shardCount: Number.parseInt(getInput('shard-count') || '2', 10),
+    parallel: Number.parseInt(getInput('parallel') || '4', 10),
+    reportFormats: (getInput('report-formats') || 'junit,json')
+      .split(',')
+      .map((s) => s.trim()),
     qualityGate: getInput('quality-gate') !== 'false',
-    passRateThreshold: parseFloat(getInput('pass-rate-threshold') || '80'),
+    passRateThreshold: Number.parseFloat(
+      getInput('pass-rate-threshold') || '80',
+    ),
     criticalTests: (getInput('critical-tests') || '')
       .split(',')
       .filter((s) => s.length > 0),
     uploadArtifacts: getInput('upload-artifacts') !== 'false',
-    artifactPaths: (getInput('artifact-paths') || 'test-results,screenshots,videos').split(','),
+    artifactPaths: (
+      getInput('artifact-paths') || 'test-results,screenshots,videos'
+    ).split(','),
     prComment: getInput('pr-comment') !== 'false',
     failOnFailure: getInput('fail-on-failure') !== 'false',
   };
@@ -122,7 +136,9 @@ async function runAction(): Promise<void> {
       // Output rule results
       for (const ruleResult of gateResult.ruleResults) {
         const status = ruleResult.passed ? '✅' : '❌';
-        core.info(`${status} ${ruleResult.ruleName}: ${ruleResult.actual} (expected: ${ruleResult.expected})`);
+        core.info(
+          `${status} ${ruleResult.ruleName}: ${ruleResult.actual} (expected: ${ruleResult.expected})`,
+        );
       }
 
       if (!gatePassed) {
@@ -169,10 +185,7 @@ async function runAction(): Promise<void> {
   }
 }
 
-async function postPRComment(
-  result: any,
-  gatePassed: boolean,
-): Promise<void> {
+async function postPRComment(result: any, gatePassed: boolean): Promise<void> {
   try {
     const token = getInput('github-token', { required: false });
     if (!token) {
@@ -220,7 +233,8 @@ function generatePRComment(result: any, gatePassed: boolean): string {
 <summary>View Failed Tests</summary>
 
 ${
-  result.tests?.filter((t: any) => t.status === 'failed')
+  result.tests
+    ?.filter((t: any) => t.status === 'failed')
     .map((t: any) => `- ❌ ${t.name}: ${t.error || 'Unknown error'}`)
     .join('\n') || 'No failed tests'
 }

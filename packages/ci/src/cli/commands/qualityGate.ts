@@ -7,12 +7,12 @@
 
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { QualityGateConfig, CIExecutionResult } from '../../types/ci';
 import {
   evaluateQualityGate,
   formatQualityGateResult,
   getExitCode,
 } from '../../services/ci/qualityGate';
+import type { CIExecutionResult, QualityGateConfig } from '../../types/ci';
 import { loadJSONFile, loadYAMLFile } from '../config-loader';
 
 export interface QualityGateCommandOptions {
@@ -120,7 +120,9 @@ export const qualityGateCommand = {
     // Display configuration
     console.log('');
     console.log('Quality Gate Configuration:');
-    console.log(`  Pass Rate Threshold: ${qualityGateConfig.passRateThreshold}%`);
+    console.log(
+      `  Pass Rate Threshold: ${qualityGateConfig.passRateThreshold}%`,
+    );
     console.log(
       `  Critical Tests Must Pass: ${qualityGateConfig.criticalTestsMustPass}`,
     );

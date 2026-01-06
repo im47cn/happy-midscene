@@ -5,12 +5,8 @@
  * This is a stub implementation that will be expanded in Phase 3.
  */
 
-import type {
-  CIExecutionResult,
-  ReportFormat,
-  RetryConfig,
-} from '../types/ci';
 import type { TestExecutionOptions } from '../services/ci/interfaces';
+import type { CIExecutionResult, ReportFormat, RetryConfig } from '../types/ci';
 
 export interface RunTestsOptions {
   suite?: string;
@@ -76,7 +72,14 @@ export async function runTests(
 /**
  * Detect current CI/CD platform from environment variables
  */
-function detectPlatform(): 'github' | 'gitlab' | 'jenkins' | 'azure' | 'circleci' | 'generic' | 'local' {
+function detectPlatform():
+  | 'github'
+  | 'gitlab'
+  | 'jenkins'
+  | 'azure'
+  | 'circleci'
+  | 'generic'
+  | 'local' {
   if (process.env.GITHUB_ACTIONS) return 'github';
   if (process.env.GITLAB_CI) return 'gitlab';
   if (process.env.JENKINS_URL) return 'jenkins';

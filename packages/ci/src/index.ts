@@ -15,7 +15,6 @@ export type {
   RetryStrategy,
   QualityGateOperator,
   NotificationChannel,
-
   // Configuration types
   CIConfig,
   EnvironmentConfig,
@@ -26,14 +25,12 @@ export type {
   ReportConfig,
   ArtifactConfig,
   NotificationConfig,
-
   // Result types
   TestCaseResult,
   ShardResult,
   CIExecutionResult,
   QualityGateResult,
   QualityGateRuleResult,
-
   // Report format types
   JUnitTestCase,
   JUnitFailure,
@@ -42,7 +39,6 @@ export type {
   JUnitTestResults,
   JSONReport,
   JSONTestSuite,
-
   // Platform metadata
   PlatformMetadata,
 } from './types/ci';
@@ -53,40 +49,31 @@ export type {
   ICIExecutor,
   CIExecutorOptions,
   TestExecutionOptions,
-
   // Shard and parallel interfaces
   IShardManager,
   IParallelRunner,
-
   // Quality gate interfaces
   IQualityGateRule,
   IQualityGateEvaluator,
   QualityGateRuleEvaluationResult,
-
   // Report interfaces
   IReportGenerator,
   IReportFormatAdapter,
-
   // Artifact interfaces
   IArtifactManager,
   ArtifactUploadResult,
-
   // Environment interfaces
   IEnvManager,
   EnvironmentConfig as IEnvironmentConfig,
-
   // Config interfaces
   IConfigLoader,
   ConfigValidationResult,
   ConfigValidationError,
-
   // Retry interfaces
   IRetryManager,
-
   // Notification interfaces
   INotificationManager,
   NotificationResult,
-
   // Platform adapter interfaces
   IPlatformAdapter,
 } from './services/ci/interfaces';

@@ -4,11 +4,11 @@
  * Splits tests into shards for parallel execution.
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { getDebug } from '@midscene/shared/logger';
-import type { IShardManager } from '../ci/interfaces';
 import type { ShardStrategy } from '../../types/ci';
+import type { IShardManager } from '../ci/interfaces';
 
 const debug = getDebug('ci:shard-manager');
 
@@ -63,7 +63,7 @@ export class ShardManager implements IShardManager {
       case 'hash-based':
         return this.hashBasedSharding(tests, shardCount);
       case 'custom':
-        // Fall back to count-based for custom strategy
+      // Fall back to count-based for custom strategy
       case 'count-based':
       default:
         return this.countBasedSharding(tests, shardCount);
@@ -95,8 +95,7 @@ export class ShardManager implements IShardManager {
     if (entry) {
       // Exponential moving average for smoother updates
       const alpha = 0.3;
-      entry.averageTime =
-        alpha * duration + (1 - alpha) * entry.averageTime;
+      entry.averageTime = alpha * duration + (1 - alpha) * entry.averageTime;
       entry.lastRun = now;
     } else {
       this.executionHistory.set(file, {
@@ -215,7 +214,10 @@ export class ShardManager implements IShardManager {
   private saveHistory(): void {
     try {
       const entries = Array.from(this.executionHistory.values());
-      const dir = this.historyPath.substring(0, this.historyPath.lastIndexOf('/'));
+      const dir = this.historyPath.substring(
+        0,
+        this.historyPath.lastIndexOf('/'),
+      );
 
       if (!existsSync(dir)) {
         // Create directory if needed (handled by writeFileSync with recursive option in Node)
