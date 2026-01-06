@@ -2,147 +2,135 @@
 
 ## Phase 1: 基础架构
 
-- [ ] **React Flow 集成** (`components/FlowCanvas.tsx`)
+- [x] **React Flow 集成** (`components/FlowCanvas.tsx`) ✅ 已完成
   - 画布初始化
   - 缩放/平移
   - 事件处理
 
-- [ ] **节点注册系统** (`services/nodeRegistry.ts`)
+- [x] **节点注册系统** (`services/nodeRegistry.ts`) ✅ 已完成
   - 节点定义接口
   - 注册表管理
   - 默认配置
 
-- [ ] **状态管理** (`store/designerStore.ts`)
+- [x] **状态管理** (`store/designerStore.ts`) ✅ 已完成
   - 流程状态
   - 选中状态
   - 历史记录 (撤销/重做)
 
 ## Phase 2: 节点实现
 
-- [ ] **基础节点组件** (`nodes/BaseNode.tsx`)
+- [x] **基础节点组件** (`nodes/BaseNode.tsx`) ✅ 已完成
   - 通用节点样式
   - 端口渲染
   - 选中/拖拽状态
 
-- [ ] **动作节点** (`nodes/actions/`)
-  - `ClickNode.tsx`
-  - `InputNode.tsx`
-  - `ScrollNode.tsx`
-  - `WaitNode.tsx`
-  - `NavigateNode.tsx`
+- [x] **动作节点** (`nodes/actions.tsx`) ✅ 已完成
+  - Click, Input, Scroll, Wait, Navigate, Hover, Drag
 
-- [ ] **验证节点** (`nodes/validation/`)
-  - `AssertExistsNode.tsx`
-  - `AssertTextNode.tsx`
-  - `AiAssertNode.tsx`
+- [x] **验证节点** (`nodes/validation.tsx`) ✅ 已完成
+  - AssertExists, AssertText, AssertState, AiAssert
 
-- [ ] **控制节点** (`nodes/control/`)
-  - `IfElseNode.tsx`
-  - `LoopNode.tsx`
-  - `ParallelNode.tsx`
-  - `GroupNode.tsx`
+- [x] **控制节点** (`nodes/control.tsx`) ✅ 已完成
+  - IfElse, Loop, Parallel, Group
 
-- [ ] **数据节点** (`nodes/data/`)
-  - `SetVariableNode.tsx`
-  - `ExtractDataNode.tsx`
+- [x] **数据节点** (`nodes/data.tsx`) ✅ 已完成
+  - SetVariable, ExtractData, ExternalData
 
-- [ ] **特殊节点** (`nodes/special/`)
-  - `StartNode.tsx`
-  - `EndNode.tsx`
-  - `CommentNode.tsx`
-  - `SubflowNode.tsx`
+- [x] **特殊节点** (`nodes/special.tsx`) ✅ 已完成
+  - Start, End, Comment, Subflow
 
 ## Phase 3: 面板组件
 
-- [ ] **节点面板** (`components/NodePanel.tsx`)
+- [x] **节点面板** (`components/NodePanel.tsx`) ✅ 已完成
   - 分类展示
   - 拖拽支持
   - 搜索过滤
 
-- [ ] **属性面板** (`components/PropertyPanel.tsx`)
+- [x] **属性面板** (`components/PropertyPanel.tsx`) ✅ 已完成
   - 动态表单生成
   - JSON Schema 渲染
   - 变量选择器
 
-- [ ] **工具栏** (`components/Toolbar.tsx`)
+- [x] **工具栏** (`components/Toolbar.tsx`) ✅ 已完成
   - 文件操作
   - 撤销/重做
   - 缩放控制
   - 执行按钮
 
-- [ ] **小地图** (`components/Minimap.tsx`)
+- [x] **小地图** (`components/Minimap.tsx`) ✅ 已完成
   - 视口指示
   - 快速导航
 
 ## Phase 4: 核心功能
 
-- [ ] **YAML 转换器** (`services/yamlConverter.ts`)
+- [x] **YAML 转换器** (`services/yamlConverter.ts`) ✅ 已完成
   - 流程转 YAML
   - YAML 导入
   - 格式验证
 
-- [ ] **流程验证器** (`services/flowValidator.ts`)
+- [x] **流程验证器** (`services/flowValidator.ts`) ✅ 已完成
   - 结构验证
   - 配置验证
   - 错误标记
 
-- [ ] **元素选择器** (`components/ElementPicker.tsx`)
+- [ ] **元素选择器** (`components/ElementPicker.tsx`) ⏳ 待开发
   - 页面元素选取
   - 描述生成
   - 截图预览
 
-- [ ] **变量管理** (`components/VariableManager.tsx`)
+- [ ] **变量管理** (`components/VariableManager.tsx`) ⏳ 待开发
   - 变量列表
   - 添加/编辑
   - 引用检查
 
 ## Phase 5: 高级功能
 
-- [ ] **执行集成** (`services/designerExecutor.ts`)
+- [ ] **执行集成** (`services/designerExecutor.ts`) ⏳ 待开发
   - 流程执行
   - 节点高亮
   - 结果反馈
 
-- [ ] **模板系统** (`services/templateManager.ts`)
+- [ ] **模板系统** (`services/templateManager.ts`) ⏳ 待开发
   - 预置模板
   - 保存为模板
   - 子流程复用
 
-- [ ] **导入导出** (`services/fileManager.ts`)
+- [x] **导入导出** (`services/fileManager.ts`) ✅ 已完成
   - 项目文件 (JSON)
   - YAML 导出
   - 批量导出
 
 ## Phase 6: 用户体验
 
-- [ ] **快捷键** (`hooks/useKeyboardShortcuts.ts`)
+- [ ] **快捷键** (`hooks/useKeyboardShortcuts.ts`) ⏳ 待开发
   - Ctrl+C/V/X
   - Ctrl+Z/Y
   - Delete
   - 方向键移动
+  - 注: FlowCanvas 已集成基础快捷键
 
-- [ ] **智能连线** (`services/edgeRouter.ts`)
+- [ ] **智能连线** (`services/edgeRouter.ts`) ⏳ 待开发
   - 自动路由
   - 避免交叉
   - 曲线平滑
 
-- [ ] **对齐辅助** (`services/alignmentGuides.ts`)
+- [ ] **对齐辅助** (`services/alignmentGuides.ts`) ⏳ 待开发
   - 网格对齐
   - 参考线
   - 自动分布
 
 ## Phase 7: 测试与文档
 
-- [ ] **单元测试**
+- [ ] **单元测试** ⏳ 待开发
   - 节点组件测试
   - YAML 转换测试
   - 验证器测试
 
-- [ ] **集成测试**
+- [ ] **集成测试** ⏳ 待开发
   - 完整流程测试
   - 执行测试
 
-- [ ] **用户文档**
+- [ ] **用户文档** ⏳ 待开发
   - 使用指南
   - 节点说明
   - 快捷键列表
