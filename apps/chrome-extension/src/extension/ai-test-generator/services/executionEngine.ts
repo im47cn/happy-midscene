@@ -18,6 +18,10 @@ import {
   maskerEngine,
 } from './masking';
 import { screenshotStorage } from './screenshotStorage';
+import {
+  getHighlightManager,
+  type HighlightManagerConfig,
+} from './executionHighlightManager';
 
 export interface DeviceEmulationConfig {
   deviceId: string;
@@ -297,6 +301,7 @@ export class ExecutionEngine {
   private isLogMaskingActive = false;
   private screenshotStorageEnabled = true;
   private currentTestCaseId?: string;
+  private highlightManager = getHighlightManager();
 
   constructor(
     private getAgent: (forceSameTabNavigation?: boolean) => any,
@@ -357,6 +362,20 @@ export class ExecutionEngine {
    */
   isScreenshotStorageEnabled(): boolean {
     return this.screenshotStorageEnabled;
+  }
+
+  /**
+   * Enable or disable element highlighting during execution
+   */
+  setHighlightingEnabled(enabled: boolean): void {
+    this.highlightManager.setConfig({ enabled });
+  }
+
+  /**
+   * Check if highlighting is enabled
+   */
+  isHighlightingEnabled(): boolean {
+    return this.highlightManager.getConfig().enabled;
   }
 
   /**
@@ -754,13 +773,26 @@ export class ExecutionEngine {
 
       // Extract element info for highlighting
       const elementInfo = this.extractElementFromDump();
-      if (elementInfo && this.callbacks.onHighlight) {
-        this.callbacks.onHighlight({
-          x: elementInfo.center[0],
-          y: elementInfo.center[1],
-          width: elementInfo.rect.width || 0,
-          height: elementInfo.rect.height || 0,
-        });
+      if (elementInfo) {
+        // Send to callback for external handling
+        if (this.callbacks.onHighlight) {
+          this.callbacks.onHighlight({
+            x: elementInfo.center[0],
+            y: elementInfo.center[1],
+            width: elementInfo.rect.width || 0,
+            height: elementInfo.rect.height || 0,
+          });
+        }
+
+        // Highlight current element on page
+        if (this.highlightManager.getConfig().enabled) {
+          await this.highlightManager.highlightCurrent({
+            x: elementInfo.rect.left ?? elementInfo.center[0] ?? 0,
+            y: elementInfo.rect.top ?? elementInfo.center[1] ?? 0,
+            width: elementInfo.rect.width || 0,
+            height: elementInfo.rect.height || 0,
+          });
+        }
       }
 
       // Success: try to collect fingerprint for future healing
@@ -796,6 +828,11 @@ export class ExecutionEngine {
         } catch (storageError) {
           console.debug('Failed to store screenshot:', storageError);
         }
+      }
+
+      // Mark highlight as success
+      if (this.highlightManager.getConfig().enabled) {
+        await this.highlightManager.markAsSuccess();
       }
 
       const result: ExecutionResult = {
@@ -838,6 +875,11 @@ export class ExecutionEngine {
         } catch (storageError) {
           console.debug('Failed to store screenshot:', storageError);
         }
+      }
+
+      // Mark highlight as failed
+      if (this.highlightManager.getConfig().enabled) {
+        await this.highlightManager.markAsFailed();
       }
 
       return {
@@ -1035,6 +1077,11 @@ export class ExecutionEngine {
     try {
       await this.initAgent();
 
+      // Initialize highlighter
+      if (this.highlightManager.getConfig().enabled) {
+        await this.highlightManager.initialize();
+      }
+
       // Apply device emulation if configured
       if (context?.deviceEmulation) {
         await this.applyDeviceEmulation(context.deviceEmulation);
@@ -1135,6 +1182,12 @@ export class ExecutionEngine {
     } finally {
       // Stop log masking
       this.stopLogMasking();
+
+      // Cleanup highlighter
+      if (this.highlightManager.getConfig().enabled) {
+        await this.highlightManager.cleanup();
+      }
+
       await this.destroyAgent();
     }
   }

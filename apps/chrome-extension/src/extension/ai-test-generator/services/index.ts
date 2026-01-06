@@ -12,3 +12,7 @@ export * from './multiDevice';
 
 // Adaptive test generation
 export * from './adaptive';
+
+// Execution highlighting
+export * from './executionHighlighter';
+export * from './executionHighlightManager';
