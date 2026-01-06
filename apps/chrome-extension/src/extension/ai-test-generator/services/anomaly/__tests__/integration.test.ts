@@ -5,15 +5,15 @@
  * 一旦我被更新，务必更新我的开头注释，以及所属的文件夹的CLAUDE.md。
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Anomaly, BaselineRecord, HealthScore } from '../../types/anomaly';
+import { alertTrigger } from '../alertTrigger';
 import { anomalyDetector } from '../anomalyDetector';
 import { baselineBuilder } from '../baselineBuilder';
-import { rootCauseAnalyzer } from '../rootCauseAnalyzer';
-import { trendPredictor } from '../trendPredictor';
 import { healthScorer } from '../healthScorer';
-import { alertTrigger } from '../alertTrigger';
+import { rootCauseAnalyzer } from '../rootCauseAnalyzer';
 import { anomalyStorage } from '../storage';
-import type { Anomaly, BaselineRecord, HealthScore } from '../../types/anomaly';
+import { trendPredictor } from '../trendPredictor';
 
 // Mock IndexedDB storage
 vi.mock('../storage', () => ({
@@ -102,7 +102,9 @@ describe('Anomaly Detection Integration Tests', () => {
 
       // Step 4: Generate alert
       if (detection.anomaly) {
-        const notification = await alertTrigger.triggerFromAnomaly(detection.anomaly);
+        const notification = await alertTrigger.triggerFromAnomaly(
+          detection.anomaly,
+        );
         expect(notification).toBeDefined();
         expect(notification.alert).toBeDefined();
         expect(notification.alert.level).toBeDefined();
@@ -146,7 +148,9 @@ describe('Anomaly Detection Integration Tests', () => {
         });
         if (detection.isAnomaly && detection.anomaly) {
           detections.push(detection.anomaly);
-          const notification = await alertTrigger.triggerFromAnomaly(detection.anomaly);
+          const notification = await alertTrigger.triggerFromAnomaly(
+            detection.anomaly,
+          );
           notifications.push(notification);
         }
       }
@@ -155,7 +159,9 @@ describe('Anomaly Detection Integration Tests', () => {
       expect(detections.length).toBeGreaterThan(0);
 
       // Check that some notifications were suppressed (either deduplicated or converged)
-      const suppressedCount = notifications.filter(n => !n.shouldNotify).length;
+      const suppressedCount = notifications.filter(
+        (n) => !n.shouldNotify,
+      ).length;
       expect(suppressedCount).toBeGreaterThan(0);
     });
   });
@@ -174,7 +180,7 @@ describe('Anomaly Detection Integration Tests', () => {
         historicalData,
         {
           horizon: 7 * 24 * 60 * 60 * 1000, // Convert days to milliseconds
-        }
+        },
       );
 
       expect(prediction).toBeDefined();
@@ -224,7 +230,10 @@ describe('Anomaly Detection Integration Tests', () => {
         recommendations: [],
       };
 
-      const result = await alertTrigger.triggerFromHealthScore(currentScore, previousScore);
+      const result = await alertTrigger.triggerFromHealthScore(
+        currentScore,
+        previousScore,
+      );
 
       expect(result).toBeDefined();
       expect(result?.alert).toBeDefined();
@@ -248,7 +257,10 @@ describe('Anomaly Detection Integration Tests', () => {
         recommendations: [],
       };
 
-      const alert = await alertTrigger.triggerFromHealthScore(currentScore, previousScore);
+      const alert = await alertTrigger.triggerFromHealthScore(
+        currentScore,
+        previousScore,
+      );
 
       expect(alert).toBeNull();
     });
@@ -282,23 +294,45 @@ describe('Anomaly Detection Integration Tests', () => {
 
       // Batch of test case results
       const testResults = [
-        { caseId: 'test-1', duration: 1100, passed: true, timestamp: Date.now() },
-        { caseId: 'test-2', duration: 5000, passed: false, timestamp: Date.now() }, // Anomaly
-        { caseId: 'test-3', duration: 950, passed: true, timestamp: Date.now() },
-        { caseId: 'test-4', duration: 4500, passed: false, timestamp: Date.now() }, // Anomaly
-        { caseId: 'test-5', duration: 1050, passed: true, timestamp: Date.now() },
+        {
+          caseId: 'test-1',
+          duration: 1100,
+          passed: true,
+          timestamp: Date.now(),
+        },
+        {
+          caseId: 'test-2',
+          duration: 5000,
+          passed: false,
+          timestamp: Date.now(),
+        }, // Anomaly
+        {
+          caseId: 'test-3',
+          duration: 950,
+          passed: true,
+          timestamp: Date.now(),
+        },
+        {
+          caseId: 'test-4',
+          duration: 4500,
+          passed: false,
+          timestamp: Date.now(),
+        }, // Anomaly
+        {
+          caseId: 'test-5',
+          duration: 1050,
+          passed: true,
+          timestamp: Date.now(),
+        },
       ];
 
       const results = await Promise.all(
         testResults.map((result) =>
-          anomalyDetector.detectForCase(
-            result.caseId,
-            [
-              { name: 'duration', value: result.duration },
-              { name: 'passed', value: result.passed ? 1 : 0 },
-            ]
-          )
-        )
+          anomalyDetector.detectForCase(result.caseId, [
+            { name: 'duration', value: result.duration },
+            { name: 'passed', value: result.passed ? 1 : 0 },
+          ]),
+        ),
       );
 
       // Should detect anomalies for test-2 and test-4
@@ -376,8 +410,8 @@ describe('Anomaly Detection Integration Tests', () => {
             metricName: 'passRate',
             value: 70 + Math.random() * 30,
             timestamp: Date.now() + i,
-          })
-        )
+          }),
+        ),
       );
 
       const endTime = performance.now();
@@ -390,14 +424,16 @@ describe('Anomaly Detection Integration Tests', () => {
 
   describe('Error Handling', () => {
     it('should gracefully handle storage failures', async () => {
-      vi.mocked(baselineBuilder.getBaseline).mockRejectedValue(new Error('Storage unavailable'));
+      vi.mocked(baselineBuilder.getBaseline).mockRejectedValue(
+        new Error('Storage unavailable'),
+      );
 
       await expect(
         anomalyDetector.detect({
           metricName: 'passRate',
           value: 70,
           timestamp: Date.now(),
-        })
+        }),
       ).rejects.toThrow('Storage unavailable');
     });
 
@@ -435,7 +471,7 @@ describe('Anomaly Detection Integration Tests', () => {
           metricName: 'passRate',
           value: 70,
           timestamp: Date.now(),
-        })
+        }),
       ).rejects.toThrow('Temporary failure');
 
       // Second call should succeed

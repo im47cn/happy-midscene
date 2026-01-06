@@ -50,6 +50,10 @@ export interface Message {
   content: string;
   timestamp: number;
   metadata?: MessageMetadata;
+  // Convenience properties - also available in metadata
+  actions?: DebugAction[];
+  suggestions?: FixSuggestion[];
+  error?: string; // For error messages
 }
 
 export interface MessageMetadata {
@@ -64,7 +68,7 @@ export interface MessageMetadata {
  * Debug action that can be executed
  */
 export interface DebugAction {
-  id: string;
+  id?: string;
   type: DebugActionType;
   target?: string;
   value?: any;
@@ -155,7 +159,12 @@ export interface TestStepInfo {
 }
 
 export interface DebugError {
-  type: 'element_not_found' | 'timeout' | 'action_failed' | 'assertion_failed' | 'unknown';
+  type:
+    | 'element_not_found'
+    | 'timeout'
+    | 'action_failed'
+    | 'assertion_failed'
+    | 'unknown';
   message: string;
   stack?: string;
   details?: string;
@@ -274,6 +283,8 @@ export interface ErrorPattern {
 export interface QuickQuestion {
   id: string;
   text: string;
+  question?: string; // Alias for text - used in components
+  context?: string; // Optional context for the question
   category: 'reason' | 'fix' | 'status' | 'element' | 'action';
   icon?: string;
 }
@@ -312,7 +323,17 @@ export const DEFAULT_DEBUG_ASSISTANT_CONFIG: DebugAssistantConfig = {
 export const DEFAULT_QUICK_QUESTIONS: QuickQuestion[] = [
   { id: 'reason', text: '为什么失败了？', category: 'reason', icon: '❓' },
   { id: 'fix', text: '怎么修复这个问题？', category: 'fix', icon: '🔧' },
-  { id: 'status', text: '当前页面是什么状态？', category: 'status', icon: '🔍' },
-  { id: 'element', text: '帮我找一下目标元素', category: 'element', icon: '🎯' },
+  {
+    id: 'status',
+    text: '当前页面是什么状态？',
+    category: 'status',
+    icon: '🔍',
+  },
+  {
+    id: 'element',
+    text: '帮我找一下目标元素',
+    category: 'element',
+    icon: '🎯',
+  },
   { id: 'retry', text: '重试这个步骤', category: 'action', icon: '🔄' },
 ];

@@ -3,8 +3,8 @@
  * Applies fix suggestions to test files
  */
 
-import type { FixSuggestion, DebugContext } from '../../types/debugAssistant';
-import { KnowledgeBase } from './knowledgeBase';
+import type { DebugContext, FixSuggestion } from '../../types/debugAssistant';
+import type { KnowledgeBase } from './knowledgeBase';
 
 export interface FixApplierOptions {
   knowledgeBase?: KnowledgeBase;
@@ -321,7 +321,10 @@ export class FixApplier {
   /**
    * Preview what a fix would look like applied
    */
-  previewFix(context: DebugContext, fix: FixSuggestion): {
+  previewFix(
+    context: DebugContext,
+    fix: FixSuggestion,
+  ): {
     original: string;
     modified: string;
     diff: string;
@@ -339,7 +342,10 @@ export class FixApplier {
   /**
    * Extract original code that would be modified
    */
-  private extractOriginalCode(context: DebugContext, fix: FixSuggestion): string {
+  private extractOriginalCode(
+    context: DebugContext,
+    fix: FixSuggestion,
+  ): string {
     // In a real implementation, this would extract the relevant code
     return `// 原始代码`;
   }
@@ -396,7 +402,11 @@ export class FixApplier {
   /**
    * Record a failed fix
    */
-  recordFailedFix(context: DebugContext, fix: FixSuggestion, errorMessage: string): void {
+  recordFailedFix(
+    context: DebugContext,
+    fix: FixSuggestion,
+    errorMessage: string,
+  ): void {
     if (this.knowledgeBase) {
       // Reduce the success rate for this pattern
       const pattern = this.extractErrorPattern(errorMessage, context);

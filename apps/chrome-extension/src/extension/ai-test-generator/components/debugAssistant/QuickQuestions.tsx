@@ -4,16 +4,16 @@
  */
 
 import {
-  EyeOutlined,
   BugOutlined,
   CameraOutlined,
   DiffOutlined,
+  EyeOutlined,
   GlobalOutlined,
   PlayCircleOutlined,
   QuestionCircleOutlined,
   SearchOutlined,
 } from '@ant-design/icons';
-import { Button, Space, Typography, Divider, Tooltip, Card } from 'antd';
+import { Button, Card, Divider, Input, Space, Tooltip, Typography } from 'antd';
 import type { QuickQuestion } from '../../types/debugAssistant';
 
 const { Text } = Typography;
@@ -30,8 +30,14 @@ interface QuickQuestionsProps {
  * Get icon for quick question based on content
  */
 function getQuestionIcon(question: string | QuickQuestion): React.ReactNode {
-  const text = typeof question === 'string' ? question : question.question;
+  const text =
+    typeof question === 'string'
+      ? question
+      : question.question || question.text || '';
 
+  if (!text) {
+    return <QuestionCircleOutlined />;
+  }
   if (text.includes('显示') || text.includes('show')) {
     return <EyeOutlined />;
   }
@@ -47,10 +53,18 @@ function getQuestionIcon(question: string | QuickQuestion): React.ReactNode {
   if (text.includes('网络') || text.includes('network')) {
     return <GlobalOutlined />;
   }
-  if (text.includes('元素') || text.includes('element') || text.includes('locate')) {
+  if (
+    text.includes('元素') ||
+    text.includes('element') ||
+    text.includes('locate')
+  ) {
     return <SearchOutlined />;
   }
-  if (text.includes('执行') || text.includes('run') || text.includes('execute')) {
+  if (
+    text.includes('执行') ||
+    text.includes('run') ||
+    text.includes('execute')
+  ) {
     return <PlayCircleOutlined />;
   }
 
@@ -60,8 +74,13 @@ function getQuestionIcon(question: string | QuickQuestion): React.ReactNode {
 /**
  * Get button color based on question type
  */
-function getQuestionType(question: string | QuickQuestion): 'default' | 'primary' | 'ghost' {
-  const text = typeof question === 'string' ? question : question.question;
+function getQuestionType(
+  question: string | QuickQuestion,
+): 'default' | 'primary' {
+  const text =
+    typeof question === 'string'
+      ? question
+      : question.question || question.text;
 
   if (text.includes('显示') || text.includes('show')) {
     return 'default';
@@ -69,11 +88,22 @@ function getQuestionType(question: string | QuickQuestion): 'default' | 'primary
   if (text.includes('解释') || text.includes('explain')) {
     return 'primary';
   }
-  if (text.includes('执行') || text.includes('run') || text.includes('execute')) {
+  if (
+    text.includes('执行') ||
+    text.includes('run') ||
+    text.includes('execute')
+  ) {
     return 'primary';
   }
 
   return 'default';
+}
+
+/**
+ * Get question text (with fallback)
+ */
+function getQuestionText(question: QuickQuestion): string {
+  return question.question || question.text;
 }
 
 export function QuickQuestions({
@@ -85,9 +115,21 @@ export function QuickQuestions({
 }: QuickQuestionsProps) {
   // Group questions by category
   const groups = {
-    基本信息: questions.filter((q) => q.question.includes('显示') || q.question.includes('状态')),
-    调试操作: questions.filter((q) => q.question.includes('高亮') || q.question.includes('定位')),
-    对比分析: questions.filter((q) => q.question.includes('对比') || q.question.includes('检查')),
+    基本信息: questions.filter(
+      (q) =>
+        getQuestionText(q).includes('显示') ||
+        getQuestionText(q).includes('状态'),
+    ),
+    调试操作: questions.filter(
+      (q) =>
+        getQuestionText(q).includes('高亮') ||
+        getQuestionText(q).includes('定位'),
+    ),
+    对比分析: questions.filter(
+      (q) =>
+        getQuestionText(q).includes('对比') ||
+        getQuestionText(q).includes('检查'),
+    ),
   };
 
   // Flatten back if too few questions
@@ -101,7 +143,10 @@ export function QuickQuestions({
 
   return (
     <div style={{ padding: 16 }}>
-      <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 12 }}>
+      <Text
+        type="secondary"
+        style={{ fontSize: 12, display: 'block', marginBottom: 12 }}
+      >
         快捷问题
       </Text>
 
@@ -122,15 +167,24 @@ export function QuickQuestions({
                   }}
                 >
                   {groupQuestions.map((question) => (
-                    <Tooltip key={question.id} title={question.context || question.question}>
+                    <Tooltip
+                      key={question.id}
+                      title={question.context || getQuestionText(question)}
+                    >
                       <Button
                         size={size}
                         icon={getQuestionIcon(question)}
                         onClick={() => handleClick(question)}
                         disabled={disabled}
-                        style={{ textAlign: 'left', height: 'auto', padding: '8px 12px' }}
+                        style={{
+                          textAlign: 'left',
+                          height: 'auto',
+                          padding: '8px 12px',
+                        }}
                       >
-                        <span style={{ fontSize: 12 }}>{question.question}</span>
+                        <span style={{ fontSize: 12 }}>
+                          {getQuestionText(question)}
+                        </span>
                       </Button>
                     </Tooltip>
                   ))}
@@ -148,16 +202,25 @@ export function QuickQuestions({
           }}
         >
           {questions.map((question) => (
-            <Tooltip key={question.id} title={question.context || question.question}>
+            <Tooltip
+              key={question.id}
+              title={question.context || getQuestionText(question)}
+            >
               <Button
                 size={size}
                 type={getQuestionType(question)}
                 icon={getQuestionIcon(question)}
                 onClick={() => handleClick(question)}
                 disabled={disabled}
-                style={{ textAlign: 'left', height: 'auto', padding: '8px 12px' }}
+                style={{
+                  textAlign: 'left',
+                  height: 'auto',
+                  padding: '8px 12px',
+                }}
               >
-                <span style={{ fontSize: 12 }}>{question.question}</span>
+                <span style={{ fontSize: 12 }}>
+                  {getQuestionText(question)}
+                </span>
               </Button>
             </Tooltip>
           ))}
@@ -175,13 +238,15 @@ export function QuickQuestions({
           placeholder="输入你的问题..."
           autoSize={{ minRows: 2, maxRows: 4 }}
           disabled={disabled}
-          onPressEnter={(e) => {
+          onPressEnter={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
             const target = e.target as HTMLTextAreaElement;
             if (target.value.trim() && !disabled) {
               onSelect?.({
                 id: 'custom',
+                text: target.value,
                 question: target.value,
-                action: 'custom',
+                category: 'reason',
+                icon: '❓',
               });
               target.value = '';
             }
@@ -214,7 +279,7 @@ export function QuickQuestionsCompact({
   return (
     <Space size="small">
       {visibleQuestions.map((question) => (
-        <Tooltip key={question.id} title={question.question}>
+        <Tooltip key={question.id} title={getQuestionText(question)}>
           <Button
             size="small"
             icon={getQuestionIcon(question)}
@@ -225,7 +290,11 @@ export function QuickQuestionsCompact({
       ))}
       {hasMore && (
         <Tooltip title="更多问题">
-          <Button size="small" icon={<QuestionCircleOutlined />} disabled={disabled} />
+          <Button
+            size="small"
+            icon={<QuestionCircleOutlined />}
+            disabled={disabled}
+          />
         </Tooltip>
       )}
     </Space>
@@ -251,7 +320,15 @@ export function QuickQuestionCategory({
   disabled,
 }: QuickQuestionCategoryProps) {
   return (
-    <Card size="small" title={<Space>{icon}{title}</Space>}>
+    <Card
+      size="small"
+      title={
+        <Space>
+          {icon}
+          {title}
+        </Space>
+      }
+    >
       <Space direction="vertical" style={{ width: '100%' }} size="small">
         {questions.map((question) => (
           <Button

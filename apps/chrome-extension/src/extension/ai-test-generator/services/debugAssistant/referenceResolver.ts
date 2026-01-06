@@ -3,7 +3,11 @@
  * Resolves references in LLM responses to actual actions and elements
  */
 
-import type { DebugAction, FixSuggestion, DebugContext } from '../../types/debugAssistant';
+import type {
+  DebugAction,
+  DebugContext,
+  FixSuggestion,
+} from '../../types/debugAssistant';
 
 export interface ResolvedReference {
   type: 'action' | 'element' | 'suggestion' | 'variable';
@@ -75,7 +79,9 @@ export class ReferenceResolver {
   ): DebugAction | null {
     // Parse action from text format [ACTION:type:target[:value]]
     // Target is optional for actions like screenshot, refresh
-    const actionMatch = text.match(/\[ACTION:(\w+)(?::([^\]:]*))?(?::([^\]]*))?\]/);
+    const actionMatch = text.match(
+      /\[ACTION:(\w+)(?::([^\]:]*))?(?::([^\]]*))?\]/,
+    );
     if (actionMatch) {
       const [, type, target, value] = actionMatch;
       return {
@@ -141,14 +147,16 @@ export class ReferenceResolver {
     options: ResolveOptions,
   ): FixSuggestion | null {
     // Parse suggestion from text format [SUGGESTION:description|code|confidence]
-    const suggestionMatch = text.match(/\[SUGGESTION:([^|]+)(?:\|([^|]*))?(?:\|([0-9.]+))?\]/);
+    const suggestionMatch = text.match(
+      /\[SUGGESTION:([^|]+)(?:\|([^|]*))?(?:\|([0-9.]+))?\]/,
+    );
     if (suggestionMatch) {
       const [, description, code, confidence] = suggestionMatch;
       return {
         type: this.inferSuggestionType(description),
         description: description.trim(),
         code: code?.trim() || '',
-        confidence: confidence ? parseFloat(confidence) : 0.7,
+        confidence: confidence ? Number.parseFloat(confidence) : 0.7,
       };
     }
 
@@ -238,7 +246,9 @@ export class ReferenceResolver {
   /**
    * Infer suggestion type from description
    */
-  private static inferSuggestionType(description: string): FixSuggestion['type'] {
+  private static inferSuggestionType(
+    description: string,
+  ): FixSuggestion['type'] {
     const desc = description.toLowerCase();
 
     if (desc.includes('wait') || desc.includes('等待')) {
@@ -247,7 +257,11 @@ export class ReferenceResolver {
     if (desc.includes('timeout') || desc.includes('超时')) {
       return 'timeout';
     }
-    if (desc.includes('locator') || desc.includes('selector') || desc.includes('选择器')) {
+    if (
+      desc.includes('locator') ||
+      desc.includes('selector') ||
+      desc.includes('选择器')
+    ) {
       return 'locator';
     }
     if (desc.includes('retry') || desc.includes('重试')) {
@@ -262,7 +276,12 @@ export class ReferenceResolver {
     if (desc.includes('debug') || desc.includes('调试')) {
       return 'debug';
     }
-    if (desc.includes('login') || desc.includes('auth') || desc.includes('登录') || desc.includes('认证')) {
+    if (
+      desc.includes('login') ||
+      desc.includes('auth') ||
+      desc.includes('登录') ||
+      desc.includes('认证')
+    ) {
       return 'auth';
     }
     if (desc.includes('navigate') || desc.includes('导航')) {
@@ -275,7 +294,10 @@ export class ReferenceResolver {
   /**
    * Calculate confidence score for element reference
    */
-  private static calculateElementConfidence(elementText: string, context: DebugContext): number {
+  private static calculateElementConfidence(
+    elementText: string,
+    context: DebugContext,
+  ): number {
     let confidence = 0.5;
 
     // Higher confidence if element text appears in execution history
@@ -285,7 +307,9 @@ export class ReferenceResolver {
 
     // Higher confidence if element text is specific (not generic)
     const genericTerms = ['button', 'input', 'element', 'the', 'a', 'an'];
-    const isGeneric = genericTerms.some((term) => elementText.toLowerCase() === term);
+    const isGeneric = genericTerms.some(
+      (term) => elementText.toLowerCase() === term,
+    );
     if (!isGeneric) {
       confidence += 0.15;
     }
@@ -332,7 +356,10 @@ export class ReferenceResolver {
       if (msg.role === 'user' || msg.role === 'assistant') {
         // Extract elements (quoted strings, bracketed content)
         // Match: 'text', "text", 【text】, 『text』, 「text」
-        const elementMatches = msg.content.match(/['"]([^'"]+)['"]|【([^】]+)】|『([^』]+)』|「([^」]+)」/g) || [];
+        const elementMatches =
+          msg.content.match(
+            /['"]([^'"]+)['"]|【([^】]+)】|『([^』]+)』|「([^」]+)」/g,
+          ) || [];
         for (const match of elementMatches) {
           const element = this.normalizeElementReference(match);
           if (element.length > 1) {
@@ -341,13 +368,17 @@ export class ReferenceResolver {
         }
 
         // Extract actions (click, input, etc.)
-        const actionMatches = msg.content.match(/(?:点击|输入|滚动|高亮)\s*[:：]?\s*([^\n,。]+)/gi) || [];
+        const actionMatches =
+          msg.content.match(
+            /(?:点击|输入|滚动|高亮)\s*[:：]?\s*([^\n,。]+)/gi,
+          ) || [];
         for (const match of actionMatches) {
           mentionedActions.add(match.trim());
         }
 
         // Extract errors
-        const errorMatches = msg.content.match(/(?:error|错误)[:：]?\s*([^\n]+)/gi) || [];
+        const errorMatches =
+          msg.content.match(/(?:error|错误)[:：]?\s*([^\n]+)/gi) || [];
         for (const match of errorMatches) {
           mentionedErrors.add(match.trim());
         }
@@ -379,7 +410,11 @@ export class ReferenceResolver {
     const pronounLower = pronoun.toLowerCase();
 
     // "it", "this", "that" usually refer to elements
-    if (['it', 'this', 'that', '这', '那', '它'].some((p) => pronounLower.includes(p))) {
+    if (
+      ['it', 'this', 'that', '这', '那', '它'].some((p) =>
+        pronounLower.includes(p),
+      )
+    ) {
       if (recentElements.length > 0) {
         return recentElements[0];
       }
@@ -401,7 +436,10 @@ export class ReferenceResolver {
       return false;
     }
 
-    if (!ref.value || (typeof ref.value === 'string' && ref.value.trim().length === 0)) {
+    if (
+      !ref.value ||
+      (typeof ref.value === 'string' && ref.value.trim().length === 0)
+    ) {
       return false;
     }
 

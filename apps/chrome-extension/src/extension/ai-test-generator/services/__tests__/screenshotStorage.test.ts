@@ -2,8 +2,11 @@
  * Unit tests for screenshot storage service
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { ScreenshotStorage, type ScreenshotMetadata } from '../screenshotStorage';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  type ScreenshotMetadata,
+  ScreenshotStorage,
+} from '../screenshotStorage';
 
 // Mock chrome.storage.local
 const mockChromeStorage = {

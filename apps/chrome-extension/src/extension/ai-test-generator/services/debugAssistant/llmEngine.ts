@@ -60,7 +60,8 @@ export class LLMEngine {
     if (options.baseURL !== undefined) this.baseURL = options.baseURL;
     if (options.model !== undefined) this.model = options.model;
     if (options.maxTokens !== undefined) this.maxTokens = options.maxTokens;
-    if (options.temperature !== undefined) this.temperature = options.temperature;
+    if (options.temperature !== undefined)
+      this.temperature = options.temperature;
     if (options.timeout !== undefined) this.timeout = options.timeout;
   }
 
@@ -101,7 +102,11 @@ export class LLMEngine {
       const content = response.content[0]?.text || '';
 
       // Update conversation history
-      this.addToHistory('user', context.conversationHistory[context.conversationHistory.length - 1]?.content || '');
+      this.addToHistory(
+        'user',
+        context.conversationHistory[context.conversationHistory.length - 1]
+          ?.content || '',
+      );
       this.addToHistory('assistant', content);
 
       return {
@@ -110,20 +115,25 @@ export class LLMEngine {
           ? {
               promptTokens: response.usage.input_tokens,
               completionTokens: response.usage.output_tokens,
-              totalTokens: response.usage.input_tokens + response.usage.output_tokens,
+              totalTokens:
+                response.usage.input_tokens + response.usage.output_tokens,
             }
           : undefined,
         model: response.model,
       };
     } catch (error) {
-      throw new Error(`LLM request failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `LLM request failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
   /**
    * Stream a chat completion request
    */
-  async *chatStream(context: LLMContext): AsyncGenerator<StreamChunk, string, unknown> {
+  async *chatStream(
+    context: LLMContext,
+  ): AsyncGenerator<StreamChunk, string, unknown> {
     const messages = this.buildMessages(context);
     let fullContent = '';
 
@@ -192,14 +202,18 @@ export class LLMEngine {
 
       return fullContent;
     } catch (error) {
-      throw new Error(`LLM stream failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `LLM stream failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
   /**
    * Build messages array from context
    */
-  private buildMessages(context: LLMContext): Array<{ role: string; content: any }> {
+  private buildMessages(
+    context: LLMContext,
+  ): Array<{ role: string; content: any }> {
     const messages: Array<{ role: string; content: any }> = [];
 
     // Add conversation history (excluding system prompt which is sent separately)
@@ -255,16 +269,27 @@ export class LLMEngine {
 
     if (context.additionalContext) {
       if (context.additionalContext.consoleErrors?.length) {
-        parts.push('**控制台错误:**\n' + context.additionalContext.consoleErrors.join('\n'));
+        parts.push(
+          '**控制台错误:**\n' +
+            context.additionalContext.consoleErrors.join('\n'),
+        );
       }
       if (context.additionalContext.networkErrors?.length) {
-        parts.push('**网络错误:**\n' + context.additionalContext.networkErrors.join('\n'));
+        parts.push(
+          '**网络错误:**\n' +
+            context.additionalContext.networkErrors.join('\n'),
+        );
       }
       if (context.additionalContext.visibleElements) {
-        parts.push('**可见元素:**\n' + context.additionalContext.visibleElements);
+        parts.push(
+          '**可见元素:**\n' + context.additionalContext.visibleElements,
+        );
       }
       if (context.additionalContext.executionHistory?.length) {
-        parts.push('**执行历史:**\n' + context.additionalContext.executionHistory.join('\n'));
+        parts.push(
+          '**执行历史:**\n' +
+            context.additionalContext.executionHistory.join('\n'),
+        );
       }
     }
 
@@ -290,7 +315,9 @@ export class LLMEngine {
   /**
    * Make a non-streaming request
    */
-  private async makeRequest(requestBody: Record<string, unknown>): Promise<any> {
+  private async makeRequest(
+    requestBody: Record<string, unknown>,
+  ): Promise<any> {
     const response = await fetch(this.baseURL, {
       method: 'POST',
       headers: this.buildHeaders(),
@@ -365,11 +392,17 @@ export class LLMEngine {
     // Additional context
     if (context.additionalContext) {
       for (const key in context.additionalContext) {
-        const value = context.additionalContext[key as keyof typeof context.additionalContext];
+        const value =
+          context.additionalContext[
+            key as keyof typeof context.additionalContext
+          ];
         if (typeof value === 'string') {
           tokens += this.estimateTokens(value);
         } else if (Array.isArray(value)) {
-          tokens += value.reduce((sum, item) => sum + this.estimateTokens(String(item)), 0);
+          tokens += value.reduce(
+            (sum, item) => sum + this.estimateTokens(String(item)),
+            0,
+          );
         }
       }
     }

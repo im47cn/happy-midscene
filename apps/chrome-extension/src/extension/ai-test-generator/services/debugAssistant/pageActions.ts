@@ -78,7 +78,10 @@ export class PageActions {
   /**
    * Click on an element using AI-powered targeting
    */
-  async click(target: string, options: ClickOptions = {}): Promise<ElementInfo> {
+  async click(
+    target: string,
+    options: ClickOptions = {},
+  ): Promise<ElementInfo> {
     const agent = this.ensureAgent();
 
     // Try using aiAct first (most reliable)
@@ -117,7 +120,11 @@ export class PageActions {
   /**
    * Input text into a field
    */
-  async input(target: string, text: string, options: InputOptions = {}): Promise<ElementInfo> {
+  async input(
+    target: string,
+    text: string,
+    options: InputOptions = {},
+  ): Promise<ElementInfo> {
     const agent = this.ensureAgent();
 
     // Try using aiAct first
@@ -185,7 +192,9 @@ export class PageActions {
 
     const page = this.getPage();
     const optionsElements = await page.evaluate(() => {
-      const options = Array.from(document.querySelectorAll('[role="option"], option, li'));
+      const options = Array.from(
+        document.querySelectorAll('[role="option"], option, li'),
+      );
       return options
         .filter((el) => el.offsetParent !== null)
         .map((el) => ({
@@ -233,11 +242,13 @@ export class PageActions {
   /**
    * Scroll the page
    */
-  async scroll(options: {
-    direction?: 'up' | 'down' | 'left' | 'right';
-    amount?: number;
-    target?: string;
-  } = {}): Promise<void> {
+  async scroll(
+    options: {
+      direction?: 'up' | 'down' | 'left' | 'right';
+      amount?: number;
+      target?: string;
+    } = {},
+  ): Promise<void> {
     const page = this.getPage();
 
     if (options.target) {
@@ -303,8 +314,9 @@ export class PageActions {
   /**
    * Refresh/reload the page
    */
-  async refresh(options: { waitUntil?: 'load' | 'domcontentloaded' | 'networkidle' } = {}):
-    Promise<void> {
+  async refresh(
+    options: { waitUntil?: 'load' | 'domcontentloaded' | 'networkidle' } = {},
+  ): Promise<void> {
     const page = this.getPage();
     await page.reload({ waitUntil: options.waitUntil || 'networkidle' });
   }
@@ -314,7 +326,10 @@ export class PageActions {
    */
   async navigate(url: string): Promise<void> {
     const page = this.getPage();
-    await page.goto(url, { waitUntil: 'networkidle', timeout: this.defaultTimeout });
+    await page.goto(url, {
+      waitUntil: 'networkidle',
+      timeout: this.defaultTimeout,
+    });
   }
 
   /**
@@ -345,7 +360,10 @@ export class PageActions {
    */
   async waitForElement(
     target: string,
-    options: { timeout?: number; state?: 'visible' | 'hidden' | 'attached' | 'detached' } = {},
+    options: {
+      timeout?: number;
+      state?: 'visible' | 'hidden' | 'attached' | 'detached';
+    } = {},
   ): Promise<ElementInfo | null> {
     const timeout = options.timeout ?? this.defaultTimeout;
     const startTime = Date.now();
@@ -372,12 +390,14 @@ export class PageActions {
   /**
    * Take a screenshot
    */
-  async screenshot(options: {
-    type?: 'png' | 'jpeg';
-    quality?: number;
-    fullPage?: boolean;
-    clip?: { x: number; y: number; width: number; height: number };
-  } = {}): Promise<string> {
+  async screenshot(
+    options: {
+      type?: 'png' | 'jpeg';
+      quality?: number;
+      fullPage?: boolean;
+      clip?: { x: number; y: number; width: number; height: number };
+    } = {},
+  ): Promise<string> {
     const page = this.getPage();
 
     const screenshot = await page.screenshot({
@@ -420,7 +440,10 @@ export class PageActions {
    */
   async evaluate<R>(fn: () => R): Promise<R>;
   async evaluate<R, A>(fn: (arg: A) => R, arg: A): Promise<R>;
-  async evaluate<R, A extends any[]>(fn: (...args: A) => R, ...args: A): Promise<R> {
+  async evaluate<R, A extends any[]>(
+    fn: (...args: A) => R,
+    ...args: A
+  ): Promise<R> {
     const page = this.getPage();
     return page.evaluate(fn, ...args);
   }
@@ -520,10 +543,12 @@ export class PageActions {
   /**
    * Get center point of a rect
    */
-  private getCenter(rect: { left: number; top: number; width: number; height: number }): [
-    number,
-    number,
-  ] {
+  private getCenter(rect: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  }): [number, number] {
     return [rect.left + rect.width / 2, rect.top + rect.height / 2];
   }
 }

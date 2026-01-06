@@ -9,7 +9,7 @@ export interface TaskStep {
   status: 'pending' | 'running' | 'success' | 'failed' | 'skipped';
   generatedAction?: string;
   error?: string;
-  selector?: string;  // Optional element selector for repair functionality
+  selector?: string; // Optional element selector for repair functionality
 }
 
 export interface TestCase {

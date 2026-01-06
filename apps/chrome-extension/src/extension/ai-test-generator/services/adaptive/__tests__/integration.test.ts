@@ -4,21 +4,21 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ExecutionContext as AdaptiveExecutionContext } from '../../../../types/adaptive';
 import {
+  AdaptiveExecutionEngine,
+  executeAdaptiveTest,
+} from '../adaptiveExecutionEngine';
+import {
+  type AdaptiveStep,
+  type AdaptiveTestCase,
   parseAdaptiveTest,
   validateAdaptiveTest,
-  type AdaptiveTestCase,
-  type AdaptiveStep,
 } from '../adaptiveParser';
 import { ConditionEngine, getConditionEngine } from '../conditionEngine';
 import { ControlFlowExecutor } from '../controlFlowExecutor';
 import { LoopManager } from '../loopManager';
 import { VariableStore, resetVariableStore } from '../variableStore';
-import {
-  AdaptiveExecutionEngine,
-  executeAdaptiveTest,
-} from '../adaptiveExecutionEngine';
-import type { ExecutionContext as AdaptiveExecutionContext } from '../../../../types/adaptive';
 
 // Mock AI Agent
 const createMockAgent = () => ({
@@ -46,7 +46,10 @@ describe('Adaptive Test Generation Integration', () => {
 
   beforeEach(() => {
     mockAgent = createMockAgent();
-    variableStore = new VariableStore({}, { enableSnapshots: true, enableChangeEvents: true });
+    variableStore = new VariableStore(
+      {},
+      { enableSnapshots: true, enableChangeEvents: true },
+    );
     conditionEngine = new ConditionEngine();
     controlFlowExecutor = new ControlFlowExecutor({ debug: false });
     loopManager = new LoopManager();
@@ -171,7 +174,7 @@ variables:
           variable: { operation: 'set', name: 'counter', value: 10 },
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       expect(context.variables.get('counter')).toBe(10);
@@ -185,7 +188,7 @@ variables:
           variable: { operation: 'increment', name: 'counter' },
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       expect(context.variables.get('counter')).toBe(11);
@@ -347,7 +350,7 @@ name: 超深嵌套
 
       // Should have warning about excessive depth
       const depthWarnings = validation.warnings.filter(
-        (w) => w.type === 'complexity' && w.message.includes('depth')
+        (w) => w.type === 'complexity' && w.message.includes('depth'),
       );
       expect(depthWarnings.length).toBeGreaterThan(0);
     });
@@ -472,7 +475,7 @@ name: 超深嵌套
           loop: loopConfig,
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       expect(result.success).toBe(true);
@@ -510,7 +513,7 @@ name: 超深嵌套
           loop: loopConfig,
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       expect(result.success).toBe(true);
@@ -545,7 +548,10 @@ name: 超深嵌套
       };
 
       // Mock collection resolution
-      vi.spyOn(controlFlowExecutor, 'resolveCollection' as any).mockResolvedValue(items);
+      vi.spyOn(
+        controlFlowExecutor,
+        'resolveCollection' as any,
+      ).mockResolvedValue(items);
 
       const result = await controlFlowExecutor.executeLoop(
         {
@@ -555,7 +561,7 @@ name: 超深嵌套
           loop: loopConfig,
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       expect(result.success).toBe(true);
@@ -585,7 +591,7 @@ name: 超深嵌套
           element: { target: '登录按钮', check: 'exists' },
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       expect(result.isTrue).toBe(true);
@@ -615,7 +621,7 @@ name: 超深嵌套
           },
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       expect(result.isTrue).toBe(true);
@@ -640,7 +646,7 @@ name: 超深嵌套
           },
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       expect(result.isTrue).toBe(true);
@@ -676,7 +682,7 @@ name: 超深嵌套
           },
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       expect(result.isTrue).toBe(true);
@@ -702,7 +708,11 @@ name: 超深嵌套
             operands: [
               {
                 type: 'variable',
-                variable: { name: 'hasPermission', operator: '==', value: true },
+                variable: {
+                  name: 'hasPermission',
+                  operator: '==',
+                  value: true,
+                },
               },
               {
                 type: 'variable',
@@ -712,7 +722,7 @@ name: 超深嵌套
           },
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       expect(result.isTrue).toBe(true);
@@ -741,7 +751,7 @@ name: 超深嵌套
           },
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       expect(result.isTrue).toBe(true);
@@ -785,7 +795,7 @@ name: 超深嵌套
           },
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       // Should short-circuit and not check element
@@ -795,7 +805,9 @@ name: 超深嵌套
 
   describe('Error Recovery Scenarios', () => {
     it('should continue on error when configured', async () => {
-      const forgivingExecutor = new ControlFlowExecutor({ continueOnError: true });
+      const forgivingExecutor = new ControlFlowExecutor({
+        continueOnError: true,
+      });
       const context: AdaptiveExecutionContext = {
         variables: new Map(),
         loopStack: [],
@@ -815,7 +827,7 @@ name: 超深嵌套
           action: { type: 'click', target: '按钮' },
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       expect(result.success).toBe(false);
@@ -841,7 +853,7 @@ name: 超深嵌套
           },
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       // Should handle missing variable
@@ -868,7 +880,7 @@ name: 超深嵌套
           element: { target: '不存在的元素', check: 'exists' },
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       expect(result.isTrue).toBe(false);
@@ -903,7 +915,10 @@ name: 超深嵌套
         await new Promise((resolve) => setTimeout(resolve, 200));
       });
 
-      vi.spyOn(controlFlowExecutor, 'evaluateCondition' as any).mockResolvedValue(true);
+      vi.spyOn(
+        controlFlowExecutor,
+        'evaluateCondition' as any,
+      ).mockResolvedValue(true);
 
       const result = await controlFlowExecutor.executeLoop(
         {
@@ -913,7 +928,7 @@ name: 超深嵌套
           loop: loopConfig,
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       expect(result.success).toBe(false);
@@ -940,7 +955,7 @@ name: 超深嵌套
           action: { type: 'click', target: '按钮' },
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       expect(context.errorStack).toHaveLength(1);
@@ -969,7 +984,7 @@ name: 超深嵌套
           element: { target: '元素', check: 'exists' },
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       // Should return fallback value
@@ -1016,13 +1031,16 @@ variables:
       };
 
       // 4. Mock condition to true
-      vi.spyOn(controlFlowExecutor, 'evaluateCondition' as any).mockResolvedValue(true);
+      vi.spyOn(
+        controlFlowExecutor,
+        'evaluateCondition' as any,
+      ).mockResolvedValue(true);
 
       // 5. Execute first step (condition)
       const conditionResult = await controlFlowExecutor.executeCondition(
         testCase.steps[0],
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       expect(conditionResult.success).toBe(true);
@@ -1059,7 +1077,7 @@ variables:
           },
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       // Get statistics
@@ -1109,7 +1127,7 @@ variables:
           },
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       // Execute another condition (takes else branch)
@@ -1139,7 +1157,7 @@ variables:
           },
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       // Check path history
@@ -1231,7 +1249,7 @@ name: 特殊字符测试
           },
         },
         context,
-        mockAgent as any
+        mockAgent as any,
       );
 
       expect(result.success).toBe(true);
@@ -1265,14 +1283,17 @@ name: 特殊字符测试
     });
 
     it('should handle concurrent variable operations', async () => {
-      const store = new VariableStore({}, { enableSnapshots: true, enableChangeEvents: true });
+      const store = new VariableStore(
+        {},
+        { enableSnapshots: true, enableChangeEvents: true },
+      );
 
       const promises = [];
       for (let i = 0; i < 100; i++) {
         promises.push(
           Promise.resolve().then(() => {
             store.set(`key${i}`, i);
-          })
+          }),
         );
       }
 

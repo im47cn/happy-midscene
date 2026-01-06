@@ -11,20 +11,25 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  extractElementBox,
-  isValidElementBox,
-  highlightElement,
-  isElementVisible,
-  isElementInteractable,
-  clampBoxToViewport,
-  findInteractableElementNear,
   type ElementBox,
+  clampBoxToViewport,
+  extractElementBox,
+  findInteractableElementNear,
+  highlightElement,
+  isElementInteractable,
+  isElementVisible,
+  isValidElementBox,
 } from '../../../../utils/elementUtils';
+import {
+  detectBrowserLocale,
+  initLocale,
+  setLocale,
+  t,
+} from '../../../../utils/i18n';
 import { perfMonitor } from '../../../../utils/performance';
-import { setLocale, t, detectBrowserLocale, initLocale } from '../../../../utils/i18n';
-import { screenshotStorage } from '../screenshotStorage';
 import type { ExecutionEngine, TaskStep, TestCase } from '../executionEngine';
 import type { ExecutionCallbacks, ExecutionResult } from '../executionEngine';
+import { screenshotStorage } from '../screenshotStorage';
 
 /**
  * Mock DOM setup for element tests
@@ -41,7 +46,13 @@ function createMockElement(
 ): HTMLElement {
   const element = document.createElement('div');
   Object.defineProperty(element, 'getBoundingClientRect', {
-    value: () => ({ ...rect, top: rect.y, left: rect.x, right: rect.x + rect.width, bottom: rect.y + rect.height }),
+    value: () => ({
+      ...rect,
+      top: rect.y,
+      left: rect.x,
+      right: rect.x + rect.width,
+      bottom: rect.y + rect.height,
+    }),
     configurable: true,
   });
 
@@ -53,8 +64,10 @@ function createMockElement(
     width: `${rect.width}px`,
     height: `${rect.height}px`,
     display: options.display ?? (options.visible !== false ? 'block' : 'none'),
-    visibility: options.visibility ?? (options.visible !== false ? 'visible' : 'hidden'),
-    pointerEvents: options.pointerEvents ?? (options.enabled !== false ? 'auto' : 'none'),
+    visibility:
+      options.visibility ?? (options.visible !== false ? 'visible' : 'hidden'),
+    pointerEvents:
+      options.pointerEvents ?? (options.enabled !== false ? 'auto' : 'none'),
   };
 
   Object.assign(element.style, styles);
@@ -88,11 +101,7 @@ function createMockAgent(): any {
 function createTestEngine(callbacks: ExecutionCallbacks = {}): ExecutionEngine {
   // Dynamic import to avoid circular dependency
   const { ExecutionEngine: EE } = require('../executionEngine');
-  return new EE(
-    () => createMockAgent(),
-    undefined,
-    undefined,
-  );
+  return new EE(() => createMockAgent(), undefined, undefined);
 }
 
 describe('Core Chrome Extension E2E Tests', () => {
@@ -112,7 +121,12 @@ describe('Core Chrome Extension E2E Tests', () => {
   describe('Feature: Element Box Selection Workflow', () => {
     it('should complete full element selection workflow', () => {
       // Step 1: Create DOM elements
-      const button = createMockElement({ x: 100, y: 100, width: 120, height: 40 });
+      const button = createMockElement({
+        x: 100,
+        y: 100,
+        width: 120,
+        height: 40,
+      });
       button.id = 'submit-button';
       document.body.appendChild(button);
 
@@ -137,7 +151,10 @@ describe('Core Chrome Extension E2E Tests', () => {
       expect(isValidElementBox(box)).toBe(true);
 
       // Step 6: Highlight element
-      const removeHighlight = highlightElement(box!, { color: '#ff0000', duration: 1000 });
+      const removeHighlight = highlightElement(box!, {
+        color: '#ff0000',
+        duration: 1000,
+      });
       expect(document.querySelector('.midscene-highlight')).toBeTruthy();
 
       // Step 7: Remove highlight
@@ -147,7 +164,12 @@ describe('Core Chrome Extension E2E Tests', () => {
 
     it('should handle viewport edge cases correctly', () => {
       // Element partially outside viewport
-      const partialElement = createMockElement({ x: -50, y: window.innerHeight - 50, width: 150, height: 150 });
+      const partialElement = createMockElement({
+        x: -50,
+        y: window.innerHeight - 50,
+        width: 150,
+        height: 150,
+      });
       document.body.appendChild(partialElement);
 
       const rect = partialElement.getBoundingClientRect();
@@ -158,24 +180,35 @@ describe('Core Chrome Extension E2E Tests', () => {
       expect(clamped.x).toBeGreaterThanOrEqual(0);
       expect(clamped.y).toBeGreaterThanOrEqual(0);
       expect(clamped.x + clamped.width).toBeLessThanOrEqual(window.innerWidth);
-      expect(clamped.y + clamped.height).toBeLessThanOrEqual(window.innerHeight);
+      expect(clamped.y + clamped.height).toBeLessThanOrEqual(
+        window.innerHeight,
+      );
     });
 
     it('should identify non-interactable elements correctly', () => {
       // Hidden element
-      const hiddenElement = createMockElement({ x: 100, y: 100, width: 100, height: 100 }, { visible: false });
+      const hiddenElement = createMockElement(
+        { x: 100, y: 100, width: 100, height: 100 },
+        { visible: false },
+      );
       document.body.appendChild(hiddenElement);
 
       expect(isElementVisible(hiddenElement)).toBe(false);
 
       // Disabled element
-      const disabledElement = createMockElement({ x: 200, y: 100, width: 100, height: 100 }, { enabled: false });
+      const disabledElement = createMockElement(
+        { x: 200, y: 100, width: 100, height: 100 },
+        { enabled: false },
+      );
       document.body.appendChild(disabledElement);
 
       expect(isElementInteractable(disabledElement)).toBe(false);
 
       // Element with pointer-events: none
-      const noPointerElement = createMockElement({ x: 300, y: 100, width: 100, height: 100 }, { pointerEvents: 'none' });
+      const noPointerElement = createMockElement(
+        { x: 300, y: 100, width: 100, height: 100 },
+        { pointerEvents: 'none' },
+      );
       document.body.appendChild(noPointerElement);
 
       expect(isElementInteractable(noPointerElement)).toBe(false);
@@ -183,7 +216,12 @@ describe('Core Chrome Extension E2E Tests', () => {
 
     it('should find nearest interactable element when direct hit misses', () => {
       // Create elements at different positions
-      const targetElement = createMockElement({ x: 200, y: 200, width: 100, height: 50 });
+      const targetElement = createMockElement({
+        x: 200,
+        y: 200,
+        width: 100,
+        height: 50,
+      });
       targetElement.id = 'target';
       document.body.appendChild(targetElement);
 
@@ -224,7 +262,12 @@ describe('Core Chrome Extension E2E Tests', () => {
 
   describe('Feature: Execution Engine with Screenshot Storage', () => {
     it('should execute test case with screenshot storage enabled', async () => {
-      const highlightCalls: Array<{ x: number; y: number; width: number; height: number }> = [];
+      const highlightCalls: Array<{
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+      }> = [];
       const stepResults: ExecutionResult[] = [];
 
       const callbacks: ExecutionCallbacks = {
@@ -492,7 +535,12 @@ describe('Core Chrome Extension E2E Tests', () => {
       const performanceTimer = perfMonitor.start('test_generation_workflow');
 
       // Step 2: Element selection
-      const button = createMockElement({ x: 100, y: 200, width: 150, height: 50 });
+      const button = createMockElement({
+        x: 100,
+        y: 200,
+        width: 150,
+        height: 50,
+      });
       button.id = 'search-button';
       button.textContent = 'Search';
       document.body.appendChild(button);
@@ -511,7 +559,12 @@ describe('Core Chrome Extension E2E Tests', () => {
       };
 
       // Step 5: Set up execution callbacks
-      const capturedHighlights: Array<{ x: number; y: number; width: number; height: number }> = [];
+      const capturedHighlights: Array<{
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+      }> = [];
       const callbacks: ExecutionCallbacks = {
         onHighlight: (element) => capturedHighlights.push(element),
         onProgress: (current, total) => {
@@ -552,7 +605,9 @@ describe('Core Chrome Extension E2E Tests', () => {
           expect(step).toBeTruthy();
           expect(error).toBeTruthy();
           expect(details).toBeTruthy();
-          expect(details.type).toMatch(/^(element_not_found|timeout|action_failed)$/);
+          expect(details.type).toMatch(
+            /^(element_not_found|timeout|action_failed)$/,
+          );
         },
         onHighlight: () => {
           // Should still attempt to highlight even during errors
@@ -633,7 +688,16 @@ describe('Core Chrome Extension E2E Tests', () => {
     });
 
     it('should handle rapid locale switches', () => {
-      const locales = ['en', 'zh-CN', 'zh-TW', 'ja', 'ko', 'es', 'fr', 'de'] as const;
+      const locales = [
+        'en',
+        'zh-CN',
+        'zh-TW',
+        'ja',
+        'ko',
+        'es',
+        'fr',
+        'de',
+      ] as const;
 
       const startTime = performance.now();
       locales.forEach((locale) => {

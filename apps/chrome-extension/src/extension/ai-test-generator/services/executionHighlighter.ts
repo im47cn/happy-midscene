@@ -241,7 +241,10 @@ export class ExecutionHighlighter {
         this.highlights.delete(id);
       }
     }
-    if (this.currentHighlight && !this.highlights.has(String(this.currentHighlight.id))) {
+    if (
+      this.currentHighlight &&
+      !this.highlights.has(String(this.currentHighlight.id))
+    ) {
       this.currentHighlight = null;
     }
   }

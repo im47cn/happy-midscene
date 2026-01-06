@@ -2,8 +2,8 @@
  * Unit tests for HealingStatistics Component
  */
 
-import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { HealingStatistics } from '../HealingStatistics';
 
 // Mock i18n
@@ -93,9 +93,7 @@ describe('HealingStatistics', () => {
 
   describe('statistics display', () => {
     it('should display overview statistics correctly', async () => {
-      vi.mocked(healingEngine.getStatistics).mockResolvedValue(
-        mockStatistics,
-      );
+      vi.mocked(healingEngine.getStatistics).mockResolvedValue(mockStatistics);
 
       render(<HealingStatistics />);
 
@@ -108,9 +106,7 @@ describe('HealingStatistics', () => {
     });
 
     it('should display strategy breakdown correctly', async () => {
-      vi.mocked(healingEngine.getStatistics).mockResolvedValue(
-        mockStatistics,
-      );
+      vi.mocked(healingEngine.getStatistics).mockResolvedValue(mockStatistics);
 
       render(<HealingStatistics />);
 
@@ -122,9 +118,7 @@ describe('HealingStatistics', () => {
     });
 
     it('should display outcome breakdown correctly', async () => {
-      vi.mocked(healingEngine.getStatistics).mockResolvedValue(
-        mockStatistics,
-      );
+      vi.mocked(healingEngine.getStatistics).mockResolvedValue(mockStatistics);
 
       render(<HealingStatistics />);
 
@@ -136,9 +130,7 @@ describe('HealingStatistics', () => {
     });
 
     it('should display unstable elements table', async () => {
-      vi.mocked(healingEngine.getStatistics).mockResolvedValue(
-        mockStatistics,
-      );
+      vi.mocked(healingEngine.getStatistics).mockResolvedValue(mockStatistics);
 
       render(<HealingStatistics />);
 
@@ -163,7 +155,9 @@ describe('HealingStatistics', () => {
       await waitFor(() => {
         // Check that success rate statistic has green color
         const successRateElement = screen.getByText('85%');
-        const parent = successRateElement.closest('.ant-statistic-content-value');
+        const parent = successRateElement.closest(
+          '.ant-statistic-content-value',
+        );
         expect(parent?.className).toContain('ant-statistic-content-value');
       });
     });
@@ -205,9 +199,7 @@ describe('HealingStatistics', () => {
       const { container } = render(<HealingStatistics />);
 
       await waitFor(() => {
-        expect(
-          screen.queryByText('healing.unstableElements'),
-        ).toBeNull();
+        expect(screen.queryByText('healing.unstableElements')).toBeNull();
       });
     });
 

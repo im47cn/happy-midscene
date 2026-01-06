@@ -10,11 +10,16 @@ import {
   RobotOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { Button, Space, Spin, Typography, Alert, Empty, Divider } from 'antd';
-import { useState, useEffect, useRef } from 'react';
-import type { Message, DebugContext, DebugAction, FixSuggestion } from '../../types/debugAssistant';
-import { MessageBubble } from './MessageBubble';
+import { Alert, Button, Divider, Empty, Space, Spin, Typography } from 'antd';
+import { useEffect, useRef, useState } from 'react';
+import type {
+  DebugAction,
+  DebugContext,
+  FixSuggestion,
+  Message,
+} from '../../types/debugAssistant';
 import { ActionButtonGroup } from './ActionButton';
+import { MessageBubble } from './MessageBubble';
 
 const { Text, Paragraph } = Typography;
 
@@ -35,13 +40,16 @@ export function DebugAssistantPanel({
   onClear,
   loading = false,
 }: DebugAssistantPanelProps) {
-  const [actionsInProgress, setActionsInProgress] = useState<Set<string>>(new Set());
+  const [actionsInProgress, setActionsInProgress] = useState<Set<string>>(
+    new Set(),
+  );
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom
   useEffect(() => {
     if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
@@ -69,14 +77,14 @@ export function DebugAssistantPanel({
   // Check if there are actions to execute
   const hasActions = messages.some(
     (msg) =>
-      msg.actions?.length > 0 ||
+      (msg.actions && msg.actions.length > 0) ||
       msg.content.includes('[ACTION:'),
   );
 
   // Check if there are suggestions to apply
   const hasSuggestions = messages.some(
     (msg) =>
-      msg.suggestions?.length > 0 ||
+      (msg.suggestions && msg.suggestions.length > 0) ||
       msg.content.includes('[SUGGESTION:'),
   );
 
@@ -108,7 +116,6 @@ export function DebugAssistantPanel({
                   </Text>
                 }
                 type="error"
-                size="small"
                 showIcon
               />
             )}
@@ -234,7 +241,6 @@ export function DebugPanelCompact({
         <Alert
           message={debugContext.lastError.message.slice(0, 50)}
           type="error"
-          size="small"
           style={{ marginBottom: 12 }}
         />
       )}
@@ -242,7 +248,11 @@ export function DebugPanelCompact({
       {lastMessage && (
         <div style={{ marginBottom: 12 }}>
           <Space>
-            {lastMessage.role === 'assistant' ? <RobotOutlined /> : <UserOutlined />}
+            {lastMessage.role === 'assistant' ? (
+              <RobotOutlined />
+            ) : (
+              <UserOutlined />
+            )}
             <Text ellipsis style={{ maxWidth: 300 }}>
               {lastMessage.content.slice(0, 100)}
             </Text>
@@ -252,9 +262,15 @@ export function DebugPanelCompact({
 
       {pendingActions.length > 0 && (
         <>
-          <Text strong style={{ fontSize: 12 }}>可执行操作:</Text>
+          <Text strong style={{ fontSize: 12 }}>
+            可执行操作:
+          </Text>
           <div style={{ marginTop: 8 }}>
-            <ActionButtonGroup actions={pendingActions} onExecuteAction={onExecuteAction} loading={loading} />
+            <ActionButtonGroup
+              actions={pendingActions}
+              onExecute={onExecuteAction}
+              loading={loading}
+            />
           </div>
         </>
       )}
@@ -262,7 +278,9 @@ export function DebugPanelCompact({
       {pendingSuggestions.length > 0 && (
         <>
           <Divider style={{ margin: '12px 0' }} />
-          <Text strong style={{ fontSize: 12 }}>修复建议:</Text>
+          <Text strong style={{ fontSize: 12 }}>
+            修复建议:
+          </Text>
           <div style={{ marginTop: 8 }}>
             {pendingSuggestions.map((suggestion, index) => (
               <Button

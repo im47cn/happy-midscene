@@ -8,6 +8,7 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   ExclamationCircleOutlined,
+  HighlightOutlined,
   InfoCircleOutlined,
   LoadingOutlined,
   PauseCircleOutlined,
@@ -15,7 +16,6 @@ import {
   ReloadOutlined,
   StopOutlined,
   ThunderboltOutlined,
-  HighlightOutlined,
 } from '@ant-design/icons';
 import {
   ChromeExtensionProxyPage,
@@ -38,7 +38,9 @@ import {
 } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { useI18n } from '../../../i18n';
+import { useI18n } from '../../../i18n';
 import { getDevicePreset } from '../config/devicePresets';
+import { elementSelector, repairEngine } from '../services/elementRepair';
 import {
   type DeviceEmulationConfig,
   ExecutionEngine,
@@ -48,15 +50,13 @@ import { historyService } from '../services/historyService';
 import type { TaskStep as ExecutionTaskStep } from '../services/markdownParser';
 import { useGeneratorStore } from '../store';
 import type { TaskStep, TestCase } from '../types';
-import type { HealingResult } from '../types/healing';
-import { HealingConfirmDialog } from './HealingConfirmDialog';
-import { useI18n } from '../../../i18n';
-import { elementSelector, repairEngine } from '../services/elementRepair';
 import type {
   RepairOptions,
   RepairResult,
   SelectedElement,
 } from '../types/elementRepair';
+import type { HealingResult } from '../types/healing';
+import { HealingConfirmDialog } from './HealingConfirmDialog';
 import { ElementPicker } from './elementRepair/ElementPicker';
 import { RepairSuggestionPanel } from './elementRepair/RepairSuggestionPanel';
 
@@ -190,9 +190,14 @@ export function ExecutionView() {
   // Element repair state
   const [elementPickerVisible, setElementPickerVisible] = useState(false);
   const [repairPanelVisible, setRepairPanelVisible] = useState(false);
-  const [selectedElement, setSelectedElement] = useState<SelectedElement | null>(null);
-  const [repairOptions, setRepairOptions] = useState<RepairOptions | null>(null);
-  const [activeRepairTab, setActiveRepairTab] = useState<'retry' | 'select'>('retry');
+  const [selectedElement, setSelectedElement] =
+    useState<SelectedElement | null>(null);
+  const [repairOptions, setRepairOptions] = useState<RepairOptions | null>(
+    null,
+  );
+  const [activeRepairTab, setActiveRepairTab] = useState<'retry' | 'select'>(
+    'retry',
+  );
 
   const engineRef = useRef<ExecutionEngine | null>(null);
   const executionStartTimeRef = useRef<number>(0);
@@ -488,13 +493,14 @@ export function ExecutionView() {
 
     // Set up repair options based on current failed step
     if (retryStepId && currentErrorDetails) {
-      const failedStep = currentCase?.steps.find(s => s.id === retryStepId);
+      const failedStep = currentCase?.steps.find((s) => s.id === retryStepId);
       setRepairOptions({
         stepId: retryStepId,
         originalDescription: failedStep?.originalText || retryInstruction,
         originalSelector: failedStep?.selector,
-        failureReason: currentErrorDetails.details || currentErrorDetails.message,
-        contextSteps: currentCase?.steps.map(s => s.originalText),
+        failureReason:
+          currentErrorDetails.details || currentErrorDetails.message,
+        contextSteps: currentCase?.steps.map((s) => s.originalText),
       });
     }
   };

@@ -2,13 +2,9 @@
  * Unit tests for LLM Engine
  */
 
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import {
-  LLMEngine,
-  getLLMEngine,
-  resetLLMEngine,
-} from '../llmEngine';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LLMContext } from '../../../types/debugAssistant';
+import { LLMEngine, getLLMEngine, resetLLMEngine } from '../llmEngine';
 
 // Mock fetch globally
 const mockFetch = vi.fn();
@@ -158,8 +154,10 @@ describe('LLMEngine', () => {
 
       const requestBody = JSON.parse(mockFetch.mock.calls[0][1].body);
       // Images should be added as separate messages
-      const imageMessages = requestBody.messages.filter((m: any) =>
-        Array.isArray(m.content) && m.content.some((c: any) => c.type === 'image')
+      const imageMessages = requestBody.messages.filter(
+        (m: any) =>
+          Array.isArray(m.content) &&
+          m.content.some((c: any) => c.type === 'image'),
       );
       expect(imageMessages.length).toBe(2);
     });
@@ -177,7 +175,9 @@ describe('LLMEngine', () => {
         images: [],
       };
 
-      await expect(llmEngine.chat(context)).rejects.toThrow('LLM request failed');
+      await expect(llmEngine.chat(context)).rejects.toThrow(
+        'LLM request failed',
+      );
     });
 
     it('should handle network errors', async () => {
@@ -189,7 +189,9 @@ describe('LLMEngine', () => {
         images: [],
       };
 
-      await expect(llmEngine.chat(context)).rejects.toThrow('LLM request failed');
+      await expect(llmEngine.chat(context)).rejects.toThrow(
+        'LLM request failed',
+      );
     });
 
     it('should update conversation history', async () => {
@@ -225,10 +227,20 @@ describe('LLMEngine', () => {
       ];
 
       const mockReader = {
-        read: vi.fn()
-          .mockResolvedValueOnce({ done: false, value: new TextEncoder().encode(streamChunks[0]) })
-          .mockResolvedValueOnce({ done: false, value: new TextEncoder().encode(streamChunks[1]) })
-          .mockResolvedValueOnce({ done: false, value: new TextEncoder().encode(streamChunks[2]) })
+        read: vi
+          .fn()
+          .mockResolvedValueOnce({
+            done: false,
+            value: new TextEncoder().encode(streamChunks[0]),
+          })
+          .mockResolvedValueOnce({
+            done: false,
+            value: new TextEncoder().encode(streamChunks[1]),
+          })
+          .mockResolvedValueOnce({
+            done: false,
+            value: new TextEncoder().encode(streamChunks[2]),
+          })
           .mockResolvedValueOnce({ done: true, value: null }),
       };
 
@@ -278,9 +290,16 @@ describe('LLMEngine', () => {
 
     it('should handle invalid stream data', async () => {
       const mockReader = {
-        read: vi.fn()
-          .mockResolvedValueOnce({ done: false, value: new TextEncoder().encode('data: invalid json\n\n') })
-          .mockResolvedValueOnce({ done: false, value: new TextEncoder().encode('data: [DONE]\n\n') })
+        read: vi
+          .fn()
+          .mockResolvedValueOnce({
+            done: false,
+            value: new TextEncoder().encode('data: invalid json\n\n'),
+          })
+          .mockResolvedValueOnce({
+            done: false,
+            value: new TextEncoder().encode('data: [DONE]\n\n'),
+          })
           .mockResolvedValueOnce({ done: true, value: null }),
       };
 
@@ -455,14 +474,19 @@ describe('LLMEngine', () => {
       const truncated = llmEngine.truncateContext(largeContext, 1000);
 
       // Should have fewer messages
-      expect(truncated.conversationHistory.length).toBeLessThan(largeContext.conversationHistory.length);
+      expect(truncated.conversationHistory.length).toBeLessThan(
+        largeContext.conversationHistory.length,
+      );
     });
 
     it('should keep most recent messages', () => {
       const context: LLMContext = {
         systemPrompt: 'Test',
         conversationHistory: [
-          { role: 'user', content: 'Old message that should be removed due to token limits' },
+          {
+            role: 'user',
+            content: 'Old message that should be removed due to token limits',
+          },
           { role: 'user', content: 'Recent message' },
         ],
         images: [],
@@ -494,7 +518,10 @@ describe('LLMEngine', () => {
     });
 
     it('should return error for invalid URL', () => {
-      const badUrlEngine = new LLMEngine({ apiKey: 'key', baseURL: 'not-a-url' });
+      const badUrlEngine = new LLMEngine({
+        apiKey: 'key',
+        baseURL: 'not-a-url',
+      });
       const result = badUrlEngine.validateConfig();
 
       expect(result.valid).toBe(false);
@@ -630,7 +657,9 @@ describe('LLMEngine', () => {
       await llmEngine.chat(context);
 
       const sentBody = JSON.parse(mockFetch.mock.calls[0][1].body);
-      const additionalMsg = sentBody.messages.find((m: any) => m.content.includes('控制台错误'));
+      const additionalMsg = sentBody.messages.find((m: any) =>
+        m.content.includes('控制台错误'),
+      );
       expect(additionalMsg).toBeDefined();
     });
 
@@ -657,7 +686,9 @@ describe('LLMEngine', () => {
       await llmEngine.chat(context);
 
       const sentBody = JSON.parse(mockFetch.mock.calls[0][1].body);
-      const additionalMsg = sentBody.messages.find((m: any) => m.content.includes('网络错误'));
+      const additionalMsg = sentBody.messages.find((m: any) =>
+        m.content.includes('网络错误'),
+      );
       expect(additionalMsg).toBeDefined();
     });
 

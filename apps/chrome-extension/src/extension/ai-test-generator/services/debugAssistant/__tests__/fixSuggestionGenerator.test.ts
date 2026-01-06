@@ -2,14 +2,14 @@
  * Unit tests for Fix Suggestion Generator
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { DebugContext } from '../../../types/debugAssistant';
 import {
   FixSuggestionGenerator,
   getFixSuggestionGenerator,
   resetFixSuggestionGenerator,
 } from '../fixSuggestionGenerator';
-import { KnowledgeBase } from '../knowledgeBase';
-import type { DebugContext } from '../../../types/debugAssistant';
+import type { KnowledgeBase } from '../knowledgeBase';
 
 describe('FixSuggestionGenerator', () => {
   let generator: FixSuggestionGenerator;
@@ -154,7 +154,9 @@ describe('FixSuggestionGenerator', () => {
 
       expect(mockKnowledgeBase.findMatchingPatterns).toHaveBeenCalled();
       // Should have KB match with reduced confidence
-      const kbSuggestion = suggestions.find((s) => s.description === 'Wait from KB');
+      const kbSuggestion = suggestions.find(
+        (s) => s.description === 'Wait from KB',
+      );
       expect(kbSuggestion?.confidence).toBeLessThan(0.9);
     });
 
@@ -189,7 +191,8 @@ describe('FixSuggestionGenerator', () => {
         },
       };
 
-      const suggestions = await lowConfidenceGenerator.generateSuggestions(context);
+      const suggestions =
+        await lowConfidenceGenerator.generateSuggestions(context);
 
       // All suggestions should meet minimum confidence
       // timeout error generates: timeout(0.75), wait(0.8)
@@ -371,7 +374,11 @@ describe('FixSuggestionGenerator', () => {
         confidence: 0.9,
       };
 
-      await generator.learnFromSuccess(context, fix, 'Cannot find element: submit');
+      await generator.learnFromSuccess(
+        context,
+        fix,
+        'Cannot find element: submit',
+      );
 
       expect(mockKnowledgeBase.addEntry).toHaveBeenCalled();
       const entry = (mockKnowledgeBase.addEntry as any).mock.calls[0][0];
@@ -380,7 +387,9 @@ describe('FixSuggestionGenerator', () => {
     });
 
     it('should not add to knowledge base if none set', async () => {
-      const noKbGenerator = new FixSuggestionGenerator({ knowledgeBase: undefined });
+      const noKbGenerator = new FixSuggestionGenerator({
+        knowledgeBase: undefined,
+      });
 
       const context: DebugContext = {
         screenshot: 'base64img',

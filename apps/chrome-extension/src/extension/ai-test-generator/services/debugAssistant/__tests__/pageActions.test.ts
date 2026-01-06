@@ -2,7 +2,7 @@
  * Unit tests for Page Actions
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PageActions, getPageActions, resetPageActions } from '../pageActions';
 
 // Mock agent
@@ -55,7 +55,14 @@ describe('PageActions', () => {
       mockAgent.aiLocate.mockResolvedValue([
         {
           center: [100, 200],
-          rect: { left: 50, top: 150, width: 100, height: 50, right: 150, bottom: 200 },
+          rect: {
+            left: 50,
+            top: 150,
+            width: 100,
+            height: 50,
+            right: 150,
+            bottom: 200,
+          },
           text: 'Submit',
         },
       ]);
@@ -72,7 +79,14 @@ describe('PageActions', () => {
       mockAgent.aiLocate.mockResolvedValue([
         {
           center: [100, 200],
-          rect: { left: 50, top: 150, width: 100, height: 50, right: 150, bottom: 200 },
+          rect: {
+            left: 50,
+            top: 150,
+            width: 100,
+            height: 50,
+            right: 150,
+            bottom: 200,
+          },
         },
       ]);
 
@@ -112,7 +126,9 @@ describe('PageActions', () => {
       mockAgent.aiAct = undefined;
       mockAgent.aiLocate.mockResolvedValue(null);
 
-      await expect(pageActions.click('Nonexistent')).rejects.toThrow('无法找到');
+      await expect(pageActions.click('Nonexistent')).rejects.toThrow(
+        '无法找到',
+      );
     });
   });
 
@@ -157,7 +173,9 @@ describe('PageActions', () => {
 
       await pageActions.input('Field', 'test', { delay: 50 });
 
-      expect(mockPage.keyboard.type).toHaveBeenCalledWith('test', { delay: 50 });
+      expect(mockPage.keyboard.type).toHaveBeenCalledWith('test', {
+        delay: 50,
+      });
     });
   });
 
@@ -167,12 +185,24 @@ describe('PageActions', () => {
       mockAgent.aiLocate.mockResolvedValue([{ center: [100, 200] }]);
       mockPage.evaluate.mockResolvedValue([
         { text: 'Option 1', rect: {} },
-        { text: 'Option 2', rect: { left: 100, top: 100, width: 50, height: 20, right: 150, bottom: 120 } },
+        {
+          text: 'Option 2',
+          rect: {
+            left: 100,
+            top: 100,
+            width: 50,
+            height: 20,
+            right: 150,
+            bottom: 120,
+          },
+        },
       ]);
 
       const result = await pageActions.select('Dropdown', 'Option 2');
 
-      expect(mockAgent.aiAct).toHaveBeenCalledWith('在Dropdown中选择"Option 2"');
+      expect(mockAgent.aiAct).toHaveBeenCalledWith(
+        '在Dropdown中选择"Option 2"',
+      );
       expect(result).toBeDefined();
     });
   });
@@ -180,7 +210,10 @@ describe('PageActions', () => {
   describe('hover', () => {
     it('should hover over element', async () => {
       mockAgent.aiLocate.mockResolvedValue([
-        { center: [100, 200], rect: { left: 50, top: 150, width: 100, height: 50 } },
+        {
+          center: [100, 200],
+          rect: { left: 50, top: 150, width: 100, height: 50 },
+        },
       ]);
 
       const result = await pageActions.hover('Element');
@@ -243,7 +276,9 @@ describe('PageActions', () => {
 
       await pageActions.refresh({ waitUntil: 'networkidle' });
 
-      expect(mockPage.reload).toHaveBeenCalledWith({ waitUntil: 'networkidle' });
+      expect(mockPage.reload).toHaveBeenCalledWith({
+        waitUntil: 'networkidle',
+      });
     });
 
     it('should navigate to URL', async () => {
@@ -276,7 +311,8 @@ describe('PageActions', () => {
 
   describe('waitForElement', () => {
     it('should wait for element to appear', async () => {
-      mockAgent.aiLocate.mockResolvedValueOnce(null)
+      mockAgent.aiLocate
+        .mockResolvedValueOnce(null)
         .mockResolvedValueOnce([{ text: 'Found' }]);
 
       const result = await pageActions.waitForElement('Element', {
@@ -288,7 +324,8 @@ describe('PageActions', () => {
     });
 
     it('should wait for element to be hidden', async () => {
-      mockAgent.aiLocate.mockResolvedValueOnce([{ text: 'Visible' }])
+      mockAgent.aiLocate
+        .mockResolvedValueOnce([{ text: 'Visible' }])
         .mockResolvedValueOnce(null);
 
       const result = await pageActions.waitForElement('Element', {
@@ -302,10 +339,12 @@ describe('PageActions', () => {
     it('should timeout when element does not appear', async () => {
       mockAgent.aiLocate.mockResolvedValue(null);
 
-      await expect(pageActions.waitForElement('Nonexistent', {
-        timeout: 100,
-        state: 'visible',
-      })).rejects.toThrow('超时');
+      await expect(
+        pageActions.waitForElement('Nonexistent', {
+          timeout: 100,
+          state: 'visible',
+        }),
+      ).rejects.toThrow('超时');
     });
   });
 
@@ -422,7 +461,10 @@ describe('PageActions', () => {
     it('should pass arguments to function', async () => {
       mockPage.evaluate.mockResolvedValue('hello world');
 
-      await pageActions.evaluate((str: string) => str.toUpperCase(), 'hello world');
+      await pageActions.evaluate(
+        (str: string) => str.toUpperCase(),
+        'hello world',
+      );
 
       expect(mockPage.evaluate).toHaveBeenCalled();
     });
@@ -443,7 +485,14 @@ describe('PageActions', () => {
       mockAgent.aiLocate.mockResolvedValue([
         {
           text: 'Button',
-          rect: { left: 100, top: 200, width: 50, height: 20, right: 150, bottom: 220 },
+          rect: {
+            left: 100,
+            top: 200,
+            width: 50,
+            height: 20,
+            right: 150,
+            bottom: 220,
+          },
           center: [125, 210],
         },
       ]);

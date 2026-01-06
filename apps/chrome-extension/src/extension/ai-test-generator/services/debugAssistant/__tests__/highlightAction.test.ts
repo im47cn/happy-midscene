@@ -2,7 +2,7 @@
  * Unit tests for Highlight Action
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   HighlightAction,
   getHighlightAction,
@@ -103,7 +103,12 @@ describe('HighlightAction', () => {
     });
 
     it('should show tooltip when requested', async () => {
-      const elements = [{ rect: { left: 0, top: 0, width: 10, height: 10 }, text: 'Button Text' }];
+      const elements = [
+        {
+          rect: { left: 0, top: 0, width: 10, height: 10 },
+          text: 'Button Text',
+        },
+      ];
       mockPage.evaluate.mockResolvedValue([]);
 
       await highlightAction.highlight('Element', elements, {
@@ -153,7 +158,9 @@ describe('HighlightAction', () => {
 
   describe('highlightMultiple', () => {
     it('should highlight multiple targets', async () => {
-      mockAgent.aiLocate.mockResolvedValue([{ rect: { left: 0, top: 0, width: 10, height: 10 } }]);
+      mockAgent.aiLocate.mockResolvedValue([
+        { rect: { left: 0, top: 0, width: 10, height: 10 } },
+      ]);
       mockPage.evaluate.mockResolvedValue([{ id: 'h-1', rect: {} }]);
 
       const results = await highlightAction.highlightMultiple([
@@ -232,7 +239,9 @@ describe('HighlightAction', () => {
 
   describe('pulse', () => {
     it('should pulse element', async () => {
-      const elements = [{ rect: { left: 100, top: 200, width: 50, height: 30 } }];
+      const elements = [
+        { rect: { left: 100, top: 200, width: 50, height: 30 } },
+      ];
       mockPage.evaluate.mockResolvedValue(undefined);
 
       const result = await highlightAction.pulse('Button', 3);
@@ -281,7 +290,9 @@ describe('HighlightAction', () => {
     it('should throw error when elements not found', async () => {
       mockAgent.aiLocate.mockResolvedValue(null);
 
-      await expect(highlightAction.drawPath('Bad 1', 'Bad 2')).rejects.toThrow('无法找到');
+      await expect(highlightAction.drawPath('Bad 1', 'Bad 2')).rejects.toThrow(
+        '无法找到',
+      );
     });
   });
 

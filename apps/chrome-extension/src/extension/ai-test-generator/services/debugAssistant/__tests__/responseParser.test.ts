@@ -2,9 +2,9 @@
  * Unit tests for response parser
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { getResponseParser, resetResponseParser } from '../responseParser';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { ParsedResponse } from '../../../types/debugAssistant';
+import { getResponseParser, resetResponseParser } from '../responseParser';
 
 describe('ResponseParser', () => {
   beforeEach(() => {
@@ -26,7 +26,8 @@ describe('ResponseParser', () => {
 
     it('should parse ACTION tags', () => {
       const parser = getResponseParser();
-      const response = 'Let me click the button for you.\n[ACTION:click:submit-button]';
+      const response =
+        'Let me click the button for you.\n[ACTION:click:submit-button]';
 
       const result = parser.parse(response);
 
@@ -65,13 +66,16 @@ describe('ResponseParser', () => {
 
     it('should parse SUGGESTION tags', () => {
       const parser = getResponseParser();
-      const response = 'Here is a fix:\n[SUGGESTION:Add explicit wait|await page.waitForSelector("#btn")|0.9]';
+      const response =
+        'Here is a fix:\n[SUGGESTION:Add explicit wait|await page.waitForSelector("#btn")|0.9]';
 
       const result = parser.parse(response);
 
       expect(result.suggestions).toHaveLength(1);
       expect(result.suggestions[0].description).toBe('Add explicit wait');
-      expect(result.suggestions[0].code).toBe('await page.waitForSelector("#btn")');
+      expect(result.suggestions[0].code).toBe(
+        'await page.waitForSelector("#btn")',
+      );
       expect(result.suggestions[0].confidence).toBe(0.9);
     });
 
@@ -92,7 +96,9 @@ describe('ResponseParser', () => {
 
       const result = parser.parse(response);
 
-      expect(result.suggestions[0].description).toBe('Wait for the element to load');
+      expect(result.suggestions[0].description).toBe(
+        'Wait for the element to load',
+      );
       expect(result.suggestions[0].code).toBe('');
     });
 
@@ -249,7 +255,9 @@ Let me take a screenshot first.
     it('should extract context details', () => {
       const parser = getResponseParser();
 
-      const request = parser.parseContextRequest('[CONTEXT:network_errors:filter by status]');
+      const request = parser.parseContextRequest(
+        '[CONTEXT:network_errors:filter by status]',
+      );
 
       expect(request?.details).toBe('filter by status');
     });

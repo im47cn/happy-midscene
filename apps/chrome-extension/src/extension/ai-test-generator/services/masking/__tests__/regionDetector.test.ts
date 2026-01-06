@@ -373,7 +373,9 @@ describe('detectScreenshotMaskRegions utility', () => {
   let detectScreenshotMaskRegions: (
     screenshot: string,
     selectors?: string[],
-  ) => Promise<Array<{ x: number; y: number; width: number; height: number; type: string }>>;
+  ) => Promise<
+    Array<{ x: number; y: number; width: number; height: number; type: string }>
+  >;
 
   beforeEach(async () => {
     vi.resetModules();

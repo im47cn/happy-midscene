@@ -3,8 +3,8 @@
  * Analyzes test failures and generates fix suggestions
  */
 
-import type { FixSuggestion, DebugContext } from '../../types/debugAssistant';
-import { KnowledgeBase, type KnowledgeEntry } from './knowledgeBase';
+import type { DebugContext, FixSuggestion } from '../../types/debugAssistant';
+import type { KnowledgeBase, KnowledgeEntry } from './knowledgeBase';
 
 export interface FixGeneratorOptions {
   knowledgeBase?: KnowledgeBase;
@@ -45,12 +45,7 @@ export class FixSuggestionGenerator {
       'cannot find element',
       'no element located',
     ],
-    timeout: [
-      '超时',
-      'timeout',
-      'timed out',
-      '等待超时',
-    ],
+    timeout: ['超时', 'timeout', 'timed out', '等待超时'],
     assertionFailed: [
       '断言失败',
       'assertion failed',
@@ -106,7 +101,10 @@ export class FixSuggestionGenerator {
     // 1. Check knowledge base first
     if (this.knowledgeBase) {
       const query = this.buildSearchQuery(context, errorMessage);
-      const matches = this.knowledgeBase.findMatchingPatterns(query, this.maxSuggestions);
+      const matches = this.knowledgeBase.findMatchingPatterns(
+        query,
+        this.maxSuggestions,
+      );
 
       for (const match of matches) {
         for (const fix of match.fixes) {
@@ -125,15 +123,24 @@ export class FixSuggestionGenerator {
 
     // 3. Add suggestions from analysis (respect minConfidence)
     for (const fix of analysis.suggestedFixes) {
-      if (fix.confidence >= this.minConfidence && !suggestions.some((s) => s.description === fix.description)) {
+      if (
+        fix.confidence >= this.minConfidence &&
+        !suggestions.some((s) => s.description === fix.description)
+      ) {
         suggestions.push(fix);
       }
     }
 
     // 4. Generate contextual suggestions based on test state
-    const contextualSuggestions = this.generateContextualSuggestions(context, errorMessage);
+    const contextualSuggestions = this.generateContextualSuggestions(
+      context,
+      errorMessage,
+    );
     for (const fix of contextualSuggestions) {
-      if (fix.confidence >= this.minConfidence && !suggestions.some((s) => s.description === fix.description)) {
+      if (
+        fix.confidence >= this.minConfidence &&
+        !suggestions.some((s) => s.description === fix.description)
+      ) {
         suggestions.push(fix);
       }
     }
@@ -146,7 +153,10 @@ export class FixSuggestionGenerator {
   /**
    * Analyze a test failure
    */
-  analyzeFailure(context: DebugContext, errorMessage?: string): FailureAnalysis {
+  analyzeFailure(
+    context: DebugContext,
+    errorMessage?: string,
+  ): FailureAnalysis {
     // Prioritize context error over parameter
     const error = context.lastError?.message || errorMessage || '';
     const errorLower = error.toLowerCase();
@@ -212,15 +222,13 @@ export class FixSuggestionGenerator {
           confidence: 0.8,
         },
       );
-    } else if (this.matchesAny(errorLower, this.commonPatterns.assertionFailed)) {
+    } else if (
+      this.matchesAny(errorLower, this.commonPatterns.assertionFailed)
+    ) {
       type = 'assertion_failed';
       severity = 'medium';
       description = '断言失败';
-      likelyCauses.push(
-        '实际值与预期不符',
-        '业务逻辑错误',
-        '数据状态异常',
-      );
+      likelyCauses.push('实际值与预期不符', '业务逻辑错误', '数据状态异常');
       suggestedFixes.push(
         {
           type: 'assertion',
@@ -263,28 +271,20 @@ export class FixSuggestionGenerator {
       type = 'stale_element';
       severity = 'medium';
       description = '元素引用已过期';
-      likelyCauses.push(
-        '页面已更新',
-        '元素被重新渲染',
-        'DOM 结构发生变化',
-      );
-      suggestedFixes.push(
-        {
-          type: 'locator',
-          description: '每次使用前重新定位元素',
-          code: `// 不要缓存元素引用\nconst button = await locate('提交按钮');\nawait click(button);`,
-          confidence: 0.85,
-        },
-      );
-    } else if (this.matchesAny(errorLower, this.commonPatterns.clickIntercepted)) {
+      likelyCauses.push('页面已更新', '元素被重新渲染', 'DOM 结构发生变化');
+      suggestedFixes.push({
+        type: 'locator',
+        description: '每次使用前重新定位元素',
+        code: `// 不要缓存元素引用\nconst button = await locate('提交按钮');\nawait click(button);`,
+        confidence: 0.85,
+      });
+    } else if (
+      this.matchesAny(errorLower, this.commonPatterns.clickIntercepted)
+    ) {
       type = 'click_intercepted';
       severity = 'medium';
       description = '点击被其他元素拦截';
-      likelyCauses.push(
-        '弹窗或遮罩层',
-        '加载动画',
-        '浮动元素',
-      );
+      likelyCauses.push('弹窗或遮罩层', '加载动画', '浮动元素');
       suggestedFixes.push(
         {
           type: 'action',
@@ -330,7 +330,12 @@ export class FixSuggestionGenerator {
     }
 
     // Check for authentication issues
-    if (context.consoleErrors?.some((e) => e.includes('401') || e.includes('403') || e.includes('unauthorized'))) {
+    if (
+      context.consoleErrors?.some(
+        (e) =>
+          e.includes('401') || e.includes('403') || e.includes('unauthorized'),
+      )
+    ) {
       suggestions.push({
         type: 'auth',
         description: '可能需要重新登录',
@@ -365,7 +370,10 @@ export class FixSuggestionGenerator {
   /**
    * Build search query for knowledge base
    */
-  private buildSearchQuery(context: DebugContext, errorMessage?: string): string {
+  private buildSearchQuery(
+    context: DebugContext,
+    errorMessage?: string,
+  ): string {
     const parts: string[] = [];
 
     if (errorMessage) {
@@ -424,7 +432,10 @@ export class FixSuggestionGenerator {
     // Simplify error message to create a pattern
     let pattern = error
       .replace(/\d+/g, 'N') // Replace numbers with N
-      .replace(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/gi, 'ID') // Replace UUIDs
+      .replace(
+        /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/gi,
+        'ID',
+      ) // Replace UUIDs
       .replace(/['"][^'"]+['"]/g, 'VALUE'); // Replace quoted strings
 
     // Add context info
@@ -517,7 +528,9 @@ export class FixSuggestionGenerator {
 // Export singleton getter
 let fixSuggestionGeneratorInstance: FixSuggestionGenerator | null = null;
 
-export function getFixSuggestionGenerator(options?: FixGeneratorOptions): FixSuggestionGenerator {
+export function getFixSuggestionGenerator(
+  options?: FixGeneratorOptions,
+): FixSuggestionGenerator {
   if (!fixSuggestionGeneratorInstance) {
     fixSuggestionGeneratorInstance = new FixSuggestionGenerator(options);
   }

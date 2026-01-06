@@ -3,7 +3,11 @@
  * System prompts and templates for LLM interactions
  */
 
-import type { DebugContext, Message, QuickQuestion } from '../../types/debugAssistant';
+import type {
+  DebugContext,
+  Message,
+  QuickQuestion,
+} from '../../types/debugAssistant';
 
 export interface PromptTemplate {
   name: string;
@@ -101,7 +105,9 @@ export class DebugPrompts {
 - 适当使用技术术语
 - 对关键点加粗强调
 
-${verbose ? `
+${
+  verbose
+    ? `
 ## 调试流程
 
 1. 理解问题：分析错误信息和上下文
@@ -127,7 +133,9 @@ ${verbose ? `
 [SUGGESTION:等待按钮可见|await waitFor('登录按钮', { state: 'visible' });|0.85]
 [SUGGESTION:使用test-id选择器|const btn = await locate('test-id=login-btn');|0.80]
 "
-` : ''}`;
+`
+    : ''
+}`;
 
     return basePrompt;
   }
@@ -179,7 +187,9 @@ You are a professional test debugging assistant, helping users analyze test fail
 4. **Consider Impact** - Assess potential side effects of fixes
 5. **Provide Options** - When multiple solutions exist, present options
 
-${verbose ? `
+${
+  verbose
+    ? `
 ## Debugging Process
 
 1. Understand: Analyze error messages and context
@@ -188,7 +198,9 @@ ${verbose ? `
 4. Verify: Confirm issue through actions
 5. Propose: Provide specific fix recommendations
 6. Follow-up: Ensure the issue is resolved
-` : ''}`;
+`
+    : ''
+}`;
 
     return basePrompt;
   }
@@ -207,7 +219,9 @@ ${verbose ? `
     let prompt = '';
 
     // Add user query
-    prompt += isZh ? `## 用户问题\n${userQuery}\n\n` : `## User Question\n${userQuery}\n\n`;
+    prompt += isZh
+      ? `## 用户问题\n${userQuery}\n\n`
+      : `## User Question\n${userQuery}\n\n`;
 
     // Add error context
     if (context.lastError) {
@@ -250,8 +264,12 @@ ${verbose ? `
   /**
    * Build a quick question prompt
    */
-  static buildQuickQuestionPrompt(question: QuickQuestion, context: DebugContext): string {
-    const isZh = !question.question || /[\u4e00-\u9fa5]/.test(question.question);
+  static buildQuickQuestionPrompt(
+    question: QuickQuestion,
+    context: DebugContext,
+  ): string {
+    const isZh =
+      !question.question || /[\u4e00-\u9fa5]/.test(question.question);
 
     let prompt = isZh ? '## 快速问题\n' : '## Quick Question\n';
     prompt += `${question.question}\n\n`;
@@ -387,7 +405,10 @@ ${verbose ? `
   /**
    * Format variables into a template
    */
-  static formatTemplate(template: string, variables: Record<string, string>): string {
+  static formatTemplate(
+    template: string,
+    variables: Record<string, string>,
+  ): string {
     let result = template;
     for (const [key, value] of Object.entries(variables)) {
       result = result.replace(new RegExp(`\\{${key}\\}`, 'g'), value);

@@ -6,13 +6,13 @@
  */
 
 import type {
+  AlertLevel,
   Anomaly,
   AnomalyAlert,
-  AlertLevel,
   AnomalyType,
-  Severity,
-  RootCause,
   HealthScore,
+  RootCause,
+  Severity,
 } from '../../types/anomaly';
 import { anomalyStorage } from './storage';
 
@@ -98,7 +98,8 @@ const ALERT_TEMPLATES: Record<AnomalyType, AlertTemplate> = {
   success_rate_drop: {
     type: 'success_rate_drop',
     titleTemplate: 'Success Rate Drop Detected',
-    messageTemplate: 'Success rate dropped to {value}% (baseline: {baseline}%). {deviation}% below normal.',
+    messageTemplate:
+      'Success rate dropped to {value}% (baseline: {baseline}%). {deviation}% below normal.',
     levelMapping: {
       low: 'info',
       medium: 'warning',
@@ -111,7 +112,8 @@ const ALERT_TEMPLATES: Record<AnomalyType, AlertTemplate> = {
   pass_rate_drop: {
     type: 'pass_rate_drop' as AnomalyType,
     titleTemplate: '通过率下降检测',
-    messageTemplate: '通过率降至 {value}% (基线: {baseline}%)。较正常值低 {deviation}%。',
+    messageTemplate:
+      '通过率降至 {value}% (基线: {baseline}%)。较正常值低 {deviation}%。',
     levelMapping: {
       low: 'info',
       medium: 'warning',
@@ -124,7 +126,8 @@ const ALERT_TEMPLATES: Record<AnomalyType, AlertTemplate> = {
   duration_spike: {
     type: 'duration_spike',
     titleTemplate: 'Duration Spike Detected',
-    messageTemplate: 'Execution time spiked to {value}ms (baseline: {baseline}ms). {deviation}% above normal.',
+    messageTemplate:
+      'Execution time spiked to {value}ms (baseline: {baseline}ms). {deviation}% above normal.',
     levelMapping: {
       low: 'info',
       medium: 'warning',
@@ -137,7 +140,8 @@ const ALERT_TEMPLATES: Record<AnomalyType, AlertTemplate> = {
   consecutive_failures: {
     type: 'consecutive_failures',
     titleTemplate: 'Consecutive Failures Alert',
-    messageTemplate: '{value} consecutive test failures detected. Immediate attention required.',
+    messageTemplate:
+      '{value} consecutive test failures detected. Immediate attention required.',
     levelMapping: {
       low: 'info',
       medium: 'warning',
@@ -150,7 +154,8 @@ const ALERT_TEMPLATES: Record<AnomalyType, AlertTemplate> = {
   failure_spike: {
     type: 'failure_spike',
     titleTemplate: 'Failure Spike Detected',
-    messageTemplate: 'Failure rate spiked to {value}% (baseline: {baseline}%). {deviation}% above normal.',
+    messageTemplate:
+      'Failure rate spiked to {value}% (baseline: {baseline}%). {deviation}% above normal.',
     levelMapping: {
       low: 'info',
       medium: 'warning',
@@ -163,7 +168,8 @@ const ALERT_TEMPLATES: Record<AnomalyType, AlertTemplate> = {
   flaky_pattern: {
     type: 'flaky_pattern',
     titleTemplate: 'Flaky Pattern Detected',
-    messageTemplate: 'Test "{caseName}" shows flaky behavior. Pass rate: {value}%.',
+    messageTemplate:
+      'Test "{caseName}" shows flaky behavior. Pass rate: {value}%.',
     levelMapping: {
       low: 'info',
       medium: 'warning',
@@ -176,7 +182,8 @@ const ALERT_TEMPLATES: Record<AnomalyType, AlertTemplate> = {
   performance_degradation: {
     type: 'performance_degradation',
     titleTemplate: 'Performance Degradation Detected',
-    messageTemplate: 'Performance degraded by {deviation}%. Current: {value}, baseline: {baseline}.',
+    messageTemplate:
+      'Performance degraded by {deviation}%. Current: {value}, baseline: {baseline}.',
     levelMapping: {
       low: 'info',
       medium: 'warning',
@@ -189,7 +196,8 @@ const ALERT_TEMPLATES: Record<AnomalyType, AlertTemplate> = {
   resource_anomaly: {
     type: 'resource_anomaly',
     titleTemplate: 'Resource Anomaly Detected',
-    messageTemplate: 'Unusual resource consumption: {metricName} at {value} ({deviation}% deviation).',
+    messageTemplate:
+      'Unusual resource consumption: {metricName} at {value} ({deviation}% deviation).',
     levelMapping: {
       low: 'info',
       medium: 'warning',
@@ -202,7 +210,8 @@ const ALERT_TEMPLATES: Record<AnomalyType, AlertTemplate> = {
   trend_change: {
     type: 'trend_change',
     titleTemplate: 'Trend Change Detected',
-    messageTemplate: 'Trend changed for {metricName}. Current: {value}, Expected: {baseline}.',
+    messageTemplate:
+      'Trend changed for {metricName}. Current: {value}, Expected: {baseline}.',
     levelMapping: {
       low: 'info',
       medium: 'warning',
@@ -215,7 +224,8 @@ const ALERT_TEMPLATES: Record<AnomalyType, AlertTemplate> = {
   seasonal_deviation: {
     type: 'seasonal_deviation',
     titleTemplate: 'Seasonal Deviation Detected',
-    messageTemplate: 'Deviation from seasonal pattern for {metricName}. Current: {value}, Expected: {baseline}.',
+    messageTemplate:
+      'Deviation from seasonal pattern for {metricName}. Current: {value}, Expected: {baseline}.',
     levelMapping: {
       low: 'info',
       medium: 'warning',
@@ -228,7 +238,8 @@ const ALERT_TEMPLATES: Record<AnomalyType, AlertTemplate> = {
   flaky_detected: {
     type: 'flaky_detected' as AnomalyType,
     titleTemplate: 'Flaky Test Detected',
-    messageTemplate: 'Test "{caseName}" shows flaky behavior. Pass rate: {value}%.',
+    messageTemplate:
+      'Test "{caseName}" shows flaky behavior. Pass rate: {value}%.',
     levelMapping: {
       low: 'info',
       medium: 'warning',
@@ -269,7 +280,10 @@ class AlertTrigger {
     }
 
     // Check minimum severity
-    if (SEVERITY_PRIORITY[anomaly.severity] < SEVERITY_PRIORITY[this.config.minSeverity]) {
+    if (
+      SEVERITY_PRIORITY[anomaly.severity] <
+      SEVERITY_PRIORITY[this.config.minSeverity]
+    ) {
       return {
         alert: this.createAlert(anomaly),
         shouldNotify: false,
@@ -325,7 +339,7 @@ class AlertTrigger {
    */
   async triggerFromHealthScore(
     current: HealthScore,
-    previous: HealthScore | null
+    previous: HealthScore | null,
   ): Promise<AlertNotification | null> {
     if (!this.config.enabled || !previous) {
       return null;
@@ -455,7 +469,7 @@ class AlertTrigger {
     // Clear old alerts
     for (const [key, alerts] of this.recentAlerts.entries()) {
       const recent = alerts.filter(
-        (a) => now - a.createdAt < this.config.deduplicationWindow * 2
+        (a) => now - a.createdAt < this.config.deduplicationWindow * 2,
       );
       if (recent.length === 0) {
         this.recentAlerts.delete(key);
@@ -511,7 +525,8 @@ class AlertTrigger {
           critical: 'emergency' as AlertLevel,
         },
       };
-      const level = fallbackTemplate.levelMapping[anomaly.severity] || 'warning';
+      const level =
+        fallbackTemplate.levelMapping[anomaly.severity] || 'warning';
       return {
         id: this.generateId(),
         anomalyId: anomaly.id,
@@ -524,7 +539,7 @@ class AlertTrigger {
     }
 
     const level = template.levelMapping[anomaly.severity];
-    let message = this.formatMessage(template.messageTemplate, anomaly);
+    const message = this.formatMessage(template.messageTemplate, anomaly);
 
     // Note: rootCauses would need to be passed separately if needed
     // Since Anomaly interface doesn't have rootCauses field
@@ -541,9 +556,12 @@ class AlertTrigger {
   }
 
   private formatMessage(template: string, anomaly: Anomaly): string {
-    const deviationPercent = anomaly.expectedValue !== 0
-      ? ((anomaly.currentValue - anomaly.expectedValue) / anomaly.expectedValue * 100)
-      : 0;
+    const deviationPercent =
+      anomaly.expectedValue !== 0
+        ? ((anomaly.currentValue - anomaly.expectedValue) /
+            anomaly.expectedValue) *
+          100
+        : 0;
 
     return template
       .replace('{value}', anomaly.currentValue.toFixed(2))
@@ -556,14 +574,20 @@ class AlertTrigger {
   private formatRootCauses(rootCauses: RootCause[]): string {
     return rootCauses
       .slice(0, 3) // Top 3
-      .map((rc, i) => `${i + 1}. [${rc.category}] ${rc.description} (${(rc.confidence * 100).toFixed(0)}% confidence)`)
+      .map(
+        (rc, i) =>
+          `${i + 1}. [${rc.category}] ${rc.description} (${(rc.confidence * 100).toFixed(0)}% confidence)`,
+      )
       .join('\n');
   }
 
   private formatSuggestions(rootCauses: RootCause[]): string {
     const allSuggestions = rootCauses.flatMap((rc) => rc.suggestions);
     const unique = [...new Set(allSuggestions.map((s) => s.action))];
-    return unique.slice(0, 3).map((s, i) => `${i + 1}. ${s}`).join('\n');
+    return unique
+      .slice(0, 3)
+      .map((s, i) => `${i + 1}. ${s}`)
+      .join('\n');
   }
 
   private getDeduplicationKey(alert: AnomalyAlert): string {
@@ -577,14 +601,17 @@ class AlertTrigger {
     return alert.title;
   }
 
-  private checkDeduplication(alert: AnomalyAlert): { isDuplicate: boolean; reason?: string } {
+  private checkDeduplication(alert: AnomalyAlert): {
+    isDuplicate: boolean;
+    reason?: string;
+  } {
     const key = this.getDeduplicationKey(alert);
     const existing = this.recentAlerts.get(key) || [];
     const now = Date.now();
 
     // Check for recent duplicate
     const recent = existing.find(
-      (a) => now - a.createdAt < this.config.deduplicationWindow
+      (a) => now - a.createdAt < this.config.deduplicationWindow,
     );
 
     if (recent) {
@@ -597,7 +624,10 @@ class AlertTrigger {
     return { isDuplicate: false };
   }
 
-  private checkConvergence(alert: AnomalyAlert): { shouldConverge: boolean; count: number } {
+  private checkConvergence(alert: AnomalyAlert): {
+    shouldConverge: boolean;
+    count: number;
+  } {
     const key = this.getConvergenceKey(alert);
     const now = Date.now();
 
@@ -629,7 +659,10 @@ class AlertTrigger {
     return { shouldConverge: false, count: group.count };
   }
 
-  private checkCooldown(alert: AnomalyAlert): { inCooldown: boolean; remainingMs: number } {
+  private checkCooldown(alert: AnomalyAlert): {
+    inCooldown: boolean;
+    remainingMs: number;
+  } {
     const key = this.getConvergenceKey(alert);
     const cooldownEnd = this.cooldownUntil.get(key);
     const now = Date.now();

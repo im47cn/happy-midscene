@@ -3,16 +3,16 @@
  * Run with: npx vitest run apps/chrome-extension/src/extension/ai-test-generator/services/elementRepair/__tests__/
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Rect } from '@midscene/core';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
   RepairOptions,
   RepairResult,
   RepairSuggestion,
   SelectedElement,
 } from '../../types/elementRepair';
-import { RepairEngine } from '../repairEngine';
 import { elementSelector } from '../elementSelector';
+import { RepairEngine } from '../repairEngine';
 
 // Mock elementSelector.validateSelector to return true in tests
 vi.spyOn(elementSelector, 'validateSelector').mockResolvedValue(true);
@@ -75,7 +75,10 @@ describe('RepairEngine', () => {
         originalSelector: '#old-submit-button',
       });
 
-      const suggestions = await engine.generateSuggestions(selectedElement, options);
+      const suggestions = await engine.generateSuggestions(
+        selectedElement,
+        options,
+      );
 
       expect(suggestions.length).toBeGreaterThan(0);
 
@@ -114,7 +117,10 @@ describe('RepairEngine', () => {
         originalSelector: '#submit-button',
       });
 
-      const suggestions = await engine.generateSuggestions(selectedElement, options);
+      const suggestions = await engine.generateSuggestions(
+        selectedElement,
+        options,
+      );
 
       const fallbackSuggestion = suggestions.find(
         (s) => s.actionType === 'add_fallback',
@@ -130,7 +136,10 @@ describe('RepairEngine', () => {
         originalDescription: 'Click submit',
       });
 
-      const suggestions = await engine.generateSuggestions(selectedElement, options);
+      const suggestions = await engine.generateSuggestions(
+        selectedElement,
+        options,
+      );
 
       const descSuggestion = suggestions.find(
         (s) => s.actionType === 'update_description',
@@ -143,7 +152,10 @@ describe('RepairEngine', () => {
       const selectedElement = createMockSelectedElement();
       const options = createMockRepairOptions();
 
-      const suggestions = await engine.generateSuggestions(selectedElement, options);
+      const suggestions = await engine.generateSuggestions(
+        selectedElement,
+        options,
+      );
 
       suggestions.forEach((s) => {
         expect(s.confidence).toBeGreaterThanOrEqual(0);
@@ -157,14 +169,21 @@ describe('RepairEngine', () => {
         failureReason: 'Element not found: #old-submit-button',
       });
 
-      const suggestions = await engine.generateSuggestions(selectedElement, options);
+      const suggestions = await engine.generateSuggestions(
+        selectedElement,
+        options,
+      );
 
       // update_selector should have high impact for 'not found' failure
-      const updateSuggestion = suggestions.find((s) => s.actionType === 'update_selector');
+      const updateSuggestion = suggestions.find(
+        (s) => s.actionType === 'update_selector',
+      );
       expect(updateSuggestion?.impact).toBe('high');
 
       // add_fallback should have medium impact
-      const fallbackSuggestion = suggestions.find((s) => s.actionType === 'add_fallback');
+      const fallbackSuggestion = suggestions.find(
+        (s) => s.actionType === 'add_fallback',
+      );
       expect(fallbackSuggestion?.impact).toBe('medium');
     });
 
@@ -172,7 +191,10 @@ describe('RepairEngine', () => {
       const selectedElement = createMockSelectedElement();
       const options = createMockRepairOptions();
 
-      const suggestions = await engine.generateSuggestions(selectedElement, options);
+      const suggestions = await engine.generateSuggestions(
+        selectedElement,
+        options,
+      );
 
       const ids = suggestions.map((s) => s.id);
       const uniqueIds = new Set(ids);
@@ -185,14 +207,23 @@ describe('RepairEngine', () => {
       const selectedElement = createMockSelectedElement();
       const options = createMockRepairOptions();
 
-      const suggestions = await engine.generateSuggestions(selectedElement, options);
-      const updateSuggestion = suggestions.find((s) => s.actionType === 'update_selector');
+      const suggestions = await engine.generateSuggestions(
+        selectedElement,
+        options,
+      );
+      const updateSuggestion = suggestions.find(
+        (s) => s.actionType === 'update_selector',
+      );
 
       if (!updateSuggestion) {
         throw new Error('No update_selector suggestion found');
       }
 
-      const result = await engine.applyRepair(updateSuggestion, selectedElement, options);
+      const result = await engine.applyRepair(
+        updateSuggestion,
+        selectedElement,
+        options,
+      );
 
       expect(result.success).toBe(true);
       expect(result.appliedRepair.actionType).toBe('update_selector');
@@ -203,10 +234,17 @@ describe('RepairEngine', () => {
       const selectedElement = createMockSelectedElement();
       const options = createMockRepairOptions();
 
-      const suggestions = await engine.generateSuggestions(selectedElement, options);
+      const suggestions = await engine.generateSuggestions(
+        selectedElement,
+        options,
+      );
       const suggestion = suggestions[0];
 
-      const result = await engine.applyRepair(suggestion, selectedElement, options);
+      const result = await engine.applyRepair(
+        suggestion,
+        selectedElement,
+        options,
+      );
 
       expect(result).toHaveProperty('success');
       expect(result).toHaveProperty('repairId');
@@ -222,10 +260,17 @@ describe('RepairEngine', () => {
       const selectedElement = createMockSelectedElement();
       const options = createMockRepairOptions();
 
-      const suggestions = await engine.generateSuggestions(selectedElement, options);
+      const suggestions = await engine.generateSuggestions(
+        selectedElement,
+        options,
+      );
       const suggestion = suggestions[0];
 
-      const result = await engine.applyRepair(suggestion, selectedElement, options);
+      const result = await engine.applyRepair(
+        suggestion,
+        selectedElement,
+        options,
+      );
       const isValid = await engine.validateRepair(result);
 
       expect(typeof isValid).toBe('boolean');
@@ -242,7 +287,10 @@ describe('RepairEngine', () => {
       const selectedElement = createMockSelectedElement();
       const options = createMockRepairOptions();
 
-      const suggestions = await engine.generateSuggestions(selectedElement, options);
+      const suggestions = await engine.generateSuggestions(
+        selectedElement,
+        options,
+      );
       const suggestion = suggestions[0];
 
       await engine.applyRepair(suggestion, selectedElement, options);
@@ -256,8 +304,14 @@ describe('RepairEngine', () => {
       const options1 = createMockRepairOptions({ stepId: 'step-1' });
       const options2 = createMockRepairOptions({ stepId: 'step-2' });
 
-      const suggestions1 = await engine.generateSuggestions(selectedElement, options1);
-      const suggestions2 = await engine.generateSuggestions(selectedElement, options2);
+      const suggestions1 = await engine.generateSuggestions(
+        selectedElement,
+        options1,
+      );
+      const suggestions2 = await engine.generateSuggestions(
+        selectedElement,
+        options2,
+      );
 
       await engine.applyRepair(suggestions1[0], selectedElement, options1);
       await engine.applyRepair(suggestions2[0], selectedElement, options2);
@@ -278,7 +332,10 @@ describe('RepairEngine', () => {
       });
       const options = createMockRepairOptions();
 
-      const suggestions = await engine.generateSuggestions(selectedElement, options);
+      const suggestions = await engine.generateSuggestions(
+        selectedElement,
+        options,
+      );
 
       expect(suggestions.length).toBeGreaterThan(0);
     });
@@ -289,7 +346,10 @@ describe('RepairEngine', () => {
       });
       const options = createMockRepairOptions();
 
-      const suggestions = await engine.generateSuggestions(selectedElement, options);
+      const suggestions = await engine.generateSuggestions(
+        selectedElement,
+        options,
+      );
 
       // Should still generate some suggestions based on other data
       expect(suggestions.length).toBeGreaterThan(0);
@@ -301,7 +361,10 @@ describe('RepairEngine', () => {
         originalSelector: undefined,
       });
 
-      const suggestions = await engine.generateSuggestions(selectedElement, options);
+      const suggestions = await engine.generateSuggestions(
+        selectedElement,
+        options,
+      );
 
       expect(suggestions.length).toBeGreaterThan(0);
     });

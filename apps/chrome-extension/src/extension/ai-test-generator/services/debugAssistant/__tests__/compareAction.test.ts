@@ -2,7 +2,7 @@
  * Unit tests for Compare Action
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   CompareAction,
   getCompareAction,
@@ -103,7 +103,10 @@ describe('CompareAction', () => {
         diffImage: '',
       });
 
-      const result = await compareAction.compareScreenshots('sameimg', 'sameimg');
+      const result = await compareAction.compareScreenshots(
+        'sameimg',
+        'sameimg',
+      );
 
       expect(result.similar).toBe(true);
       expect(result.score).toBe(1.0);
@@ -387,14 +390,20 @@ describe('CompareAction', () => {
         error: '元素不存在',
       });
 
-      const result = await compareAction.compareElement('.nonexistent', snapshot.id);
+      const result = await compareAction.compareElement(
+        '.nonexistent',
+        snapshot.id,
+      );
 
       expect(result.similar).toBe(false);
       expect(result.message).toContain('元素不存在');
     });
 
     it('should handle non-existent snapshot for element compare', async () => {
-      const result = await compareAction.compareElement('.button', 'nonexistent');
+      const result = await compareAction.compareElement(
+        '.button',
+        'nonexistent',
+      );
 
       expect(result.similar).toBe(false);
       expect(result.message).toContain('快照不存在');

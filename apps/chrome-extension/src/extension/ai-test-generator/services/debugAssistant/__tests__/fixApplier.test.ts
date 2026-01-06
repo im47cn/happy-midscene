@@ -2,14 +2,13 @@
  * Unit tests for Fix Applier
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import {
-  FixApplier,
-  getFixApplier,
-  resetFixApplier,
-} from '../fixApplier';
-import { KnowledgeBase } from '../knowledgeBase';
-import type { FixSuggestion, DebugContext } from '../../../types/debugAssistant';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type {
+  DebugContext,
+  FixSuggestion,
+} from '../../../types/debugAssistant';
+import { FixApplier, getFixApplier, resetFixApplier } from '../fixApplier';
+import type { KnowledgeBase } from '../knowledgeBase';
 
 describe('FixApplier', () => {
   let fixApplier: FixApplier;
@@ -245,7 +244,9 @@ describe('FixApplier', () => {
 
       // Mock a method to throw
       const originalMethod = fixApplier['applyWaitFix'];
-      fixApplier['applyWaitFix'] = vi.fn().mockRejectedValue(new Error('Apply failed'));
+      fixApplier['applyWaitFix'] = vi
+        .fn()
+        .mockRejectedValue(new Error('Apply failed'));
 
       const result = await fixApplier.applyFix(context, fix);
 
@@ -397,7 +398,11 @@ describe('FixApplier', () => {
         confidence: 0.9,
       };
 
-      fixApplier.recordSuccessfulFix(context, fix, 'Cannot find element submit');
+      fixApplier.recordSuccessfulFix(
+        context,
+        fix,
+        'Cannot find element submit',
+      );
 
       expect(mockKnowledgeBase.addEntry).toHaveBeenCalled();
       const entry = (mockKnowledgeBase.addEntry as any).mock.calls[0][0];
@@ -497,7 +502,10 @@ describe('FixApplier', () => {
       fixApplier.recordFailedFix(context, fix, 'element not found');
 
       expect(mockKnowledgeBase.findMatchingPatterns).toHaveBeenCalled();
-      expect(mockKnowledgeBase.updateSuccessRate).toHaveBeenCalledWith('kb-1', false);
+      expect(mockKnowledgeBase.updateSuccessRate).toHaveBeenCalledWith(
+        'kb-1',
+        false,
+      );
     });
 
     it('should not update if no matching pattern found', () => {
@@ -565,7 +573,12 @@ describe('FixApplier', () => {
     });
 
     it('should return a copy of the map', () => {
-      const result = { success: true, message: 'Fix', modifiedFiles: [], canRevert: true };
+      const result = {
+        success: true,
+        message: 'Fix',
+        modifiedFiles: [],
+        canRevert: true,
+      };
       (fixApplier as any).appliedFixes.set('fix-1', result);
 
       const applied = fixApplier.getAppliedFixes();
@@ -578,7 +591,12 @@ describe('FixApplier', () => {
 
   describe('clearHistory', () => {
     it('should clear applied fixes history', () => {
-      const result = { success: true, message: 'Fix', modifiedFiles: [], canRevert: true };
+      const result = {
+        success: true,
+        message: 'Fix',
+        modifiedFiles: [],
+        canRevert: true,
+      };
       (fixApplier as any).appliedFixes.set('fix-1', result);
 
       fixApplier.clearHistory();

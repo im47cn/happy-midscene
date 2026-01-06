@@ -100,9 +100,12 @@ function getTypeLabel(type: AnomalyType): string {
     flaky_pattern: '抖动模式',
     performance_degradation: '性能下降',
     success_rate_drop: '成功率下降',
+    pass_rate_drop: '通过率下降',
     resource_anomaly: '资源异常',
     trend_change: '趋势变化',
     seasonal_deviation: '周期偏差',
+    consecutive_failures: '连续失败',
+    flaky_detected: '抖动检测',
   };
   return labels[type] || type;
 }

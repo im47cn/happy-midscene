@@ -5,11 +5,11 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  type VariableChangeEvent,
+  type VariableSnapshot,
   VariableStore,
   getVariableStore,
   resetVariableStore,
-  type VariableSnapshot,
-  type VariableChangeEvent,
 } from '../variableStore';
 
 describe('VariableStore', () => {
@@ -170,7 +170,9 @@ describe('VariableStore', () => {
       store.set('name', 'Alice');
       store.set('age', 30);
 
-      const result = store.replaceVariables('Hello ${name}, you are ${age} years old');
+      const result = store.replaceVariables(
+        'Hello ${name}, you are ${age} years old',
+      );
 
       expect(result).toBe('Hello Alice, you are 30 years old');
     });
@@ -313,7 +315,10 @@ describe('VariableStore', () => {
 
   describe('Change Events', () => {
     it('should not emit events when disabled', () => {
-      const noEventsStore = new VariableStore({}, { enableChangeEvents: false });
+      const noEventsStore = new VariableStore(
+        {},
+        { enableChangeEvents: false },
+      );
       const listener = vi.fn();
 
       noEventsStore.onChange(listener);
@@ -341,7 +346,10 @@ describe('VariableStore', () => {
     });
 
     it('should emit increment event', () => {
-      const eventStore = new VariableStore({ count: 5 }, { enableChangeEvents: true });
+      const eventStore = new VariableStore(
+        { count: 5 },
+        { enableChangeEvents: true },
+      );
       const listener = vi.fn();
 
       eventStore.onChange(listener);
@@ -375,7 +383,10 @@ describe('VariableStore', () => {
     });
 
     it('should emit delete event', () => {
-      const eventStore = new VariableStore({ temp: 'value' }, { enableChangeEvents: true });
+      const eventStore = new VariableStore(
+        { temp: 'value' },
+        { enableChangeEvents: true },
+      );
       const listener = vi.fn();
 
       eventStore.onChange(listener);

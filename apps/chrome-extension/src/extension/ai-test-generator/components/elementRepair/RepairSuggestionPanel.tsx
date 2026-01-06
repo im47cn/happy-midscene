@@ -4,17 +4,32 @@
  */
 
 import {
+  BulbOutlined,
   CheckCircleOutlined,
   CloseOutlined,
   ExclamationCircleOutlined,
   ToolOutlined,
-  BulbOutlined,
 } from '@ant-design/icons';
-import { Alert, Button, Card, Descriptions, Progress, Space, Tag, Typography, message } from 'antd';
-import { useState, useCallback, useEffect } from 'react';
+import {
+  Alert,
+  Button,
+  Card,
+  Descriptions,
+  Progress,
+  Space,
+  Tag,
+  Typography,
+  message,
+} from 'antd';
+import { useCallback, useEffect, useState } from 'react';
 import { useI18n } from '../../../../i18n';
-import type { RepairOptions, RepairResult, RepairSuggestion, SelectedElement } from '../../types/elementRepair';
 import { repairEngine } from '../../services/elementRepair';
+import type {
+  RepairOptions,
+  RepairResult,
+  RepairSuggestion,
+  SelectedElement,
+} from '../../types/elementRepair';
 
 const { Text, Title, Paragraph } = Typography;
 
@@ -52,7 +67,13 @@ function getActionTypeInfo(actionType: RepairSuggestion['actionType']) {
       color: 'purple',
     },
   };
-  return types[actionType] || { label: actionType, icon: <ToolOutlined />, color: 'default' };
+  return (
+    types[actionType] || {
+      label: actionType,
+      icon: <ToolOutlined />,
+      color: 'default',
+    }
+  );
 }
 
 /**
@@ -98,7 +119,10 @@ export function RepairSuggestionPanel({
     if (!selectedElement || !repairOptions) return;
 
     try {
-      const result = await repairEngine.generateSuggestions(selectedElement, repairOptions);
+      const result = await repairEngine.generateSuggestions(
+        selectedElement,
+        repairOptions,
+      );
       setSuggestions(result);
     } catch (error) {
       console.error('Failed to generate suggestions:', error);
@@ -114,10 +138,14 @@ export function RepairSuggestionPanel({
       setApplying(suggestion.id);
 
       try {
-        const result = await repairEngine.applyRepair(suggestion, selectedElement, repairOptions);
+        const result = await repairEngine.applyRepair(
+          suggestion,
+          selectedElement,
+          repairOptions,
+        );
 
         if (result.success) {
-          setAppliedRepairs(prev => new Set(prev).add(suggestion.id));
+          setAppliedRepairs((prev) => new Set(prev).add(suggestion.id));
           message.success(t('repairApplied'));
           onRepairApplied?.(result);
         } else {
@@ -150,7 +178,12 @@ export function RepairSuggestionPanel({
         </Space>
       }
       extra={
-        <Button type="text" size="small" icon={<CloseOutlined />} onClick={onClose} />
+        <Button
+          type="text"
+          size="small"
+          icon={<CloseOutlined />}
+          onClick={onClose}
+        />
       }
       className="repair-suggestion-panel"
     >
@@ -189,7 +222,7 @@ export function RepairSuggestionPanel({
           />
         ) : (
           <Space direction="vertical" style={{ width: '100%' }} size="small">
-            {suggestions.map(suggestion => {
+            {suggestions.map((suggestion) => {
               const typeInfo = actionTypeInfo(suggestion.actionType);
               const confidenceLevel = getConfidenceLevel(suggestion.confidence);
               const isApplied = appliedRepairs.has(suggestion.id);
@@ -208,12 +241,20 @@ export function RepairSuggestionPanel({
                       </Tag>
                     ) : (
                       <Tag color={getImpactColor(suggestion.impact)}>
-                        {suggestion.impact === 'high' ? t('high') : suggestion.impact === 'medium' ? t('medium') : t('low')}
+                        {suggestion.impact === 'high'
+                          ? t('high')
+                          : suggestion.impact === 'medium'
+                            ? t('medium')
+                            : t('low')}
                       </Tag>
                     )
                   }
                 >
-                  <Space direction="vertical" style={{ width: '100%' }} size="small">
+                  <Space
+                    direction="vertical"
+                    style={{ width: '100%' }}
+                    size="small"
+                  >
                     {/* Title */}
                     <Space>
                       {typeInfo.icon}
@@ -228,7 +269,12 @@ export function RepairSuggestionPanel({
 
                     {/* Confidence */}
                     <div style={{ marginBottom: 8 }}>
-                      <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                      <Space
+                        style={{
+                          width: '100%',
+                          justifyContent: 'space-between',
+                        }}
+                      >
                         <Text type="secondary">{t('confidence')}:</Text>
                         <Text strong>{suggestion.confidence}%</Text>
                       </Space>
@@ -236,7 +282,13 @@ export function RepairSuggestionPanel({
                         percent={suggestion.confidence}
                         status={confidenceLevel.status}
                         size="small"
-                        strokeColor={suggestion.confidence >= 80 ? '#52c41a' : suggestion.confidence >= 50 ? '#faad14' : '#ff4d4f'}
+                        strokeColor={
+                          suggestion.confidence >= 80
+                            ? '#52c41a'
+                            : suggestion.confidence >= 50
+                              ? '#faad14'
+                              : '#ff4d4f'
+                        }
                       />
                     </div>
 

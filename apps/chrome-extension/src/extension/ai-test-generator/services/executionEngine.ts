@@ -9,6 +9,10 @@ import { DEFAULT_SELF_HEALING_CONFIG } from '../types/healing';
 import type { MaskingConfig } from '../types/masking';
 import { DEFAULT_MASKING_CONFIG } from '../types/masking';
 import { alertManager, dataCollector } from './analytics';
+import {
+  type HighlightManagerConfig,
+  getHighlightManager,
+} from './executionHighlightManager';
 import { healingEngine } from './healing';
 import type { TaskStep, TestCase } from './markdownParser';
 import {
@@ -18,10 +22,6 @@ import {
   maskerEngine,
 } from './masking';
 import { screenshotStorage } from './screenshotStorage';
-import {
-  getHighlightManager,
-  type HighlightManagerConfig,
-} from './executionHighlightManager';
 
 export interface DeviceEmulationConfig {
   deviceId: string;

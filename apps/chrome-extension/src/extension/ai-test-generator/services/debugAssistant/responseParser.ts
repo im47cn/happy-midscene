@@ -5,10 +5,10 @@
 
 import type {
   DebugAction,
-  FixSuggestion,
-  ParsedResponse,
   DebugActionType,
+  FixSuggestion,
   FixSuggestionType,
+  ParsedResponse,
 } from '../../types/debugAssistant';
 
 export interface ParseResult extends ParsedResponse {
@@ -214,9 +214,14 @@ export class ResponseParser {
     let remainingContent = innerContent;
 
     if (confidenceMatch) {
-      confidence = Math.min(1, Math.max(0, Number.parseFloat(confidenceMatch[1])));
+      confidence = Math.min(
+        1,
+        Math.max(0, Number.parseFloat(confidenceMatch[1])),
+      );
       // Remove confidence from content
-      remainingContent = innerContent.substring(0, innerContent.lastIndexOf('|')).trim();
+      remainingContent = innerContent
+        .substring(0, innerContent.lastIndexOf('|'))
+        .trim();
     }
 
     // Now we have either: description or description|code
@@ -343,16 +348,21 @@ export class ResponseParser {
       case 'scroll':
         // Parse direction: "up", "down", "left", "right"
         if (value.toLowerCase().includes('up')) options.scrollDirection = 'up';
-        else if (value.toLowerCase().includes('down')) options.scrollDirection = 'down';
-        else if (value.toLowerCase().includes('left')) options.scrollDirection = 'left';
-        else if (value.toLowerCase().includes('right')) options.scrollDirection = 'right';
+        else if (value.toLowerCase().includes('down'))
+          options.scrollDirection = 'down';
+        else if (value.toLowerCase().includes('left'))
+          options.scrollDirection = 'left';
+        else if (value.toLowerCase().includes('right'))
+          options.scrollDirection = 'right';
         break;
 
       case 'click':
       case 'highlight':
       case 'locate':
         // Parse index: "button 2", "第三个按钮"
-        const indexMatch = value.match(/(\d+)|第([一二三四五六七八九十百千万]+)[个些]/);
+        const indexMatch = value.match(
+          /(\d+)|第([一二三四五六七八九十百千万]+)[个些]/,
+        );
         if (indexMatch) {
           const num = this.chineseToNumber(indexMatch[1] || indexMatch[2]);
           if (!Number.isNaN(num)) options.index = num;
@@ -482,7 +492,9 @@ export class ResponseParser {
   /**
    * Extract before/after code for diff display
    */
-  private extractBeforeAfter(code: string): { before: string; after: string } | undefined {
+  private extractBeforeAfter(
+    code: string,
+  ): { before: string; after: string } | undefined {
     const lines = code.split('\n');
 
     // Look for patterns like "- ai: old" and "+ ai: new"
@@ -609,7 +621,9 @@ export class ResponseParser {
 // Export singleton getter
 let parserInstance: ResponseParser | null = null;
 
-export function getResponseParser(options?: ResponseParserOptions): ResponseParser {
+export function getResponseParser(
+  options?: ResponseParserOptions,
+): ResponseParser {
   if (!parserInstance) {
     parserInstance = new ResponseParser(options);
   }

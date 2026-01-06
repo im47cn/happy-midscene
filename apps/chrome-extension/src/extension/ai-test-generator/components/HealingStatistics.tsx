@@ -10,7 +10,16 @@ import {
   PercentageOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
-import { Card, Col, Empty, Progress, Row, Statistic, Table, Typography } from 'antd';
+import {
+  Card,
+  Col,
+  Empty,
+  Progress,
+  Row,
+  Statistic,
+  Table,
+  Typography,
+} from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useEffect, useState } from 'react';
 import { useI18n } from '../../../i18n';
@@ -104,7 +113,8 @@ export function HealingStatistics() {
   ];
 
   // Calculate strategy percentages
-  const totalSuccess = statistics.normalSuccessCount + statistics.deepThinkSuccessCount;
+  const totalSuccess =
+    statistics.normalSuccessCount + statistics.deepThinkSuccessCount;
   const normalPercent =
     totalSuccess > 0
       ? Math.round((statistics.normalSuccessCount / totalSuccess) * 100)
@@ -199,7 +209,8 @@ export function HealingStatistics() {
               >
                 <span>{t('healing.normalMode')}</span>
                 <span>
-                  {statistics.normalSuccessCount} / {totalSuccess} ({normalPercent}%)
+                  {statistics.normalSuccessCount} / {totalSuccess} (
+                  {normalPercent}%)
                 </span>
               </div>
               <Progress
@@ -218,7 +229,8 @@ export function HealingStatistics() {
               >
                 <span>{t('healing.deepThink')}</span>
                 <span>
-                  {statistics.deepThinkSuccessCount} / {totalSuccess} ({deepThinkPercent}%)
+                  {statistics.deepThinkSuccessCount} / {totalSuccess} (
+                  {deepThinkPercent}%)
                 </span>
               </div>
               <Progress

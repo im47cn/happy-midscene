@@ -4,18 +4,31 @@
  */
 
 import {
+  CheckOutlined,
   CloseOutlined,
   CopyOutlined,
   EyeOutlined,
   HighlightOutlined,
-  CheckOutlined,
 } from '@ant-design/icons';
-import { Button, Card, List, Space, Tag, Tooltip, Typography, message } from 'antd';
-import { useState, useEffect, useCallback } from 'react';
+import {
+  Button,
+  Card,
+  List,
+  Space,
+  Tag,
+  Tooltip,
+  Typography,
+  message,
+} from 'antd';
+import { useCallback, useEffect, useState } from 'react';
 import { useI18n } from '../../../../i18n';
-import type { SelectedElement, SelectionMode, SelectionState } from '../../types/elementRepair';
-import type { ElementSelector as SelectorType } from '../../types/elementRepair';
 import { elementSelector } from '../../services/elementRepair';
+import type {
+  SelectedElement,
+  SelectionMode,
+  SelectionState,
+} from '../../types/elementRepair';
+import type { ElementSelector as SelectorType } from '../../types/elementRepair';
 
 const { Text, Paragraph, Title } = Typography;
 
@@ -62,7 +75,8 @@ export function ElementPicker({
 }: ElementPickerProps) {
   const { t } = useI18n();
   const [state, setState] = useState<SelectionState>('idle');
-  const [selectedElement, setSelectedElement] = useState<SelectedElement | null>(null);
+  const [selectedElement, setSelectedElement] =
+    useState<SelectedElement | null>(null);
 
   // Listen for element selection events
   useEffect(() => {
@@ -72,10 +86,16 @@ export function ElementPicker({
       onElementSelected?.(element);
     };
 
-    document.addEventListener('midscene-element-selected', handleElementSelected as EventListener);
+    document.addEventListener(
+      'midscene-element-selected',
+      handleElementSelected as EventListener,
+    );
 
     return () => {
-      document.removeEventListener('midscene-element-selected', handleElementSelected as EventListener);
+      document.removeEventListener(
+        'midscene-element-selected',
+        handleElementSelected as EventListener,
+      );
     };
   }, [onElementSelected]);
 
@@ -119,10 +139,13 @@ export function ElementPicker({
   }, []);
 
   // Copy selector to clipboard
-  const handleCopySelector = useCallback((selector: string) => {
-    navigator.clipboard.writeText(selector);
-    message.success(t('copiedToClipboard'));
-  }, [t]);
+  const handleCopySelector = useCallback(
+    (selector: string) => {
+      navigator.clipboard.writeText(selector);
+      message.success(t('copiedToClipboard'));
+    },
+    [t],
+  );
 
   if (!visible) {
     return null;
@@ -201,13 +224,15 @@ export function ElementPicker({
               <Paragraph style={{ marginBottom: 8 }}>
                 <Text strong>{t('position')}：</Text>
                 <Text>
-                  ({Math.round(selectedElement.center[0])}, {Math.round(selectedElement.center[1])})
+                  ({Math.round(selectedElement.center[0])},{' '}
+                  {Math.round(selectedElement.center[1])})
                 </Text>
               </Paragraph>
               <Paragraph style={{ marginBottom: 8 }}>
                 <Text strong>{t('size')}：</Text>
                 <Text>
-                  {Math.round(selectedElement.rect.width)} × {Math.round(selectedElement.rect.height)}
+                  {Math.round(selectedElement.rect.width)} ×{' '}
+                  {Math.round(selectedElement.rect.height)}
                 </Text>
               </Paragraph>
             </div>
@@ -240,8 +265,13 @@ export function ElementPicker({
                         }
                         title={
                           <Space>
-                            <Text>{selector.value.slice(0, 40)}{selector.value.length > 40 ? '...' : ''}</Text>
-                            <Tag color={getPriorityColor(selector.priority)}>{selector.priority}%</Tag>
+                            <Text>
+                              {selector.value.slice(0, 40)}
+                              {selector.value.length > 40 ? '...' : ''}
+                            </Text>
+                            <Tag color={getPriorityColor(selector.priority)}>
+                              {selector.priority}%
+                            </Tag>
                           </Space>
                         }
                         description={selector.reason}

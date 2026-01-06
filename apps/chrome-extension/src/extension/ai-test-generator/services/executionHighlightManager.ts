@@ -6,7 +6,14 @@
 import type { HighlightRect, HighlightType } from './executionHighlighter';
 
 interface HighlightMessage {
-  type: 'highlight' | 'highlightCurrent' | 'markAsSuccess' | 'markAsFailed' | 'clear' | 'clearAll' | 'cleanup';
+  type:
+    | 'highlight'
+    | 'highlightCurrent'
+    | 'markAsSuccess'
+    | 'markAsFailed'
+    | 'clear'
+    | 'clearAll'
+    | 'cleanup';
   rect?: HighlightRect;
   highlightType?: HighlightType;
 }
@@ -78,14 +85,16 @@ function initHighlighterInPage(): void {
 
       const highlight = document.createElement('div');
       highlight.id = id;
-      highlight.style.cssText =
-        `position:absolute;left:${rect.x}px;top:${rect.y}px;width:${rect.width}px;height:${rect.height}px;border:3px solid ${color};border-radius:4px;background-color:${color}20;box-sizing:border-box;transition:all 0.3s ease;animation:midscene-pulse 1s ease-in-out infinite;`;
+      highlight.style.cssText = `position:absolute;left:${rect.x}px;top:${rect.y}px;width:${rect.width}px;height:${rect.height}px;border:3px solid ${color};border-radius:4px;background-color:${color}20;box-sizing:border-box;transition:all 0.3s ease;animation:midscene-pulse 1s ease-in-out infinite;`;
 
       overlay.appendChild(highlight);
       highlights.set(id, highlight);
 
       if (duration) {
-        setTimeout(() => window.__midsceneHighlighterAPI.removeHighlight(id), duration);
+        setTimeout(
+          () => window.__midsceneHighlighterAPI.removeHighlight(id),
+          duration,
+        );
       }
 
       if (currentHighlight && currentHighlight.parentNode) {
@@ -121,7 +130,9 @@ function initHighlighterInPage(): void {
       if (currentHighlight) {
         currentHighlight.style.borderColor = color;
         currentHighlight.style.backgroundColor = color + '20';
-        currentHighlight.style.animation = animate ? 'midshake 0.5s ease-in-out' : 'none';
+        currentHighlight.style.animation = animate
+          ? 'midshake 0.5s ease-in-out'
+          : 'none';
       }
     },
     markSuccess: () => {
@@ -180,7 +191,11 @@ function initHighlighterInPage(): void {
         if (currentHighlight && currentHighlight.parentNode) {
           currentHighlight.parentNode.removeChild(currentHighlight);
         }
-        window.__midsceneHighlighterAPI.createHighlight(rect, 'current', rect?.duration);
+        window.__midsceneHighlighterAPI.createHighlight(
+          rect,
+          'current',
+          rect?.duration,
+        );
         break;
       case 'markAsSuccess':
         window.__midsceneHighlighterAPI.markSuccess();
@@ -313,10 +328,16 @@ export class ExecutionHighlightManager {
   /**
    * Highlight an element
    */
-  async highlight(rect: HighlightRect, type: HighlightType = 'current'): Promise<void> {
+  async highlight(
+    rect: HighlightRect,
+    type: HighlightType = 'current',
+  ): Promise<void> {
     await this.sendMessage({
       type: 'highlight',
-      rect: { ...rect, duration: rect.duration || this.config.autoRemoveDuration },
+      rect: {
+        ...rect,
+        duration: rect.duration || this.config.autoRemoveDuration,
+      },
       highlightType: type,
     });
   }
@@ -327,7 +348,10 @@ export class ExecutionHighlightManager {
   async highlightCurrent(rect: HighlightRect): Promise<void> {
     await this.sendMessage({
       type: 'highlightCurrent',
-      rect: { ...rect, duration: rect.duration || this.config.autoRemoveDuration },
+      rect: {
+        ...rect,
+        duration: rect.duration || this.config.autoRemoveDuration,
+      },
       highlightType: 'current',
     });
   }

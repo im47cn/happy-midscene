@@ -2,9 +2,13 @@
  * Unit tests for Action Executor
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ActionExecutor, getActionExecutor, resetActionExecutor } from '../actionExecutor';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { DebugAction } from '../../../types/debugAssistant';
+import {
+  ActionExecutor,
+  getActionExecutor,
+  resetActionExecutor,
+} from '../actionExecutor';
 
 // Mock agent
 const mockAgent = {
@@ -146,7 +150,12 @@ describe('ActionExecutor', () => {
           rect: { left: 100, top: 200, width: 50, height: 30 },
         },
       ]);
-      mockAgent.page.evaluate.mockResolvedValue([{ id: 'highlight-1', rect: { left: 100, top: 200, width: 50, height: 30 } }]);
+      mockAgent.page.evaluate.mockResolvedValue([
+        {
+          id: 'highlight-1',
+          rect: { left: 100, top: 200, width: 50, height: 30 },
+        },
+      ]);
 
       const action: DebugAction = {
         type: 'highlight',

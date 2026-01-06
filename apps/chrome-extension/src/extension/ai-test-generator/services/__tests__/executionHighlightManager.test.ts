@@ -2,9 +2,9 @@
  * Unit tests for ExecutionHighlightManager
  */
 
-import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  ExecutionHighlightManager,
+  type ExecutionHighlightManager,
   getHighlightManager,
   resetHighlightManager,
 } from '../executionHighlightManager';
@@ -137,7 +137,9 @@ describe('ExecutionHighlightManager', () => {
     });
 
     it('should handle script injection error', async () => {
-      (mockExecuteScript as any).mockRejectedValue(new Error('Injection failed'));
+      (mockExecuteScript as any).mockRejectedValue(
+        new Error('Injection failed'),
+      );
 
       const result = await manager.initialize();
 

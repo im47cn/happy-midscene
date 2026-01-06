@@ -4,12 +4,12 @@
  */
 
 import type {
-  DebugContext,
-  Message,
-  LLMContext,
   ConsoleError,
-  NetworkError,
+  DebugContext,
   ElementInfo,
+  LLMContext,
+  Message,
+  NetworkError,
 } from '../../types/debugAssistant';
 
 export interface ContextBuilderOptions {
@@ -44,11 +44,7 @@ export class ContextBuilder {
   /**
    * Build complete LLM context from debug context and messages
    */
-  build(
-    debugContext: any,
-    messages: Message[],
-    userQuery: string = '',
-  ): LLMContext {
+  build(debugContext: any, messages: Message[], userQuery = ''): LLMContext {
     const systemPrompt = this.buildSystemPrompt(debugContext);
     const conversationHistory = this.buildConversationHistory(messages);
     const images = this.collectImages(debugContext);
@@ -110,8 +106,8 @@ export class ContextBuilder {
     if (context.executionHistory && context.executionHistory.length > 0) {
       // For string array format (tests), count based on "FAILED" in string
       if (typeof context.executionHistory[0] === 'string') {
-        const failCount = context.executionHistory.filter((h: string) =>
-          h.includes('FAILED') || h.includes('failed')
+        const failCount = context.executionHistory.filter(
+          (h: string) => h.includes('FAILED') || h.includes('failed'),
         ).length;
         const successCount = context.executionHistory.length - failCount;
         prompt += `
@@ -122,7 +118,9 @@ export class ContextBuilder {
 `;
       } else {
         // StepResult format
-        const successCount = context.executionHistory.filter((r: any) => r.success).length;
+        const successCount = context.executionHistory.filter(
+          (r: any) => r.success,
+        ).length;
         const failCount = context.executionHistory.length - successCount;
         prompt += `
 ## 执行历史
@@ -198,7 +196,10 @@ export class ContextBuilder {
 
     // Previous screenshots for comparison - limit by maxImages config
     if (context.previousScreenshots && context.previousScreenshots.length > 0) {
-      const previousCount = Math.min(this.config.maxImages - 1, context.previousScreenshots.length);
+      const previousCount = Math.min(
+        this.config.maxImages - 1,
+        context.previousScreenshots.length,
+      );
       const previousScreenshots = context.previousScreenshots
         .slice(-previousCount)
         .reverse(); // Most recent first
@@ -219,24 +220,34 @@ export class ContextBuilder {
   buildAdditionalContext(
     context: any,
     messages: Message[],
-    userQuery: string = '',
+    userQuery = '',
   ): string {
     // Use provided userQuery or extract from last user message
-    const query = userQuery.toLowerCase() ||
-      [...messages].reverse().find((m) => m.role === 'user')?.content.toLowerCase() ||
+    const query =
+      userQuery.toLowerCase() ||
+      [...messages]
+        .reverse()
+        .find((m) => m.role === 'user')
+        ?.content.toLowerCase() ||
       '';
 
     let additionalContext = '';
 
     // Handle different context structures for console errors
     const consoleErrors = context.consoleErrors || [];
-    if (consoleErrors.length > 0 && this.shouldIncludeContext('console', query)) {
+    if (
+      consoleErrors.length > 0 &&
+      this.shouldIncludeContext('console', query)
+    ) {
       additionalContext += this.formatConsoleErrors(consoleErrors);
     }
 
     // Handle different context structures for network errors
     const networkErrors = context.networkErrors || [];
-    if (networkErrors.length > 0 && this.shouldIncludeContext('network', query)) {
+    if (
+      networkErrors.length > 0 &&
+      this.shouldIncludeContext('network', query)
+    ) {
       additionalContext += this.formatNetworkErrors(networkErrors);
     }
 
@@ -250,8 +261,13 @@ export class ContextBuilder {
     }
 
     // Handle execution history if asking about history
-    if (context.executionHistory && this.shouldIncludeContext('history', query)) {
-      additionalContext += this.formatExecutionHistory(context.executionHistory);
+    if (
+      context.executionHistory &&
+      this.shouldIncludeContext('history', query)
+    ) {
+      additionalContext += this.formatExecutionHistory(
+        context.executionHistory,
+      );
     }
 
     return additionalContext;
@@ -262,20 +278,60 @@ export class ContextBuilder {
    * Can be called with (contextType, userQuery) or (keyword, contextString)
    */
   private shouldIncludeContext(
-    contextTypeOrKeyword: 'console' | 'network' | 'element' | 'history' | string,
+    contextTypeOrKeyword:
+      | 'console'
+      | 'network'
+      | 'element'
+      | 'history'
+      | string,
     userQueryOrContextString: string,
   ): boolean {
     const contextKeywords: Record<string, string[]> = {
-      console: ['控制台', '日志', 'console', 'log', '错误', 'warning', 'error', '报错'],
+      console: [
+        '控制台',
+        '日志',
+        'console',
+        'log',
+        '错误',
+        'warning',
+        'error',
+        '报错',
+      ],
       network: ['网络', '请求', 'request', 'network', '接口', 'api'],
-      element: ['元素', '按钮', '输入框', 'element', 'elements', 'button', 'input', '找到', 'locate', 'visible', '可见', 'find', '查找'],
-      history: ['之前', '历史', '上一步', 'previous', 'history', 'execution', '执行', 'steps', '步骤'],
+      element: [
+        '元素',
+        '按钮',
+        '输入框',
+        'element',
+        'elements',
+        'button',
+        'input',
+        '找到',
+        'locate',
+        'visible',
+        '可见',
+        'find',
+        '查找',
+      ],
+      history: [
+        '之前',
+        '历史',
+        '上一步',
+        'previous',
+        'history',
+        'execution',
+        '执行',
+        'steps',
+        '步骤',
+      ],
     };
 
     // Check if first argument is a valid context type
     if (contextTypeOrKeyword in contextKeywords) {
       const keywords = contextKeywords[contextTypeOrKeyword];
-      return keywords.some((keyword) => userQueryOrContextString.includes(keyword));
+      return keywords.some((keyword) =>
+        userQueryOrContextString.includes(keyword),
+      );
     }
 
     // Otherwise, treat first argument as a keyword and check if it exists in any context
@@ -317,12 +373,16 @@ export class ContextBuilder {
     const errorLines = errors.slice(-10).map((e) => {
       // Handle both string format (from tests) and ConsoleError objects
       if (typeof e === 'string') {
-        const level = e.toLowerCase().includes('error') ? '❌' :
-                      e.toLowerCase().includes('warning') ? '⚠️' : 'ℹ️';
+        const level = e.toLowerCase().includes('error')
+          ? '❌'
+          : e.toLowerCase().includes('warning')
+            ? '⚠️'
+            : 'ℹ️';
         return `${level} ${e}`;
       }
       // ConsoleError object format
-      const level = e.level === 'error' ? '❌' : e.level === 'warning' ? '⚠️' : 'ℹ️';
+      const level =
+        e.level === 'error' ? '❌' : e.level === 'warning' ? '⚠️' : 'ℹ️';
       return `${level} ${e.message}${e.source ? ` (${e.source})` : ''}`;
     });
 
@@ -385,7 +445,8 @@ ${elementLines.join('\n')}
     const historyLines = history.map((h: any, i: number) => {
       if (typeof h === 'string') {
         // Test format: "Step 1: Navigate to page" or "Step 5: Click submit - FAILED"
-        const status = h.includes('FAILED') || h.includes('failed') ? '❌' : '✅';
+        const status =
+          h.includes('FAILED') || h.includes('failed') ? '❌' : '✅';
         return `${i + 1}. ${status} ${h}`;
       }
       // StepResult format

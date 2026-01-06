@@ -11,12 +11,18 @@ import {
   SendOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
-import { Button, Drawer, Input, Space, Tabs, Typography, Badge } from 'antd';
-import { useState, useRef, useEffect } from 'react';
-import type { DebugContext, Message, QuickQuestion } from '../../types/debugAssistant';
+import { Badge, Button, Drawer, Input, Space, Tabs, Typography } from 'antd';
+import { useEffect, useRef, useState } from 'react';
+import { DEFAULT_QUICK_QUESTIONS } from '../../services/debugAssistant/prompts';
+import type {
+  DebugAction,
+  DebugContext,
+  FixSuggestion,
+  Message,
+  QuickQuestion,
+} from '../../types/debugAssistant';
 import { DebugAssistantPanel } from './DebugAssistantPanel';
 import { QuickQuestions } from './QuickQuestions';
-import { DEFAULT_QUICK_QUESTIONS } from '../../services/debugAssistant/prompts';
 
 const { Text } = Typography;
 
@@ -25,8 +31,8 @@ interface DebugAssistantProps {
   debugContext?: DebugContext;
   onClose?: () => void;
   onSendMessage?: (message: string) => Promise<Message>;
-  onExecuteAction?: (actionType: string, target?: string, value?: any) => Promise<void>;
-  onApplyFix?: (fixId: string) => Promise<void>;
+  onExecuteAction?: (action: DebugAction) => Promise<void>;
+  onApplyFix?: (fix: FixSuggestion) => Promise<void>;
   quickQuestions?: QuickQuestion[];
   loading?: boolean;
 }
@@ -43,7 +49,9 @@ export function DebugAssistant({
 }: DebugAssistantProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
-  const [activeTab, setActiveTab] = useState<'chat' | 'actions' | 'history'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'actions' | 'history'>(
+    'chat',
+  );
   const [unreadCount, setUnreadCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -55,10 +63,11 @@ export function DebugAssistant({
   // Handle quick question click
   const handleQuickQuestion = async (question: QuickQuestion) => {
     if (onSendMessage) {
-      setInputValue(question.question);
+      const questionText = question.question || question.text;
+      setInputValue(questionText);
       // Auto-send after a short delay
       setTimeout(async () => {
-        const response = await onSendMessage(question.question);
+        const response = await onSendMessage(questionText);
         setMessages((prev) => [...prev, response]);
         setUnreadCount(0);
       }, 100);
@@ -93,7 +102,7 @@ export function DebugAssistant({
         role: 'assistant',
         content: `抱歉，发生了错误：${error instanceof Error ? error.message : String(error)}`,
         timestamp: Date.now(),
-        error: true,
+        error: error instanceof Error ? error.message : String(error),
       };
       setMessages((prev) => [...prev, errorMessage]);
     }
@@ -115,7 +124,8 @@ export function DebugAssistant({
 
   // Get error info for header
   const hasError = !!debugContext?.lastError;
-  const errorType = debugContext?.lastError?.message?.split(':')[0] || '未知错误';
+  const errorType =
+    debugContext?.lastError?.message?.split(':')[0] || '未知错误';
 
   return (
     <Drawer
@@ -168,8 +178,6 @@ export function DebugAssistant({
                 onKeyDown={handleKeyPress}
                 disabled={loading}
                 allowClear
-                multiline
-                autoSize={{ minRows: 1, maxRows: 4 }}
               />
               <Button
                 type="primary"
@@ -226,17 +234,25 @@ export function DebugAssistant({
               <div style={{ padding: 16 }}>
                 <Text type="secondary">执行历史</Text>
                 {debugContext?.executionHistory?.map((step, index) => (
-                  <div key={index} style={{ padding: '8px 0', borderBottom: '1px solid #f0f0f0' }}>
-                    <Text>{step}</Text>
+                  <div
+                    key={index}
+                    style={{
+                      padding: '8px 0',
+                      borderBottom: '1px solid #f0f0f0',
+                    }}
+                  >
+                    <Text>{step.description}</Text>
                   </div>
                 ))}
               </div>
             ),
           },
         ]}
-        styles={{
-          body: { padding: 0 },
-        }}
+        style={
+          {
+            body: { padding: 0 },
+          } as any
+        }
       />
       <div ref={messagesEndRef} />
     </Drawer>
@@ -249,7 +265,7 @@ export function DebugAssistant({
 interface DebugAssistantInlineProps {
   debugContext?: DebugContext;
   onSendMessage?: (message: string) => Promise<Message>;
-  onExecuteAction?: (actionType: string, target?: string, value?: any) => Promise<void>;
+  onExecuteAction?: (action: DebugAction) => Promise<void>;
 }
 
 export function DebugAssistantInline({
@@ -292,7 +308,9 @@ export function DebugAssistantInline({
           <BugOutlined />
           <Text>调试助手</Text>
           {debugContext?.lastError && (
-            <Text type="danger">{debugContext.lastError.message.slice(0, 30)}...</Text>
+            <Text type="danger">
+              {debugContext.lastError.message.slice(0, 30)}...
+            </Text>
           )}
         </Space>
         <Button type="text" size="small">
@@ -310,7 +328,13 @@ export function DebugAssistantInline({
             autoSize={{ minRows: 2, maxRows: 6 }}
             disabled={loading}
           />
-          <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end' }}>
+          <div
+            style={{
+              marginTop: 8,
+              display: 'flex',
+              justifyContent: 'flex-end',
+            }}
+          >
             <Button
               type="primary"
               size="small"

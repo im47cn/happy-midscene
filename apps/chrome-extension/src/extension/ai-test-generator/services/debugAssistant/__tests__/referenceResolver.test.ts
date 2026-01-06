@@ -2,9 +2,9 @@
  * Unit tests for reference resolver
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { ReferenceResolver } from '../referenceResolver';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { DebugContext } from '../../../types/debugAssistant';
+import { ReferenceResolver } from '../referenceResolver';
 
 describe('ReferenceResolver', () => {
   let debugContext: DebugContext;
@@ -38,7 +38,9 @@ describe('ReferenceResolver', () => {
   describe('resolveActionReference', () => {
     it('should parse ACTION tag format', () => {
       const text = '[ACTION:click:submit-button]';
-      const action = ReferenceResolver.resolveActionReference(text, { context: debugContext });
+      const action = ReferenceResolver.resolveActionReference(text, {
+        context: debugContext,
+      });
 
       expect(action).not.toBeNull();
       expect(action?.type).toBe('click');
@@ -47,7 +49,9 @@ describe('ReferenceResolver', () => {
 
     it('should parse ACTION tag with value', () => {
       const text = '[ACTION:input:username:text-value]';
-      const action = ReferenceResolver.resolveActionReference(text, { context: debugContext });
+      const action = ReferenceResolver.resolveActionReference(text, {
+        context: debugContext,
+      });
 
       expect(action?.type).toBe('input');
       expect(action?.target).toBe('username');
@@ -55,11 +59,7 @@ describe('ReferenceResolver', () => {
     });
 
     it('should parse click action patterns', () => {
-      const patterns = [
-        '点击提交按钮',
-        'click the button',
-        'Click submit',
-      ];
+      const patterns = ['点击提交按钮', 'click the button', 'Click submit'];
 
       for (const pattern of patterns) {
         const action = ReferenceResolver.resolveActionReference(pattern, {
@@ -70,10 +70,7 @@ describe('ReferenceResolver', () => {
     });
 
     it('should parse input action patterns', () => {
-      const patterns = [
-        '输入test到username',
-        'type hello into input',
-      ];
+      const patterns = ['输入test到username', 'type hello into input'];
 
       for (const pattern of patterns) {
         const action = ReferenceResolver.resolveActionReference(pattern, {
@@ -150,7 +147,8 @@ describe('ReferenceResolver', () => {
 
   describe('resolveSuggestionReference', () => {
     it('should parse SUGGESTION tag format', () => {
-      const text = '[SUGGESTION:Add wait time|await page.waitForTimeout(5000)|0.9]';
+      const text =
+        '[SUGGESTION:Add wait time|await page.waitForTimeout(5000)|0.9]';
       const suggestion = ReferenceResolver.resolveSuggestionReference(text, {
         context: debugContext,
       });
@@ -321,14 +319,18 @@ Try this approach.
       expect(ReferenceResolver.normalizeElementReference('"button"')).toBe(
         'button',
       );
-      expect(ReferenceResolver.normalizeElementReference("'text'")).toBe('text');
+      expect(ReferenceResolver.normalizeElementReference("'text'")).toBe(
+        'text',
+      );
     });
 
     it('should remove brackets', () => {
       expect(ReferenceResolver.normalizeElementReference('【button】')).toBe(
         'button',
       );
-      expect(ReferenceResolver.normalizeElementReference('「text」')).toBe('text');
+      expect(ReferenceResolver.normalizeElementReference('「text」')).toBe(
+        'text',
+      );
       expect(ReferenceResolver.normalizeElementReference('『el』')).toBe('el');
     });
 

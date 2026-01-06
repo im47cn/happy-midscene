@@ -3,7 +3,7 @@
  * Stores and retrieves debug patterns and fix suggestions
  */
 
-import type { FixSuggestion, DebugKnowledge } from '../../types/debugAssistant';
+import type { DebugKnowledge, FixSuggestion } from '../../types/debugAssistant';
 
 export interface KnowledgeEntry {
   id: string;
@@ -52,7 +52,9 @@ export class KnowledgeBase {
   /**
    * Add a new entry to the knowledge base
    */
-  addEntry(entry: Omit<KnowledgeEntry, 'id' | 'createdAt' | 'lastUsedAt'>): string {
+  addEntry(
+    entry: Omit<KnowledgeEntry, 'id' | 'createdAt' | 'lastUsedAt'>,
+  ): string {
     // Check for similar existing entries
     const existing = this.findSimilarEntry(entry.pattern);
     if (existing) {
@@ -61,9 +63,14 @@ export class KnowledgeBase {
       existing.lastUsedAt = Date.now();
       // Merge fixes
       for (const fix of entry.fixes) {
-        const existingFix = existing.fixes.find((f) => f.description === fix.description);
+        const existingFix = existing.fixes.find(
+          (f) => f.description === fix.description,
+        );
         if (existingFix) {
-          existingFix.confidence = Math.max(existingFix.confidence, fix.confidence);
+          existingFix.confidence = Math.max(
+            existingFix.confidence,
+            fix.confidence,
+          );
         } else {
           existing.fixes.push(fix);
         }
@@ -108,7 +115,10 @@ export class KnowledgeBase {
       const patternLower = entry.pattern.toLowerCase();
 
       // Exact match gets highest score
-      if (patternLower.includes(queryLower) || queryLower.includes(patternLower)) {
+      if (
+        patternLower.includes(queryLower) ||
+        queryLower.includes(patternLower)
+      ) {
         score += 10;
         hasMatch = true;
       }
@@ -123,7 +133,10 @@ export class KnowledgeBase {
 
       // Tag matches
       for (const tag of entry.tags) {
-        if (tag.toLowerCase().includes(queryLower) || queryLower.includes(tag.toLowerCase())) {
+        if (
+          tag.toLowerCase().includes(queryLower) ||
+          queryLower.includes(tag.toLowerCase())
+        ) {
           score += 3;
           hasMatch = true;
         }
@@ -136,7 +149,8 @@ export class KnowledgeBase {
         score += entry.successRate * 5;
 
         // Recency boost
-        const daysSinceUsed = (Date.now() - entry.lastUsedAt) / (1000 * 60 * 60 * 24);
+        const daysSinceUsed =
+          (Date.now() - entry.lastUsedAt) / (1000 * 60 * 60 * 24);
         if (daysSinceUsed < 7) {
           score += 2;
         } else if (daysSinceUsed < 30) {
@@ -160,11 +174,15 @@ export class KnowledgeBase {
    */
   private findSimilarEntry(pattern: string): KnowledgeEntry | null {
     const patternLower = pattern.toLowerCase();
-    const patternWords = new Set(patternLower.split(/\s+/).filter((w) => w.length > 3));
+    const patternWords = new Set(
+      patternLower.split(/\s+/).filter((w) => w.length > 3),
+    );
 
     for (const entry of this.entries.values()) {
       const entryLower = entry.pattern.toLowerCase();
-      const entryWords = new Set(entryLower.split(/\s+/).filter((w) => w.length > 3));
+      const entryWords = new Set(
+        entryLower.split(/\s+/).filter((w) => w.length > 3),
+      );
 
       // Skip if both patterns are empty after filtering (only short words)
       if (patternWords.size === 0 && entryWords.size === 0) {
@@ -195,7 +213,8 @@ export class KnowledgeBase {
         }
 
         // If high overlap, consider it similar
-        const overlapRatio = overlapCount / Math.min(patternWords.size, entryWords.size);
+        const overlapRatio =
+          overlapCount / Math.min(patternWords.size, entryWords.size);
         if (overlapRatio >= 0.75) {
           return entry;
         }
@@ -203,10 +222,15 @@ export class KnowledgeBase {
 
       // Check if one contains the other (only for multi-word patterns)
       if (patternWords.size > 1 || entryWords.size > 1) {
-        const shorter = patternLower.length < entryLower.length ? patternLower : entryLower;
-        const longer = patternLower.length < entryLower.length ? entryLower : patternLower;
+        const shorter =
+          patternLower.length < entryLower.length ? patternLower : entryLower;
+        const longer =
+          patternLower.length < entryLower.length ? entryLower : patternLower;
         // Only consider a match if the shorter is at least 85% of the longer's length
-        if ((shorter.length / longer.length) >= 0.85 && longer.includes(shorter)) {
+        if (
+          shorter.length / longer.length >= 0.85 &&
+          longer.includes(shorter)
+        ) {
           return entry;
         }
       }
@@ -317,8 +341,12 @@ export class KnowledgeBase {
   private pruneOldEntries(): void {
     const sorted = Array.from(this.entries.entries()).sort((a, b) => {
       // Keep entries with higher success rate and more recent use
-      const scoreA = a[1].successRate * 100 + (10000 - (Date.now() - a[1].lastUsedAt) / 1000);
-      const scoreB = b[1].successRate * 100 + (10000 - (Date.now() - b[1].lastUsedAt) / 1000);
+      const scoreA =
+        a[1].successRate * 100 +
+        (10000 - (Date.now() - a[1].lastUsedAt) / 1000);
+      const scoreB =
+        b[1].successRate * 100 +
+        (10000 - (Date.now() - b[1].lastUsedAt) / 1000);
       return scoreB - scoreA;
     });
 
@@ -396,7 +424,9 @@ export class KnowledgeBase {
   /**
    * Convert DebugKnowledge to KnowledgeEntry
    */
-  static fromDebugKnowledge(knowledge: DebugKnowledge): Omit<KnowledgeEntry, 'id' | 'createdAt' | 'lastUsedAt'> {
+  static fromDebugKnowledge(
+    knowledge: DebugKnowledge,
+  ): Omit<KnowledgeEntry, 'id' | 'createdAt' | 'lastUsedAt'> {
     return {
       pattern: knowledge.pattern,
       fixes: knowledge.fixes,
@@ -423,7 +453,9 @@ export class KnowledgeBase {
 // Export singleton getter
 let knowledgeBaseInstance: KnowledgeBase | null = null;
 
-export function getKnowledgeBase(options?: KnowledgeBaseOptions): KnowledgeBase {
+export function getKnowledgeBase(
+  options?: KnowledgeBaseOptions,
+): KnowledgeBase {
   if (!knowledgeBaseInstance) {
     knowledgeBaseInstance = new KnowledgeBase(options);
   }

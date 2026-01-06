@@ -19,10 +19,10 @@ export type SelectionState = 'idle' | 'selecting' | 'selected' | 'validating';
  * Repair action type
  */
 export type RepairActionType =
-  | 'update_selector'      // Update the element selector
-  | 'add_fallback'         // Add fallback selector
-  | 'update_description'   // Update semantic description
-  | 'add_wait_condition';  // Add wait condition for element
+  | 'update_selector' // Update the element selector
+  | 'add_fallback' // Add fallback selector
+  | 'update_description' // Update semantic description
+  | 'add_wait_condition'; // Add wait condition for element
 
 /**
  * Selected element information
@@ -54,8 +54,8 @@ export interface SelectedElement {
 export interface ElementSelector {
   type: 'css' | 'xpath' | 'text' | 'semantic' | 'data-testid';
   value: string;
-  priority: number;       // 0-100, higher is better
-  reason: string;         // Why this selector is suggested
+  priority: number; // 0-100, higher is better
+  reason: string; // Why this selector is suggested
 }
 
 /**

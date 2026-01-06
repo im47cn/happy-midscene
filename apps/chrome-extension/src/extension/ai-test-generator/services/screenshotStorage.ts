@@ -157,7 +157,9 @@ export class ScreenshotStorage {
           }
 
           ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', this.config.compressionQuality));
+          resolve(
+            canvas.toDataURL('image/jpeg', this.config.compressionQuality),
+          );
         } catch (error) {
           reject(error);
         }
@@ -190,10 +192,14 @@ export class ScreenshotStorage {
           ctx.drawImage(img, 0, 0);
 
           // Get compressed data URL
-          const compressed = canvas.toDataURL('image/jpeg', this.config.compressionQuality);
+          const compressed = canvas.toDataURL(
+            'image/jpeg',
+            this.config.compressionQuality,
+          );
 
           // Calculate approximate size
-          const base64Length = compressed.length - 'data:image/jpeg;base64,'.length;
+          const base64Length =
+            compressed.length - 'data:image/jpeg;base64,'.length;
           const sizeInBytes = (base64Length * 3) / 4;
 
           resolve({
@@ -222,7 +228,9 @@ export class ScreenshotStorage {
 
     await this.init();
 
-    const id = metadata.id || `screenshot_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const id =
+      metadata.id ||
+      `screenshot_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const timestamp = metadata.timestamp || Date.now();
 
     const fullMetadata: ScreenshotMetadata = {
@@ -234,7 +242,8 @@ export class ScreenshotStorage {
 
     try {
       // Compress screenshot
-      const { dataUrl: compressedDataUrl } = await this.compressScreenshot(dataUrl);
+      const { dataUrl: compressedDataUrl } =
+        await this.compressScreenshot(dataUrl);
 
       // Generate thumbnail
       let thumbnailUrl: string | undefined;
@@ -275,7 +284,10 @@ export class ScreenshotStorage {
   /**
    * Store screenshot in IndexedDB
    */
-  private async storeToIndexedDB(id: string, screenshot: StoredScreenshot): Promise<void> {
+  private async storeToIndexedDB(
+    id: string,
+    screenshot: StoredScreenshot,
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open('MidsceneScreenshots', 1);
 
@@ -323,7 +335,10 @@ export class ScreenshotStorage {
     try {
       return await this.retrieveFromIndexedDB(id);
     } catch (error) {
-      console.error('[ScreenshotStorage] Failed to retrieve screenshot:', error);
+      console.error(
+        '[ScreenshotStorage] Failed to retrieve screenshot:',
+        error,
+      );
       return null;
     }
   }
@@ -331,7 +346,9 @@ export class ScreenshotStorage {
   /**
    * Retrieve screenshot from IndexedDB
    */
-  private async retrieveFromIndexedDB(id: string): Promise<StoredScreenshot | null> {
+  private async retrieveFromIndexedDB(
+    id: string,
+  ): Promise<StoredScreenshot | null> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open('MidsceneScreenshots', 1);
 
@@ -498,7 +515,10 @@ export class ScreenshotStorage {
     metadata.sort((a, b) => a.timestamp - b.timestamp);
 
     // Delete oldest screenshots
-    const toDelete = metadata.slice(0, metadata.length - this.config.maxScreenshots);
+    const toDelete = metadata.slice(
+      0,
+      metadata.length - this.config.maxScreenshots,
+    );
     for (const meta of toDelete) {
       await this.deleteFromIndexedDB(meta.id);
       this.metadataCache.delete(meta.id);
@@ -528,7 +548,9 @@ export class ScreenshotStorage {
 
     if (toDelete.length > 0) {
       await this.saveMetadata();
-      console.log(`[ScreenshotStorage] Cleaned up ${toDelete.length} old screenshots`);
+      console.log(
+        `[ScreenshotStorage] Cleaned up ${toDelete.length} old screenshots`,
+      );
     }
   }
 
@@ -556,12 +578,10 @@ export class ScreenshotStorage {
     return {
       count: metadata.length,
       totalSize,
-      oldestTimestamp: metadata.length > 0
-        ? Math.min(...metadata.map((m) => m.timestamp))
-        : 0,
-      newestTimestamp: metadata.length > 0
-        ? Math.max(...metadata.map((m) => m.timestamp))
-        : 0,
+      oldestTimestamp:
+        metadata.length > 0 ? Math.min(...metadata.map((m) => m.timestamp)) : 0,
+      newestTimestamp:
+        metadata.length > 0 ? Math.max(...metadata.map((m) => m.timestamp)) : 0,
     };
   }
 
@@ -571,10 +591,13 @@ export class ScreenshotStorage {
   private async calculateIndexedDBSize(): Promise<number> {
     return new Promise((resolve) => {
       if (navigator.storage && navigator.storage.estimate) {
-        navigator.storage.estimate().then((estimate) => {
-          // This is a rough estimate
-          resolve(estimate.usage || 0);
-        }).catch(() => resolve(0));
+        navigator.storage
+          .estimate()
+          .then((estimate) => {
+            // This is a rough estimate
+            resolve(estimate.usage || 0);
+          })
+          .catch(() => resolve(0));
       } else {
         resolve(0);
       }
@@ -588,7 +611,9 @@ export class ScreenshotStorage {
     await this.init();
 
     const metadata = testCaseId
-      ? Array.from(this.metadataCache.values()).filter((m) => m.testCaseId === testCaseId)
+      ? Array.from(this.metadataCache.values()).filter(
+          (m) => m.testCaseId === testCaseId,
+        )
       : Array.from(this.metadataCache.values());
 
     if (metadata.length === 0) {

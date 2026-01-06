@@ -2,9 +2,9 @@
  * Unit tests for Context Builder
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getContextBuilder, resetContextBuilder } from '../contextBuilder';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { DebugContext, Message } from '../../../types/debugAssistant';
+import { getContextBuilder, resetContextBuilder } from '../contextBuilder';
 
 describe('ContextBuilder', () => {
   let debugContext: DebugContext;
@@ -29,9 +29,16 @@ describe('ContextBuilder', () => {
         description: 'Click submit button',
         index: 5,
       },
-      consoleErrors: ['Error: Network request failed', 'Warning: Deprecated API'],
+      consoleErrors: [
+        'Error: Network request failed',
+        'Warning: Deprecated API',
+      ],
       networkErrors: [
-        { url: 'https://api.example.com/data', status: 500, error: 'Internal Server Error' },
+        {
+          url: 'https://api.example.com/data',
+          status: 500,
+          error: 'Internal Server Error',
+        },
       ],
       executionHistory: [
         'Step 1: Navigate to page',
@@ -51,7 +58,8 @@ describe('ContextBuilder', () => {
       },
       {
         role: 'assistant',
-        content: 'The test failed because the submit button could not be found.',
+        content:
+          'The test failed because the submit button could not be found.',
         timestamp: Date.now(),
       },
     ];
@@ -60,7 +68,11 @@ describe('ContextBuilder', () => {
   describe('build', () => {
     it('should build complete LLM context', () => {
       const contextBuilder = getContextBuilder();
-      const context = contextBuilder.build(debugContext, conversationHistory, 'Tell me more about this error');
+      const context = contextBuilder.build(
+        debugContext,
+        conversationHistory,
+        'Tell me more about this error',
+      );
 
       expect(context).toBeDefined();
       expect(context.systemPrompt).toBeTruthy();
@@ -70,7 +82,11 @@ describe('ContextBuilder', () => {
 
     it('should include system prompt in Chinese', () => {
       const contextBuilder = getContextBuilder();
-      const context = contextBuilder.build(debugContext, conversationHistory, '');
+      const context = contextBuilder.build(
+        debugContext,
+        conversationHistory,
+        '',
+      );
 
       expect(context.systemPrompt).toContain('Midscene');
       expect(context.systemPrompt).toContain('调试助手');
@@ -94,7 +110,11 @@ describe('ContextBuilder', () => {
 
     it('should include current screenshot and previous screenshots', () => {
       const contextBuilder = getContextBuilder();
-      const context = contextBuilder.build(debugContext, conversationHistory, '');
+      const context = contextBuilder.build(
+        debugContext,
+        conversationHistory,
+        '',
+      );
 
       expect(context.images).toBeDefined();
       expect(context.images.length).toBeGreaterThan(0);
@@ -102,14 +122,22 @@ describe('ContextBuilder', () => {
 
     it('should inject console errors when question asks about errors', () => {
       const contextBuilder = getContextBuilder();
-      const context = contextBuilder.build(debugContext, conversationHistory, 'What are the console errors?');
+      const context = contextBuilder.build(
+        debugContext,
+        conversationHistory,
+        'What are the console errors?',
+      );
 
       expect(context.systemPrompt).toContain('consoleErrors');
     });
 
     it('should inject network errors when question asks about network', () => {
       const contextBuilder = getContextBuilder();
-      const context = contextBuilder.build(debugContext, conversationHistory, 'Are there network issues?');
+      const context = contextBuilder.build(
+        debugContext,
+        conversationHistory,
+        'Are there network issues?',
+      );
 
       expect(context.systemPrompt).toContain('networkErrors');
     });
@@ -123,18 +151,33 @@ describe('ContextBuilder', () => {
             text: 'Submit',
             selector: 'button[type="submit"]',
             visible: true,
-            rect: { left: 100, top: 200, width: 80, height: 30, right: 180, bottom: 230 },
+            rect: {
+              left: 100,
+              top: 200,
+              width: 80,
+              height: 30,
+              right: 180,
+              bottom: 230,
+            },
           },
         ],
       };
-      const context = contextBuilder.build(contextWithElements, conversationHistory, 'What elements are visible?');
+      const context = contextBuilder.build(
+        contextWithElements,
+        conversationHistory,
+        'What elements are visible?',
+      );
 
       expect(context.systemPrompt).toContain('visibleElements');
     });
 
     it('should inject execution history when question asks about history', () => {
       const contextBuilder = getContextBuilder();
-      const context = contextBuilder.build(debugContext, conversationHistory, 'Show me the execution history');
+      const context = contextBuilder.build(
+        debugContext,
+        conversationHistory,
+        'Show me the execution history',
+      );
 
       expect(context.systemPrompt).toContain('executionHistory');
     });
@@ -168,7 +211,11 @@ describe('ContextBuilder', () => {
   describe('formatConsoleErrors', () => {
     it('should format console errors with emoji indicators', () => {
       const contextBuilder = getContextBuilder();
-      const context = contextBuilder.build(debugContext, conversationHistory, 'console errors');
+      const context = contextBuilder.build(
+        debugContext,
+        conversationHistory,
+        'console errors',
+      );
 
       expect(context.systemPrompt).toContain('❌');
       expect(context.systemPrompt).toContain('⚠️');
@@ -181,7 +228,11 @@ describe('ContextBuilder', () => {
         consoleErrors: Array.from({ length: 15 }, (_, i) => `Error ${i}`),
       };
 
-      const context = contextBuilder.build(manyErrors, conversationHistory, 'console errors');
+      const context = contextBuilder.build(
+        manyErrors,
+        conversationHistory,
+        'console errors',
+      );
 
       // Should format at most 10 errors
       const errorMatches = context.systemPrompt.match(/❌/g);
@@ -192,7 +243,11 @@ describe('ContextBuilder', () => {
   describe('formatNetworkErrors', () => {
     it('should format network errors with details', () => {
       const contextBuilder = getContextBuilder();
-      const context = contextBuilder.build(debugContext, conversationHistory, 'network errors');
+      const context = contextBuilder.build(
+        debugContext,
+        conversationHistory,
+        'network errors',
+      );
 
       expect(context.systemPrompt).toContain('500');
       expect(context.systemPrompt).toContain('api.example.com');
@@ -209,13 +264,27 @@ describe('ContextBuilder', () => {
             text: 'Submit',
             selector: 'button[type="submit"]',
             visible: true,
-            rect: { left: 100, top: 200, width: 80, height: 30, right: 180, bottom: 230 },
+            rect: {
+              left: 100,
+              top: 200,
+              width: 80,
+              height: 30,
+              right: 180,
+              bottom: 230,
+            },
           },
           {
             text: 'Cancel',
             selector: 'button[type="button"]',
             visible: true,
-            rect: { left: 200, top: 200, width: 80, height: 30, right: 280, bottom: 230 },
+            rect: {
+              left: 200,
+              top: 200,
+              width: 80,
+              height: 30,
+              right: 280,
+              bottom: 230,
+            },
           },
         ],
       };
@@ -235,7 +304,14 @@ describe('ContextBuilder', () => {
           text: `Element ${i}`,
           selector: `#elem-${i}`,
           visible: true,
-          rect: { left: i * 10, top: 0, width: 50, height: 20, right: i * 10 + 50, bottom: 20 },
+          rect: {
+            left: i * 10,
+            top: 0,
+            width: 50,
+            height: 20,
+            right: i * 10 + 50,
+            bottom: 20,
+          },
         })),
       };
 
@@ -297,7 +373,10 @@ describe('ContextBuilder', () => {
 
       const keywords = ['console', '错误', 'error', '报错'];
       for (const keyword of keywords) {
-        const shouldInclude = (contextBuilder as any).shouldIncludeContext(keyword, 'consoleErrors');
+        const shouldInclude = (contextBuilder as any).shouldIncludeContext(
+          keyword,
+          'consoleErrors',
+        );
         expect(shouldInclude).toBe(true);
       }
     });
@@ -307,7 +386,10 @@ describe('ContextBuilder', () => {
 
       const keywords = ['network', '网络', '请求', 'request', 'api'];
       for (const keyword of keywords) {
-        const shouldInclude = (contextBuilder as any).shouldIncludeContext(keyword, 'networkErrors');
+        const shouldInclude = (contextBuilder as any).shouldIncludeContext(
+          keyword,
+          'networkErrors',
+        );
         expect(shouldInclude).toBe(true);
       }
     });
@@ -317,7 +399,10 @@ describe('ContextBuilder', () => {
 
       const keywords = ['element', '元素', 'visible', '可见', 'find', '查找'];
       for (const keyword of keywords) {
-        const shouldInclude = (contextBuilder as any).shouldIncludeContext(keyword, 'visibleElements');
+        const shouldInclude = (contextBuilder as any).shouldIncludeContext(
+          keyword,
+          'visibleElements',
+        );
         expect(shouldInclude).toBe(true);
       }
     });
@@ -325,9 +410,19 @@ describe('ContextBuilder', () => {
     it('should detect history keywords', () => {
       const contextBuilder = getContextBuilder();
 
-      const keywords = ['history', '历史', 'execution', '执行', 'steps', '步骤'];
+      const keywords = [
+        'history',
+        '历史',
+        'execution',
+        '执行',
+        'steps',
+        '步骤',
+      ];
       for (const keyword of keywords) {
-        const shouldInclude = (contextBuilder as any).shouldIncludeContext(keyword, 'executionHistory');
+        const shouldInclude = (contextBuilder as any).shouldIncludeContext(
+          keyword,
+          'executionHistory',
+        );
         expect(shouldInclude).toBe(true);
       }
     });

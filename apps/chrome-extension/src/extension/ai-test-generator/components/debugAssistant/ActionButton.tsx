@@ -4,16 +4,16 @@
  */
 
 import {
-  EyeOutlined,
   CameraOutlined,
+  CheckCircleOutlined,
   DiffOutlined,
+  EyeOutlined,
+  LoginOutlined,
+  PlayCircleOutlined,
   ReloadOutlined,
   SearchOutlined,
-  PlayCircleOutlined,
-  LoginOutlined,
-  CheckCircleOutlined,
 } from '@ant-design/icons';
-import { Button, Space, Tooltip, Dropdown, Typography } from 'antd';
+import { Button, Dropdown, Space, Tooltip, Typography } from 'antd';
 import type { MenuProps } from 'antd';
 import type { DebugAction, DebugActionType } from '../../types/debugAssistant';
 
@@ -80,7 +80,9 @@ function getActionLabel(type: DebugActionType | string): string {
 /**
  * Get button type for action
  */
-function getButtonType(type: DebugActionType | string): 'default' | 'primary' | 'dashed' | 'link' | 'text' {
+function getButtonType(
+  type: DebugActionType | string,
+): 'default' | 'primary' | 'dashed' | 'link' | 'text' {
   if (['highlight', 'screenshot', 'describe'].includes(type)) {
     return 'default';
   }
@@ -105,14 +107,20 @@ export function ActionButton({
 
   // For actions with value, show a dropdown
   if (value !== undefined && typeof value === 'object' && value.options) {
-    const menuItems: MenuProps['items'] = value.options.map((opt: any, index: number) => ({
-      key: index,
-      label: opt.label || opt,
-      onClick: () => onExecute?.(),
-    }));
+    const menuItems: MenuProps['items'] = value.options.map(
+      (opt: any, index: number) => ({
+        key: index,
+        label: opt.label || opt,
+        onClick: () => onExecute?.(),
+      }),
+    );
 
     return (
-      <Dropdown menu={{ items: menuItems }} trigger={['click']} disabled={loading}>
+      <Dropdown
+        menu={{ items: menuItems }}
+        trigger={['click']}
+        disabled={loading}
+      >
         <Button size={size} type={buttonType} icon={icon} loading={loading}>
           {showLabel && <span>{label}</span>}
         </Button>
@@ -150,7 +158,12 @@ interface ActionButtonGroupProps {
   size?: 'small' | 'middle' | 'large';
 }
 
-export function ActionButtonGroup({ actions, onExecute, loading, size }: ActionButtonGroupProps) {
+export function ActionButtonGroup({
+  actions,
+  onExecute,
+  loading,
+  size,
+}: ActionButtonGroupProps) {
   return (
     <Space size="small" wrap>
       {actions.map((action, index) => (
@@ -159,7 +172,9 @@ export function ActionButtonGroup({ actions, onExecute, loading, size }: ActionB
           type={action.type}
           target={action.target}
           value={action.value}
-          onExecute={() => onExecute?.(action as DebugAction)}
+          onExecute={async () => {
+            await onExecute?.(action as DebugAction);
+          }}
           loading={loading}
           size={size}
         />
@@ -190,17 +205,32 @@ export function QuickActionToolbar({
     <Space size="small">
       {onHighlight && (
         <Tooltip title="高亮元素">
-          <Button size="small" icon={<EyeOutlined />} onClick={onHighlight} disabled={loading} />
+          <Button
+            size="small"
+            icon={<EyeOutlined />}
+            onClick={onHighlight}
+            disabled={loading}
+          />
         </Tooltip>
       )}
       {onScreenshot && (
         <Tooltip title="截取屏幕">
-          <Button size="small" icon={<CameraOutlined />} onClick={onScreenshot} disabled={loading} />
+          <Button
+            size="small"
+            icon={<CameraOutlined />}
+            onClick={onScreenshot}
+            disabled={loading}
+          />
         </Tooltip>
       )}
       {onRefresh && (
         <Tooltip title="刷新页面">
-          <Button size="small" icon={<ReloadOutlined />} onClick={onRefresh} disabled={loading} />
+          <Button
+            size="small"
+            icon={<ReloadOutlined />}
+            onClick={onRefresh}
+            disabled={loading}
+          />
         </Tooltip>
       )}
     </Space>

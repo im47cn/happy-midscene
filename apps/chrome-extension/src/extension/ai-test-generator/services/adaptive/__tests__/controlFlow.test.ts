@@ -4,10 +4,14 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type {
+  AdaptiveStep,
+  ExecutionContext,
+  LoopContext,
+} from '../../../../types/adaptive';
 import { ControlFlowExecutor, executeStep } from '../controlFlowExecutor';
 import { LoopManager } from '../loopManager';
 import { VariableStore } from '../variableStore';
-import type { ExecutionContext, AdaptiveStep, LoopContext } from '../../../../types/adaptive';
 
 // Mock agent
 const mockAgent = {
@@ -64,7 +68,11 @@ describe('ControlFlowExecutor', () => {
       // Mock condition evaluation to true
       vi.spyOn(executor, 'evaluateCondition' as any).mockResolvedValue(true);
 
-      const result = await executor.executeCondition(conditionStep, context, mockAgent as any);
+      const result = await executor.executeCondition(
+        conditionStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(true);
       expect(result.branch).toBe('then');
@@ -100,7 +108,11 @@ describe('ControlFlowExecutor', () => {
       // Mock condition evaluation to false
       vi.spyOn(executor, 'evaluateCondition' as any).mockResolvedValue(false);
 
-      const result = await executor.executeCondition(conditionStep, context, mockAgent as any);
+      const result = await executor.executeCondition(
+        conditionStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(true);
       expect(result.branch).toBe('else');
@@ -126,7 +138,11 @@ describe('ControlFlowExecutor', () => {
 
       vi.spyOn(executor, 'evaluateCondition' as any).mockResolvedValue(false);
 
-      const result = await executor.executeCondition(conditionStep, context, mockAgent as any);
+      const result = await executor.executeCondition(
+        conditionStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(true);
       expect(result.branch).toBe('else');
@@ -163,7 +179,11 @@ describe('ControlFlowExecutor', () => {
 
       vi.spyOn(executor, 'evaluateCondition' as any).mockResolvedValue(true);
 
-      const result = await executor.executeCondition(outerCondition, context, mockAgent as any);
+      const result = await executor.executeCondition(
+        outerCondition,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(true);
       expect(context.currentDepth).toBe(2); // Should track nesting depth
@@ -213,9 +233,15 @@ describe('ControlFlowExecutor', () => {
         },
       };
 
-      vi.spyOn(executor, 'evaluateCondition' as any).mockRejectedValue(new Error('Evaluation failed'));
+      vi.spyOn(executor, 'evaluateCondition' as any).mockRejectedValue(
+        new Error('Evaluation failed'),
+      );
 
-      const result = await executor.executeCondition(conditionStep, context, mockAgent as any);
+      const result = await executor.executeCondition(
+        conditionStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
@@ -244,7 +270,11 @@ describe('ControlFlowExecutor', () => {
         },
       };
 
-      const result = await executor.executeLoop(loopStep, context, mockAgent as any);
+      const result = await executor.executeLoop(
+        loopStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(true);
       expect(result.iterations).toBe(5);
@@ -270,7 +300,11 @@ describe('ControlFlowExecutor', () => {
         },
       };
 
-      const result = await executor.executeLoop(loopStep, context, mockAgent as any);
+      const result = await executor.executeLoop(
+        loopStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(true);
       expect(result.iterations).toBe(10); // Limited by maxIterations
@@ -299,12 +333,18 @@ describe('ControlFlowExecutor', () => {
       };
 
       // Mock condition: return true for first 3 iterations, then false
-      vi.spyOn(executor, 'evaluateCondition' as any).mockImplementation(async () => {
-        callCount++;
-        return callCount <= 3;
-      });
+      vi.spyOn(executor, 'evaluateCondition' as any).mockImplementation(
+        async () => {
+          callCount++;
+          return callCount <= 3;
+        },
+      );
 
-      const result = await executor.executeLoop(loopStep, context, mockAgent as any);
+      const result = await executor.executeLoop(
+        loopStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(true);
       expect(result.iterations).toBe(3);
@@ -334,9 +374,15 @@ describe('ControlFlowExecutor', () => {
       };
 
       // Setup mock for forEach collection resolution
-      vi.spyOn(executor, 'resolveCollection' as any).mockResolvedValue(collection);
+      vi.spyOn(executor, 'resolveCollection' as any).mockResolvedValue(
+        collection,
+      );
 
-      const result = await executor.executeLoop(loopStep, context, mockAgent as any);
+      const result = await executor.executeLoop(
+        loopStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(true);
       expect(result.iterations).toBe(3);
@@ -391,9 +437,15 @@ describe('ControlFlowExecutor', () => {
       };
 
       // Mock action execution to fail
-      vi.spyOn(executor, 'executeAction' as any).mockRejectedValue(new Error('Action failed'));
+      vi.spyOn(executor, 'executeAction' as any).mockRejectedValue(
+        new Error('Action failed'),
+      );
 
-      const result = await executor.executeLoop(loopStep, context, mockAgent as any);
+      const result = await executor.executeLoop(
+        loopStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
@@ -421,11 +473,17 @@ describe('ControlFlowExecutor', () => {
       };
 
       vi.spyOn(executor, 'evaluateCondition' as any).mockResolvedValue(true);
-      vi.spyOn(executor, 'executeAction' as any).mockImplementation(async () => {
-        await new Promise(resolve => setTimeout(resolve, 200)); // Slow operation
-      });
+      vi.spyOn(executor, 'executeAction' as any).mockImplementation(
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 200)); // Slow operation
+        },
+      );
 
-      const result = await executor.executeLoop(loopStep, context, mockAgent as any);
+      const result = await executor.executeLoop(
+        loopStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(false);
       expect(result.timedOut).toBe(true);
@@ -488,7 +546,11 @@ describe('ControlFlowExecutor', () => {
 
       mockAgent.click.mockResolvedValue({ success: true });
 
-      const result = await executor.executeAction(actionStep, context, mockAgent as any);
+      const result = await executor.executeAction(
+        actionStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(true);
       expect(mockAgent.click).toHaveBeenCalledWith('提交按钮');
@@ -504,7 +566,11 @@ describe('ControlFlowExecutor', () => {
 
       mockAgent.input.mockResolvedValue({ success: true });
 
-      const result = await executor.executeAction(actionStep, context, mockAgent as any);
+      const result = await executor.executeAction(
+        actionStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(true);
       expect(mockAgent.input).toHaveBeenCalledWith('用户名输入框', 'testuser');
@@ -518,7 +584,11 @@ describe('ControlFlowExecutor', () => {
         action: { type: 'wait', target: '2s' },
       };
 
-      const result = await executor.executeAction(actionStep, context, mockAgent as any);
+      const result = await executor.executeAction(
+        actionStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(true);
       expect(result.duration).toBeGreaterThan(1900); // ~2 seconds
@@ -532,7 +602,11 @@ describe('ControlFlowExecutor', () => {
         action: { type: 'navigate', target: 'https://example.com' },
       };
 
-      const result = await executor.executeAction(actionStep, context, mockAgent as any);
+      const result = await executor.executeAction(
+        actionStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(true);
     });
@@ -547,7 +621,11 @@ describe('ControlFlowExecutor', () => {
 
       mockAgent.click.mockRejectedValue(new Error('Element not found'));
 
-      const result = await executor.executeAction(actionStep, context, mockAgent as any);
+      const result = await executor.executeAction(
+        actionStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
@@ -563,7 +641,11 @@ describe('ControlFlowExecutor', () => {
         variable: { operation: 'set', name: 'count', value: 10 },
       };
 
-      const result = await executor.executeVariable(varStep, context, mockAgent as any);
+      const result = await executor.executeVariable(
+        varStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(true);
       expect(context.variables.get('count')).toBe(10);
@@ -579,7 +661,11 @@ describe('ControlFlowExecutor', () => {
 
       context.variables.set('count', 5);
 
-      const result = await executor.executeVariable(varStep, context, mockAgent as any);
+      const result = await executor.executeVariable(
+        varStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(true);
       expect(context.variables.get('count')).toBe(6);
@@ -599,7 +685,11 @@ describe('ControlFlowExecutor', () => {
         text: '余额: ¥100.00',
       });
 
-      const result = await executor.executeVariable(varStep, context, mockAgent as any);
+      const result = await executor.executeVariable(
+        varStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(true);
       expect(context.variables.has('balance')).toBe(true);
@@ -636,7 +726,9 @@ describe('ControlFlowExecutor', () => {
 
   describe('error recovery', () => {
     it('should continue on error when configured', async () => {
-      const executorWithRecovery = new ControlFlowExecutor({ continueOnError: true });
+      const executorWithRecovery = new ControlFlowExecutor({
+        continueOnError: true,
+      });
 
       const actionStep: AdaptiveStep = {
         id: 'step-1',
@@ -647,7 +739,11 @@ describe('ControlFlowExecutor', () => {
 
       mockAgent.click.mockRejectedValue(new Error('Click failed'));
 
-      const result = await executorWithRecovery.executeAction(actionStep, context, mockAgent as any);
+      const result = await executorWithRecovery.executeAction(
+        actionStep,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(false);
       expect(result.recovered).toBe(true);

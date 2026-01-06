@@ -5,13 +5,22 @@
 
 import {
   CheckCircleOutlined,
-  CodeOutlined,
   CloseCircleOutlined,
+  CodeOutlined,
   CopyOutlined,
   EditOutlined,
   InfoCircleOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Space, Tag, Tooltip, Typography, Collapse, Input } from 'antd';
+import {
+  Button,
+  Card,
+  Collapse,
+  Input,
+  Space,
+  Tag,
+  Tooltip,
+  Typography,
+} from 'antd';
 import { useState } from 'react';
 import type { FixSuggestion } from '../../types/debugAssistant';
 
@@ -146,10 +155,17 @@ export function FixSuggestionCard({
             {description}
           </Text>
           {confidence !== undefined && (
-            <Tag color={getConfidenceColor(confidence)}>{Math.round(confidence * 100)}%</Tag>
+            <Tag color={getConfidenceColor(confidence)}>
+              {Math.round(confidence * 100)}%
+            </Tag>
           )}
           {onApply && (
-            <Button size="small" type="primary" onClick={onApply} loading={loading}>
+            <Button
+              size="small"
+              type="primary"
+              onClick={onApply}
+              loading={loading}
+            >
               应用
             </Button>
           )}
@@ -172,7 +188,9 @@ export function FixSuggestionCard({
           )}
           {confidence !== undefined && (
             <Tooltip title={`置信度: ${getConfidenceLabel(confidence)}`}>
-              <Tag color={getConfidenceColor(confidence)}>{Math.round(confidence * 100)}%</Tag>
+              <Tag color={getConfidenceColor(confidence)}>
+                {Math.round(confidence * 100)}%
+              </Tag>
             </Tooltip>
           )}
         </Space>
@@ -209,7 +227,11 @@ export function FixSuggestionCard({
                         style={{ fontFamily: 'monospace', fontSize: 12 }}
                       />
                       <Space style={{ marginTop: 8 }}>
-                        <Button size="small" type="primary" onClick={handleSaveEdit}>
+                        <Button
+                          size="small"
+                          type="primary"
+                          onClick={handleSaveEdit}
+                        >
                           保存
                         </Button>
                         <Button size="small" onClick={() => setEditing(false)}>
@@ -234,13 +256,19 @@ export function FixSuggestionCard({
                       <Space style={{ marginTop: 8 }}>
                         <Button
                           size="small"
-                          icon={copied ? <CheckCircleOutlined /> : <CopyOutlined />}
+                          icon={
+                            copied ? <CheckCircleOutlined /> : <CopyOutlined />
+                          }
                           onClick={handleCopy}
                         >
                           {copied ? '已复制' : '复制'}
                         </Button>
                         {onEdit && (
-                          <Button size="small" icon={<EditOutlined />} onClick={() => setEditing(true)}>
+                          <Button
+                            size="small"
+                            icon={<EditOutlined />}
+                            onClick={() => setEditing(true)}
+                          >
                             编辑
                           </Button>
                         )}
@@ -256,12 +284,23 @@ export function FixSuggestionCard({
         {/* Action buttons */}
         <Space>
           {onApply && (
-            <Button size="small" type="primary" icon={<CheckCircleOutlined />} onClick={onApply} loading={loading}>
+            <Button
+              size="small"
+              type="primary"
+              icon={<CheckCircleOutlined />}
+              onClick={onApply}
+              loading={loading}
+            >
               应用修复
             </Button>
           )}
           {onReject && (
-            <Button size="small" icon={<CloseCircleOutlined />} onClick={onReject} disabled={loading}>
+            <Button
+              size="small"
+              icon={<CloseCircleOutlined />}
+              onClick={onReject}
+              disabled={loading}
+            >
               忽略
             </Button>
           )}
@@ -275,13 +314,23 @@ export function FixSuggestionCard({
  * Compact list of fix suggestions
  */
 interface FixSuggestionListProps {
-  suggestions: Array<{ description: string; code?: string; confidence?: number; type?: FixSuggestion['type'] }>;
+  suggestions: Array<{
+    description: string;
+    code?: string;
+    confidence?: number;
+    type?: FixSuggestion['type'];
+  }>;
   onApply?: (index: number) => Promise<void>;
   onReject?: (index: number) => void;
   loading?: boolean;
 }
 
-export function FixSuggestionList({ suggestions, onApply, onReject, loading }: FixSuggestionListProps) {
+export function FixSuggestionList({
+  suggestions,
+  onApply,
+  onReject,
+  loading,
+}: FixSuggestionListProps) {
   if (suggestions.length === 0) {
     return (
       <div style={{ padding: 16, textAlign: 'center' }}>

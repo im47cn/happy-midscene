@@ -4,13 +4,13 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
+import type { AdaptiveTestCase } from '../../../../types/adaptive';
 import {
-  parseAdaptiveTest,
-  validateAdaptiveTest,
   buildParseTree,
   formatAdaptiveTestToMarkdown,
+  parseAdaptiveTest,
+  validateAdaptiveTest,
 } from '../adaptiveParser';
-import type { AdaptiveTestCase } from '../../../../types/adaptive';
 
 describe('AdaptiveParser', () => {
   describe('parseAdaptiveTest', () => {
@@ -284,7 +284,7 @@ steps:
       const result = validateAdaptiveTest(testCase);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.message.includes('name'))).toBe(true);
+      expect(result.errors.some((e) => e.message.includes('name'))).toBe(true);
     });
 
     it('should detect empty steps', () => {
@@ -310,14 +310,23 @@ steps:
       const result = validateAdaptiveTest(testCase);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.message.includes('at least one step'))).toBe(true);
+      expect(
+        result.errors.some((e) => e.message.includes('at least one step')),
+      ).toBe(true);
     });
 
     it('should warn about high maxLoopIterations', () => {
       const testCase: AdaptiveTestCase = {
         id: 'test-1',
         name: 'Test',
-        steps: [{ id: 'step-1', type: 'action', description: 'action', action: { type: 'click', target: 'btn' } }],
+        steps: [
+          {
+            id: 'step-1',
+            type: 'action',
+            description: 'action',
+            action: { type: 'click', target: 'btn' },
+          },
+        ],
         variables: {},
         config: {
           maxLoopIterations: 150,
@@ -335,7 +344,7 @@ steps:
 
       const result = validateAdaptiveTest(testCase);
 
-      expect(result.warnings.some(w => w.type === 'performance')).toBe(true);
+      expect(result.warnings.some((w) => w.type === 'performance')).toBe(true);
     });
 
     it('should validate while loop has condition', () => {
@@ -372,7 +381,9 @@ steps:
       const result = validateAdaptiveTest(testCase);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.message.includes('condition'))).toBe(true);
+      expect(result.errors.some((e) => e.message.includes('condition'))).toBe(
+        true,
+      );
     });
 
     it('should validate forEach loop has collection', () => {
@@ -409,7 +420,9 @@ steps:
       const result = validateAdaptiveTest(testCase);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.message.includes('collection'))).toBe(true);
+      expect(result.errors.some((e) => e.message.includes('collection'))).toBe(
+        true,
+      );
     });
   });
 

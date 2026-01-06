@@ -75,7 +75,7 @@ class LRUCache<T> {
     if (this.cache.size >= this.maxSize) {
       // Find entry with lowest access count and oldest access time
       let oldestKey: string | null = null;
-      let oldestScore = Infinity;
+      let oldestScore = Number.POSITIVE_INFINITY;
 
       for (const [key, entry] of this.cache.entries()) {
         const score = entry.lastAccess / (entry.accessCount + 1);
@@ -123,11 +123,15 @@ class LRUCache<T> {
   /**
    * Set value in cache
    */
-  set(...args: [...prefix: Parameters<typeof this.generateKey>, value: T]): void {
+  set(
+    ...args: [...prefix: Parameters<typeof this.generateKey>, value: T]
+  ): void {
     if (!this.enabled) return;
 
     const value = args.pop() as T;
-    const key = this.generateKey(...args as Parameters<typeof this.generateKey>);
+    const key = this.generateKey(
+      ...(args as Parameters<typeof this.generateKey>),
+    );
 
     this.evictIfNeeded();
 
@@ -205,10 +209,7 @@ class LRUCache<T> {
   /**
    * Get or set pattern (common pattern for caching expensive computations)
    */
-  async getOrSet(
-    key: string,
-    factory: () => Promise<T> | T,
-  ): Promise<T> {
+  async getOrSet(key: string, factory: () => Promise<T> | T): Promise<T> {
     const cached = this.get(key);
     if (cached !== null) {
       return cached;
@@ -233,15 +234,17 @@ export class CacheManager {
   private fixSuggestionCache: LRUCache<any>;
   private enabled: boolean;
 
-  constructor(options: {
-    llmCacheSize?: number;
-    llmCacheTTL?: number;
-    diagCacheSize?: number;
-    diagCacheTTL?: number;
-    screenshotCacheSize?: number;
-    screenshotCacheTTL?: number;
-    enabled?: boolean;
-  } = {}) {
+  constructor(
+    options: {
+      llmCacheSize?: number;
+      llmCacheTTL?: number;
+      diagCacheSize?: number;
+      diagCacheTTL?: number;
+      screenshotCacheSize?: number;
+      screenshotCacheTTL?: number;
+      enabled?: boolean;
+    } = {},
+  ) {
     this.llmResponseCache = new LRUCache<string>({
       maxSize: options.llmCacheSize ?? 50,
       ttl: options.llmCacheTTL ?? 10 * 60 * 1000, // 10 minutes
@@ -484,10 +487,29 @@ export class CacheManager {
     const elements = this.elementLocateCache.getStats();
     const fixes = this.fixSuggestionCache.getStats();
 
-    const totalSize = llm.size + diagnostics.size + screenshots.size + context.size + elements.size + fixes.size;
-    const totalHits = llm.totalHits + diagnostics.totalHits + screenshots.totalHits + context.totalHits + elements.totalHits + fixes.totalHits;
-    const totalMisses = llm.totalMisses + diagnostics.totalMisses + screenshots.totalMisses + context.totalMisses + elements.totalMisses + fixes.totalMisses;
-    const overallHitRate = totalHits + totalMisses > 0 ? totalHits / (totalHits + totalMisses) : 0;
+    const totalSize =
+      llm.size +
+      diagnostics.size +
+      screenshots.size +
+      context.size +
+      elements.size +
+      fixes.size;
+    const totalHits =
+      llm.totalHits +
+      diagnostics.totalHits +
+      screenshots.totalHits +
+      context.totalHits +
+      elements.totalHits +
+      fixes.totalHits;
+    const totalMisses =
+      llm.totalMisses +
+      diagnostics.totalMisses +
+      screenshots.totalMisses +
+      context.totalMisses +
+      elements.totalMisses +
+      fixes.totalMisses;
+    const overallHitRate =
+      totalHits + totalMisses > 0 ? totalHits / (totalHits + totalMisses) : 0;
 
     return {
       llm,
@@ -530,7 +552,9 @@ let cacheManagerInstance: CacheManager | null = null;
 /**
  * Get or create the cache manager instance
  */
-export function getCacheManager(options?: Parameters<typeof CacheManager.prototype.constructor>[0]): CacheManager {
+export function getCacheManager(
+  options?: Parameters<typeof CacheManager.prototype.constructor>[0],
+): CacheManager {
   if (!cacheManagerInstance) {
     cacheManagerInstance = new CacheManager(options);
   }

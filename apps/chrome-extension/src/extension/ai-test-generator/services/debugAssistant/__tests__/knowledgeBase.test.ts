@@ -2,9 +2,13 @@
  * Unit tests for knowledge base
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { getKnowledgeBase, resetKnowledgeBase, KnowledgeBase } from '../knowledgeBase';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FixSuggestion } from '../../../types/debugAssistant';
+import {
+  KnowledgeBase,
+  getKnowledgeBase,
+  resetKnowledgeBase,
+} from '../knowledgeBase';
 
 // Mock localStorage
 const mockStorage = new Map<string, string>();
@@ -54,9 +58,23 @@ describe('KnowledgeBase', () => {
     });
 
     it('should load from localStorage if enabled', () => {
-      mockStorage.set('debug-assistant-knowledge', JSON.stringify([
-        ['kb-1', { pattern: 'test', fixes: [], frequency: 1, successRate: 0.5, createdAt: Date.now(), lastUsedAt: Date.now(), tags: [] }]
-      ]));
+      mockStorage.set(
+        'debug-assistant-knowledge',
+        JSON.stringify([
+          [
+            'kb-1',
+            {
+              pattern: 'test',
+              fixes: [],
+              frequency: 1,
+              successRate: 0.5,
+              createdAt: Date.now(),
+              lastUsedAt: Date.now(),
+              tags: [],
+            },
+          ],
+        ]),
+      );
 
       const kb = new KnowledgeBase({ persistenceEnabled: true });
       const stats = kb.getStats();
@@ -68,7 +86,12 @@ describe('KnowledgeBase', () => {
   describe('addEntry', () => {
     it('should add a new entry', () => {
       const fixes: FixSuggestion[] = [
-        { type: 'wait', description: 'Wait for element', code: '', confidence: 0.8 },
+        {
+          type: 'wait',
+          description: 'Wait for element',
+          code: '',
+          confidence: 0.8,
+        },
       ];
 
       const id = knowledgeBase.addEntry({
@@ -119,7 +142,10 @@ describe('KnowledgeBase', () => {
     });
 
     it('should prune old entries when max is reached', () => {
-      const kb = new KnowledgeBase({ maxEntries: 3, persistenceEnabled: false });
+      const kb = new KnowledgeBase({
+        maxEntries: 3,
+        persistenceEnabled: false,
+      });
 
       // Add 4 entries
       for (let i = 0; i < 4; i++) {
@@ -141,7 +167,9 @@ describe('KnowledgeBase', () => {
     beforeEach(() => {
       knowledgeBase.addEntry({
         pattern: 'element not found',
-        fixes: [{ type: 'wait', description: 'Wait', code: '', confidence: 0.8 }],
+        fixes: [
+          { type: 'wait', description: 'Wait', code: '', confidence: 0.8 },
+        ],
         frequency: 5,
         successRate: 0.9,
         tags: ['element'],
@@ -149,7 +177,14 @@ describe('KnowledgeBase', () => {
 
       knowledgeBase.addEntry({
         pattern: 'timeout error',
-        fixes: [{ type: 'timeout', description: 'Increase timeout', code: '', confidence: 0.7 }],
+        fixes: [
+          {
+            type: 'timeout',
+            description: 'Increase timeout',
+            code: '',
+            confidence: 0.7,
+          },
+        ],
         frequency: 3,
         successRate: 0.6,
         tags: ['timeout'],
@@ -178,7 +213,9 @@ describe('KnowledgeBase', () => {
     });
 
     it('should return empty array for no matches', () => {
-      const results = knowledgeBase.findMatchingPatterns('nonexistent pattern xyz');
+      const results = knowledgeBase.findMatchingPatterns(
+        'nonexistent pattern xyz',
+      );
 
       expect(results).toEqual([]);
     });
@@ -224,7 +261,12 @@ describe('KnowledgeBase', () => {
 
   describe('recordFixUsed', () => {
     it('should increment frequency and update last used time', () => {
-      const fix: FixSuggestion = { type: 'wait', description: 'Wait', code: '', confidence: 0.8 };
+      const fix: FixSuggestion = {
+        type: 'wait',
+        description: 'Wait',
+        code: '',
+        confidence: 0.8,
+      };
 
       const id = knowledgeBase.addEntry({
         pattern: 'test',
@@ -243,8 +285,18 @@ describe('KnowledgeBase', () => {
     });
 
     it('should move used fix to front of list', () => {
-      const fix1: FixSuggestion = { type: 'wait', description: 'Wait', code: '', confidence: 0.8 };
-      const fix2: FixSuggestion = { type: 'retry', description: 'Retry', code: '', confidence: 0.7 };
+      const fix1: FixSuggestion = {
+        type: 'wait',
+        description: 'Wait',
+        code: '',
+        confidence: 0.8,
+      };
+      const fix2: FixSuggestion = {
+        type: 'retry',
+        description: 'Retry',
+        code: '',
+        confidence: 0.7,
+      };
 
       const id = knowledgeBase.addEntry({
         pattern: 'test',
@@ -266,7 +318,9 @@ describe('KnowledgeBase', () => {
     it('should return statistics', () => {
       knowledgeBase.addEntry({
         pattern: 'test',
-        fixes: [{ type: 'wait', description: 'Wait', code: '', confidence: 0.8 }],
+        fixes: [
+          { type: 'wait', description: 'Wait', code: '', confidence: 0.8 },
+        ],
         frequency: 1,
         successRate: 0.5,
         tags: [],
@@ -509,7 +563,9 @@ describe('KnowledgeBase', () => {
     it('should export knowledge base as JSON', () => {
       knowledgeBase.addEntry({
         pattern: 'test pattern',
-        fixes: [{ type: 'wait', description: 'Wait', code: '', confidence: 0.8 }],
+        fixes: [
+          { type: 'wait', description: 'Wait', code: '', confidence: 0.8 },
+        ],
         frequency: 5,
         successRate: 0.9,
         tags: ['test'],
@@ -524,16 +580,19 @@ describe('KnowledgeBase', () => {
 
     it('should import knowledge base from JSON', () => {
       const data = JSON.stringify([
-        ['kb-import-1', {
-          id: 'kb-import-1',
-          pattern: 'imported pattern',
-          fixes: [],
-          frequency: 1,
-          successRate: 0.5,
-          createdAt: Date.now(),
-          lastUsedAt: Date.now(),
-          tags: [],
-        }]
+        [
+          'kb-import-1',
+          {
+            id: 'kb-import-1',
+            pattern: 'imported pattern',
+            fixes: [],
+            frequency: 1,
+            successRate: 0.5,
+            createdAt: Date.now(),
+            lastUsedAt: Date.now(),
+            tags: [],
+          },
+        ],
       ]);
 
       knowledgeBase.import(data);
@@ -583,16 +642,19 @@ describe('KnowledgeBase', () => {
 
     it('should load from localStorage on creation', () => {
       const data = JSON.stringify([
-        ['kb-1', {
-          id: 'kb-1',
-          pattern: 'persisted',
-          fixes: [],
-          frequency: 1,
-          successRate: 0.5,
-          createdAt: Date.now(),
-          lastUsedAt: Date.now(),
-          tags: [],
-        }]
+        [
+          'kb-1',
+          {
+            id: 'kb-1',
+            pattern: 'persisted',
+            fixes: [],
+            frequency: 1,
+            successRate: 0.5,
+            createdAt: Date.now(),
+            lastUsedAt: Date.now(),
+            tags: [],
+          },
+        ],
       ]);
 
       mockStorage.set('debug-assistant-knowledge', data);
@@ -608,7 +670,9 @@ describe('KnowledgeBase', () => {
     it('should convert DebugKnowledge to KnowledgeEntry format', () => {
       const debugKnowledge = {
         pattern: 'test',
-        fixes: [{ type: 'wait', description: 'Wait', code: '', confidence: 0.8 }],
+        fixes: [
+          { type: 'wait', description: 'Wait', code: '', confidence: 0.8 },
+        ],
         frequency: 5,
         successRate: 0.9,
         tags: ['test'],

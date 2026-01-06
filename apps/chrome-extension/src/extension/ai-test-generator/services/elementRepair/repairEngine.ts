@@ -38,8 +38,8 @@ function calculateConfidence(
 
     // Check for keyword overlap
     const originalWords = originalLower.split(/\s+/);
-    const matchingWords = originalWords.filter(word =>
-      word.length > 2 && descLower.includes(word),
+    const matchingWords = originalWords.filter(
+      (word) => word.length > 2 && descLower.includes(word),
     );
 
     confidence += Math.min(matchingWords.length * 10, 30);
@@ -55,7 +55,10 @@ function calculateConfidence(
   }
 
   // Reduce if failure reason suggests dynamic content
-  if (options.failureReason.includes('timeout') || options.failureReason.includes('not visible')) {
+  if (
+    options.failureReason.includes('timeout') ||
+    options.failureReason.includes('not visible')
+  ) {
     confidence -= 10;
   }
 
@@ -97,13 +100,20 @@ export class RepairEngine implements IRepairEngine {
         description: `使用 ${bestSelector.type} 选择器: ${bestSelector.value.slice(0, 50)}${bestSelector.value.length > 50 ? '...' : ''}`,
         currentValue: originalSelector || '无',
         suggestedValue: bestSelector.value,
-        confidence: calculateConfidence(selectedElement, options, bestSelector.type),
+        confidence: calculateConfidence(
+          selectedElement,
+          options,
+          bestSelector.type,
+        ),
         impact: this.assessImpact(failureReason, 'update_selector'),
       });
     }
 
     // Suggestion 2: Update semantic description
-    if (selectedElement.semanticDescription && selectedElement.semanticDescription !== originalDescription) {
+    if (
+      selectedElement.semanticDescription &&
+      selectedElement.semanticDescription !== originalDescription
+    ) {
       suggestions.push({
         id: generateId(),
         actionType: 'update_description',
@@ -126,13 +136,18 @@ export class RepairEngine implements IRepairEngine {
         description: `添加 ${fallbackSelector.type} 作为备用选择器`,
         currentValue: '无备用选择器',
         suggestedValue: fallbackSelector.value,
-        confidence: calculateConfidence(selectedElement, options, fallbackSelector.type) - 10,
+        confidence:
+          calculateConfidence(selectedElement, options, fallbackSelector.type) -
+          10,
         impact: 'medium',
       });
     }
 
     // Suggestion 4: Add wait condition (if failure reason suggests timing issue)
-    if (failureReason.includes('timeout') || failureReason.includes('not found')) {
+    if (
+      failureReason.includes('timeout') ||
+      failureReason.includes('not found')
+    ) {
       suggestions.push({
         id: generateId(),
         actionType: 'add_wait_condition',
@@ -165,7 +180,9 @@ export class RepairEngine implements IRepairEngine {
       case 'update_selector':
       case 'add_fallback':
         // Validate the new selector
-        const isValid = await elementSelector.validateSelector(suggestion.suggestedValue);
+        const isValid = await elementSelector.validateSelector(
+          suggestion.suggestedValue,
+        );
         if (isValid) {
           success = true;
           validationResult = {
@@ -179,7 +196,9 @@ export class RepairEngine implements IRepairEngine {
         // Validate by trying to locate with semantic description
         if (this.agent && selectedElement.semanticDescription) {
           try {
-            const result = await this.agent.aiLocate(selectedElement.semanticDescription);
+            const result = await this.agent.aiLocate(
+              selectedElement.semanticDescription,
+            );
             if (result.center && result.rect) {
               success = true;
               validationResult = {
@@ -275,14 +294,17 @@ export class RepairEngine implements IRepairEngine {
     }
 
     const totalRepairs = allResults.length;
-    const successfulRepairs = allResults.filter(r => r.success).length;
+    const successfulRepairs = allResults.filter((r) => r.success).length;
     const failedRepairs = totalRepairs - successfulRepairs;
 
     return {
       totalRepairs,
       successfulRepairs,
       failedRepairs,
-      averageConfidence: totalRepairs > 0 ? Math.round((successfulRepairs / totalRepairs) * 100) : 0,
+      averageConfidence:
+        totalRepairs > 0
+          ? Math.round((successfulRepairs / totalRepairs) * 100)
+          : 0,
     };
   }
 
@@ -291,10 +313,19 @@ export class RepairEngine implements IRepairEngine {
   /**
    * Assess the impact of a repair action
    */
-  private assessImpact(failureReason: string, actionType: string): 'high' | 'medium' | 'low' {
+  private assessImpact(
+    failureReason: string,
+    actionType: string,
+  ): 'high' | 'medium' | 'low' {
     // High impact fixes for common failures
-    if (failureReason.includes('not found') || failureReason.includes('timeout')) {
-      if (actionType === 'update_selector' || actionType === 'add_wait_condition') {
+    if (
+      failureReason.includes('not found') ||
+      failureReason.includes('timeout')
+    ) {
+      if (
+        actionType === 'update_selector' ||
+        actionType === 'add_wait_condition'
+      ) {
         return 'high';
       }
     }

@@ -4,21 +4,26 @@
  * Integrates with ExecutionEngine to provide conversational debugging
  */
 
-import type { DebugContext, Message, DebugAction, FixSuggestion } from '../../types/debugAssistant';
-import type { ExecutionResult, ExecutionError } from '../executionEngine';
-import type { TestCase, TaskStep } from '../markdownParser';
-import { getActionExecutor } from './actionExecutor';
-import { getContextBuilder } from './contextBuilder';
+import type {
+  DebugAction,
+  DebugContext,
+  FixSuggestion,
+  Message,
+} from '../../types/debugAssistant';
 import { getConversationManager } from '../conversationManager';
+import type { ExecutionError, ExecutionResult } from '../executionEngine';
+import type { TaskStep, TestCase } from '../markdownParser';
 import { getResponseParser } from '../responseParser';
-import { getLLMEngine } from './llmEngine';
-import { getFixSuggestionGenerator } from './fixSuggestionGenerator';
-import { getFixApplier } from './fixApplier';
-import { getKnowledgeBase } from './knowledgeBase';
-import { getReferenceResolver } from './referenceResolver';
+import { getActionExecutor } from './actionExecutor';
 import { getCompareAction } from './compareAction';
+import { getContextBuilder } from './contextBuilder';
+import { getFixApplier } from './fixApplier';
+import { getFixSuggestionGenerator } from './fixSuggestionGenerator';
+import { getKnowledgeBase } from './knowledgeBase';
+import { getLLMEngine } from './llmEngine';
 import { getPageActions } from './pageActions';
 import { DEFAULT_QUICK_QUESTIONS } from './prompts';
+import { getReferenceResolver } from './referenceResolver';
 
 export interface DebugAssistantConfig {
   enabled?: boolean;
@@ -100,8 +105,12 @@ export class DebugAssistantService {
   private onMessageCallbacks: Array<(message: Message) => void> = [];
   private onSessionStartCallbacks: Array<(session: DebugSession) => void> = [];
   private onSessionEndCallbacks: Array<(session: DebugSession) => void> = [];
-  private onActionExecutedCallbacks: Array<(action: DebugAction, result: any) => void> = [];
-  private onFixAppliedCallbacks: Array<(fix: FixSuggestion, success: boolean) => void> = [];
+  private onActionExecutedCallbacks: Array<
+    (action: DebugAction, result: any) => void
+  > = [];
+  private onFixAppliedCallbacks: Array<
+    (fix: FixSuggestion, success: boolean) => void
+  > = [];
 
   constructor(options: DebugAssistantOptions) {
     this.getAgent = options.getAgent;
@@ -212,7 +221,12 @@ export class DebugAssistantService {
     this.currentSession = session;
 
     // Build debug context
-    const debugContext = await this.buildDebugContext(testCase, step, result, stepIndex);
+    const debugContext = await this.buildDebugContext(
+      testCase,
+      step,
+      result,
+      stepIndex,
+    );
 
     // Add to execution history
     this.executionHistory.push(
@@ -276,7 +290,7 @@ export class DebugAssistantService {
     let pageTitle = '';
     let visibleElements: any[] = [];
     let consoleErrors: string[] = [];
-    let networkErrors: string[] = [];
+    const networkErrors: string[] = [];
 
     if (page) {
       try {
@@ -386,7 +400,9 @@ export class DebugAssistantService {
     const llmContext = this.contextBuilder.build({
       debugContext,
       userQuery: userMessage,
-      conversationHistory: this.conversationHistory.slice(-this.config.maxMessageHistory),
+      conversationHistory: this.conversationHistory.slice(
+        -this.config.maxMessageHistory,
+      ),
     });
 
     // Call LLM
@@ -417,11 +433,17 @@ export class DebugAssistantService {
 
     // Handle context requests
     if (parsedResponse.contextRequest) {
-      await this.handleContextRequest(parsedResponse.contextRequest, debugContext);
+      await this.handleContextRequest(
+        parsedResponse.contextRequest,
+        debugContext,
+      );
     }
 
     // Add to knowledge base if fixes were suggested
-    if (this.config.knowledgeBaseEnabled && parsedResponse.suggestions.length > 0) {
+    if (
+      this.config.knowledgeBaseEnabled &&
+      parsedResponse.suggestions.length > 0
+    ) {
       const errorPattern = debugContext.lastError?.message || 'unknown_error';
       this.knowledgeBase.addEntry({
         pattern: errorPattern,
@@ -559,7 +581,9 @@ export class DebugAssistantService {
         debugContext.lastError.message,
         3,
       );
-      kbSuggestions = matchingPatterns.flatMap((entry) => entry.fixes).slice(0, 3);
+      kbSuggestions = matchingPatterns
+        .flatMap((entry) => entry.fixes)
+        .slice(0, 3);
     }
 
     // Combine suggestions
@@ -588,13 +612,21 @@ export class DebugAssistantService {
   /**
    * Get quick questions for current context
    */
-  getQuickQuestions(): Array<{ question: string; category: string; icon?: string }> {
+  getQuickQuestions(): Array<{
+    question: string;
+    category: string;
+    icon?: string;
+  }> {
     if (!this.currentSession?.error) {
       return DEFAULT_QUICK_QUESTIONS;
     }
 
     const errorType = this.currentSession.error.type;
-    const specificQuestions: Array<{ question: string; category: string; icon?: string }> = [];
+    const specificQuestions: Array<{
+      question: string;
+      category: string;
+      icon?: string;
+    }> = [];
 
     switch (errorType) {
       case 'element_not_found':
@@ -801,7 +833,9 @@ export class DebugAssistantService {
   onMessage(callback: (message: Message) => void): () => void {
     this.onMessageCallbacks.push(callback);
     return () => {
-      this.onMessageCallbacks = this.onMessageCallbacks.filter((cb) => cb !== callback);
+      this.onMessageCallbacks = this.onMessageCallbacks.filter(
+        (cb) => cb !== callback,
+      );
     };
   }
 
@@ -817,11 +851,15 @@ export class DebugAssistantService {
   onSessionEnd(callback: (session: DebugSession) => void): () => void {
     this.onSessionEndCallbacks.push(callback);
     return () => {
-      this.onSessionEndCallbacks = this.onSessionEndCallbacks.filter((cb) => cb !== callback);
+      this.onSessionEndCallbacks = this.onSessionEndCallbacks.filter(
+        (cb) => cb !== callback,
+      );
     };
   }
 
-  onActionExecuted(callback: (action: DebugAction, result: any) => void): () => void {
+  onActionExecuted(
+    callback: (action: DebugAction, result: any) => void,
+  ): () => void {
     this.onActionExecutedCallbacks.push(callback);
     return () => {
       this.onActionExecutedCallbacks = this.onActionExecutedCallbacks.filter(
@@ -830,7 +868,9 @@ export class DebugAssistantService {
     };
   }
 
-  onFixApplied(callback: (fix: FixSuggestion, success: boolean) => void): () => void {
+  onFixApplied(
+    callback: (fix: FixSuggestion, success: boolean) => void,
+  ): () => void {
     this.onFixAppliedCallbacks.push(callback);
     return () => {
       this.onFixAppliedCallbacks = this.onFixAppliedCallbacks.filter(
@@ -881,7 +921,9 @@ export function getDebugAssistantService(
     debugAssistantServiceInstance = new DebugAssistantService(options);
   }
   if (!debugAssistantServiceInstance) {
-    throw new Error('DebugAssistantService not initialized. Call getDebugAssistantService with options first.');
+    throw new Error(
+      'DebugAssistantService not initialized. Call getDebugAssistantService with options first.',
+    );
   }
   return debugAssistantServiceInstance;
 }

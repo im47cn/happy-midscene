@@ -26,10 +26,7 @@ function generateId(): string {
  * Calculate center point of a rect
  */
 function getCenter(rect: Rect): [number, number] {
-  return [
-    rect.left + rect.width / 2,
-    rect.top + rect.height / 2,
-  ];
+  return [rect.left + rect.width / 2, rect.top + rect.height / 2];
 }
 
 /**
@@ -39,7 +36,11 @@ function isElementVisible(el: HTMLElement): boolean {
   if (!el) return false;
 
   const style = window.getComputedStyle(el);
-  if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+  if (
+    style.display === 'none' ||
+    style.visibility === 'hidden' ||
+    style.opacity === '0'
+  ) {
     return false;
   }
 
@@ -68,9 +69,9 @@ function getElementPath(el: HTMLElement): string {
     }
 
     if (current.className) {
-      const classes = current.className.split(' ').filter(c => c.trim());
+      const classes = current.className.split(' ').filter((c) => c.trim());
       if (classes.length > 0) {
-        selector += '.' + classes.map(c => CSS.escape(c)).join('.');
+        selector += '.' + classes.map((c) => CSS.escape(c)).join('.');
       }
     }
 
@@ -243,7 +244,10 @@ export class ElementSelectorService implements IElementSelector {
   /**
    * Highlight element at position
    */
-  async highlightElement(x: number, y: number): Promise<SelectedElement | null> {
+  async highlightElement(
+    x: number,
+    y: number,
+  ): Promise<SelectedElement | null> {
     const element = document.elementFromPoint(x, y) as HTMLElement;
     if (!element) {
       return null;
@@ -262,7 +266,10 @@ export class ElementSelectorService implements IElementSelector {
 
     // Get element rect
     const rect = element.getBoundingClientRect();
-    if (rect.width < this.config.minElementSize || rect.height < this.config.minElementSize) {
+    if (
+      rect.width < this.config.minElementSize ||
+      rect.height < this.config.minElementSize
+    ) {
       return null;
     }
 
@@ -310,11 +317,14 @@ export class ElementSelectorService implements IElementSelector {
 
     // Class selector (if meaningful)
     if (element.className) {
-      const classes = element.className.split(' ').filter(c => c.trim());
+      const classes = element.className.split(' ').filter((c) => c.trim());
       if (classes.length > 0 && classes.length < 5) {
         selectors.push({
           type: 'css',
-          value: element.tagName.toLowerCase() + '.' + classes.map(c => CSS.escape(c)).join('.'),
+          value:
+            element.tagName.toLowerCase() +
+            '.' +
+            classes.map((c) => CSS.escape(c)).join('.'),
           priority: 70,
           reason: 'CSS class selector',
         });
@@ -362,7 +372,7 @@ export class ElementSelectorService implements IElementSelector {
       if (selector.startsWith('text=')) {
         const text = selector.slice(6, -1);
         const elements = Array.from(document.querySelectorAll('*'));
-        return elements.some(el => el.textContent?.trim() === text);
+        return elements.some((el) => el.textContent?.trim() === text);
       }
 
       if (selector.startsWith('/')) {
@@ -455,8 +465,18 @@ export class ElementSelectorService implements IElementSelector {
     document.addEventListener('keydown', keyDownHandler);
 
     this.eventListeners.push(
-      { target: document, type: 'mousemove', handler: mouseMoveHandler, options: { capture: true } },
-      { target: document, type: 'click', handler: clickHandler, options: { capture: true } },
+      {
+        target: document,
+        type: 'mousemove',
+        handler: mouseMoveHandler,
+        options: { capture: true },
+      },
+      {
+        target: document,
+        type: 'click',
+        handler: clickHandler,
+        options: { capture: true },
+      },
       { target: document, type: 'keydown', handler: keyDownHandler },
     );
   }
@@ -477,7 +497,10 @@ export class ElementSelectorService implements IElementSelector {
   private handleMouseMove(e: MouseEvent): void {
     if (!this.config.highlightElements) return;
 
-    const element = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement;
+    const element = document.elementFromPoint(
+      e.clientX,
+      e.clientY,
+    ) as HTMLElement;
     if (!element) return;
 
     const rect = element.getBoundingClientRect();
@@ -488,7 +511,10 @@ export class ElementSelectorService implements IElementSelector {
    * Handle element click
    */
   private handleElementClick(e: MouseEvent): void {
-    const element = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement;
+    const element = document.elementFromPoint(
+      e.clientX,
+      e.clientY,
+    ) as HTMLElement;
     if (!element) return;
 
     const rect = element.getBoundingClientRect();
@@ -554,7 +580,9 @@ export class ElementSelectorService implements IElementSelector {
 
     const tagName = element.tagName.toLowerCase();
     const idInfo = element.id ? `#${element.id}` : '';
-    const classInfo = element.className ? `.${element.className.split(' ')[0]}` : '';
+    const classInfo = element.className
+      ? `.${element.className.split(' ')[0]}`
+      : '';
 
     this.tooltipElement.textContent = `<${tagName}${idInfo}${classInfo}>`;
 

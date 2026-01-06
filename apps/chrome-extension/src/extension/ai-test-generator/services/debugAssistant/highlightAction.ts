@@ -84,7 +84,8 @@ export class HighlightAction {
 
     // Default highlight colors
     const color = options.color || '#ff6b6b';
-    const backgroundColor = options.backgroundColor || 'rgba(255, 107, 107, 0.2)';
+    const backgroundColor =
+      options.backgroundColor || 'rgba(255, 107, 107, 0.2)';
     const borderWidth = options.borderWidth || 3;
 
     // If elements not provided, try to locate them
@@ -165,7 +166,9 @@ export class HighlightAction {
               white-space: nowrap;
               pointer-events: none;
             `;
-            tooltip.textContent = el.text || `Element at (${Math.round(el.rect.left)}, ${Math.round(el.rect.top)})`;
+            tooltip.textContent =
+              el.text ||
+              `Element at (${Math.round(el.rect.left)}, ${Math.round(el.rect.top)})`;
             div.appendChild(tooltip);
           }
 
@@ -216,7 +219,8 @@ export class HighlightAction {
     const highlightId = this.generateHighlightId();
 
     const color = options.color || '#ff6b6b';
-    const backgroundColor = options.backgroundColor || 'rgba(255, 107, 107, 0.2)';
+    const backgroundColor =
+      options.backgroundColor || 'rgba(255, 107, 107, 0.2)';
     const borderWidth = options.borderWidth || 3;
 
     await page.evaluate(
@@ -256,7 +260,17 @@ export class HighlightAction {
 
         document.body.appendChild(div);
       },
-      { id: highlightId, xPos: x, yPos: y, w: width, h: height, col: color, bgCol: backgroundColor, borderW: borderWidth, lbl: options.label || '' },
+      {
+        id: highlightId,
+        xPos: x,
+        yPos: y,
+        w: width,
+        h: height,
+        col: color,
+        bgCol: backgroundColor,
+        borderW: borderWidth,
+        lbl: options.label || '',
+      },
     );
 
     this.activeHighlights.set(highlightId, [highlightId]);
@@ -422,7 +436,12 @@ export class HighlightAction {
     const fromElements = await this.locateElements(fromTarget);
     const toElements = await this.locateElements(toTarget);
 
-    if (!fromElements || fromElements.length === 0 || !toElements || toElements.length === 0) {
+    if (
+      !fromElements ||
+      fromElements.length === 0 ||
+      !toElements ||
+      toElements.length === 0
+    ) {
       throw new Error('无法找到源或目标元素');
     }
 
@@ -432,7 +451,10 @@ export class HighlightAction {
 
     await page.evaluate(
       ({ id, from, to, col, lbl }) => {
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        const svg = document.createElementNS(
+          'http://www.w3.org/2000/svg',
+          'svg',
+        );
         svg.id = id;
         svg.style.cssText = `
           position: fixed;
@@ -450,9 +472,15 @@ export class HighlightAction {
         const toY = to.rect.top + to.rect.height / 2;
 
         // Create path
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const path = document.createElementNS(
+          'http://www.w3.org/2000/svg',
+          'path',
+        );
         const midX = (fromX + toX) / 2;
-        path.setAttribute('d', `M ${fromX} ${fromY} Q ${midX} ${fromY} ${toX} ${toY}`);
+        path.setAttribute(
+          'd',
+          `M ${fromX} ${fromY} Q ${midX} ${fromY} ${toX} ${toY}`,
+        );
         path.setAttribute('stroke', col);
         path.setAttribute('stroke-width', '2');
         path.setAttribute('fill', 'none');
@@ -461,7 +489,10 @@ export class HighlightAction {
 
         // Add label if provided
         if (lbl) {
-          const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          const text = document.createElementNS(
+            'http://www.w3.org/2000/svg',
+            'text',
+          );
           text.setAttribute('x', midX);
           text.setAttribute('y', (fromY + toY) / 2 - 10);
           text.setAttribute('text-anchor', 'middle');
@@ -474,7 +505,13 @@ export class HighlightAction {
 
         document.body.appendChild(svg);
       },
-      { id: pathId, from: fromEl, to: toEl, col: options.color || '#ff6b6b', lbl: options.label || '' },
+      {
+        id: pathId,
+        from: fromEl,
+        to: toEl,
+        col: options.color || '#ff6b6b',
+        lbl: options.label || '',
+      },
     );
 
     this.activeHighlights.set(pathId, [pathId]);
@@ -526,7 +563,9 @@ export class HighlightAction {
 // Export singleton getter
 let highlightActionInstance: HighlightAction | null = null;
 
-export function getHighlightAction(options: HighlightActionOptions): HighlightAction {
+export function getHighlightAction(
+  options: HighlightActionOptions,
+): HighlightAction {
   if (!highlightActionInstance) {
     highlightActionInstance = new HighlightAction(options);
   }

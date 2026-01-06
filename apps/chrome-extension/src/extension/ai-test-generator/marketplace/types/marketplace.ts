@@ -442,9 +442,7 @@ export interface IRatingSystem {
     templateId: string,
     userId: string,
   ): Promise<TemplateReview | null>;
-  getReviewStats(
-    templateId: string,
-  ): Promise<{
+  getReviewStats(templateId: string): Promise<{
     average: number;
     count: number;
     distribution: Record<number, number>;

@@ -4,8 +4,8 @@
  */
 
 import type {
-  DebugAction,
   ActionResult,
+  DebugAction,
   DebugActionType,
 } from '../../types/debugAssistant';
 
@@ -565,7 +565,9 @@ export class ActionExecutor {
 // Export singleton getter
 let executorInstance: ActionExecutor | null = null;
 
-export function getActionExecutor(options: ActionExecutorOptions): ActionExecutor {
+export function getActionExecutor(
+  options: ActionExecutorOptions,
+): ActionExecutor {
   if (!executorInstance) {
     executorInstance = new ActionExecutor(options);
   }

@@ -2,11 +2,11 @@
  * Unit tests for ExecutionHighlighter
  */
 
-import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  ExecutionHighlighter,
-  getExecutionHighlighter,
+  type ExecutionHighlighter,
   cleanupExecutionHighlighter,
+  getExecutionHighlighter,
 } from '../executionHighlighter';
 
 // Store original global document
@@ -109,7 +109,8 @@ describe('ExecutionHighlighter', () => {
       highlighter.highlight(rect);
 
       expect(mockOverlay.appendChild).toHaveBeenCalled();
-      const createdHighlight = (mockOverlay.appendChild as any).mock.calls[0][0];
+      const createdHighlight = (mockOverlay.appendChild as any).mock
+        .calls[0][0];
       expect(createdHighlight.style.border).toBe('3px solid #1890ff'); // blue for current
     });
 
@@ -118,7 +119,8 @@ describe('ExecutionHighlighter', () => {
 
       highlighter.highlight(rect);
 
-      const createdHighlight = (mockOverlay.appendChild as any).mock.calls[0][0];
+      const createdHighlight = (mockOverlay.appendChild as any).mock
+        .calls[0][0];
       expect(createdHighlight.style.border).toBe('3px solid #ff00ff');
     });
 
@@ -127,7 +129,8 @@ describe('ExecutionHighlighter', () => {
 
       highlighter.highlight(rect, 'success');
 
-      const createdHighlight = (mockOverlay.appendChild as any).mock.calls[0][0];
+      const createdHighlight = (mockOverlay.appendChild as any).mock
+        .calls[0][0];
       expect(createdHighlight.style.border).toBe('3px solid #52c41a'); // green
     });
 
@@ -136,7 +139,8 @@ describe('ExecutionHighlighter', () => {
 
       highlighter.highlight(rect, 'failed');
 
-      const createdHighlight = (mockOverlay.appendChild as any).mock.calls[0][0];
+      const createdHighlight = (mockOverlay.appendChild as any).mock
+        .calls[0][0];
       expect(createdHighlight.style.border).toBe('3px solid #ff4d4f'); // red
     });
 
@@ -145,7 +149,8 @@ describe('ExecutionHighlighter', () => {
 
       highlighter.highlight(rect, 'pending');
 
-      const createdHighlight = (mockOverlay.appendChild as any).mock.calls[0][0];
+      const createdHighlight = (mockOverlay.appendChild as any).mock
+        .calls[0][0];
       expect(createdHighlight.style.border).toBe('3px solid #faad14'); // yellow
     });
 
@@ -154,7 +159,8 @@ describe('ExecutionHighlighter', () => {
 
       highlighter.highlight(rect);
 
-      const createdHighlight = (mockOverlay.appendChild as any).mock.calls[0][0];
+      const createdHighlight = (mockOverlay.appendChild as any).mock
+        .calls[0][0];
       expect(createdHighlight.style.left).toBe('100px');
       expect(createdHighlight.style.top).toBe('200px');
       expect(createdHighlight.style.width).toBe('150px');
@@ -182,7 +188,11 @@ describe('ExecutionHighlighter', () => {
     });
 
     it('should remove previous current highlight', () => {
-      const prevHighlight = { remove: vi.fn(), id: 'prev-highlight', style: { animation: '' } };
+      const prevHighlight = {
+        remove: vi.fn(),
+        id: 'prev-highlight',
+        style: { animation: '' },
+      };
       highlighter['currentHighlight'] = prevHighlight as any;
       highlighter['highlights'].set('prev-highlight', prevHighlight as any);
 
@@ -197,7 +207,8 @@ describe('ExecutionHighlighter', () => {
       const rect = { x: 100, y: 200, width: 150, height: 50 };
       highlighter.highlightCurrent(rect);
 
-      const createdHighlight = (mockOverlay.appendChild as any).mock.calls[0][0];
+      const createdHighlight = (mockOverlay.appendChild as any).mock
+        .calls[0][0];
       expect(createdHighlight.style.border).toBe('3px solid #1890ff');
     });
   });
@@ -207,7 +218,10 @@ describe('ExecutionHighlighter', () => {
       (document.createElement as any).mockReturnValue(mockOverlay);
       (document.getElementById as any).mockReturnValue(null);
       highlighter.init();
-      highlighter['currentHighlight'] = { ...mockHighlight, style: { animation: '', borderColor: '' } };
+      highlighter['currentHighlight'] = {
+        ...mockHighlight,
+        style: { animation: '', borderColor: '' },
+      };
     });
 
     it('should change color to green', () => {
@@ -240,7 +254,10 @@ describe('ExecutionHighlighter', () => {
         return mockOverlay;
       });
       highlighter.init();
-      highlighter['currentHighlight'] = { ...mockHighlight, style: { animation: '', borderColor: '' } };
+      highlighter['currentHighlight'] = {
+        ...mockHighlight,
+        style: { animation: '', borderColor: '' },
+      };
     });
 
     it('should change color to red', () => {
@@ -252,7 +269,9 @@ describe('ExecutionHighlighter', () => {
     it('should add shake animation', () => {
       highlighter.markAsFailed();
 
-      expect(highlighter['currentHighlight'].style.animation).toBe('midshake 0.5s ease-in-out');
+      expect(highlighter['currentHighlight'].style.animation).toBe(
+        'midshake 0.5s ease-in-out',
+      );
     });
   });
 

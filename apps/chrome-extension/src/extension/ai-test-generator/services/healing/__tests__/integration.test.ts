@@ -4,8 +4,8 @@
  * Tests UI change scenarios and full healing workflow
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ChromeExtensionProxyPageAgent } from '@midscene/web/chrome-extension';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
   HealingHistoryEntry,
   HealingResult,
@@ -56,7 +56,10 @@ vi.mock('../storage', () => {
       mockStorage.history = [];
     }),
     getHistoryByHealingId: vi.fn(async (healingId: string) => {
-      return mockStorage.history.find((h) => h.result.healingId === healingId) || null;
+      return (
+        mockStorage.history.find((h) => h.result.healingId === healingId) ||
+        null
+      );
     }),
     updateHistoryEntry: vi.fn(async (entry: HealingHistoryEntry) => {
       const index = mockStorage.history.findIndex((h) => h.id === entry.id);
@@ -122,7 +125,9 @@ describe('Self-Healing Integration Tests', () => {
       );
 
       expect(initialFingerprint.stepId).toBe('submit-button');
-      expect(initialFingerprint.semanticDescription).toBe('Submit button with blue background');
+      expect(initialFingerprint.semanticDescription).toBe(
+        'Submit button with blue background',
+      );
       expect(initialFingerprint.healingCount).toBe(0);
 
       // Step 2: Simulate element not found (original location fails)
@@ -151,7 +156,12 @@ describe('Self-Healing Integration Tests', () => {
       // Step 5: Verify fingerprint was updated with new location
       const updatedFingerprint = await healingStorage.get('submit-button');
       expect(updatedFingerprint?.lastKnownCenter).toEqual([150, 150]);
-      expect(updatedFingerprint?.lastKnownRect).toEqual({ left: 100, top: 125, width: 100, height: 50 });
+      expect(updatedFingerprint?.lastKnownRect).toEqual({
+        left: 100,
+        top: 125,
+        width: 100,
+        height: 50,
+      });
       expect(updatedFingerprint?.healingCount).toBe(1);
 
       // Step 6: Verify statistics reflect the healing
@@ -165,11 +175,12 @@ describe('Self-Healing Integration Tests', () => {
       engine.setAgent(mockAgent);
 
       // Collect fingerprint
-      await engine.collectFingerprint(
-        'login-input',
-        [200, 150],
-        { left: 150, top: 125, width: 100, height: 50 },
-      );
+      await engine.collectFingerprint('login-input', [200, 150], {
+        left: 150,
+        top: 125,
+        width: 100,
+        height: 50,
+      });
 
       // Trigger healing
       const healingResult = await engine.heal(
@@ -201,9 +212,11 @@ describe('Self-Healing Integration Tests', () => {
     it('should retry with DeepThink mode after normal mode fails', async () => {
       // Mock agent: normal mode fails, deepThink succeeds
       const deepThinkAgent = createMockAgent({
-        aiLocate: vi.fn()
+        aiLocate: vi
+          .fn()
           .mockRejectedValueOnce(new Error('Element not found')) // Normal mode fails
-          .mockResolvedValueOnce({ // DeepThink succeeds
+          .mockResolvedValueOnce({
+            // DeepThink succeeds
             center: [180, 140],
             rect: { left: 130, top: 115, width: 100, height: 50 },
           }),
@@ -212,11 +225,12 @@ describe('Self-Healing Integration Tests', () => {
       engine.setAgent(deepThinkAgent);
 
       // Collect fingerprint first
-      await engine.collectFingerprint(
-        'deep-link',
-        [100, 100],
-        { left: 50, top: 75, width: 100, height: 50 },
-      );
+      await engine.collectFingerprint('deep-link', [100, 100], {
+        left: 50,
+        top: 75,
+        width: 100,
+        height: 50,
+      });
 
       // Trigger healing - should try normal, then deepThink
       const healingResult = await engine.heal(
@@ -238,11 +252,12 @@ describe('Self-Healing Integration Tests', () => {
       engine.setAgent(failingAgent);
 
       // Collect fingerprint
-      await engine.collectFingerprint(
-        'missing-element',
-        [100, 100],
-        { left: 50, top: 75, width: 100, height: 50 },
-      );
+      await engine.collectFingerprint('missing-element', [100, 100], {
+        left: 50,
+        top: 75,
+        width: 100,
+        height: 50,
+      });
 
       // Try healing - all strategies should fail
       const healingResult = await engine.heal(
@@ -265,11 +280,12 @@ describe('Self-Healing Integration Tests', () => {
       engine.setAgent(mockAgent);
 
       // Original element at [100, 100]
-      await engine.collectFingerprint(
-        'moved-button',
-        [100, 100],
-        { left: 50, top: 75, width: 100, height: 50 },
-      );
+      await engine.collectFingerprint('moved-button', [100, 100], {
+        left: 50,
+        top: 75,
+        width: 100,
+        height: 50,
+      });
 
       // Element moved to [120, 110] - small shift
       const movedAgent = createMockAgent({
@@ -294,11 +310,12 @@ describe('Self-Healing Integration Tests', () => {
       engine.setAgent(mockAgent);
 
       // Original element at [100, 100]
-      await engine.collectFingerprint(
-        'far-moved-button',
-        [100, 100],
-        { left: 50, top: 75, width: 100, height: 50 },
-      );
+      await engine.collectFingerprint('far-moved-button', [100, 100], {
+        left: 50,
+        top: 75,
+        width: 100,
+        height: 50,
+      });
 
       // Element moved to [300, 300] - large shift
       const farMovedAgent = createMockAgent({
@@ -309,7 +326,10 @@ describe('Self-Healing Integration Tests', () => {
       });
       engine.setAgent(farMovedAgent);
 
-      const result = await engine.heal('far-moved-button', 'Click far moved button');
+      const result = await engine.heal(
+        'far-moved-button',
+        'Click far moved button',
+      );
 
       // Large shift should have lower confidence
       expect(result.success).toBe(true);
@@ -323,11 +343,12 @@ describe('Self-Healing Integration Tests', () => {
       engine.setAgent(mockAgent);
 
       // Original element: 100x50
-      await engine.collectFingerprint(
-        'resized-button',
-        [100, 100],
-        { left: 50, top: 75, width: 100, height: 50 },
-      );
+      await engine.collectFingerprint('resized-button', [100, 100], {
+        left: 50,
+        top: 75,
+        width: 100,
+        height: 50,
+      });
 
       // Element resized to 80x40 (smaller)
       const resizedAgent = createMockAgent({
@@ -338,7 +359,10 @@ describe('Self-Healing Integration Tests', () => {
       });
       engine.setAgent(resizedAgent);
 
-      const result = await engine.heal('resized-button', 'Click resized button');
+      const result = await engine.heal(
+        'resized-button',
+        'Click resized button',
+      );
 
       expect(result.success).toBe(true);
       // Size change affects confidence
@@ -350,11 +374,12 @@ describe('Self-Healing Integration Tests', () => {
       engine.setAgent(mockAgent);
 
       // Original element
-      await engine.collectFingerprint(
-        'moved-and-resized',
-        [100, 100],
-        { left: 50, top: 75, width: 100, height: 50 },
-      );
+      await engine.collectFingerprint('moved-and-resized', [100, 100], {
+        left: 50,
+        top: 75,
+        width: 100,
+        height: 50,
+      });
 
       // Element moved and resized
       const changedAgent = createMockAgent({
@@ -365,7 +390,10 @@ describe('Self-Healing Integration Tests', () => {
       });
       engine.setAgent(changedAgent);
 
-      const result = await engine.heal('moved-and-resized', 'Click changed element');
+      const result = await engine.heal(
+        'moved-and-resized',
+        'Click changed element',
+      );
 
       expect(result.success).toBe(true);
       // Both distance and size factors should affect confidence
@@ -379,15 +407,19 @@ describe('Self-Healing Integration Tests', () => {
       const stepId = 'unstable-button';
 
       // First execution - collect fingerprint
-      await engine.collectFingerprint(
-        stepId,
-        [100, 100],
-        { left: 50, top: 75, width: 100, height: 50 },
-      );
+      await engine.collectFingerprint(stepId, [100, 100], {
+        left: 50,
+        top: 75,
+        width: 100,
+        height: 50,
+      });
 
       // First healing
       await engine.heal(stepId, 'Click button');
-      await engine.confirmHealing((await healingStorage.getAllHistoryEntries())[0].result.healingId, true);
+      await engine.confirmHealing(
+        (await healingStorage.getAllHistoryEntries())[0].result.healingId,
+        true,
+      );
 
       // Second healing (element moved again)
       const movedAgent = createMockAgent({
@@ -420,28 +452,35 @@ describe('Self-Healing Integration Tests', () => {
     it('should use DeepThink for better confidence on difficult cases', async () => {
       engine.setAgent(mockAgent);
 
-      await engine.collectFingerprint(
-        'complex-element',
-        [100, 100],
-        { left: 50, top: 75, width: 100, height: 50 },
-      );
+      await engine.collectFingerprint('complex-element', [100, 100], {
+        left: 50,
+        top: 75,
+        width: 100,
+        height: 50,
+      });
 
       // Normal mode finds element with low confidence location
       // DeepThink mode finds better location
       const strategyAgent = createMockAgent({
-        aiLocate: vi.fn()
-          .mockResolvedValueOnce({ // Normal mode - far location
+        aiLocate: vi
+          .fn()
+          .mockResolvedValueOnce({
+            // Normal mode - far location
             center: [250, 250],
             rect: { left: 200, top: 225, width: 100, height: 50 },
           })
-          .mockResolvedValueOnce({ // DeepThink - closer location
+          .mockResolvedValueOnce({
+            // DeepThink - closer location
             center: [110, 105],
             rect: { left: 60, top: 80, width: 100, height: 50 },
           }),
       });
       engine.setAgent(strategyAgent);
 
-      const result = await engine.heal('complex-element', 'Find complex element');
+      const result = await engine.heal(
+        'complex-element',
+        'Find complex element',
+      );
 
       // Should have tried both strategies
       expect(result.attemptsCount).toBe(2);
@@ -455,11 +494,12 @@ describe('Self-Healing Integration Tests', () => {
       engine.updateConfig({ enableDeepThink: false });
       engine.setAgent(mockAgent);
 
-      await engine.collectFingerprint(
-        'no-deepthink',
-        [100, 100],
-        { left: 50, top: 75, width: 100, height: 50 },
-      );
+      await engine.collectFingerprint('no-deepthink', [100, 100], {
+        left: 50,
+        top: 75,
+        width: 100,
+        height: 50,
+      });
 
       // Normal mode fails
       const failingAgent = createMockAgent({
@@ -481,11 +521,12 @@ describe('Self-Healing Integration Tests', () => {
 
       // Create 5 fingerprints
       for (let i = 1; i <= 5; i++) {
-        await engine.collectFingerprint(
-          `step-${i}`,
-          [100, 100],
-          { left: 50, top: 75, width: 100, height: 50 },
-        );
+        await engine.collectFingerprint(`step-${i}`, [100, 100], {
+          left: 50,
+          top: 75,
+          width: 100,
+          height: 50,
+        });
       }
 
       // 3 successful healings, 2 failures
@@ -513,24 +554,29 @@ describe('Self-Healing Integration Tests', () => {
     it('should calculate average confidence and time cost', async () => {
       engine.setAgent(mockAgent);
 
-      await engine.collectFingerprint(
-        'metrics-test',
-        [100, 100],
-        { left: 50, top: 75, width: 100, height: 50 },
-      );
+      await engine.collectFingerprint('metrics-test', [100, 100], {
+        left: 50,
+        top: 75,
+        width: 100,
+        height: 50,
+      });
 
       // Simulate healing with different results
       const metricsAgent = createMockAgent({
-        aiLocate: vi.fn()
-          .mockResolvedValueOnce({ // First: high confidence, fast
+        aiLocate: vi
+          .fn()
+          .mockResolvedValueOnce({
+            // First: high confidence, fast
             center: [105, 102],
             rect: { left: 55, top: 77, width: 100, height: 50 },
           })
-          .mockResolvedValueOnce({ // Second: medium confidence, slower
+          .mockResolvedValueOnce({
+            // Second: medium confidence, slower
             center: [130, 120],
             rect: { left: 80, top: 95, width: 100, height: 50 },
           })
-          .mockResolvedValueOnce({ // Third: low confidence, slow
+          .mockResolvedValueOnce({
+            // Third: low confidence, slow
             center: [200, 180],
             rect: { left: 150, top: 155, width: 100, height: 50 },
           }),
@@ -566,11 +612,12 @@ describe('Self-Healing Integration Tests', () => {
     it('should handle multiple confirmations for same healing id', async () => {
       engine.setAgent(mockAgent);
 
-      await engine.collectFingerprint(
-        'double-confirm',
-        [100, 100],
-        { left: 50, top: 75, width: 100, height: 50 },
-      );
+      await engine.collectFingerprint('double-confirm', [100, 100], {
+        left: 50,
+        top: 75,
+        width: 100,
+        height: 50,
+      });
 
       const result = await engine.heal('double-confirm', 'Test');
 

@@ -16,4 +16,7 @@ export type {
   SelectionMode,
   SelectionState,
 } from '../../types/elementRepair';
-export type { IElementSelector, IRepairEngine } from '../../types/elementRepair';
+export type {
+  IElementSelector,
+  IRepairEngine,
+} from '../../types/elementRepair';

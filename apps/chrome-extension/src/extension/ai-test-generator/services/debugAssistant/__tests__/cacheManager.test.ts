@@ -2,8 +2,12 @@
  * Unit tests for cache manager
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { getCacheManager, resetCacheManager, CacheManager } from '../cacheManager';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  CacheManager,
+  getCacheManager,
+  resetCacheManager,
+} from '../cacheManager';
 
 describe('CacheManager', () => {
   let cacheManager: CacheManager;
@@ -148,8 +152,18 @@ describe('CacheManager', () => {
     });
 
     it('should invalidate all element locations', () => {
-      cacheManager.cacheElementLocation('#btn1', { x: 10, y: 20, width: 50, height: 20 });
-      cacheManager.cacheElementLocation('#btn2', { x: 30, y: 40, width: 60, height: 25 });
+      cacheManager.cacheElementLocation('#btn1', {
+        x: 10,
+        y: 20,
+        width: 50,
+        height: 20,
+      });
+      cacheManager.cacheElementLocation('#btn2', {
+        x: 30,
+        y: 40,
+        width: 60,
+        height: 25,
+      });
 
       cacheManager.invalidateElementLocations();
 

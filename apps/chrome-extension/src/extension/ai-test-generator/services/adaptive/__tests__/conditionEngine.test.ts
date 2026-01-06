@@ -4,9 +4,15 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type {
+  ConditionExpression,
+  ExecutionContext,
+} from '../../../../types/adaptive';
 import { ConditionEngine, evaluateCondition } from '../conditionEngine';
-import { parseConditionExpression, parseNaturalLanguageCondition } from '../expressionParser';
-import type { ExecutionContext, ConditionExpression } from '../../../../types/adaptive';
+import {
+  parseConditionExpression,
+  parseNaturalLanguageCondition,
+} from '../expressionParser';
 
 // Mock Midscene agent
 const mockAgent = {
@@ -537,7 +543,11 @@ describe('ConditionEngine', () => {
         };
 
         const engineWithTimeout = new ConditionEngine({ timeout: 100 });
-        const result = await engineWithTimeout.evaluate(expr, context, mockAgent as any);
+        const result = await engineWithTimeout.evaluate(
+          expr,
+          context,
+          mockAgent as any,
+        );
 
         expect(result.success).toBe(false);
         expect(result.timedOut).toBe(true);
@@ -549,7 +559,11 @@ describe('ConditionEngine', () => {
     it('should evaluate condition from expression string', async () => {
       mockAgent.locate.mockResolvedValue({ found: true });
 
-      const result = await evaluateCondition('登录按钮存在', context, mockAgent as any);
+      const result = await evaluateCondition(
+        '登录按钮存在',
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(true);
       expect(result.value).toBe(true);
@@ -560,7 +574,11 @@ describe('ConditionEngine', () => {
 
       const parsed = parseNaturalLanguageCondition('登录按钮存在');
       if (parsed.success && parsed.result) {
-        const result = await evaluateCondition(parsed.result, context, mockAgent as any);
+        const result = await evaluateCondition(
+          parsed.result,
+          context,
+          mockAgent as any,
+        );
         expect(result.success).toBe(true);
         expect(result.value).toBe(true);
       }
@@ -643,7 +661,11 @@ describe('ConditionEngine', () => {
         },
       };
 
-      const result = await engineWithFallback.evaluate(expr, context, mockAgent as any);
+      const result = await engineWithFallback.evaluate(
+        expr,
+        context,
+        mockAgent as any,
+      );
 
       expect(result.success).toBe(true);
       expect(result.value).toBe(false); // fallback value

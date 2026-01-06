@@ -17,7 +17,12 @@ export interface CompareResult {
 
 export interface CompareOptions {
   threshold?: number; // 0-1, default 0.95
-  ignoreRegions?: Array<{ x: number; y: number; width: number; height: number }>;
+  ignoreRegions?: Array<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }>;
   ignoreColor?: boolean; // Compare only structure/brightness
   createDiffImage?: boolean; // Generate visual diff
 }
@@ -121,7 +126,11 @@ export class CompareAction {
     }
 
     const currentScreenshot = await this.takeCurrentScreenshot();
-    return this.compareScreenshots(snapshot.screenshot, currentScreenshot, options);
+    return this.compareScreenshots(
+      snapshot.screenshot,
+      currentScreenshot,
+      options,
+    );
   }
 
   /**
@@ -139,7 +148,14 @@ export class CompareAction {
 
       // Perform comparison using browser's canvas
       const result = await page.evaluate(
-        ({ beforeImg, afterImg, thresh, ignoreCol, createDiff, ignoreRegs }) => {
+        ({
+          beforeImg,
+          afterImg,
+          thresh,
+          ignoreCol,
+          createDiff,
+          ignoreRegs,
+        }) => {
           // Create image elements from base64
           const img1 = new Image();
           const img2 = new Image();
@@ -193,7 +209,10 @@ export class CompareAction {
               if (!ignoreRegs || ignoreRegs.length === 0) return false;
               return ignoreRegs.some(
                 (reg) =>
-                  x >= reg.x && x < reg.x + reg.width && y >= reg.y && y < reg.y + reg.height,
+                  x >= reg.x &&
+                  x < reg.x + reg.width &&
+                  y >= reg.y &&
+                  y < reg.y + reg.height,
               );
             };
 
@@ -231,7 +250,9 @@ export class CompareAction {
                   const dr = r1 - r2;
                   const dg = g1 - g2;
                   const db = b1 - b2;
-                  diff = Math.sqrt(dr * dr + dg * dg + db * db) / (255 * Math.sqrt(3));
+                  diff =
+                    Math.sqrt(dr * dr + dg * dg + db * db) /
+                    (255 * Math.sqrt(3));
                 }
 
                 totalPixels++;
@@ -250,7 +271,9 @@ export class CompareAction {
                     diffData.data[i + 2] = 0;
                   } else {
                     // Grayscale for same
-                    const gray = Math.round(0.299 * r1 + 0.587 * g1 + 0.114 * b1);
+                    const gray = Math.round(
+                      0.299 * r1 + 0.587 * g1 + 0.114 * b1,
+                    );
                     diffData.data[i] = gray;
                     diffData.data[i + 1] = gray;
                     diffData.data[i + 2] = gray;
@@ -292,9 +315,10 @@ export class CompareAction {
         similar: result.score >= threshold,
         score: result.score,
         diff: result.diffImage,
-        message: result.score >= threshold
-          ? '页面状态基本一致'
-          : `页面存在差异，差异比例: ${result.differencePercentage.toFixed(1)}%`,
+        message:
+          result.score >= threshold
+            ? '页面状态基本一致'
+            : `页面存在差异，差异比例: ${result.differencePercentage.toFixed(1)}%`,
         details: {
           totalPixels: result.totalPixels,
           differentPixels: result.differentPixels,
@@ -313,7 +337,10 @@ export class CompareAction {
   /**
    * Compare current page state with a previous screenshot
    */
-  async compare(value?: { previousScreenshot?: string; snapshotId?: string }): Promise<{
+  async compare(value?: {
+    previousScreenshot?: string;
+    snapshotId?: string;
+  }): Promise<{
     success: boolean;
     message: string;
     data?: {
@@ -343,9 +370,13 @@ export class CompareAction {
       actualPrevious = this.snapshots.get(previousScreenshot)!.screenshot;
     }
 
-    const result = await this.compareScreenshots(actualPrevious, currentScreenshot, {
-      createDiffImage: true,
-    });
+    const result = await this.compareScreenshots(
+      actualPrevious,
+      currentScreenshot,
+      {
+        createDiffImage: true,
+      },
+    );
 
     return {
       success: result.similar,
@@ -373,14 +404,19 @@ export class CompareAction {
    * Create a snapshot before an action
    */
   async createBeforeSnapshot(label?: string): Promise<string> {
-    const snapshot = await this.takeSnapshot(`${label || 'before'}-${Date.now()}`);
+    const snapshot = await this.takeSnapshot(
+      `${label || 'before'}-${Date.now()}`,
+    );
     return snapshot.id;
   }
 
   /**
    * Create a snapshot after an action and compare
    */
-  async createAfterSnapshot(beforeId: string, options?: CompareOptions): Promise<CompareResult> {
+  async createAfterSnapshot(
+    beforeId: string,
+    options?: CompareOptions,
+  ): Promise<CompareResult> {
     const afterSnapshot = await this.takeSnapshot(`after-${Date.now()}`);
     return this.compareWithSnapshot(beforeId, options);
   }
