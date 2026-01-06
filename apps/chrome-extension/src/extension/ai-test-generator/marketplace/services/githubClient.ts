@@ -4,12 +4,12 @@
  */
 
 import type {
+  DEFAULT_GITHUB_API_CONFIG,
   Gist,
   GistFile,
   GitHubAPIConfig,
   GitHubUser,
   TemplateIndex,
-  DEFAULT_GITHUB_API_CONFIG,
 } from '../types';
 import { githubAuth } from './githubAuth';
 
@@ -57,7 +57,7 @@ export class GitHubAPIError extends Error {
   constructor(
     message: string,
     public statusCode: number,
-    public response?: unknown
+    public response?: unknown,
   ) {
     super(message);
     this.name = 'GitHubAPIError';
@@ -103,15 +103,13 @@ export class GitHubClient {
    */
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<T> {
     // Check rate limit
     if (this.rateLimitRemaining <= 0 && Date.now() < this.rateLimitReset) {
-      throw new GitHubAPIError(
-        'Rate limit exceeded',
-        429,
-        { resetAt: this.rateLimitReset }
-      );
+      throw new GitHubAPIError('Rate limit exceeded', 429, {
+        resetAt: this.rateLimitReset,
+      });
     }
 
     const url = endpoint.startsWith('http')
@@ -129,15 +127,15 @@ export class GitHubClient {
     // Update rate limit info
     const remaining = response.headers.get('X-RateLimit-Remaining');
     const reset = response.headers.get('X-RateLimit-Reset');
-    if (remaining) this.rateLimitRemaining = parseInt(remaining, 10);
-    if (reset) this.rateLimitReset = parseInt(reset, 10) * 1000;
+    if (remaining) this.rateLimitRemaining = Number.parseInt(remaining, 10);
+    if (reset) this.rateLimitReset = Number.parseInt(reset, 10) * 1000;
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       throw new GitHubAPIError(
         error.message || `Request failed with status ${response.status}`,
         response.status,
-        error
+        error,
       );
     }
 
@@ -170,7 +168,7 @@ export class GitHubClient {
   async createGist(
     files: Record<string, { content: string }>,
     description: string,
-    isPublic = true
+    isPublic = true,
   ): Promise<Gist> {
     return this.request<Gist>('/gists', {
       method: 'POST',
@@ -188,7 +186,7 @@ export class GitHubClient {
   async updateGist(
     gistId: string,
     files: Record<string, { content: string } | null>,
-    description?: string
+    description?: string,
   ): Promise<Gist> {
     const body: Record<string, unknown> = { files };
     if (description !== undefined) {
@@ -221,9 +219,7 @@ export class GitHubClient {
    * List Gists for the authenticated user
    */
   async listMyGists(page = 1, perPage = 30): Promise<Gist[]> {
-    return this.request<Gist[]>(
-      `/gists?page=${page}&per_page=${perPage}`
-    );
+    return this.request<Gist[]>(`/gists?page=${page}&per_page=${perPage}`);
   }
 
   /**
@@ -269,7 +265,7 @@ export class GitHubClient {
   async getIssue(issueNumber: number): Promise<GitHubIssue> {
     const [owner, repo] = this.config.templateRepo.split('/');
     return this.request<GitHubIssue>(
-      `/repos/${owner}/${repo}/issues/${issueNumber}`
+      `/repos/${owner}/${repo}/issues/${issueNumber}`,
     );
   }
 
@@ -311,7 +307,7 @@ export class GitHubClient {
    */
   async createComment(
     issueNumber: number,
-    body: string
+    body: string,
   ): Promise<GitHubComment> {
     const [owner, repo] = this.config.templateRepo.split('/');
     return this.request<GitHubComment>(
@@ -319,24 +315,21 @@ export class GitHubClient {
       {
         method: 'POST',
         body: JSON.stringify({ body }),
-      }
+      },
     );
   }
 
   /**
    * Update a comment
    */
-  async updateComment(
-    commentId: number,
-    body: string
-  ): Promise<GitHubComment> {
+  async updateComment(commentId: number, body: string): Promise<GitHubComment> {
     const [owner, repo] = this.config.templateRepo.split('/');
     return this.request<GitHubComment>(
       `/repos/${owner}/${repo}/issues/comments/${commentId}`,
       {
         method: 'PATCH',
         body: JSON.stringify({ body }),
-      }
+      },
     );
   }
 
@@ -349,7 +342,7 @@ export class GitHubClient {
       `/repos/${owner}/${repo}/issues/comments/${commentId}`,
       {
         method: 'DELETE',
-      }
+      },
     );
   }
 
@@ -359,11 +352,11 @@ export class GitHubClient {
   async listComments(
     issueNumber: number,
     page = 1,
-    perPage = 30
+    perPage = 30,
   ): Promise<GitHubComment[]> {
     const [owner, repo] = this.config.templateRepo.split('/');
     return this.request<GitHubComment[]>(
-      `/repos/${owner}/${repo}/issues/${issueNumber}/comments?page=${page}&per_page=${perPage}`
+      `/repos/${owner}/${repo}/issues/${issueNumber}/comments?page=${page}&per_page=${perPage}`,
     );
   }
 
@@ -376,7 +369,15 @@ export class GitHubClient {
    */
   async addIssueReaction(
     issueNumber: number,
-    reaction: '+1' | '-1' | 'laugh' | 'confused' | 'heart' | 'hooray' | 'rocket' | 'eyes'
+    reaction:
+      | '+1'
+      | '-1'
+      | 'laugh'
+      | 'confused'
+      | 'heart'
+      | 'hooray'
+      | 'rocket'
+      | 'eyes',
   ): Promise<void> {
     const [owner, repo] = this.config.templateRepo.split('/');
     await this.request<void>(
@@ -387,7 +388,7 @@ export class GitHubClient {
           Accept: 'application/vnd.github.squirrel-girl-preview+json',
         },
         body: JSON.stringify({ content: reaction }),
-      }
+      },
     );
   }
 
@@ -396,7 +397,15 @@ export class GitHubClient {
    */
   async addCommentReaction(
     commentId: number,
-    reaction: '+1' | '-1' | 'laugh' | 'confused' | 'heart' | 'hooray' | 'rocket' | 'eyes'
+    reaction:
+      | '+1'
+      | '-1'
+      | 'laugh'
+      | 'confused'
+      | 'heart'
+      | 'hooray'
+      | 'rocket'
+      | 'eyes',
   ): Promise<void> {
     const [owner, repo] = this.config.templateRepo.split('/');
     await this.request<void>(
@@ -407,7 +416,7 @@ export class GitHubClient {
           Accept: 'application/vnd.github.squirrel-girl-preview+json',
         },
         body: JSON.stringify({ content: reaction }),
-      }
+      },
     );
   }
 
@@ -422,7 +431,7 @@ export class GitHubClient {
   async createTemplateSubmission(
     title: string,
     body: string,
-    categorySlug = 'template-submissions'
+    categorySlug = 'template-submissions',
   ): Promise<{ id: string; url: string }> {
     // GitHub Discussions require GraphQL API
     const query = `
@@ -462,14 +471,15 @@ export class GitHubClient {
       };
     }>(categoriesQuery, { owner, repo });
 
-    const category = categoriesResult.repository.discussionCategories.nodes.find(
-      (c) => c.slug === categorySlug
-    );
+    const category =
+      categoriesResult.repository.discussionCategories.nodes.find(
+        (c) => c.slug === categorySlug,
+      );
 
     if (!category) {
       throw new GitHubAPIError(
         `Discussion category "${categorySlug}" not found`,
-        404
+        404,
       );
     }
 
@@ -494,7 +504,7 @@ export class GitHubClient {
    */
   private async graphqlRequest<T>(
     query: string,
-    variables: Record<string, unknown> = {}
+    variables: Record<string, unknown> = {},
   ): Promise<T> {
     const response = await fetch('https://api.github.com/graphql', {
       method: 'POST',
@@ -505,9 +515,10 @@ export class GitHubClient {
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       throw new GitHubAPIError(
-        error.message || `GraphQL request failed with status ${response.status}`,
+        error.message ||
+          `GraphQL request failed with status ${response.status}`,
         response.status,
-        error
+        error,
       );
     }
 
@@ -517,7 +528,7 @@ export class GitHubClient {
       throw new GitHubAPIError(
         result.errors[0]?.message || 'GraphQL error',
         400,
-        result.errors
+        result.errors,
       );
     }
 
@@ -543,9 +554,12 @@ export class GitHubClient {
    */
   configure(config: Partial<GitHubAPIConfig>): void {
     if (config.clientId !== undefined) this.config.clientId = config.clientId;
-    if (config.templateRepo !== undefined) this.config.templateRepo = config.templateRepo;
-    if (config.indexIssueNumber !== undefined) this.config.indexIssueNumber = config.indexIssueNumber;
-    if (config.apiBaseUrl !== undefined) this.config.apiBaseUrl = config.apiBaseUrl;
+    if (config.templateRepo !== undefined)
+      this.config.templateRepo = config.templateRepo;
+    if (config.indexIssueNumber !== undefined)
+      this.config.indexIssueNumber = config.indexIssueNumber;
+    if (config.apiBaseUrl !== undefined)
+      this.config.apiBaseUrl = config.apiBaseUrl;
   }
 }
 

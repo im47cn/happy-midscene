@@ -2,12 +2,14 @@
  * ErrorBoundary Component Tests
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MarketplaceErrorBoundary, withErrorBoundary } from '../ErrorBoundary';
 
 // Component that throws an error
-const ThrowError: React.FC<{ shouldThrow?: boolean }> = ({ shouldThrow = true }) => {
+const ThrowError: React.FC<{ shouldThrow?: boolean }> = ({
+  shouldThrow = true,
+}) => {
   if (shouldThrow) {
     throw new Error('Test error');
   }
@@ -28,7 +30,7 @@ describe('MarketplaceErrorBoundary', () => {
     render(
       <MarketplaceErrorBoundary>
         <div>Child content</div>
-      </MarketplaceErrorBoundary>
+      </MarketplaceErrorBoundary>,
     );
 
     expect(screen.getByText('Child content')).toBeInTheDocument();
@@ -38,19 +40,23 @@ describe('MarketplaceErrorBoundary', () => {
     render(
       <MarketplaceErrorBoundary>
         <ThrowError />
-      </MarketplaceErrorBoundary>
+      </MarketplaceErrorBoundary>,
     );
 
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
-    expect(screen.getByText(/An error occurred while loading the marketplace/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Try Again/i })).toBeInTheDocument();
+    expect(
+      screen.getByText(/An error occurred while loading the marketplace/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /Try Again/i }),
+    ).toBeInTheDocument();
   });
 
   it('should render custom fallback when provided', () => {
     render(
       <MarketplaceErrorBoundary fallback={<div>Custom error message</div>}>
         <ThrowError />
-      </MarketplaceErrorBoundary>
+      </MarketplaceErrorBoundary>,
     );
 
     expect(screen.getByText('Custom error message')).toBeInTheDocument();
@@ -62,7 +68,7 @@ describe('MarketplaceErrorBoundary', () => {
     render(
       <MarketplaceErrorBoundary onError={onError}>
         <ThrowError />
-      </MarketplaceErrorBoundary>
+      </MarketplaceErrorBoundary>,
     );
 
     expect(onError).toHaveBeenCalledTimes(1);
@@ -70,7 +76,7 @@ describe('MarketplaceErrorBoundary', () => {
       expect.any(Error),
       expect.objectContaining({
         componentStack: expect.any(String),
-      })
+      }),
     );
   });
 
@@ -78,7 +84,7 @@ describe('MarketplaceErrorBoundary', () => {
     render(
       <MarketplaceErrorBoundary showDetails>
         <ThrowError />
-      </MarketplaceErrorBoundary>
+      </MarketplaceErrorBoundary>,
     );
 
     expect(screen.getByText('Error')).toBeInTheDocument();
@@ -148,6 +154,8 @@ describe('withErrorBoundary HOC', () => {
 
     const WrappedComponent = withErrorBoundary(TestComponent);
 
-    expect(WrappedComponent.displayName).toBe('WithErrorBoundary(TestComponent)');
+    expect(WrappedComponent.displayName).toBe(
+      'WithErrorBoundary(TestComponent)',
+    );
   });
 });

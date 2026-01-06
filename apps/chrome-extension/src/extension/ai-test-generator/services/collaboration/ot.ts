@@ -44,7 +44,7 @@ export class OperationalTransform {
    */
   async transform(
     op: EditorOperation,
-    currentVersion: number
+    currentVersion: number,
   ): Promise<EditorOperation> {
     // In production, this would transform against concurrent operations
     // For now, just update the version
@@ -60,9 +60,17 @@ export class OperationalTransform {
   async apply(document: string, operation: EditorOperation): Promise<string> {
     switch (operation.type) {
       case 'insert':
-        return this.insertAt(document, operation.position, operation.content || '');
+        return this.insertAt(
+          document,
+          operation.position,
+          operation.content || '',
+        );
       case 'delete':
-        return this.deleteAt(document, operation.position, operation.length || 0);
+        return this.deleteAt(
+          document,
+          operation.position,
+          operation.length || 0,
+        );
       case 'retain':
         return document;
     }
@@ -71,7 +79,10 @@ export class OperationalTransform {
   /**
    * Transform two operations against each other
    */
-  transformOps(op1: EditorOperation, op2: EditorOperation): [EditorOperation, EditorOperation] {
+  transformOps(
+    op1: EditorOperation,
+    op2: EditorOperation,
+  ): [EditorOperation, EditorOperation] {
     // Transform op1 against op2 and vice versa
     const transformed1 = this.transformOpAgainst(op1, op2);
     const transformed2 = this.transformOpAgainst(op2, op1);
@@ -84,7 +95,7 @@ export class OperationalTransform {
    */
   private transformOpAgainst(
     op: EditorOperation,
-    against: EditorOperation
+    against: EditorOperation,
   ): EditorOperation {
     let newPos = op.position;
 
@@ -113,13 +124,15 @@ export class OperationalTransform {
   /**
    * Insert text at position
    */
-  private insertAt(document: string, position: number, content: string): string {
+  private insertAt(
+    document: string,
+    position: number,
+    content: string,
+  ): string {
     if (position < 0) position = 0;
     if (position > document.length) position = document.length;
 
-    return (
-      document.slice(0, position) + content + document.slice(position)
-    );
+    return document.slice(0, position) + content + document.slice(position);
   }
 
   /**
@@ -243,7 +256,7 @@ export class OperationalTransform {
    */
   transformPath(
     ops: EditorOperation[],
-    against: EditorOperation
+    against: EditorOperation,
   ): EditorOperation[] {
     const result: EditorOperation[] = [];
 

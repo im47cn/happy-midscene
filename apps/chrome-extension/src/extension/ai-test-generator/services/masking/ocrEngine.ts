@@ -4,7 +4,11 @@
  * Uses Tesseract.js when available, falls back to pattern-based detection
  */
 
-import type { DetectionResult, MaskRegion, SensitiveCategory } from '../../types/masking';
+import type {
+  DetectionResult,
+  MaskRegion,
+  SensitiveCategory,
+} from '../../types/masking';
 import { detectorEngine } from './detectorEngine';
 
 /**
@@ -117,7 +121,9 @@ export class OCREngine {
       const Tesseract = await import('tesseract.js').catch(() => null);
 
       if (!Tesseract) {
-        console.warn('Tesseract.js not available. OCR features will be limited.');
+        console.warn(
+          'Tesseract.js not available. OCR features will be limited.',
+        );
         this.isAvailable = false;
         return;
       }
@@ -201,7 +207,9 @@ export class OCREngine {
    * @param imageData - ImageData or base64 string
    * @returns Array of sensitive text matches with regions
    */
-  async detectSensitiveText(imageData: ImageData | string): Promise<SensitiveTextMatch[]> {
+  async detectSensitiveText(
+    imageData: ImageData | string,
+  ): Promise<SensitiveTextMatch[]> {
     const ocrResult = await this.recognizeText(imageData);
 
     if (!ocrResult.text || ocrResult.lines.length === 0) {
@@ -245,7 +253,10 @@ export class OCREngine {
   /**
    * Find words in a line that contain the detected text
    */
-  private findMatchingWords(line: OCRLine, detection: DetectionResult): OCRWord[] {
+  private findMatchingWords(
+    line: OCRLine,
+    detection: DetectionResult,
+  ): OCRWord[] {
     const matchingWords: OCRWord[] = [];
     const searchText = detection.value.toLowerCase();
 
@@ -284,15 +295,20 @@ export class OCREngine {
   /**
    * Calculate bounding region from multiple words
    */
-  private calculateBoundingRegion(words: OCRWord[]): { x: number; y: number; width: number; height: number } {
+  private calculateBoundingRegion(words: OCRWord[]): {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } {
     if (words.length === 0) {
       return { x: 0, y: 0, width: 0, height: 0 };
     }
 
-    let minX = Infinity;
-    let minY = Infinity;
-    let maxX = -Infinity;
-    let maxY = -Infinity;
+    let minX = Number.POSITIVE_INFINITY;
+    let minY = Number.POSITIVE_INFINITY;
+    let maxX = Number.NEGATIVE_INFINITY;
+    let maxY = Number.NEGATIVE_INFINITY;
 
     for (const word of words) {
       minX = Math.min(minX, word.bbox.x0);

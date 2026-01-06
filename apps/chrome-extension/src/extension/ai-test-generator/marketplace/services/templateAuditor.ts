@@ -4,11 +4,7 @@
  */
 
 import * as yaml from 'js-yaml';
-import type {
-  AuditResult,
-  ITemplateAuditor,
-  TemplateDraft,
-} from '../types';
+import type { AuditResult, ITemplateAuditor, TemplateDraft } from '../types';
 
 /**
  * Patterns for detecting sensitive information
@@ -19,7 +15,10 @@ const SENSITIVE_PATTERNS = [
   { pattern: /pwd\s*[:=]\s*["'][^"']+["']/gi, name: 'Hardcoded password' },
 
   // API keys
-  { pattern: /api[_-]?key\s*[:=]\s*["'][a-zA-Z0-9_-]{20,}["']/gi, name: 'API key' },
+  {
+    pattern: /api[_-]?key\s*[:=]\s*["'][a-zA-Z0-9_-]{20,}["']/gi,
+    name: 'API key',
+  },
   { pattern: /apikey\s*[:=]\s*["'][a-zA-Z0-9_-]{20,}["']/gi, name: 'API key' },
 
   // Tokens
@@ -34,8 +33,14 @@ const SENSITIVE_PATTERNS = [
   { pattern: /AKIA[A-Z0-9]{16}/g, name: 'AWS access key' },
 
   // Connection strings
-  { pattern: /mongodb(\+srv)?:\/\/[^@]+:[^@]+@/gi, name: 'MongoDB connection string' },
-  { pattern: /postgres:\/\/[^@]+:[^@]+@/gi, name: 'PostgreSQL connection string' },
+  {
+    pattern: /mongodb(\+srv)?:\/\/[^@]+:[^@]+@/gi,
+    name: 'MongoDB connection string',
+  },
+  {
+    pattern: /postgres:\/\/[^@]+:[^@]+@/gi,
+    name: 'PostgreSQL connection string',
+  },
   { pattern: /mysql:\/\/[^@]+:[^@]+@/gi, name: 'MySQL connection string' },
 ];
 
@@ -72,13 +77,17 @@ export class TemplateAuditor implements ITemplateAuditor {
     // Check for sensitive information
     const sensitiveCheck = this.detectSensitiveInfo(draft.content.yaml);
     if (sensitiveCheck.found) {
-      reasons.push(`Sensitive information detected: ${sensitiveCheck.matches.join(', ')}`);
+      reasons.push(
+        `Sensitive information detected: ${sensitiveCheck.matches.join(', ')}`,
+      );
     }
 
     // Check for malicious code
     const maliciousCheck = this.detectMaliciousCode(draft.content.yaml);
     if (maliciousCheck.found) {
-      reasons.push(`Potentially malicious code detected: ${maliciousCheck.matches.join(', ')}`);
+      reasons.push(
+        `Potentially malicious code detected: ${maliciousCheck.matches.join(', ')}`,
+      );
     }
 
     // Validate YAML syntax
@@ -90,10 +99,14 @@ export class TemplateAuditor implements ITemplateAuditor {
     // Check for undefined parameters
     const paramCheck = this.checkParameters(draft);
     if (paramCheck.undefinedParams.length > 0) {
-      warnings.push(`Parameters used but not defined: ${paramCheck.undefinedParams.join(', ')}`);
+      warnings.push(
+        `Parameters used but not defined: ${paramCheck.undefinedParams.join(', ')}`,
+      );
     }
     if (paramCheck.unusedParams.length > 0) {
-      warnings.push(`Parameters defined but not used: ${paramCheck.unusedParams.join(', ')}`);
+      warnings.push(
+        `Parameters defined but not used: ${paramCheck.unusedParams.join(', ')}`,
+      );
     }
 
     // Check content quality
@@ -193,7 +206,9 @@ export class TemplateAuditor implements ITemplateAuditor {
     const definedParams = new Set(draft.content.parameters.map((p) => p.name));
 
     // Find undefined and unused parameters
-    const undefinedParams = [...usedParams].filter((p) => !definedParams.has(p));
+    const undefinedParams = [...usedParams].filter(
+      (p) => !definedParams.has(p),
+    );
     const unusedParams = [...definedParams].filter((p) => !usedParams.has(p));
 
     return { undefinedParams, unusedParams };
@@ -228,17 +243,21 @@ export class TemplateAuditor implements ITemplateAuditor {
     }
 
     // Check for parameters without descriptions
-    const paramsWithoutDesc = draft.content.parameters.filter((p) => !p.description);
+    const paramsWithoutDesc = draft.content.parameters.filter(
+      (p) => !p.description,
+    );
     if (paramsWithoutDesc.length > 0) {
       suggestions.push('Consider adding descriptions for all parameters');
     }
 
     // Check for required parameters without defaults
     const requiredWithoutDefault = draft.content.parameters.filter(
-      (p) => p.required && p.default === undefined
+      (p) => p.required && p.default === undefined,
     );
     if (requiredWithoutDefault.length > 0) {
-      suggestions.push('Consider providing default values for required parameters');
+      suggestions.push(
+        'Consider providing default values for required parameters',
+      );
     }
 
     return { warnings, suggestions };

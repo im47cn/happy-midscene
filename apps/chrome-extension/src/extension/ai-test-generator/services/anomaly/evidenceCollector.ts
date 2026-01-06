@@ -5,7 +5,7 @@
  * 一旦我被更新，务必更新我的开头注释，以及所属的文件夹的CLAUDE.md。
  */
 
-import type { Evidence, Anomaly, RootCauseCategory } from '../../types/anomaly';
+import type { Anomaly, Evidence, RootCauseCategory } from '../../types/anomaly';
 
 // ============================================================================
 // Types
@@ -121,7 +121,7 @@ const EVIDENCE_PATTERNS: EvidencePattern[] = [
       /script timeout/i,
       /promise.*rejected.*timeout/i,
     ],
-    extractWeight: (_, ctx) => ctx.status === 'timeout' ? 0.9 : 0.7,
+    extractWeight: (_, ctx) => (ctx.status === 'timeout' ? 0.9 : 0.7),
     extractDescription: (match) => `Timing issue detected: ${match}`,
   },
   // Network issues
@@ -200,7 +200,9 @@ class EvidenceCollector {
     const environmentChanges: ChangeInfo[] = [];
 
     // Extract evidence from anomaly description
-    const descriptionEvidence = this.extractFromDescription(anomaly.description);
+    const descriptionEvidence = this.extractFromDescription(
+      anomaly.description,
+    );
     primary.push(...descriptionEvidence.filter((e) => e.weight >= 0.7));
     secondary.push(...descriptionEvidence.filter((e) => e.weight < 0.7));
 
@@ -215,7 +217,9 @@ class EvidenceCollector {
 
       // Detect environment changes
       if (context.environmentInfo) {
-        environmentChanges.push(...this.detectEnvironmentChanges(context.environmentInfo));
+        environmentChanges.push(
+          ...this.detectEnvironmentChanges(context.environmentInfo),
+        );
       }
     }
 
@@ -309,7 +313,12 @@ class EvidenceCollector {
           type: 'log',
           description: log.message,
           data: { level: log.level, source: log.source },
-          severity: log.level === 'error' ? 'error' : log.level === 'warn' ? 'warning' : 'info',
+          severity:
+            log.level === 'error'
+              ? 'error'
+              : log.level === 'warn'
+                ? 'warning'
+                : 'info',
         });
       }
     }
@@ -317,7 +326,8 @@ class EvidenceCollector {
     // Add network requests
     if (context.networkRequests) {
       for (const request of context.networkRequests) {
-        const isError = request.error || (request.status && request.status >= 400);
+        const isError =
+          request.error || (request.status && request.status >= 400);
         events.push({
           timestamp: request.timestamp,
           type: 'network',
@@ -411,11 +421,15 @@ class EvidenceCollector {
   correlateChanges(
     anomalyTime: number,
     changes: ChangeInfo[],
-    windowMs: number = 24 * 60 * 60 * 1000
+    windowMs: number = 24 * 60 * 60 * 1000,
   ): ChangeInfo[] {
-    return changes.filter(
-      (change) => Math.abs(change.timestamp - anomalyTime) <= windowMs
-    ).sort((a, b) => Math.abs(a.timestamp - anomalyTime) - Math.abs(b.timestamp - anomalyTime));
+    return changes
+      .filter((change) => Math.abs(change.timestamp - anomalyTime) <= windowMs)
+      .sort(
+        (a, b) =>
+          Math.abs(a.timestamp - anomalyTime) -
+          Math.abs(b.timestamp - anomalyTime),
+      );
   }
 
   // ============================================================================
@@ -433,12 +447,16 @@ class EvidenceCollector {
         if (regex.test(description)) {
           evidence.push({
             type: 'description_pattern',
-            description: pattern.extractDescription(description, {} as ExecutionContext),
+            description: pattern.extractDescription(
+              description,
+              {} as ExecutionContext,
+            ),
             data: {
               category: pattern.category,
               source: 'anomaly_description',
             },
-            weight: pattern.extractWeight(description, {} as ExecutionContext) * 0.8, // Reduce weight for description-only
+            weight:
+              pattern.extractWeight(description, {} as ExecutionContext) * 0.8, // Reduce weight for description-only
           });
           break; // Only one evidence per category from description
         }
@@ -451,7 +469,10 @@ class EvidenceCollector {
   /**
    * Extract evidence from execution context
    */
-  private extractFromContext(context: ExecutionContext): { primary: Evidence[]; secondary: Evidence[] } {
+  private extractFromContext(context: ExecutionContext): {
+    primary: Evidence[];
+    secondary: Evidence[];
+  } {
     const primary: Evidence[] = [];
     const secondary: Evidence[] = [];
 
@@ -468,7 +489,7 @@ class EvidenceCollector {
     // Network failure evidence
     if (context.networkRequests) {
       const failedRequests = context.networkRequests.filter(
-        (r) => r.error || (r.status && r.status >= 400)
+        (r) => r.error || (r.status && r.status >= 400),
       );
       if (failedRequests.length > 0) {
         const evidence: Evidence = {
@@ -516,9 +537,15 @@ class EvidenceCollector {
     const absDeviation = Math.abs(deviation);
 
     let category: RootCauseCategory;
-    if (anomaly.type === 'duration_spike' || anomaly.type === 'performance_degradation') {
+    if (
+      anomaly.type === 'duration_spike' ||
+      anomaly.type === 'performance_degradation'
+    ) {
       category = 'timing_issue';
-    } else if (anomaly.type === 'failure_spike' || anomaly.type === 'success_rate_drop') {
+    } else if (
+      anomaly.type === 'failure_spike' ||
+      anomaly.type === 'success_rate_drop'
+    ) {
       category = 'code_change';
     } else if (anomaly.type === 'resource_anomaly') {
       category = 'resource_constraint';
@@ -559,7 +586,7 @@ class EvidenceCollector {
   private generateSummary(
     primary: Evidence[],
     secondary: Evidence[],
-    timeline: TimelineEvent[]
+    timeline: TimelineEvent[],
   ): string {
     const parts: string[] = [];
 

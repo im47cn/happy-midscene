@@ -6,12 +6,12 @@
  */
 
 import type {
-  RootCause,
-  RootCauseCategory,
-  Evidence,
-  Suggestion,
   Anomaly,
   AnomalyType,
+  Evidence,
+  RootCause,
+  RootCauseCategory,
+  Suggestion,
 } from '../../types/anomaly';
 import type { CollectedEvidence, ExecutionContext } from './evidenceCollector';
 
@@ -30,7 +30,12 @@ export interface MatchRule {
 }
 
 export interface MatchCondition {
-  type: 'evidence_type' | 'evidence_pattern' | 'anomaly_type' | 'metric_name' | 'severity';
+  type:
+    | 'evidence_type'
+    | 'evidence_pattern'
+    | 'anomaly_type'
+    | 'metric_name'
+    | 'severity';
   operator: 'equals' | 'contains' | 'matches' | 'in';
   value: string | string[] | RegExp;
   weight: number; // How much this condition contributes to confidence
@@ -88,9 +93,22 @@ const MATCH_RULES: MatchRule[] = [
       },
     ],
     suggestions: [
-      { action: 'Update element selector to match current DOM structure', priority: 1, effort: 'low' },
-      { action: 'Add wait conditions for dynamic elements', priority: 2, effort: 'low' },
-      { action: 'Consider using more stable selectors (data-testid, aria-label)', priority: 3, effort: 'medium' },
+      {
+        action: 'Update element selector to match current DOM structure',
+        priority: 1,
+        effort: 'low',
+      },
+      {
+        action: 'Add wait conditions for dynamic elements',
+        priority: 2,
+        effort: 'low',
+      },
+      {
+        action:
+          'Consider using more stable selectors (data-testid, aria-label)',
+        priority: 3,
+        effort: 'medium',
+      },
     ],
     baseConfidence: 70,
   },
@@ -109,9 +127,21 @@ const MATCH_RULES: MatchRule[] = [
       },
     ],
     suggestions: [
-      { action: 'Add explicit wait after page transitions', priority: 1, effort: 'low' },
-      { action: 'Re-query element before interaction', priority: 2, effort: 'low' },
-      { action: 'Handle dynamic content loading with proper waits', priority: 3, effort: 'medium' },
+      {
+        action: 'Add explicit wait after page transitions',
+        priority: 1,
+        effort: 'low',
+      },
+      {
+        action: 'Re-query element before interaction',
+        priority: 2,
+        effort: 'low',
+      },
+      {
+        action: 'Handle dynamic content loading with proper waits',
+        priority: 3,
+        effort: 'medium',
+      },
     ],
     baseConfidence: 75,
   },
@@ -139,9 +169,21 @@ const MATCH_RULES: MatchRule[] = [
       },
     ],
     suggestions: [
-      { action: 'Increase timeout threshold for slow operations', priority: 1, effort: 'low' },
-      { action: 'Investigate page load performance', priority: 2, effort: 'medium' },
-      { action: 'Add conditional waits instead of fixed delays', priority: 3, effort: 'medium' },
+      {
+        action: 'Increase timeout threshold for slow operations',
+        priority: 1,
+        effort: 'low',
+      },
+      {
+        action: 'Investigate page load performance',
+        priority: 2,
+        effort: 'medium',
+      },
+      {
+        action: 'Add conditional waits instead of fixed delays',
+        priority: 3,
+        effort: 'medium',
+      },
     ],
     baseConfidence: 65,
   },
@@ -167,9 +209,21 @@ const MATCH_RULES: MatchRule[] = [
       },
     ],
     suggestions: [
-      { action: 'Profile application to identify bottlenecks', priority: 1, effort: 'medium' },
-      { action: 'Check for recent code changes affecting performance', priority: 2, effort: 'low' },
-      { action: 'Review database queries and API response times', priority: 3, effort: 'medium' },
+      {
+        action: 'Profile application to identify bottlenecks',
+        priority: 1,
+        effort: 'medium',
+      },
+      {
+        action: 'Check for recent code changes affecting performance',
+        priority: 2,
+        effort: 'low',
+      },
+      {
+        action: 'Review database queries and API response times',
+        priority: 3,
+        effort: 'medium',
+      },
     ],
     baseConfidence: 60,
   },
@@ -184,7 +238,8 @@ const MATCH_RULES: MatchRule[] = [
       {
         type: 'evidence_pattern',
         operator: 'matches',
-        value: /network.*error|fetch.*failed|connection.*refused|status.*[45]\d{2}/i,
+        value:
+          /network.*error|fetch.*failed|connection.*refused|status.*[45]\d{2}/i,
         weight: 0.4,
         required: true,
       },
@@ -197,9 +252,21 @@ const MATCH_RULES: MatchRule[] = [
       },
     ],
     suggestions: [
-      { action: 'Verify API endpoint availability and response', priority: 1, effort: 'low' },
-      { action: 'Check network connectivity and firewall rules', priority: 2, effort: 'low' },
-      { action: 'Add retry logic for transient network failures', priority: 3, effort: 'medium' },
+      {
+        action: 'Verify API endpoint availability and response',
+        priority: 1,
+        effort: 'low',
+      },
+      {
+        action: 'Check network connectivity and firewall rules',
+        priority: 2,
+        effort: 'low',
+      },
+      {
+        action: 'Add retry logic for transient network failures',
+        priority: 3,
+        effort: 'medium',
+      },
     ],
     baseConfidence: 70,
   },
@@ -218,9 +285,17 @@ const MATCH_RULES: MatchRule[] = [
       },
     ],
     suggestions: [
-      { action: 'Check server logs for error details', priority: 1, effort: 'low' },
+      {
+        action: 'Check server logs for error details',
+        priority: 1,
+        effort: 'low',
+      },
       { action: 'Verify backend service health', priority: 2, effort: 'low' },
-      { action: 'Review recent deployments for regressions', priority: 3, effort: 'medium' },
+      {
+        action: 'Review recent deployments for regressions',
+        priority: 3,
+        effort: 'medium',
+      },
     ],
     baseConfidence: 75,
   },
@@ -235,15 +310,28 @@ const MATCH_RULES: MatchRule[] = [
       {
         type: 'evidence_pattern',
         operator: 'matches',
-        value: /assertion.*failed|expected.*but.*received|does not match|validation.*error/i,
+        value:
+          /assertion.*failed|expected.*but.*received|does not match|validation.*error/i,
         weight: 0.4,
         required: true,
       },
     ],
     suggestions: [
-      { action: 'Verify test data is current and valid', priority: 1, effort: 'low' },
-      { action: 'Check for data schema changes', priority: 2, effort: 'medium' },
-      { action: 'Update assertions to match new data format', priority: 3, effort: 'low' },
+      {
+        action: 'Verify test data is current and valid',
+        priority: 1,
+        effort: 'low',
+      },
+      {
+        action: 'Check for data schema changes',
+        priority: 2,
+        effort: 'medium',
+      },
+      {
+        action: 'Update assertions to match new data format',
+        priority: 3,
+        effort: 'low',
+      },
     ],
     baseConfidence: 65,
   },
@@ -262,9 +350,17 @@ const MATCH_RULES: MatchRule[] = [
       },
     ],
     suggestions: [
-      { action: 'Add null checks before accessing properties', priority: 1, effort: 'low' },
+      {
+        action: 'Add null checks before accessing properties',
+        priority: 1,
+        effort: 'low',
+      },
       { action: 'Verify API response structure', priority: 2, effort: 'low' },
-      { action: 'Handle edge cases for missing data', priority: 3, effort: 'medium' },
+      {
+        action: 'Handle edge cases for missing data',
+        priority: 3,
+        effort: 'medium',
+      },
     ],
     baseConfidence: 70,
   },
@@ -285,9 +381,21 @@ const MATCH_RULES: MatchRule[] = [
       },
     ],
     suggestions: [
-      { action: 'Test against updated browser version', priority: 1, effort: 'low' },
-      { action: 'Review browser changelog for breaking changes', priority: 2, effort: 'medium' },
-      { action: 'Update browser-specific workarounds', priority: 3, effort: 'medium' },
+      {
+        action: 'Test against updated browser version',
+        priority: 1,
+        effort: 'low',
+      },
+      {
+        action: 'Review browser changelog for breaking changes',
+        priority: 2,
+        effort: 'medium',
+      },
+      {
+        action: 'Update browser-specific workarounds',
+        priority: 3,
+        effort: 'medium',
+      },
     ],
     baseConfidence: 55,
   },
@@ -315,9 +423,21 @@ const MATCH_RULES: MatchRule[] = [
       },
     ],
     suggestions: [
-      { action: 'Review recent commits for relevant changes', priority: 1, effort: 'low' },
-      { action: 'Consider reverting suspicious changes', priority: 2, effort: 'low' },
-      { action: 'Add test coverage for affected functionality', priority: 3, effort: 'medium' },
+      {
+        action: 'Review recent commits for relevant changes',
+        priority: 1,
+        effort: 'low',
+      },
+      {
+        action: 'Consider reverting suspicious changes',
+        priority: 2,
+        effort: 'low',
+      },
+      {
+        action: 'Add test coverage for affected functionality',
+        priority: 3,
+        effort: 'medium',
+      },
     ],
     baseConfidence: 50,
   },
@@ -338,9 +458,17 @@ const MATCH_RULES: MatchRule[] = [
       },
     ],
     suggestions: [
-      { action: 'Increase memory allocation for test environment', priority: 1, effort: 'low' },
+      {
+        action: 'Increase memory allocation for test environment',
+        priority: 1,
+        effort: 'low',
+      },
       { action: 'Identify and fix memory leaks', priority: 2, effort: 'high' },
-      { action: 'Split large test suites into smaller batches', priority: 3, effort: 'medium' },
+      {
+        action: 'Split large test suites into smaller batches',
+        priority: 3,
+        effort: 'medium',
+      },
     ],
     baseConfidence: 75,
   },
@@ -361,7 +489,11 @@ const MATCH_RULES: MatchRule[] = [
     suggestions: [
       { action: 'Add delays between API calls', priority: 1, effort: 'low' },
       { action: 'Implement request throttling', priority: 2, effort: 'medium' },
-      { action: 'Request rate limit increase from API provider', priority: 3, effort: 'low' },
+      {
+        action: 'Request rate limit increase from API provider',
+        priority: 3,
+        effort: 'low',
+      },
     ],
     baseConfidence: 80,
   },
@@ -378,7 +510,11 @@ class CauseMatcher {
   /**
    * Match evidence to potential root causes
    */
-  match(evidence: CollectedEvidence, anomaly: Anomaly, context?: ExecutionContext): RootCause[] {
+  match(
+    evidence: CollectedEvidence,
+    anomaly: Anomaly,
+    context?: ExecutionContext,
+  ): RootCause[] {
     const matchResults = this.evaluateRules(evidence, anomaly, context);
 
     // Filter and sort by confidence
@@ -387,7 +523,9 @@ class CauseMatcher {
       .sort((a, b) => b.confidence - a.confidence);
 
     // Convert to RootCause objects
-    return validMatches.map((match, index) => this.createRootCause(match, index));
+    return validMatches.map((match, index) =>
+      this.createRootCause(match, index),
+    );
   }
 
   /**
@@ -395,7 +533,7 @@ class CauseMatcher {
    */
   calculateSimilarity(
     current: CollectedEvidence,
-    historical: CollectedEvidence
+    historical: CollectedEvidence,
   ): number {
     let similarity = 0;
     let totalWeight = 0;
@@ -406,31 +544,49 @@ class CauseMatcher {
 
     const commonTypes = [...currentTypes].filter((t) => historicalTypes.has(t));
     const typeWeight = 0.4;
-    similarity += (commonTypes.length / Math.max(currentTypes.size, historicalTypes.size)) * typeWeight;
+    similarity +=
+      (commonTypes.length / Math.max(currentTypes.size, historicalTypes.size)) *
+      typeWeight;
     totalWeight += typeWeight;
 
     // Compare categories in evidence data
     const currentCategories = new Set(
-      current.primary.map((e) => (e.data as Record<string, unknown>).category as string).filter(Boolean)
+      current.primary
+        .map((e) => (e.data as Record<string, unknown>).category as string)
+        .filter(Boolean),
     );
     const historicalCategories = new Set(
-      historical.primary.map((e) => (e.data as Record<string, unknown>).category as string).filter(Boolean)
+      historical.primary
+        .map((e) => (e.data as Record<string, unknown>).category as string)
+        .filter(Boolean),
     );
 
     if (currentCategories.size > 0 && historicalCategories.size > 0) {
-      const commonCategories = [...currentCategories].filter((c) => historicalCategories.has(c));
+      const commonCategories = [...currentCategories].filter((c) =>
+        historicalCategories.has(c),
+      );
       const categoryWeight = 0.3;
-      similarity += (commonCategories.length / Math.max(currentCategories.size, historicalCategories.size)) * categoryWeight;
+      similarity +=
+        (commonCategories.length /
+          Math.max(currentCategories.size, historicalCategories.size)) *
+        categoryWeight;
       totalWeight += categoryWeight;
     }
 
     // Compare timeline event patterns
-    const currentErrorEvents = current.timeline.filter((e) => e.severity === 'error');
-    const historicalErrorEvents = historical.timeline.filter((e) => e.severity === 'error');
+    const currentErrorEvents = current.timeline.filter(
+      (e) => e.severity === 'error',
+    );
+    const historicalErrorEvents = historical.timeline.filter(
+      (e) => e.severity === 'error',
+    );
 
     if (currentErrorEvents.length > 0 || historicalErrorEvents.length > 0) {
       const timelineWeight = 0.3;
-      const eventSimilarity = 1 - Math.abs(currentErrorEvents.length - historicalErrorEvents.length) / Math.max(currentErrorEvents.length, historicalErrorEvents.length, 1);
+      const eventSimilarity =
+        1 -
+        Math.abs(currentErrorEvents.length - historicalErrorEvents.length) /
+          Math.max(currentErrorEvents.length, historicalErrorEvents.length, 1);
       similarity += eventSimilarity * timelineWeight;
       totalWeight += timelineWeight;
     }
@@ -471,7 +627,7 @@ class CauseMatcher {
     category: RootCauseCategory,
     evidence: CollectedEvidence,
     resolutionTime?: number,
-    fix?: string
+    fix?: string,
   ): void {
     const fingerprint = this.generateFingerprint(evidence);
     const existing = this.historicalPatterns.get(fingerprint);
@@ -480,7 +636,8 @@ class CauseMatcher {
       existing.occurrences++;
       existing.lastSeen = Date.now();
       if (resolutionTime && existing.avgResolutionTime) {
-        existing.avgResolutionTime = (existing.avgResolutionTime + resolutionTime) / 2;
+        existing.avgResolutionTime =
+          (existing.avgResolutionTime + resolutionTime) / 2;
       } else if (resolutionTime) {
         existing.avgResolutionTime = resolutionTime;
       }
@@ -521,7 +678,7 @@ class CauseMatcher {
   private evaluateRules(
     evidence: CollectedEvidence,
     anomaly: Anomaly,
-    context?: ExecutionContext
+    context?: ExecutionContext,
   ): MatchResult[] {
     const results: MatchResult[] = [];
 
@@ -542,7 +699,7 @@ class CauseMatcher {
     rule: MatchRule,
     evidence: CollectedEvidence,
     anomaly: Anomaly,
-    context?: ExecutionContext
+    context?: ExecutionContext,
   ): MatchResult | null {
     const matchedConditions: string[] = [];
     const matchedEvidence: Evidence[] = [];
@@ -551,7 +708,12 @@ class CauseMatcher {
 
     for (const condition of rule.conditions) {
       totalWeight += condition.weight;
-      const { matched, evidenceItems } = this.evaluateCondition(condition, evidence, anomaly, context);
+      const { matched, evidenceItems } = this.evaluateCondition(
+        condition,
+        evidence,
+        anomaly,
+        context,
+      );
 
       if (matched) {
         matchedConditions.push(`${condition.type}:${condition.operator}`);
@@ -564,8 +726,12 @@ class CauseMatcher {
     }
 
     // Calculate confidence
-    const conditionScore = totalWeight > 0 ? (earnedWeight / totalWeight) * 100 : 0;
-    const confidence = Math.min(100, (rule.baseConfidence * conditionScore) / 100);
+    const conditionScore =
+      totalWeight > 0 ? (earnedWeight / totalWeight) * 100 : 0;
+    const confidence = Math.min(
+      100,
+      (rule.baseConfidence * conditionScore) / 100,
+    );
 
     if (confidence < 40) {
       return null;
@@ -586,7 +752,7 @@ class CauseMatcher {
     condition: MatchCondition,
     evidence: CollectedEvidence,
     anomaly: Anomaly,
-    context?: ExecutionContext
+    context?: ExecutionContext,
   ): { matched: boolean; evidenceItems: Evidence[] } {
     const matchedEvidence: Evidence[] = [];
 
@@ -594,7 +760,11 @@ class CauseMatcher {
       case 'evidence_type': {
         const allEvidence = [...evidence.primary, ...evidence.secondary];
         const matched = allEvidence.some((e) => {
-          const matches = this.matchValue(e.type, condition.operator, condition.value);
+          const matches = this.matchValue(
+            e.type,
+            condition.operator,
+            condition.value,
+          );
           if (matches) matchedEvidence.push(e);
           return matches;
         });
@@ -604,8 +774,13 @@ class CauseMatcher {
       case 'evidence_pattern': {
         const allEvidence = [...evidence.primary, ...evidence.secondary];
         const matched = allEvidence.some((e) => {
-          const textToMatch = e.description + (e.data ? JSON.stringify(e.data) : '');
-          const matches = this.matchValue(textToMatch, condition.operator, condition.value);
+          const textToMatch =
+            e.description + (e.data ? JSON.stringify(e.data) : '');
+          const matches = this.matchValue(
+            textToMatch,
+            condition.operator,
+            condition.value,
+          );
           if (matches) matchedEvidence.push(e);
           return matches;
         });
@@ -614,21 +789,33 @@ class CauseMatcher {
 
       case 'anomaly_type': {
         return {
-          matched: this.matchValue(anomaly.type, condition.operator, condition.value),
+          matched: this.matchValue(
+            anomaly.type,
+            condition.operator,
+            condition.value,
+          ),
           evidenceItems: [],
         };
       }
 
       case 'metric_name': {
         return {
-          matched: this.matchValue(anomaly.metric, condition.operator, condition.value),
+          matched: this.matchValue(
+            anomaly.metric,
+            condition.operator,
+            condition.value,
+          ),
           evidenceItems: [],
         };
       }
 
       case 'severity': {
         return {
-          matched: this.matchValue(anomaly.severity, condition.operator, condition.value),
+          matched: this.matchValue(
+            anomaly.severity,
+            condition.operator,
+            condition.value,
+          ),
           evidenceItems: [],
         };
       }
@@ -644,14 +831,17 @@ class CauseMatcher {
   private matchValue(
     actual: string,
     operator: MatchCondition['operator'],
-    expected: string | string[] | RegExp
+    expected: string | string[] | RegExp,
   ): boolean {
     switch (operator) {
       case 'equals':
         return actual === expected;
 
       case 'contains':
-        return typeof expected === 'string' && actual.toLowerCase().includes(expected.toLowerCase());
+        return (
+          typeof expected === 'string' &&
+          actual.toLowerCase().includes(expected.toLowerCase())
+        );
 
       case 'matches':
         if (expected instanceof RegExp) {
@@ -671,11 +861,13 @@ class CauseMatcher {
    * Create a RootCause object from match result
    */
   private createRootCause(match: MatchResult, index: number): RootCause {
-    const suggestions: Suggestion[] = match.rule.suggestions.map((template) => ({
-      action: template.action,
-      priority: template.priority,
-      effort: template.effort,
-    }));
+    const suggestions: Suggestion[] = match.rule.suggestions.map(
+      (template) => ({
+        action: template.action,
+        priority: template.priority,
+        effort: template.effort,
+      }),
+    );
 
     return {
       id: `rc_${Date.now()}_${index}`,
@@ -698,15 +890,19 @@ class CauseMatcher {
     parts.push(types.join(','));
 
     // Include categories
-    const categories = [...new Set(
-      evidence.primary
-        .map((e) => (e.data as Record<string, unknown>).category as string)
-        .filter(Boolean)
-    )].sort();
+    const categories = [
+      ...new Set(
+        evidence.primary
+          .map((e) => (e.data as Record<string, unknown>).category as string)
+          .filter(Boolean),
+      ),
+    ].sort();
     parts.push(categories.join(','));
 
     // Include error event count
-    const errorCount = evidence.timeline.filter((e) => e.severity === 'error').length;
+    const errorCount = evidence.timeline.filter(
+      (e) => e.severity === 'error',
+    ).length;
     parts.push(`errors:${errorCount}`);
 
     return parts.join('|');

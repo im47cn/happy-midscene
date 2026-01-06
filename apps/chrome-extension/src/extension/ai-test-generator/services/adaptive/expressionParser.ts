@@ -4,9 +4,9 @@
  */
 
 import type {
+  ComparisonOperator,
   ConditionExpression,
   ConditionType,
-  ComparisonOperator,
   ElementCheck,
   LogicalOperator,
   PageState,
@@ -28,7 +28,10 @@ export interface ParseResult<T> {
  */
 type Token =
   | { type: 'ELEMENT' | 'TEXT' | 'STATE' | 'VARIABLE'; value: string }
-  | { type: 'OPERATOR'; value: ComparisonOperator | TextOperator | LogicalOperator }
+  | {
+      type: 'OPERATOR';
+      value: ComparisonOperator | TextOperator | LogicalOperator;
+    }
   | { type: 'CHECK'; value: ElementCheck }
   | { type: 'PAGE_STATE'; value: PageState }
   | { type: 'NUMBER'; value: number }
@@ -36,7 +39,10 @@ type Token =
   | { type: 'LPAREN'; value: string }
   | { type: 'RPAREN'; value: string }
   | { type: 'COMMA'; value: string }
-  | { type: 'KEYWORD'; value: 'is' | 'not' | 'and' | 'or' | 'contains' | 'matches' | 'equals' }
+  | {
+      type: 'KEYWORD';
+      value: 'is' | 'not' | 'and' | 'or' | 'contains' | 'matches' | 'equals';
+    }
   | { type: 'EOF'; value: string };
 
 /**
@@ -131,7 +137,7 @@ class Lexer {
       // Numbers
       if (/\d/.test(char)) {
         const num = this.readNumber();
-        tokens.push({ type: 'NUMBER', value: parseInt(num, 10) });
+        tokens.push({ type: 'NUMBER', value: Number.parseInt(num, 10) });
         continue;
       }
 
@@ -166,7 +172,12 @@ class Lexer {
           tokens.push({ type: 'KEYWORD', value: 'not' });
           continue;
         }
-        if (lowerWord === 'is' || lowerWord === 'is not' || lowerWord === '是' || lowerWord === '不是') {
+        if (
+          lowerWord === 'is' ||
+          lowerWord === 'is not' ||
+          lowerWord === '是' ||
+          lowerWord === '不是'
+        ) {
           tokens.push({ type: 'KEYWORD', value: 'is' });
           continue;
         }
@@ -200,7 +211,11 @@ class Lexer {
         }
 
         // Page states
-        if (['logged_in', 'loading', 'error', 'empty', 'custom'].includes(lowerWord)) {
+        if (
+          ['logged_in', 'loading', 'error', 'empty', 'custom'].includes(
+            lowerWord,
+          )
+        ) {
           tokens.push({ type: 'PAGE_STATE', value: lowerWord as PageState });
           continue;
         }
@@ -218,7 +233,10 @@ class Lexer {
 
         // Comparison operators
         if (['==', '!=', '>', '<', '>=', '<='].includes(lowerWord)) {
-          tokens.push({ type: 'OPERATOR', value: lowerWord as ComparisonOperator });
+          tokens.push({
+            type: 'OPERATOR',
+            value: lowerWord as ComparisonOperator,
+          });
           continue;
         }
 
@@ -285,7 +303,10 @@ class Parser {
 
     const checkToken = this.expect('CHECK');
     if (!checkToken) {
-      return { success: false, error: 'Expected element check (exists/visible/enabled/selected)' };
+      return {
+        success: false,
+        error: 'Expected element check (exists/visible/enabled/selected)',
+      };
     }
 
     return {
@@ -313,8 +334,16 @@ class Parser {
     }
 
     const operatorToken = this.expect('OPERATOR');
-    if (!operatorToken || !['equals', 'contains', 'matches'].includes(operatorToken.value as TextOperator)) {
-      return { success: false, error: 'Expected text operator (equals/contains/matches)' };
+    if (
+      !operatorToken ||
+      !['equals', 'contains', 'matches'].includes(
+        operatorToken.value as TextOperator,
+      )
+    ) {
+      return {
+        success: false,
+        error: 'Expected text operator (equals/contains/matches)',
+      };
     }
 
     const valueToken = this.expect('STRING');
@@ -349,7 +378,10 @@ class Parser {
 
     const stateToken = this.expect('PAGE_STATE');
     if (!stateToken) {
-      return { success: false, error: 'Expected page state (logged_in/loading/error/empty/custom)' };
+      return {
+        success: false,
+        error: 'Expected page state (logged_in/loading/error/empty/custom)',
+      };
     }
 
     return {
@@ -407,7 +439,10 @@ class Parser {
       };
     }
 
-    return { success: false, error: 'Expected variable value (number or string)' };
+    return {
+      success: false,
+      error: 'Expected variable value (number or string)',
+    };
   }
 
   private parseCompound(): ParseResult<ConditionExpression> {
@@ -418,13 +453,19 @@ class Parser {
     }
 
     const operatorToken = this.expect('KEYWORD');
-    if (!operatorToken || !['and', 'or'].includes(operatorToken.value as LogicalOperator)) {
+    if (
+      !operatorToken ||
+      !['and', 'or'].includes(operatorToken.value as LogicalOperator)
+    ) {
       return left; // Just return the left side
     }
 
     const right = this.parseExpression();
     if (!right.success || !right.result) {
-      return { success: false, error: 'Expected right side of compound condition' };
+      return {
+        success: false,
+        error: 'Expected right side of compound condition',
+      };
     }
 
     return {
@@ -506,7 +547,9 @@ class Parser {
 /**
  * 解析条件表达式
  */
-export function parseConditionExpression(input: string): ParseResult<ConditionExpression> {
+export function parseConditionExpression(
+  input: string,
+): ParseResult<ConditionExpression> {
   try {
     const lexer = new Lexer(input);
     const tokens = lexer.tokenize();
@@ -528,18 +571,25 @@ export function parseConditionExpression(input: string): ParseResult<ConditionEx
 /**
  * 简化解析 - 从自然语言描述推断条件类型
  */
-export function parseNaturalLanguageCondition(text: string): ParseResult<ConditionExpression> {
+export function parseNaturalLanguageCondition(
+  text: string,
+): ParseResult<ConditionExpression> {
   const lowerText = text.toLowerCase().trim();
 
   // Element conditions
   if (lowerText.includes('element') || lowerText.includes('元素')) {
-    const match = text.match(/element\s+"([^"]+)"/) || text.match(/元素\s+"([^"]+)"/);
+    const match =
+      text.match(/element\s+"([^"]+)"/) || text.match(/元素\s+"([^"]+)"/);
     if (match) {
       let check: ElementCheck = 'visible';
-      if (lowerText.includes('exists') || lowerText.includes('存在')) check = 'exists';
-      if (lowerText.includes('visible') || lowerText.includes('可见')) check = 'visible';
-      if (lowerText.includes('enabled') || lowerText.includes('可用')) check = 'enabled';
-      if (lowerText.includes('selected') || lowerText.includes('选中')) check = 'selected';
+      if (lowerText.includes('exists') || lowerText.includes('存在'))
+        check = 'exists';
+      if (lowerText.includes('visible') || lowerText.includes('可见'))
+        check = 'visible';
+      if (lowerText.includes('enabled') || lowerText.includes('可用'))
+        check = 'enabled';
+      if (lowerText.includes('selected') || lowerText.includes('选中'))
+        check = 'selected';
 
       return {
         success: true,
@@ -553,14 +603,20 @@ export function parseNaturalLanguageCondition(text: string): ParseResult<Conditi
 
   // Text conditions
   if (lowerText.includes('text') || lowerText.includes('文本')) {
-    const match = text.match(/text\s+"([^"]+)"/) || text.match(/文本\s+"([^"]+)"/);
+    const match =
+      text.match(/text\s+"([^"]+)"/) || text.match(/文本\s+"([^"]+)"/);
     if (match) {
       let operator: TextOperator = 'contains';
-      if (lowerText.includes('equals') || lowerText.includes('等于')) operator = 'equals';
-      if (lowerText.includes('contains') || lowerText.includes('包含')) operator = 'contains';
-      if (lowerText.includes('matches') || lowerText.includes('匹配')) operator = 'matches';
+      if (lowerText.includes('equals') || lowerText.includes('等于'))
+        operator = 'equals';
+      if (lowerText.includes('contains') || lowerText.includes('包含'))
+        operator = 'contains';
+      if (lowerText.includes('matches') || lowerText.includes('匹配'))
+        operator = 'matches';
 
-      const valueMatch = text.match(/"(?:[^"]+)"\s+(?:contains|equals|matches)\s+"([^"]+)"/);
+      const valueMatch = text.match(
+        /"(?:[^"]+)"\s+(?:contains|equals|matches)\s+"([^"]+)"/,
+      );
       const value = valueMatch ? valueMatch[1] : '';
 
       return {
@@ -602,7 +658,9 @@ export function parseNaturalLanguageCondition(text: string): ParseResult<Conditi
   // Variable conditions
   const varMatch = text.match(/^(\w+)\s*(==|!=|>=?|<=?)\s*(.+)$/);
   if (varMatch) {
-    const value = isNaN(Number(varMatch[3])) ? varMatch[3] : Number(varMatch[3]);
+    const value = isNaN(Number(varMatch[3]))
+      ? varMatch[3]
+      : Number(varMatch[3]);
     return {
       success: true,
       result: {

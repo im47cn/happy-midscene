@@ -38,9 +38,9 @@ import {
 } from 'antd';
 import { useState } from 'react';
 import type {
-  AnomalyWithAnalysis,
   AnomalyStatus,
   AnomalyType,
+  AnomalyWithAnalysis,
   Evidence,
   RootCause,
   RootCauseCategory,
@@ -67,12 +67,20 @@ interface AnomalyDetailProps {
 // Helper Functions
 // ============================================================================
 
-function getSeverityConfig(severity: Severity): { color: string; icon: React.ReactNode; label: string } {
+function getSeverityConfig(severity: Severity): {
+  color: string;
+  icon: React.ReactNode;
+  label: string;
+} {
   switch (severity) {
     case 'critical':
       return { color: '#ff4d4f', icon: <AlertOutlined />, label: '严重' };
     case 'high':
-      return { color: '#fa541c', icon: <ExclamationCircleOutlined />, label: '高' };
+      return {
+        color: '#fa541c',
+        icon: <ExclamationCircleOutlined />,
+        label: '高',
+      };
     case 'medium':
       return { color: '#faad14', icon: <WarningOutlined />, label: '中' };
     case 'low':
@@ -81,7 +89,10 @@ function getSeverityConfig(severity: Severity): { color: string; icon: React.Rea
   }
 }
 
-function getStatusConfig(status: AnomalyStatus): { color: string; label: string } {
+function getStatusConfig(status: AnomalyStatus): {
+  color: string;
+  label: string;
+} {
   switch (status) {
     case 'new':
       return { color: 'red', label: '新建' };
@@ -123,7 +134,10 @@ function getCategoryLabel(category: RootCauseCategory): string {
   return labels[category] || category;
 }
 
-function getEffortLabel(effort: 'low' | 'medium' | 'high'): { color: string; label: string } {
+function getEffortLabel(effort: 'low' | 'medium' | 'high'): {
+  color: string;
+  label: string;
+} {
   switch (effort) {
     case 'low':
       return { color: 'green', label: '低' };
@@ -155,7 +169,10 @@ function formatDuration(start: number, end: number): string {
 // Sub Components
 // ============================================================================
 
-function RootCauseCard({ rootCause, index }: { rootCause: RootCause; index: number }) {
+function RootCauseCard({
+  rootCause,
+  index,
+}: { rootCause: RootCause; index: number }) {
   return (
     <Card
       size="small"
@@ -163,7 +180,15 @@ function RootCauseCard({ rootCause, index }: { rootCause: RootCause; index: numb
         <Space>
           <Badge count={index + 1} style={{ backgroundColor: '#1890ff' }} />
           <Text strong>{getCategoryLabel(rootCause.category)}</Text>
-          <Tag color={rootCause.confidence >= 70 ? 'green' : rootCause.confidence >= 40 ? 'orange' : 'default'}>
+          <Tag
+            color={
+              rootCause.confidence >= 70
+                ? 'green'
+                : rootCause.confidence >= 40
+                  ? 'orange'
+                  : 'default'
+            }
+          >
             置信度 {rootCause.confidence}%
           </Tag>
         </Space>
@@ -185,7 +210,9 @@ function RootCauseCard({ rootCause, index }: { rootCause: RootCause; index: numb
                 <Space direction="vertical" style={{ width: '100%' }}>
                   <Space>
                     <Tag>{evidence.type}</Tag>
-                    <Text type="secondary">权重: {evidence.weight.toFixed(2)}</Text>
+                    <Text type="secondary">
+                      权重: {evidence.weight.toFixed(2)}
+                    </Text>
                   </Space>
                   <Text>{evidence.description}</Text>
                 </Space>
@@ -202,7 +229,9 @@ function RootCauseCard({ rootCause, index }: { rootCause: RootCause; index: numb
           </Divider>
           <List
             size="small"
-            dataSource={rootCause.suggestions.sort((a, b) => a.priority - b.priority)}
+            dataSource={rootCause.suggestions.sort(
+              (a, b) => a.priority - b.priority,
+            )}
             renderItem={(suggestion: Suggestion, idx) => {
               const effort = getEffortLabel(suggestion.effort);
               return (
@@ -244,7 +273,9 @@ function StatusTimeline({ anomaly }: { anomaly: AnomalyWithAnalysis }) {
       children: (
         <div>
           <Text strong>已确认</Text>
-          {anomaly.acknowledgedBy && <Text type="secondary"> by {anomaly.acknowledgedBy}</Text>}
+          {anomaly.acknowledgedBy && (
+            <Text type="secondary"> by {anomaly.acknowledgedBy}</Text>
+          )}
           <br />
           <Text type="secondary">{formatTime(anomaly.acknowledgedAt)}</Text>
         </div>
@@ -324,14 +355,12 @@ export function AnomalyDetail({
           value={anomaly.currentValue}
           valueStyle={{ color: severityConfig.color }}
         />
-        <Statistic
-          title="期望值"
-          value={anomaly.expectedValue}
-          precision={2}
-        />
+        <Statistic title="期望值" value={anomaly.expectedValue} precision={2} />
         <Statistic
           title="偏差"
-          value={anomaly.deviationInfo?.percentageDeviation ?? anomaly.deviation}
+          value={
+            anomaly.deviationInfo?.percentageDeviation ?? anomaly.deviation
+          }
           suffix={anomaly.deviationInfo ? '%' : ''}
           valueStyle={{
             color: anomaly.deviation > 0 ? '#cf1322' : '#3f8600',
@@ -356,14 +385,23 @@ export function AnomalyDetail({
             label: '指标详情',
             children: (
               <Descriptions column={2} size="small">
-                <Descriptions.Item label="指标名称">{anomaly.metric}</Descriptions.Item>
-                <Descriptions.Item label="检测时间">{formatTime(anomaly.detectedAt)}</Descriptions.Item>
+                <Descriptions.Item label="指标名称">
+                  {anomaly.metric}
+                </Descriptions.Item>
+                <Descriptions.Item label="检测时间">
+                  {formatTime(anomaly.detectedAt)}
+                </Descriptions.Item>
                 {anomaly.baseline && (
                   <>
-                    <Descriptions.Item label="基线周期">{anomaly.baseline.period}</Descriptions.Item>
-                    <Descriptions.Item label="样本数量">{anomaly.baseline.sampleCount}</Descriptions.Item>
+                    <Descriptions.Item label="基线周期">
+                      {anomaly.baseline.period}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="样本数量">
+                      {anomaly.baseline.sampleCount}
+                    </Descriptions.Item>
                     <Descriptions.Item label="基线范围">
-                      {anomaly.baseline.min.toFixed(2)} - {anomaly.baseline.max.toFixed(2)}
+                      {anomaly.baseline.min.toFixed(2)} -{' '}
+                      {anomaly.baseline.max.toFixed(2)}
                     </Descriptions.Item>
                     <Descriptions.Item label="标准差">
                       ±{anomaly.baseline.stdDev.toFixed(2)}
@@ -371,72 +409,116 @@ export function AnomalyDetail({
                   </>
                 )}
                 {anomaly.caseName && (
-                  <Descriptions.Item label="关联用例">{anomaly.caseName}</Descriptions.Item>
+                  <Descriptions.Item label="关联用例">
+                    {anomaly.caseName}
+                  </Descriptions.Item>
                 )}
               </Descriptions>
             ),
           },
-          ...(anomaly.impact ? [{
-            key: 'impact',
-            label: (
-              <Space>
-                影响范围
-                <Tag color={
-                  anomaly.impact.estimatedScope === 'high' ? 'red' :
-                  anomaly.impact.estimatedScope === 'medium' ? 'orange' : 'green'
-                }>
-                  {anomaly.impact.estimatedScope === 'high' ? '高' :
-                   anomaly.impact.estimatedScope === 'medium' ? '中' : '低'}
-                </Tag>
-              </Space>
-            ),
-            children: (
-              <div>
-                {anomaly.impact.affectedCases.length > 0 && (
-                  <div style={{ marginBottom: 12 }}>
-                    <Text strong>受影响用例 ({anomaly.impact.affectedCases.length})</Text>
-                    <div style={{ marginTop: 8 }}>
-                      {anomaly.impact.affectedCases.slice(0, 5).map((caseId: string) => (
-                        <Tag key={caseId} style={{ marginBottom: 4 }}>{caseId}</Tag>
-                      ))}
-                      {anomaly.impact.affectedCases.length > 5 && (
-                        <Tag>+{anomaly.impact.affectedCases.length - 5} 更多</Tag>
+          ...(anomaly.impact
+            ? [
+                {
+                  key: 'impact',
+                  label: (
+                    <Space>
+                      影响范围
+                      <Tag
+                        color={
+                          anomaly.impact.estimatedScope === 'high'
+                            ? 'red'
+                            : anomaly.impact.estimatedScope === 'medium'
+                              ? 'orange'
+                              : 'green'
+                        }
+                      >
+                        {anomaly.impact.estimatedScope === 'high'
+                          ? '高'
+                          : anomaly.impact.estimatedScope === 'medium'
+                            ? '中'
+                            : '低'}
+                      </Tag>
+                    </Space>
+                  ),
+                  children: (
+                    <div>
+                      {anomaly.impact.affectedCases.length > 0 && (
+                        <div style={{ marginBottom: 12 }}>
+                          <Text strong>
+                            受影响用例 ({anomaly.impact.affectedCases.length})
+                          </Text>
+                          <div style={{ marginTop: 8 }}>
+                            {anomaly.impact.affectedCases
+                              .slice(0, 5)
+                              .map((caseId: string) => (
+                                <Tag key={caseId} style={{ marginBottom: 4 }}>
+                                  {caseId}
+                                </Tag>
+                              ))}
+                            {anomaly.impact.affectedCases.length > 5 && (
+                              <Tag>
+                                +{anomaly.impact.affectedCases.length - 5} 更多
+                              </Tag>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {anomaly.impact.affectedFeatures.length > 0 && (
+                        <div>
+                          <Text strong>
+                            受影响功能 ({anomaly.impact.affectedFeatures.length}
+                            )
+                          </Text>
+                          <div style={{ marginTop: 8 }}>
+                            {anomaly.impact.affectedFeatures.map(
+                              (feature: string) => (
+                                <Tag
+                                  key={feature}
+                                  color="blue"
+                                  style={{ marginBottom: 4 }}
+                                >
+                                  {feature}
+                                </Tag>
+                              ),
+                            )}
+                          </div>
+                        </div>
                       )}
                     </div>
-                  </div>
-                )}
-                {anomaly.impact.affectedFeatures.length > 0 && (
-                  <div>
-                    <Text strong>受影响功能 ({anomaly.impact.affectedFeatures.length})</Text>
-                    <div style={{ marginTop: 8 }}>
-                      {anomaly.impact.affectedFeatures.map((feature: string) => (
-                        <Tag key={feature} color="blue" style={{ marginBottom: 4 }}>{feature}</Tag>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ),
-          }] : []),
+                  ),
+                },
+              ]
+            : []),
           {
             key: 'rootCauses',
             label: (
               <Space>
                 根因分析
-                <Badge count={anomaly.rootCauses?.length ?? 0} style={{ backgroundColor: '#1890ff' }} />
+                <Badge
+                  count={anomaly.rootCauses?.length ?? 0}
+                  style={{ backgroundColor: '#1890ff' }}
+                />
               </Space>
             ),
-            children: (anomaly.rootCauses?.length ?? 0) > 0 ? (
-              <div>
-                {anomaly.rootCauses!
-                  .sort((a: RootCause, b: RootCause) => b.confidence - a.confidence)
-                  .map((cause: RootCause, idx: number) => (
-                    <RootCauseCard key={cause.id} rootCause={cause} index={idx} />
-                  ))}
-              </div>
-            ) : (
-              <Text type="secondary">暂无根因分析结果</Text>
-            ),
+            children:
+              (anomaly.rootCauses?.length ?? 0) > 0 ? (
+                <div>
+                  {anomaly
+                    .rootCauses!.sort(
+                      (a: RootCause, b: RootCause) =>
+                        b.confidence - a.confidence,
+                    )
+                    .map((cause: RootCause, idx: number) => (
+                      <RootCauseCard
+                        key={cause.id}
+                        rootCause={cause}
+                        index={idx}
+                      />
+                    ))}
+                </div>
+              ) : (
+                <Text type="secondary">暂无根因分析结果</Text>
+              ),
           },
           {
             key: 'timeline',
@@ -452,7 +534,13 @@ export function AnomalyDetail({
 
       {/* Action Buttons */}
       <Divider />
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+        }}
+      >
         <Space direction="vertical" style={{ flex: 1 }}>
           {showResolveInput && (
             <div style={{ marginBottom: 12 }}>
@@ -464,7 +552,11 @@ export function AnomalyDetail({
                 style={{ marginBottom: 8 }}
               />
               <Space>
-                <Button type="primary" onClick={handleResolve} disabled={!resolution.trim()}>
+                <Button
+                  type="primary"
+                  onClick={handleResolve}
+                  disabled={!resolution.trim()}
+                >
                   确认解决
                 </Button>
                 <Button onClick={() => setShowResolveInput(false)}>取消</Button>

@@ -3,12 +3,12 @@
  * Analyzes code changes and their impact on test cases
  */
 
-import type {
-  ChangeInfo,
-  ChangeImpact,
-  CaseCorrelation,
-} from '../../types/recommendation';
 import type { CaseStats } from '../../types/analytics';
+import type {
+  CaseCorrelation,
+  ChangeImpact,
+  ChangeInfo,
+} from '../../types/recommendation';
 import { analyticsStorage } from '../analytics/analyticsStorage';
 
 /**
@@ -26,11 +26,11 @@ const FILE_MAPPING_PATTERNS: Record<string, RegExp[]> = {
  * Component dependency mapping
  */
 const COMPONENT_DEPENDENCIES: Record<string, string[]> = {
-  'Button': ['all'], // Button affects all tests
-  'Input': ['form', 'login', 'search'],
-  'Form': ['login', 'signup', 'checkout'],
-  'Modal': ['all'],
-  'Table': ['dashboard', 'list'],
+  Button: ['all'], // Button affects all tests
+  Input: ['form', 'login', 'search'],
+  Form: ['login', 'signup', 'checkout'],
+  Modal: ['all'],
+  Table: ['dashboard', 'list'],
 };
 
 /**
@@ -48,8 +48,15 @@ export class ChangeAnalyzer {
 
     for (const change of changes) {
       const affectedCases = this.findAffectedCases(change, allCaseStats);
-      const impactLevel = this.calculateImpactLevel(affectedCases, allCaseStats);
-      const reasoning = this.generateReasoning(change, affectedCases, impactLevel);
+      const impactLevel = this.calculateImpactLevel(
+        affectedCases,
+        allCaseStats,
+      );
+      const reasoning = this.generateReasoning(
+        change,
+        affectedCases,
+        impactLevel,
+      );
 
       impacts.push({
         change,
@@ -68,7 +75,9 @@ export class ChangeAnalyzer {
   /**
    * Map changes to affected test cases
    */
-  async mapChangesToCases(changes: ChangeInfo[]): Promise<Map<string, string[]>> {
+  async mapChangesToCases(
+    changes: ChangeInfo[],
+  ): Promise<Map<string, string[]>> {
     const allCaseStats = await analyticsStorage.getAllCaseStats();
     const mapping = new Map<string, string[]>();
 
@@ -89,7 +98,12 @@ export class ChangeAnalyzer {
     // Collect all affected cases with their impact levels
     const caseImpacts = new Map<string, number>();
     for (const impact of impacts) {
-      const weight = impact.impactLevel === 'high' ? 3 : impact.impactLevel === 'medium' ? 2 : 1;
+      const weight =
+        impact.impactLevel === 'high'
+          ? 3
+          : impact.impactLevel === 'medium'
+            ? 2
+            : 1;
       for (const caseId of impact.affectedCases) {
         const existing = caseImpacts.get(caseId) ?? 0;
         caseImpacts.set(caseId, existing + weight);
@@ -129,7 +143,10 @@ export class ChangeAnalyzer {
   /**
    * Find affected cases for a change
    */
-  private findAffectedCases(change: ChangeInfo, allCases: CaseStats[]): string[] {
+  private findAffectedCases(
+    change: ChangeInfo,
+    allCases: CaseStats[],
+  ): string[] {
     const affected: string[] = [];
     const target = change.target.toLowerCase();
 
@@ -153,9 +170,14 @@ export class ChangeAnalyzer {
       }
 
       // Component dependency matching
-      for (const [component, relatedPatterns] of Object.entries(COMPONENT_DEPENDENCIES)) {
+      for (const [component, relatedPatterns] of Object.entries(
+        COMPONENT_DEPENDENCIES,
+      )) {
         if (target.includes(component.toLowerCase())) {
-          if (relatedPatterns.includes('all') || relatedPatterns.some((p) => caseName.includes(p))) {
+          if (
+            relatedPatterns.includes('all') ||
+            relatedPatterns.some((p) => caseName.includes(p))
+          ) {
             if (!affected.includes(caseStat.caseId)) {
               affected.push(caseStat.caseId);
             }
@@ -181,7 +203,10 @@ export class ChangeAnalyzer {
   /**
    * Calculate impact level
    */
-  private calculateImpactLevel(affectedCases: string[], allCases: CaseStats[]): ChangeImpact['impactLevel'] {
+  private calculateImpactLevel(
+    affectedCases: string[],
+    allCases: CaseStats[],
+  ): ChangeImpact['impactLevel'] {
     const ratio = affectedCases.length / Math.max(allCases.length, 1);
 
     if (ratio > 0.3 || affectedCases.length > 10) return 'high';
@@ -192,7 +217,11 @@ export class ChangeAnalyzer {
   /**
    * Generate reasoning for impact analysis
    */
-  private generateReasoning(change: ChangeInfo, affectedCases: string[], impactLevel: ChangeImpact['impactLevel']): string[] {
+  private generateReasoning(
+    change: ChangeInfo,
+    affectedCases: string[],
+    impactLevel: ChangeImpact['impactLevel'],
+  ): string[] {
     const reasoning: string[] = [];
 
     reasoning.push(`变更目标: ${change.target} (${change.type})`);

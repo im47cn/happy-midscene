@@ -29,18 +29,29 @@ import {
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import {
-  whitelistManager,
   type WhitelistEntry,
   type WhitelistType,
+  whitelistManager,
 } from '../../services/masking';
 
 /**
  * Type display configuration
  */
-const TYPE_CONFIG: Record<WhitelistType, { color: string; label: string; description: string }> = {
+const TYPE_CONFIG: Record<
+  WhitelistType,
+  { color: string; label: string; description: string }
+> = {
   exact: { color: 'blue', label: '精确匹配', description: '完全匹配指定值' },
-  pattern: { color: 'purple', label: '正则模式', description: '使用正则表达式匹配' },
-  domain: { color: 'green', label: '域名', description: '匹配指定域名及其子域名' },
+  pattern: {
+    color: 'purple',
+    label: '正则模式',
+    description: '使用正则表达式匹配',
+  },
+  domain: {
+    color: 'green',
+    label: '域名',
+    description: '匹配指定域名及其子域名',
+  },
   path: { color: 'orange', label: '路径前缀', description: '匹配指定路径前缀' },
 };
 
@@ -60,7 +71,9 @@ interface WhitelistManagerProps {
 /**
  * WhitelistManager component
  */
-export const WhitelistManagerUI: React.FC<WhitelistManagerProps> = ({ onClose }) => {
+export const WhitelistManagerUI: React.FC<WhitelistManagerProps> = ({
+  onClose,
+}) => {
   const [entries, setEntries] = useState<WhitelistEntry[]>([]);
   const [enabled, setEnabled] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
@@ -102,15 +115,18 @@ export const WhitelistManagerUI: React.FC<WhitelistManagerProps> = ({ onClose })
   }, [form]);
 
   // Open editor for existing entry
-  const handleEdit = useCallback((entry: WhitelistEntry) => {
-    setEditingEntry(entry);
-    form.setFieldsValue({
-      type: entry.type,
-      value: entry.value,
-      description: entry.description,
-    });
-    setShowEditor(true);
-  }, [form]);
+  const handleEdit = useCallback(
+    (entry: WhitelistEntry) => {
+      setEditingEntry(entry);
+      form.setFieldsValue({
+        type: entry.type,
+        value: entry.value,
+        description: entry.description,
+      });
+      setShowEditor(true);
+    },
+    [form],
+  );
 
   // Save entry
   const handleSave = useCallback(async () => {

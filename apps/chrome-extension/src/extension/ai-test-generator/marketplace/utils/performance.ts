@@ -27,7 +27,7 @@ export function useDebounce<T>(value: T, delay: number): T {
  */
 export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
   callback: T,
-  delay: number
+  delay: number,
 ): (...args: Parameters<T>) => void {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -40,7 +40,7 @@ export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
         callback(...args);
       }, delay);
     },
-    [callback, delay]
+    [callback, delay],
   );
 
   useEffect(() => {
@@ -59,7 +59,7 @@ export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
  */
 export function useThrottledCallback<T extends (...args: unknown[]) => unknown>(
   callback: T,
-  interval: number
+  interval: number,
 ): (...args: Parameters<T>) => void {
   const lastCallRef = useRef<number>(0);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -82,7 +82,7 @@ export function useThrottledCallback<T extends (...args: unknown[]) => unknown>(
         }, interval - timeSinceLastCall);
       }
     },
-    [callback, interval]
+    [callback, interval],
   );
 
   useEffect(() => {
@@ -100,7 +100,7 @@ export function useThrottledCallback<T extends (...args: unknown[]) => unknown>(
  * Intersection Observer hook for lazy loading
  */
 export function useIntersectionObserver(
-  options: IntersectionObserverInit = {}
+  options: IntersectionObserverInit = {},
 ): [React.RefCallback<Element>, boolean] {
   const [isIntersecting, setIsIntersecting] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -118,7 +118,7 @@ export function useIntersectionObserver(
         observerRef.current.observe(element);
       }
     },
-    [options.threshold, options.root, options.rootMargin]
+    [options.threshold, options.root, options.rootMargin],
   );
 
   useEffect(() => {
@@ -136,7 +136,7 @@ export function useIntersectionObserver(
  * Lazy load component visibility
  */
 export function useLazyLoad(
-  threshold: number = 0.1
+  threshold = 0.1,
 ): [React.RefCallback<Element>, boolean] {
   const [hasLoaded, setHasLoaded] = useState(false);
   const [ref, isIntersecting] = useIntersectionObserver({ threshold });
@@ -157,7 +157,7 @@ export function useVirtualList<T>(
   items: T[],
   itemHeight: number,
   containerHeight: number,
-  overscan: number = 3
+  overscan = 3,
 ): {
   virtualItems: { item: T; index: number; style: React.CSSProperties }[];
   totalHeight: number;
@@ -168,10 +168,13 @@ export function useVirtualList<T>(
 
   const { startIndex, endIndex, virtualItems, totalHeight } = useMemo(() => {
     const totalHeight = items.length * itemHeight;
-    const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
+    const startIndex = Math.max(
+      0,
+      Math.floor(scrollTop / itemHeight) - overscan,
+    );
     const endIndex = Math.min(
       items.length - 1,
-      Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan
+      Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan,
     );
 
     const virtualItems = [];
@@ -205,7 +208,7 @@ export function useVirtualList<T>(
 export function useMemoizedComputation<T, D extends unknown[]>(
   compute: () => T,
   dependencies: D,
-  isEqual?: (a: D, b: D) => boolean
+  isEqual?: (a: D, b: D) => boolean,
 ): T {
   const prevDepsRef = useRef<D | null>(null);
   const resultRef = useRef<T | null>(null);
@@ -236,7 +239,7 @@ export function useMemoizedComputation<T, D extends unknown[]>(
  */
 export function useIdleCallback(
   callback: () => void,
-  options: { timeout?: number } = {}
+  options: { timeout?: number } = {},
 ): () => void {
   const callbackRef = useRef(callback);
   callbackRef.current = callback;
@@ -257,7 +260,7 @@ export function useIdleCallback(
  */
 export function useBatchedUpdates<T>(
   initialValue: T,
-  delay: number = 100
+  delay = 100,
 ): [T, (updater: (prev: T) => T) => void, () => void] {
   const [value, setValue] = useState<T>(initialValue);
   const pendingUpdatesRef = useRef<Array<(prev: T) => T>>([]);
@@ -281,7 +284,7 @@ export function useBatchedUpdates<T>(
         }, delay);
       }
     },
-    [delay]
+    [delay],
   );
 
   const flushUpdates = useCallback(() => {
@@ -317,7 +320,7 @@ export function useBatchedUpdates<T>(
  */
 export function usePrefetch<T>(
   fetchFn: () => Promise<T>,
-  options: { enabled?: boolean; delay?: number } = {}
+  options: { enabled?: boolean; delay?: number } = {},
 ): { data: T | null; isLoading: boolean; prefetch: () => void } {
   const { enabled = true, delay = 500 } = options;
   const [data, setData] = useState<T | null>(null);
@@ -360,7 +363,7 @@ export function usePrefetch<T>(
  */
 export function useLazyImage(
   src: string,
-  placeholder?: string
+  placeholder?: string,
 ): { imageSrc: string; isLoaded: boolean; error: boolean } {
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(false);
@@ -392,13 +395,10 @@ export function useLazyImage(
  * Stable callback reference that doesn't cause re-renders
  */
 export function useStableCallback<T extends (...args: unknown[]) => unknown>(
-  callback: T
+  callback: T,
 ): T {
   const callbackRef = useRef(callback);
   callbackRef.current = callback;
 
-  return useCallback(
-    ((...args) => callbackRef.current(...args)) as T,
-    []
-  );
+  return useCallback(((...args) => callbackRef.current(...args)) as T, []);
 }

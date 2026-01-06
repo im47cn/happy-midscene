@@ -5,9 +5,9 @@
 
 import { describe, expect, it } from 'vitest';
 import {
-  tokenizeAdaptiveSyntax,
   type SyntaxToken,
   type TokenType,
+  tokenizeAdaptiveSyntax,
 } from '../AdaptiveSyntaxHighlight';
 
 describe('tokenizeAdaptiveSyntax', () => {
@@ -35,7 +35,9 @@ describe('tokenizeAdaptiveSyntax', () => {
   });
 
   it('should tokenize loop keywords', () => {
-    const tokens = tokenizeAdaptiveSyntax('while endwhile repeat until foreach endfor in');
+    const tokens = tokenizeAdaptiveSyntax(
+      'while endwhile repeat until foreach endfor in',
+    );
     const keywordTokens = tokens.filter((t) => t.type === 'keyword');
     expect(keywordTokens).toHaveLength(7);
     const values = keywordTokens.map((t) => t.value);
@@ -94,7 +96,8 @@ describe('tokenizeAdaptiveSyntax', () => {
 
   it('should tokenize complex adaptive test', () => {
     // Use string concatenation to avoid template literal issues
-    const text = '# Login test\nif ${userLoggedIn}\n  Click "logout button"\nelse\n  Click "login button"\nendif';
+    const text =
+      '# Login test\nif ${userLoggedIn}\n  Click "logout button"\nelse\n  Click "login button"\nendif';
     const tokens = tokenizeAdaptiveSyntax(text);
 
     // Check for various token types

@@ -36,7 +36,8 @@ import {
   Typography,
   message,
 } from 'antd';
-import React, { useState, useCallback } from 'react';
+import type React from 'react';
+import { useCallback, useState } from 'react';
 import type {
   DeviceConfig,
   DeviceInfo,
@@ -399,8 +400,7 @@ export function DeviceManager({
   const renderDeviceCard = (device: DeviceInfo) => {
     const status = statusConfig[device.status];
     const isLoading = loading === device.id;
-    const isConnected =
-      device.status === 'ready' || device.status === 'busy';
+    const isConnected = device.status === 'ready' || device.status === 'busy';
 
     return (
       <List.Item key={device.id}>
@@ -463,11 +463,7 @@ export function DeviceManager({
         >
           <Card.Meta
             avatar={
-              <Badge
-                status={status.color as any}
-                dot
-                offset={[-2, 24]}
-              >
+              <Badge status={status.color as any} dot offset={[-2, 24]}>
                 <span style={{ fontSize: 24 }}>
                   {deviceTypeIcons[device.type]}
                 </span>
@@ -530,7 +526,9 @@ export function DeviceManager({
           <span>设备管理</span>
           <Badge
             count={`${connectedCount}/${devices.length}`}
-            style={{ backgroundColor: connectedCount > 0 ? '#52c41a' : '#d9d9d9' }}
+            style={{
+              backgroundColor: connectedCount > 0 ? '#52c41a' : '#d9d9d9',
+            }}
           />
         </Space>
       }

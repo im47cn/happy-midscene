@@ -6,7 +6,12 @@
 /**
  * 条件表达式类型
  */
-export type ConditionType = 'element' | 'text' | 'state' | 'variable' | 'compound';
+export type ConditionType =
+  | 'element'
+  | 'text'
+  | 'state'
+  | 'variable'
+  | 'compound';
 
 /**
  * 循环类型
@@ -127,7 +132,15 @@ export interface VariableOperation {
  * 动作接口
  */
 export interface Action {
-  type: 'click' | 'input' | 'assert' | 'wait' | 'navigate' | 'scroll' | 'hover' | 'drag';
+  type:
+    | 'click'
+    | 'input'
+    | 'assert'
+    | 'wait'
+    | 'navigate'
+    | 'scroll'
+    | 'hover'
+    | 'drag';
   target: string;
   value?: string;
 }

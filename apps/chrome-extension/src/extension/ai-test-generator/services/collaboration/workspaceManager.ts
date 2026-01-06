@@ -5,15 +5,15 @@
  */
 
 import type {
+  MemberRole,
   Workspace,
   WorkspaceMember,
-  MemberRole,
   WorkspaceSettings,
   WorkspaceVisibility,
 } from '../../types/collaboration';
 import type {
-  IWorkspaceManager,
   CreateWorkspaceData,
+  IWorkspaceManager,
   UpdateWorkspaceData,
 } from './interfaces';
 
@@ -98,7 +98,8 @@ export class WorkspaceManager implements IWorkspaceManager {
     }
 
     if (data.name !== undefined) workspace.name = data.name;
-    if (data.description !== undefined) workspace.description = data.description;
+    if (data.description !== undefined)
+      workspace.description = data.description;
     if (data.visibility !== undefined) workspace.visibility = data.visibility;
 
     workspace.updatedAt = Date.now();
@@ -156,7 +157,7 @@ export class WorkspaceManager implements IWorkspaceManager {
   async addMember(
     workspaceId: string,
     userId: string,
-    role: MemberRole
+    role: MemberRole,
   ): Promise<void> {
     const workspace = this.storage.workspaces.get(workspaceId);
     if (!workspace) {
@@ -214,7 +215,7 @@ export class WorkspaceManager implements IWorkspaceManager {
   async updateMemberRole(
     workspaceId: string,
     userId: string,
-    role: MemberRole
+    role: MemberRole,
   ): Promise<void> {
     const workspace = this.storage.workspaces.get(workspaceId);
     if (!workspace) {
@@ -252,7 +253,7 @@ export class WorkspaceManager implements IWorkspaceManager {
    */
   async updateSettings(
     workspaceId: string,
-    settings: Partial<WorkspaceSettings>
+    settings: Partial<WorkspaceSettings>,
   ): Promise<void> {
     const workspace = this.storage.workspaces.get(workspaceId);
     if (!workspace) {
@@ -310,7 +311,7 @@ export class WorkspaceManager implements IWorkspaceManager {
   private addToIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     if (!index.has(key)) {
       index.set(key, new Set());
@@ -324,7 +325,7 @@ export class WorkspaceManager implements IWorkspaceManager {
   private removeFromIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     const set = index.get(key);
     if (set) {

@@ -479,8 +479,7 @@ export class CollaborativeReportGenerator {
 
     // Add sync points
     for (const sp of result.syncPoints) {
-      const left =
-        ((sp.startTime - result.startTime) / totalDuration) * 100;
+      const left = ((sp.startTime - result.startTime) / totalDuration) * 100;
       const width = (sp.duration / totalDuration) * 100;
 
       lines.push(`
@@ -559,12 +558,8 @@ export class CollaborativeReportGenerator {
       lines.push(`> ${options.description}`);
       lines.push('');
     }
-    lines.push(
-      `**Status:** ${original.success ? '✅ PASSED' : '❌ FAILED'}`,
-    );
-    lines.push(
-      `**Date:** ${new Date(original.startTime).toLocaleString()}`,
-    );
+    lines.push(`**Status:** ${original.success ? '✅ PASSED' : '❌ FAILED'}`);
+    lines.push(`**Date:** ${new Date(original.startTime).toLocaleString()}`);
     lines.push('');
 
     // Summary
@@ -572,19 +567,29 @@ export class CollaborativeReportGenerator {
     lines.push('');
     lines.push(`| Metric | Value |`);
     lines.push(`|--------|-------|`);
-    lines.push(`| Total Duration | ${this.formatDuration(stats.totalDuration)} |`);
-    lines.push(`| Steps Passed | ${stats.successfulSteps}/${stats.totalSteps} |`);
+    lines.push(
+      `| Total Duration | ${this.formatDuration(stats.totalDuration)} |`,
+    );
+    lines.push(
+      `| Steps Passed | ${stats.successfulSteps}/${stats.totalSteps} |`,
+    );
     lines.push(`| Success Rate | ${stats.successRate.toFixed(1)}% |`);
     lines.push(`| Devices | ${original.devices.length} |`);
     lines.push(`| Sync Points | ${original.syncPoints.length} |`);
-    lines.push(`| Sync Overhead | ${this.formatDuration(stats.totalSyncWaitTime)} (${stats.syncOverheadPercentage.toFixed(1)}%) |`);
+    lines.push(
+      `| Sync Overhead | ${this.formatDuration(stats.totalSyncWaitTime)} (${stats.syncOverheadPercentage.toFixed(1)}%) |`,
+    );
     lines.push('');
 
     // Device Comparison
     lines.push('## Device Comparison');
     lines.push('');
-    lines.push('| Device | Steps | Passed | Failed | Success Rate | Duration |');
-    lines.push('|--------|-------|--------|--------|--------------|----------|');
+    lines.push(
+      '| Device | Steps | Passed | Failed | Success Rate | Duration |',
+    );
+    lines.push(
+      '|--------|-------|--------|--------|--------------|----------|',
+    );
     for (const d of deviceComparisons) {
       lines.push(
         `| ${d.deviceAlias} | ${d.totalSteps} | ${d.successfulSteps} | ${d.failedSteps} | ${d.successRate.toFixed(1)}% | ${this.formatDuration(d.totalDuration)} |`,

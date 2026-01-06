@@ -4,23 +4,28 @@
  */
 
 import type {
-  AdaptiveTestCase,
-  AdaptiveStep,
   ExecutionContext as AdaptiveExecutionContext,
+  AdaptiveStep,
+  AdaptiveTestCase,
   StepResult,
 } from '../../types/adaptive';
 import { DEFAULT_ADAPTIVE_CONFIG } from '../../types/adaptive';
+import type {
+  ExecutionCallbacks,
+  ExecutionContext,
+  ExecutionEngine,
+  ExecutionResult,
+} from '../executionEngine';
 import {
   ControlFlowExecutor,
   type ControlFlowOptions,
   type ExtendedStepResult,
 } from './controlFlowExecutor';
 import {
-  VariableStore,
-  getVariableStore,
   type VariableChangeEvent,
+  type VariableStore,
+  getVariableStore,
 } from './variableStore';
-import type { ExecutionEngine, ExecutionContext, ExecutionCallbacks, ExecutionResult } from '../executionEngine';
 
 /**
  * AI Agent 接口 (Midscene)
@@ -28,7 +33,10 @@ import type { ExecutionEngine, ExecutionContext, ExecutionCallbacks, ExecutionRe
 interface AIAgent {
   aiAct?(prompt: string): Promise<void>;
   aiLocate?(prompt: string, options?: { deepThink?: boolean }): Promise<any>;
-  describeElementAtPoint?(center: { x: number; y: number }, options?: any): Promise<any>;
+  describeElementAtPoint?(
+    center: { x: number; y: number },
+    options?: any,
+  ): Promise<any>;
   dump?: { executions?: any[] };
   page?: {
     goto?(url: string): Promise<void>;
@@ -42,11 +50,18 @@ interface AIAgent {
 export interface AdaptiveExecutionCallbacks extends ExecutionCallbacks {
   // 步骤生命周期
   onAdaptiveStepStart?: (step: AdaptiveStep, depth: number) => void;
-  onAdaptiveStepComplete?: (step: AdaptiveStep, result: ExtendedStepResult) => void;
+  onAdaptiveStepComplete?: (
+    step: AdaptiveStep,
+    result: ExtendedStepResult,
+  ) => void;
   onAdaptiveStepFailed?: (step: AdaptiveStep, error: Error) => void;
 
   // 流程控制事件
-  onConditionEvaluated?: (stepId: string, expression: string, result: boolean) => void;
+  onConditionEvaluated?: (
+    stepId: string,
+    expression: string,
+    result: boolean,
+  ) => void;
   onLoopIteration?: (stepId: string, iteration: number, total: number) => void;
   onVariableChanged?: (event: VariableChangeEvent) => void;
 
@@ -124,7 +139,7 @@ export class AdaptiveExecutionEngine {
   constructor(
     private getAgent: (forceSameTabNavigation?: boolean) => AIAgent,
     options: AdaptiveExecutionOptions = {},
-    config?: Partial<typeof DEFAULT_ADAPTIVE_CONFIG>
+    config?: Partial<typeof DEFAULT_ADAPTIVE_CONFIG>,
   ) {
     this.options = {
       totalTimeout: 300000,
@@ -223,7 +238,7 @@ export class AdaptiveExecutionEngine {
    */
   async executeAdaptiveTestCase(
     testCase: AdaptiveTestCase,
-    context?: ExecutionContext
+    context?: ExecutionContext,
   ): Promise<AdaptiveExecutionResult> {
     const startTime = Date.now();
 
@@ -266,7 +281,7 @@ export class AdaptiveExecutionEngine {
       // Execute all steps with flow control
       const results = await this.executeStepsWithFlowControl(
         testCase.steps,
-        stepContext
+        stepContext,
       );
 
       // Clear timeout
@@ -327,7 +342,7 @@ export class AdaptiveExecutionEngine {
    */
   private async executeStepsWithFlowControl(
     steps: AdaptiveStep[],
-    stepContext: StepExecutionContext
+    stepContext: StepExecutionContext,
   ): Promise<ExtendedStepResult[]> {
     const results: ExtendedStepResult[] = [];
 
@@ -335,7 +350,9 @@ export class AdaptiveExecutionEngine {
       // Check if should stop
       if (this.controlFlowExecutor.shouldStop(stepContext.context)) {
         if (this.options.verbose) {
-          console.warn('[AdaptiveExecution] Execution stopped due to safety limits');
+          console.warn(
+            '[AdaptiveExecution] Execution stopped due to safety limits',
+          );
         }
         break;
       }
@@ -344,7 +361,7 @@ export class AdaptiveExecutionEngine {
       const result = await this.controlFlowExecutor.executeStep(
         step,
         stepContext.context,
-        async (s) => this.executeBaseAction(s, stepContext)
+        async (s) => this.executeBaseAction(s, stepContext),
       );
 
       results.push(result);
@@ -352,7 +369,10 @@ export class AdaptiveExecutionEngine {
       // Update path history
       if (result.branch) {
         this.pathHistory.push(`${step.id}:${result.branch}`);
-        this.callbacks.onBranchTaken?.(step.id, result.branch as 'then' | 'else');
+        this.callbacks.onBranchTaken?.(
+          step.id,
+          result.branch as 'then' | 'else',
+        );
       }
 
       // Track depth
@@ -360,7 +380,7 @@ export class AdaptiveExecutionEngine {
         this.currentDepth = result.contextSnapshot.currentDepth;
         this.callbacks.onDepthChanged?.(
           this.currentDepth,
-          this.config.maxNestedDepth
+          this.config.maxNestedDepth,
         );
       }
 
@@ -389,7 +409,7 @@ export class AdaptiveExecutionEngine {
    */
   private async executeBaseAction(
     step: AdaptiveStep,
-    stepContext: StepExecutionContext
+    stepContext: StepExecutionContext,
   ): Promise<void> {
     if (!step.action) {
       return;
@@ -397,7 +417,7 @@ export class AdaptiveExecutionEngine {
 
     // Replace variable references in description
     const processedDescription = this.variableStore.replaceVariables(
-      step.description
+      step.description,
     );
 
     // Execute using the underlying agent
@@ -418,7 +438,7 @@ export class AdaptiveExecutionEngine {
    */
   private async extractVariable(
     varName: string,
-    selector: string
+    selector: string,
   ): Promise<void> {
     const agent = this.agent;
     if (!agent?.aiLocate) {
@@ -446,7 +466,10 @@ export class AdaptiveExecutionEngine {
       }
     } catch (error) {
       if (this.options.debug) {
-        console.warn(`[AdaptiveExecution] Failed to extract variable ${varName}:`, error);
+        console.warn(
+          `[AdaptiveExecution] Failed to extract variable ${varName}:`,
+          error,
+        );
       }
     }
   }
@@ -456,7 +479,7 @@ export class AdaptiveExecutionEngine {
    */
   private buildAdaptiveContext(
     testCase: AdaptiveTestCase,
-    context?: ExecutionContext
+    context?: ExecutionContext,
   ): AdaptiveExecutionContext {
     return {
       variables: new Map(Object.entries(testCase.variables)),
@@ -500,14 +523,14 @@ export class AdaptiveExecutionEngine {
    */
   private handleControlFlowStepComplete(
     step: AdaptiveStep,
-    result: ExtendedStepResult
+    result: ExtendedStepResult,
   ): void {
     // Notify condition evaluation
     if (result.branch && step.condition?.expression) {
       this.callbacks.onConditionEvaluated?.(
         step.id,
         step.condition.expression,
-        result.branch === 'then'
+        result.branch === 'then',
       );
     }
 
@@ -516,7 +539,7 @@ export class AdaptiveExecutionEngine {
       this.callbacks.onLoopIteration?.(
         step.id,
         result.iterations,
-        result.iterations
+        result.iterations,
       );
     }
   }
@@ -526,7 +549,7 @@ export class AdaptiveExecutionEngine {
    */
   private generateYaml(
     testCase: AdaptiveTestCase,
-    results: ExtendedStepResult[]
+    results: ExtendedStepResult[],
   ): string {
     const lines: string[] = [
       '# Adaptive Test Case',
@@ -631,7 +654,7 @@ let defaultEngine: AdaptiveExecutionEngine | null = null;
 export function getAdaptiveExecutionEngine(
   getAgent: (forceSameTabNavigation?: boolean) => AIAgent,
   options?: AdaptiveExecutionOptions,
-  config?: Partial<typeof DEFAULT_ADAPTIVE_CONFIG>
+  config?: Partial<typeof DEFAULT_ADAPTIVE_CONFIG>,
 ): AdaptiveExecutionEngine {
   if (!defaultEngine) {
     defaultEngine = new AdaptiveExecutionEngine(getAgent, options, config);
@@ -646,7 +669,7 @@ export async function executeAdaptiveTest(
   testCase: AdaptiveTestCase,
   getAgent: (forceSameTabNavigation?: boolean) => AIAgent,
   context?: ExecutionContext,
-  options?: AdaptiveExecutionOptions
+  options?: AdaptiveExecutionOptions,
 ): Promise<AdaptiveExecutionResult> {
   const engine = getAdaptiveExecutionEngine(getAgent, options);
   return engine.executeAdaptiveTestCase(testCase, context);

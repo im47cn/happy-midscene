@@ -3,7 +3,7 @@
  * 可视化测试设计器类型定义 - 支持 React Flow 节点编辑器
  */
 
-import type { Node, Edge, Connection } from '@xyflow/react';
+import type { Connection, Edge, Node } from '@xyflow/react';
 
 /**
  * 节点类型枚举
@@ -40,7 +40,12 @@ export type NodeType =
 /**
  * 节点分类
  */
-export type NodeCategory = 'special' | 'action' | 'validation' | 'control' | 'data';
+export type NodeCategory =
+  | 'special'
+  | 'action'
+  | 'validation'
+  | 'control'
+  | 'data';
 
 /**
  * 失败处理策略
@@ -55,7 +60,15 @@ export type LoopType = 'count' | 'while' | 'forEach';
 /**
  * 条件操作符
  */
-export type ComparisonOperator = '==' | '!=' | '>' | '<' | '>=' | '<=' | 'contains' | 'matches';
+export type ComparisonOperator =
+  | '=='
+  | '!='
+  | '>'
+  | '<'
+  | '>='
+  | '<='
+  | 'contains'
+  | 'matches';
 
 /**
  * 变量类型
@@ -713,7 +726,12 @@ export interface TemplateParameter {
 /**
  * 执行状态
  */
-export type ExecutionStatus = 'idle' | 'running' | 'paused' | 'completed' | 'failed';
+export type ExecutionStatus =
+  | 'idle'
+  | 'running'
+  | 'paused'
+  | 'completed'
+  | 'failed';
 
 /**
  * 执行结果

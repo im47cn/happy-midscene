@@ -88,10 +88,10 @@ export const PublishForm: React.FC<PublishFormProps> = ({
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
   const [isAuditing, setIsAuditing] = useState(false);
   const [parameters, setParameters] = useState<ParameterDef[]>(
-    initialDraft?.content?.parameters || []
+    initialDraft?.content?.parameters || [],
   );
   const [yamlContent, setYamlContent] = useState(
-    initialDraft?.content?.yaml || ''
+    initialDraft?.content?.yaml || '',
   );
 
   // Extract parameters from YAML when it changes
@@ -113,14 +113,14 @@ export const PublishForm: React.FC<PublishFormProps> = ({
             label: formatLabel(name),
             type: 'string',
             required: true,
-          })
+          }),
         );
 
       if (newParams.length > 0) {
         setParameters((prev) => [...prev, ...newParams]);
       }
     },
-    [parameters]
+    [parameters],
   );
 
   const handleAddParameter = useCallback(() => {
@@ -145,7 +145,7 @@ export const PublishForm: React.FC<PublishFormProps> = ({
         return updated;
       });
     },
-    []
+    [],
   );
 
   const handleAudit = useCallback(async () => {
@@ -201,7 +201,7 @@ export const PublishForm: React.FC<PublishFormProps> = ({
         onSubmit(draft);
       }
     },
-    [yamlContent, parameters, onSubmit]
+    [yamlContent, parameters, onSubmit],
   );
 
   // Initialize form with initial draft values
@@ -240,7 +240,11 @@ export const PublishForm: React.FC<PublishFormProps> = ({
         </Title>
 
         {/* Basic Information */}
-        <Card size="small" title="Basic Information" style={{ marginBottom: 16 }}>
+        <Card
+          size="small"
+          title="Basic Information"
+          style={{ marginBottom: 16 }}
+        >
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
@@ -288,7 +292,10 @@ export const PublishForm: React.FC<PublishFormProps> = ({
             label="Full Description"
             rules={[
               { required: true, message: 'Please enter a description' },
-              { min: 20, message: 'Description should be at least 20 characters' },
+              {
+                min: 20,
+                message: 'Description should be at least 20 characters',
+              },
             ]}
           >
             <TextArea
@@ -452,7 +459,7 @@ flow:
                           handleParameterChange(
                             index,
                             'required',
-                            e.target.checked
+                            e.target.checked,
                           )
                         }
                       >
@@ -465,7 +472,11 @@ flow:
                         placeholder="Default"
                         value={param.default as string}
                         onChange={(e) =>
-                          handleParameterChange(index, 'default', e.target.value)
+                          handleParameterChange(
+                            index,
+                            'default',
+                            e.target.value,
+                          )
                         }
                       />
                     </Col>
@@ -475,7 +486,11 @@ flow:
                     placeholder="Description"
                     value={param.description}
                     onChange={(e) =>
-                      handleParameterChange(index, 'description', e.target.value)
+                      handleParameterChange(
+                        index,
+                        'description',
+                        e.target.value,
+                      )
                     }
                     style={{ marginTop: 8 }}
                     prefix={<InfoCircleOutlined />}

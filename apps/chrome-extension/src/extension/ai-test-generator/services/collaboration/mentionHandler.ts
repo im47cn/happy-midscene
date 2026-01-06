@@ -71,7 +71,10 @@ export class MentionHandler implements IMentionHandler {
   /**
    * Search for mentionable users
    */
-  async searchMentionable(workspaceId: string, query: string): Promise<string[]> {
+  async searchMentionable(
+    workspaceId: string,
+    query: string,
+  ): Promise<string[]> {
     const members = await memberManager.searchMembers(workspaceId, query);
     return members.map((m) => m.userId);
   }
@@ -147,7 +150,10 @@ export class MentionHandler implements IMentionHandler {
   /**
    * Extract mention suggestions as user types
    */
-  extractMentionContext(text: string, cursorPosition: number): {
+  extractMentionContext(
+    text: string,
+    cursorPosition: number,
+  ): {
     query: string;
     startIndex: number;
   } | null {
@@ -183,7 +189,7 @@ export class MentionHandler implements IMentionHandler {
    */
   async validateAllMentions(
     text: string,
-    workspaceId: string
+    workspaceId: string,
   ): Promise<{
     valid: string[];
     invalid: string[];
@@ -194,7 +200,7 @@ export class MentionHandler implements IMentionHandler {
 
     for (const username of usernames) {
       const userId = await this.getUserIdFromUsername(username);
-      if (userId && await this.validateMention(userId, workspaceId)) {
+      if (userId && (await this.validateMention(userId, workspaceId))) {
         valid.push(username);
       } else {
         invalid.push(username);
@@ -223,7 +229,7 @@ export class MentionHandler implements IMentionHandler {
   /**
    * Convert user IDs to usernames
    */
-  async convertToUsernames(userIds: string[]): Promise< string[]> {
+  async convertToUsernames(userIds: string[]): Promise<string[]> {
     const usernames: string[] = [];
 
     for (const userId of userIds) {
@@ -260,7 +266,7 @@ export class MentionHandler implements IMentionHandler {
    * Get all unique mentioned users from comments
    */
   async getMentionedUsersFromComments(
-    comments: Array<{ content: string; mentions: string[] }>
+    comments: Array<{ content: string; mentions: string[] }>,
   ): Promise<Set<string>> {
     const mentionedUsers = new Set<string>();
 

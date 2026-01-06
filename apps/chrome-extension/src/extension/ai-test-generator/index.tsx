@@ -141,13 +141,17 @@ export function AITestGenerator() {
   const handleApplyTemplate = useCallback(
     (yaml: string) => {
       // Apply the template YAML to the input
-      useGeneratorStore.getState().setMarkdownInput(
-        `# Applied Template\n\n\`\`\`yaml\n${yaml}\n\`\`\`\n`
-      );
+      useGeneratorStore
+        .getState()
+        .setMarkdownInput(
+          `# Applied Template\n\n\`\`\`yaml\n${yaml}\n\`\`\`\n`,
+        );
       setCurrentView('input');
-      message.success(t('templateApplied') + '! You can now modify and run it.');
+      message.success(
+        t('templateApplied') + '! You can now modify and run it.',
+      );
     },
-    [setCurrentView, t]
+    [setCurrentView, t],
   );
 
   const renderContent = () => {
@@ -260,10 +264,7 @@ function AITestGeneratorWithErrorBoundary() {
   const { t } = useI18n();
 
   return (
-    <ErrorBoundary
-      fallbackTitle={t('aiGenError')}
-      onReset={handleReset}
-    >
+    <ErrorBoundary fallbackTitle={t('aiGenError')} onReset={handleReset}>
       <AITestGenerator />
     </ErrorBoundary>
   );

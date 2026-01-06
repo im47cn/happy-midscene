@@ -4,8 +4,8 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { nodeRegistry } from '../services/nodeRegistry';
 import type { NodeCategory, NodeType } from '../../types/designer';
+import { nodeRegistry } from '../services/nodeRegistry';
 
 export interface NodePanelProps {
   /** 筛选条件 */
@@ -21,13 +21,14 @@ export interface NodePanelProps {
 /**
  * 节点分类标签
  */
-const CATEGORY_LABELS: Record<NodeCategory, { label: string; color: string }> = {
-  special: { label: '特殊', color: 'bg-amber-100 text-amber-800' },
-  action: { label: '动作', color: 'bg-blue-100 text-blue-800' },
-  validation: { label: '验证', color: 'bg-green-100 text-green-800' },
-  control: { label: '控制', color: 'bg-indigo-100 text-indigo-800' },
-  data: { label: '数据', color: 'bg-pink-100 text-pink-800' },
-} as const;
+const CATEGORY_LABELS: Record<NodeCategory, { label: string; color: string }> =
+  {
+    special: { label: '特殊', color: 'bg-amber-100 text-amber-800' },
+    action: { label: '动作', color: 'bg-blue-100 text-blue-800' },
+    validation: { label: '验证', color: 'bg-green-100 text-green-800' },
+    control: { label: '控制', color: 'bg-indigo-100 text-indigo-800' },
+    data: { label: '数据', color: 'bg-pink-100 text-pink-800' },
+  } as const;
 
 /**
  * DraggableNode 组件 - 可拖拽的节点
@@ -40,7 +41,13 @@ interface DraggableNodeProps {
   onClick?: (type: NodeType) => void;
 }
 
-const DraggableNode: React.FC<DraggableNodeProps> = ({ type, label, icon, category, onClick }) => {
+const DraggableNode: React.FC<DraggableNodeProps> = ({
+  type,
+  label,
+  icon,
+  category,
+  onClick,
+}) => {
   const categoryStyle = CATEGORY_LABELS[category];
 
   const onDragStart = useCallback(
@@ -48,7 +55,7 @@ const DraggableNode: React.FC<DraggableNodeProps> = ({ type, label, icon, catego
       event.dataTransfer.setData('application/reactflow', type);
       event.dataTransfer.effectAllowed = 'move';
     },
-    [type]
+    [type],
   );
 
   const handleClick = useCallback(() => {
@@ -118,9 +125,15 @@ const NodeCategorySection: React.FC<NodeCategorySectionProps> = ({
           backgroundColor: categoryStyle.color,
         }}
       >
-        <span className={`transition-transform ${collapsed ? 'rotate-[-90deg]' : ''}`}>▼</span>
+        <span
+          className={`transition-transform ${collapsed ? 'rotate-[-90deg]' : ''}`}
+        >
+          ▼
+        </span>
         <span>{categoryStyle.label}</span>
-        <span className="ml-auto text-xs opacity-70">{filteredNodes.length}</span>
+        <span className="ml-auto text-xs opacity-70">
+          {filteredNodes.length}
+        </span>
       </button>
 
       {!collapsed && (
@@ -158,7 +171,10 @@ export const NodePanel: React.FC<NodePanelProps> = ({
   }, [filterCategories]);
 
   const categorizedNodes = useMemo(() => {
-    const result = new Map<NodeCategory, Array<{ type: NodeType; label: string; icon: string }>>();
+    const result = new Map<
+      NodeCategory,
+      Array<{ type: NodeType; label: string; icon: string }>
+    >();
 
     categories.forEach((category) => {
       const nodes = nodeRegistry.getByCategory(category);
@@ -168,7 +184,7 @@ export const NodePanel: React.FC<NodePanelProps> = ({
           type: def.type,
           label: def.label,
           icon: def.icon,
-        }))
+        })),
       );
     });
 
@@ -176,7 +192,9 @@ export const NodePanel: React.FC<NodePanelProps> = ({
   }, [categories]);
 
   return (
-    <div className={`node-panel bg-white border-r border-gray-200 overflow-y-auto ${className}`}>
+    <div
+      className={`node-panel bg-white border-r border-gray-200 overflow-y-auto ${className}`}
+    >
       <div className="p-3">
         <h3 className="text-sm font-semibold text-gray-700 mb-3">节点面板</h3>
 

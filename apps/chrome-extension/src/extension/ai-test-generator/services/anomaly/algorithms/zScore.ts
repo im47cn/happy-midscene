@@ -26,7 +26,11 @@ export interface ZScoreResult {
 /**
  * Calculate Z-score for a single value
  */
-export function calculateZScore(value: number, mean: number, stdDev: number): number {
+export function calculateZScore(
+  value: number,
+  mean: number,
+  stdDev: number,
+): number {
   if (stdDev === 0) return 0;
   return (value - mean) / stdDev;
 }
@@ -37,13 +41,14 @@ export function calculateZScore(value: number, mean: number, stdDev: number): nu
 export function detectZScoreAnomaly(
   value: number,
   baseline: BaselineInfo,
-  options: ZScoreDetectionOptions = {}
+  options: ZScoreDetectionOptions = {},
 ): ZScoreResult {
   const { threshold = 3, minAbsoluteDeviation = 0 } = options;
 
   const zScore = calculateZScore(value, baseline.mean, baseline.stdDev);
   const deviation = value - baseline.mean;
-  const percentageDeviation = baseline.mean !== 0 ? (deviation / baseline.mean) * 100 : 0;
+  const percentageDeviation =
+    baseline.mean !== 0 ? (deviation / baseline.mean) * 100 : 0;
 
   const isAnomaly =
     Math.abs(zScore) > threshold && Math.abs(deviation) >= minAbsoluteDeviation;
@@ -62,7 +67,7 @@ export function detectZScoreAnomaly(
 export function detectZScoreAnomalies(
   values: number[],
   baseline: BaselineInfo,
-  options: ZScoreDetectionOptions = {}
+  options: ZScoreDetectionOptions = {},
 ): AnomalyPoint[] {
   const anomalies: AnomalyPoint[] = [];
 
@@ -84,23 +89,35 @@ export function detectZScoreAnomalies(
  * Modified Z-score using Median Absolute Deviation (MAD)
  * More robust to outliers in the baseline
  */
-export function calculateModifiedZScore(value: number, median: number, mad: number): number {
+export function calculateModifiedZScore(
+  value: number,
+  median: number,
+  mad: number,
+): number {
   if (mad === 0) return 0;
   // 0.6745 is the standard deviation / MAD ratio for normal distribution
-  return 0.6745 * (value - median) / mad;
+  return (0.6745 * (value - median)) / mad;
 }
 
 /**
  * Calculate Median Absolute Deviation
  */
-export function calculateMAD(values: number[]): { median: number; mad: number } {
+export function calculateMAD(values: number[]): {
+  median: number;
+  mad: number;
+} {
   if (values.length === 0) return { median: 0, mad: 0 };
 
   const sorted = [...values].sort((a, b) => a - b);
   const n = sorted.length;
-  const median = n % 2 === 0 ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2 : sorted[Math.floor(n / 2)];
+  const median =
+    n % 2 === 0
+      ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2
+      : sorted[Math.floor(n / 2)];
 
-  const absoluteDeviations = values.map((v) => Math.abs(v - median)).sort((a, b) => a - b);
+  const absoluteDeviations = values
+    .map((v) => Math.abs(v - median))
+    .sort((a, b) => a - b);
   const mad =
     n % 2 === 0
       ? (absoluteDeviations[n / 2 - 1] + absoluteDeviations[n / 2]) / 2
@@ -115,7 +132,7 @@ export function calculateMAD(values: number[]): { median: number; mad: number } 
 export function detectModifiedZScoreAnomaly(
   value: number,
   values: number[],
-  threshold: number = 3.5
+  threshold = 3.5,
 ): ZScoreResult {
   const { median, mad } = calculateMAD(values);
   const modifiedZScore = calculateModifiedZScore(value, median, mad);

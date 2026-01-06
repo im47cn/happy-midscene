@@ -11,15 +11,7 @@ import {
   StarFilled,
   UserOutlined,
 } from '@ant-design/icons';
-import {
-  Avatar,
-  Button,
-  Empty,
-  List,
-  Progress,
-  Space,
-  Typography,
-} from 'antd';
+import { Avatar, Button, Empty, List, Progress, Space, Typography } from 'antd';
 import type React from 'react';
 import type { TemplateReview } from '../types';
 
@@ -72,12 +64,23 @@ const RatingStars: React.FC<{ rating: number; size?: number }> = ({
  * Review statistics summary
  */
 const ReviewStats: React.FC<{
-  stats: { average: number; count: number; distribution: Record<number, number> };
+  stats: {
+    average: number;
+    count: number;
+    distribution: Record<number, number>;
+  };
 }> = ({ stats }) => {
   const maxCount = Math.max(...Object.values(stats.distribution));
 
   return (
-    <div style={{ display: 'flex', gap: 24, padding: '16px 0', borderBottom: '1px solid #f0f0f0' }}>
+    <div
+      style={{
+        display: 'flex',
+        gap: 24,
+        padding: '16px 0',
+        borderBottom: '1px solid #f0f0f0',
+      }}
+    >
       {/* Average rating */}
       <div style={{ textAlign: 'center', minWidth: 80 }}>
         <div style={{ fontSize: 36, fontWeight: 'bold', lineHeight: 1 }}>
@@ -96,7 +99,15 @@ const ReviewStats: React.FC<{
           const percent = maxCount > 0 ? (count / maxCount) * 100 : 0;
 
           return (
-            <div key={star} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <div
+              key={star}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                marginBottom: 4,
+              }}
+            >
               <Text style={{ width: 12, fontSize: 12 }}>{star}</Text>
               <StarFilled style={{ fontSize: 12, color: '#fadb14' }} />
               <Progress
@@ -106,7 +117,14 @@ const ReviewStats: React.FC<{
                 strokeColor="#fadb14"
                 style={{ flex: 1, margin: 0 }}
               />
-              <Text style={{ width: 24, fontSize: 12, textAlign: 'right', color: '#8c8c8c' }}>
+              <Text
+                style={{
+                  width: 24,
+                  fontSize: 12,
+                  textAlign: 'right',
+                  color: '#8c8c8c',
+                }}
+              >
                 {count}
               </Text>
             </div>
@@ -140,19 +158,26 @@ export const ReviewList: React.FC<ReviewListProps> = ({
         loading={loading}
         dataSource={reviews}
         renderItem={(review) => (
-          <List.Item
-            style={{ padding: '16px 0', alignItems: 'flex-start' }}
-          >
+          <List.Item style={{ padding: '16px 0', alignItems: 'flex-start' }}>
             <div style={{ width: '100%' }}>
               {/* Header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  marginBottom: 8,
+                }}
+              >
                 <Avatar
                   size={32}
                   icon={<UserOutlined />}
                   src={review.userAvatar}
                 />
                 <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div
+                    style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+                  >
                     <Text strong>{review.userName}</Text>
                     <RatingStars rating={review.rating} />
                   </div>
@@ -181,7 +206,13 @@ export const ReviewList: React.FC<ReviewListProps> = ({
                 <Button
                   type="text"
                   size="small"
-                  icon={review.notHelpful > 0 ? <DislikeFilled /> : <DislikeOutlined />}
+                  icon={
+                    review.notHelpful > 0 ? (
+                      <DislikeFilled />
+                    ) : (
+                      <DislikeOutlined />
+                    )
+                  }
                   onClick={() => onVoteHelpful?.(review.id, false)}
                 >
                   Not helpful ({review.notHelpful})

@@ -3,8 +3,12 @@
  * Login/logout button for GitHub authentication
  */
 
-import { GithubOutlined, LoadingOutlined, LogoutOutlined } from '@ant-design/icons';
-import { Button, message, Tooltip } from 'antd';
+import {
+  GithubOutlined,
+  LoadingOutlined,
+  LogoutOutlined,
+} from '@ant-design/icons';
+import { Button, Tooltip, message } from 'antd';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useI18n } from '../../../../i18n';
@@ -23,7 +27,9 @@ export const AuthButton: React.FC<AuthButtonProps> = ({
   size = 'small',
 }) => {
   const { t } = useI18n();
-  const [authState, setAuthState] = useState<AuthState>(githubAuth.getAuthState());
+  const [authState, setAuthState] = useState<AuthState>(
+    githubAuth.getAuthState(),
+  );
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -46,8 +52,12 @@ export const AuthButton: React.FC<AuthButtonProps> = ({
         message.success(t('loginSuccess'));
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      if (errorMessage.includes('cancelled') || errorMessage.includes('closed')) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      if (
+        errorMessage.includes('cancelled') ||
+        errorMessage.includes('closed')
+      ) {
         message.info(t('loginCancelled'));
       } else {
         message.error(`${t('loginFailed')}: ${errorMessage}`);
@@ -69,11 +79,7 @@ export const AuthButton: React.FC<AuthButtonProps> = ({
 
     return (
       <Tooltip title={t('logout')}>
-        <Button
-          size={size}
-          icon={<LogoutOutlined />}
-          onClick={handleLogout}
-        />
+        <Button size={size} icon={<LogoutOutlined />} onClick={handleLogout} />
       </Tooltip>
     );
   }

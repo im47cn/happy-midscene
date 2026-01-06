@@ -2,9 +2,9 @@
  * Knowledge Search Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { KnowledgeSearch } from '../knowledgeSearch';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { KnowledgeArticle } from '../../types/collaboration';
+import { KnowledgeSearch } from '../knowledgeSearch';
 
 describe('KnowledgeSearch', () => {
   let ks: KnowledgeSearch;
@@ -21,7 +21,7 @@ describe('KnowledgeSearch', () => {
     id: string,
     title: string,
     content: string,
-    tags: string[] = []
+    tags: string[] = [],
   ): KnowledgeArticle => ({
     id,
     title,
@@ -35,7 +35,11 @@ describe('KnowledgeSearch', () => {
 
   describe('indexArticle', () => {
     it('should index an article', async () => {
-      const article = createArticle('article1', 'Test Title', 'Test content here');
+      const article = createArticle(
+        'article1',
+        'Test Title',
+        'Test content here',
+      );
 
       await ks.indexArticle(article);
 
@@ -45,7 +49,11 @@ describe('KnowledgeSearch', () => {
 
     it('should tokenize title with higher weight', async () => {
       const article1 = createArticle('article1', 'unique keyword', 'content');
-      const article2 = createArticle('article2', 'other title', 'unique keyword content');
+      const article2 = createArticle(
+        'article2',
+        'other title',
+        'unique keyword content',
+      );
 
       await ks.indexArticle(article1);
       await ks.indexArticle(article2);
@@ -56,7 +64,9 @@ describe('KnowledgeSearch', () => {
     });
 
     it('should index tags with 2x weight', async () => {
-      const article1 = createArticle('article1', 'Title', 'content', ['tagged']);
+      const article1 = createArticle('article1', 'Title', 'content', [
+        'tagged',
+      ]);
       const article2 = createArticle('article2', 'Title', 'tagged content');
 
       await ks.indexArticle(article1);
@@ -80,7 +90,7 @@ describe('KnowledgeSearch', () => {
       const article = createArticle(
         'article1',
         'Test',
-        '<p>This is <strong>bold</strong> content</p>'
+        '<p>This is <strong>bold</strong> content</p>',
       );
 
       await ks.indexArticle(article);
@@ -99,7 +109,11 @@ describe('KnowledgeSearch', () => {
     });
 
     it('should filter stopwords', async () => {
-      const article = createArticle('article1', 'The Title', 'content with the and');
+      const article = createArticle(
+        'article1',
+        'The Title',
+        'content with the and',
+      );
 
       await ks.indexArticle(article);
 
@@ -136,9 +150,23 @@ describe('KnowledgeSearch', () => {
 
   describe('search', () => {
     beforeEach(async () => {
-      await ks.indexArticle(createArticle('a1', 'JavaScript Tutorial', 'Learn JavaScript programming basics'));
-      await ks.indexArticle(createArticle('a2', 'Python Guide', 'Python programming for beginners'));
-      await ks.indexArticle(createArticle('a3', 'TypeScript Basics', 'TypeScript is a typed JavaScript'));
+      await ks.indexArticle(
+        createArticle(
+          'a1',
+          'JavaScript Tutorial',
+          'Learn JavaScript programming basics',
+        ),
+      );
+      await ks.indexArticle(
+        createArticle('a2', 'Python Guide', 'Python programming for beginners'),
+      );
+      await ks.indexArticle(
+        createArticle(
+          'a3',
+          'TypeScript Basics',
+          'TypeScript is a typed JavaScript',
+        ),
+      );
     });
 
     it('should find articles by title', async () => {
@@ -212,8 +240,16 @@ describe('KnowledgeSearch', () => {
 
   describe('searchDetailed', () => {
     beforeEach(async () => {
-      await ks.indexArticle(createArticle('a1', 'JavaScript Tutorial', 'Learn JavaScript programming basics'));
-      await ks.indexArticle(createArticle('a2', 'Python Guide', 'Python programming for beginners'));
+      await ks.indexArticle(
+        createArticle(
+          'a1',
+          'JavaScript Tutorial',
+          'Learn JavaScript programming basics',
+        ),
+      );
+      await ks.indexArticle(
+        createArticle('a2', 'Python Guide', 'Python programming for beginners'),
+      );
     });
 
     it('should return detailed search results', async () => {
@@ -247,9 +283,19 @@ describe('KnowledgeSearch', () => {
 
   describe('suggestSimilar', () => {
     beforeEach(async () => {
-      await ks.indexArticle(createArticle('a1', 'JavaScript Tutorial', 'Learn JavaScript basics'));
-      await ks.indexArticle(createArticle('a2', 'JavaScript Advanced', 'Advanced JavaScript techniques'));
-      await ks.indexArticle(createArticle('a3', 'Python Guide', 'Python for beginners'));
+      await ks.indexArticle(
+        createArticle('a1', 'JavaScript Tutorial', 'Learn JavaScript basics'),
+      );
+      await ks.indexArticle(
+        createArticle(
+          'a2',
+          'JavaScript Advanced',
+          'Advanced JavaScript techniques',
+        ),
+      );
+      await ks.indexArticle(
+        createArticle('a3', 'Python Guide', 'Python for beginners'),
+      );
     });
 
     it('should suggest similar articles', async () => {
@@ -286,9 +332,13 @@ describe('KnowledgeSearch', () => {
 
   describe('autocomplete', () => {
     beforeEach(async () => {
-      await ks.indexArticle(createArticle('a1', 'JavaScript Tutorial', 'Learn JavaScript'));
+      await ks.indexArticle(
+        createArticle('a1', 'JavaScript Tutorial', 'Learn JavaScript'),
+      );
       await ks.indexArticle(createArticle('a2', 'Java Guide', 'Learn Java'));
-      await ks.indexArticle(createArticle('a3', 'Python Programming', 'Learn Python'));
+      await ks.indexArticle(
+        createArticle('a3', 'Python Programming', 'Learn Python'),
+      );
     });
 
     it('should return terms starting with prefix', async () => {
@@ -327,9 +377,19 @@ describe('KnowledgeSearch', () => {
 
   describe('getTrendingTerms', () => {
     beforeEach(async () => {
-      await ks.indexArticle(createArticle('a1', 'JavaScript Tutorial', 'Learn JavaScript programming'));
-      await ks.indexArticle(createArticle('a2', 'JavaScript Guide', 'JavaScript for beginners'));
-      await ks.indexArticle(createArticle('a3', 'Python Tutorial', 'Learn Python programming'));
+      await ks.indexArticle(
+        createArticle(
+          'a1',
+          'JavaScript Tutorial',
+          'Learn JavaScript programming',
+        ),
+      );
+      await ks.indexArticle(
+        createArticle('a2', 'JavaScript Guide', 'JavaScript for beginners'),
+      );
+      await ks.indexArticle(
+        createArticle('a3', 'Python Tutorial', 'Learn Python programming'),
+      );
     });
 
     it('should return most frequent terms', async () => {
@@ -373,7 +433,9 @@ describe('KnowledgeSearch', () => {
     });
 
     it('should reset statistics', async () => {
-      await ks.indexArticle(createArticle('a1', 'Title with words', 'Content with more words'));
+      await ks.indexArticle(
+        createArticle('a1', 'Title with words', 'Content with more words'),
+      );
 
       await ks.clearIndex();
 
@@ -409,7 +471,9 @@ describe('KnowledgeSearch', () => {
     });
 
     it('should count unique terms', async () => {
-      await ks.indexArticle(createArticle('a1', 'word1 word2 word1', 'word2 word3'));
+      await ks.indexArticle(
+        createArticle('a1', 'word1 word2 word1', 'word2 word3'),
+      );
 
       const stats = await ks.getIndexStats();
       // word1 appears twice but counts as one unique term
@@ -418,7 +482,9 @@ describe('KnowledgeSearch', () => {
     });
 
     it('should exclude stopwords from counts', async () => {
-      await ks.indexArticle(createArticle('a1', 'The title', 'content with the and'));
+      await ks.indexArticle(
+        createArticle('a1', 'The title', 'content with the and'),
+      );
 
       const stats = await ks.getIndexStats();
       // Stopwords should be filtered out
@@ -445,9 +511,7 @@ describe('KnowledgeSearch', () => {
     });
 
     it('should clear existing index before rebuilding', async () => {
-      const articles = [
-        createArticle('a1', 'Title 1', 'Content 1'),
-      ];
+      const articles = [createArticle('a1', 'Title 1', 'Content 1')];
 
       // Add to existing index
       await ks.indexArticle(createArticle('old', 'Old', 'Old'));
@@ -477,14 +541,22 @@ describe('KnowledgeSearch', () => {
     });
 
     it('should strip HTML tags', async () => {
-      await ks.indexArticle(createArticle('a1', 'Title', '<p>Content with <strong>bold</strong> text</p>'));
+      await ks.indexArticle(
+        createArticle(
+          'a1',
+          'Title',
+          '<p>Content with <strong>bold</strong> text</p>',
+        ),
+      );
 
       const results = await ks.search('bold');
       expect(results).toHaveLength(1);
     });
 
     it('should handle special characters', async () => {
-      await ks.indexArticle(createArticle('a1', 'Title!', 'Content, with; special: characters.'));
+      await ks.indexArticle(
+        createArticle('a1', 'Title!', 'Content, with; special: characters.'),
+      );
 
       const results = await ks.search('content');
       expect(results).toHaveLength(1);
@@ -493,7 +565,9 @@ describe('KnowledgeSearch', () => {
 
   describe('tokenization', () => {
     it('should split on whitespace', async () => {
-      await ks.indexArticle(createArticle('a1', 'word1 word2   word3', 'content'));
+      await ks.indexArticle(
+        createArticle('a1', 'word1 word2   word3', 'content'),
+      );
 
       const results = await ks.search('word2');
       expect(results).toHaveLength(1);
@@ -522,7 +596,11 @@ describe('KnowledgeSearch', () => {
     });
 
     it('should handle article with only HTML', async () => {
-      const article = createArticle('a1', '<p></p>', '<div><span></span></div>');
+      const article = createArticle(
+        'a1',
+        '<p></p>',
+        '<div><span></span></div>',
+      );
 
       await ks.indexArticle(article);
 
@@ -541,7 +619,11 @@ describe('KnowledgeSearch', () => {
       // Note: The normalizeText function strips diacritics, which can break words
       // "Tïtle" becomes "t tle" after normalization (ï is stripped, creating two tokens)
       // This test verifies that tokenization still works with unicode content
-      const article = createArticle('a1', 'Tïtle wïth spëcial', 'Cøntënt with ññ');
+      const article = createArticle(
+        'a1',
+        'Tïtle wïth spëcial',
+        'Cøntënt with ññ',
+      );
 
       await ks.indexArticle(article);
 

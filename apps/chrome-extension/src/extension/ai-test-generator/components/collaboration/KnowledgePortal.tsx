@@ -4,7 +4,8 @@
  * Knowledge base browser with search and categories.
  */
 
-import React, { useState, useEffect } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import type {
   KnowledgeArticle,
   KnowledgeCategory,
@@ -45,11 +46,14 @@ export const KnowledgePortal: React.FC<KnowledgePortalProps> = ({
   const [categories, setCategories] = useState<KnowledgeCategory[]>([]);
   const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedArticle, setSelectedArticle] = useState<KnowledgeArticle | null>(null);
+  const [selectedArticle, setSelectedArticle] =
+    useState<KnowledgeArticle | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [popularArticles, setPopularArticles] = useState<KnowledgeArticle[]>([]);
+  const [popularArticles, setPopularArticles] = useState<KnowledgeArticle[]>(
+    [],
+  );
 
   /**
    * New article form state
@@ -194,7 +198,11 @@ export const KnowledgePortal: React.FC<KnowledgePortalProps> = ({
   /**
    * Render category tree
    */
-  const renderCategoryTree = (categories: KnowledgeCategory[], parentId?: string, level = 0) => {
+  const renderCategoryTree = (
+    categories: KnowledgeCategory[],
+    parentId?: string,
+    level = 0,
+  ) => {
     const filtered = categories.filter((c) => c.parentId === parentId);
 
     return filtered.map((category) => (
@@ -315,7 +323,9 @@ export const KnowledgePortal: React.FC<KnowledgePortalProps> = ({
             <div key={result.id} className="search-result-item">
               <h4>{result.title}</h4>
               <p className="result-snippet">{result.snippet}</p>
-              <div className="result-score">Relevance: {Math.round(result.score * 100)}%</div>
+              <div className="result-score">
+                Relevance: {Math.round(result.score * 100)}%
+              </div>
             </div>
           ))}
         </div>
@@ -346,7 +356,9 @@ export const KnowledgePortal: React.FC<KnowledgePortalProps> = ({
           <h1>{selectedArticle.title}</h1>
           <div className="article-header">
             <span>By {selectedArticle.author}</span>
-            <span>{new Date(selectedArticle.createdAt).toLocaleDateString()}</span>
+            <span>
+              {new Date(selectedArticle.createdAt).toLocaleDateString()}
+            </span>
             <span>{selectedArticle.views} views</span>
           </div>
           <div className="article-body">
@@ -375,20 +387,24 @@ export const KnowledgePortal: React.FC<KnowledgePortalProps> = ({
    */
   const renderCreateForm = () => (
     <div className="article-create">
-      <button
-        className="btn-back"
-        onClick={() => setViewMode('browse')}
-      >
+      <button className="btn-back" onClick={() => setViewMode('browse')}>
         ← Cancel
       </button>
       <h2>Create New Article</h2>
-      <form onSubmit={(e) => { e.preventDefault(); handleCreateArticle(); }}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleCreateArticle();
+        }}
+      >
         <div className="form-group">
           <label>Title</label>
           <input
             type="text"
             value={newArticle.title}
-            onChange={(e) => setNewArticle({ ...newArticle, title: e.target.value })}
+            onChange={(e) =>
+              setNewArticle({ ...newArticle, title: e.target.value })
+            }
             className="form-input"
             placeholder="Article title..."
             required
@@ -398,7 +414,9 @@ export const KnowledgePortal: React.FC<KnowledgePortalProps> = ({
           <label>Category</label>
           <select
             value={newArticle.categoryId}
-            onChange={(e) => setNewArticle({ ...newArticle, categoryId: e.target.value })}
+            onChange={(e) =>
+              setNewArticle({ ...newArticle, categoryId: e.target.value })
+            }
             className="form-select"
           >
             <option value="">No category</option>
@@ -413,14 +431,20 @@ export const KnowledgePortal: React.FC<KnowledgePortalProps> = ({
           <label>Tags</label>
           <div className="tag-input">
             {newArticle.tags.map((tag) => (
-              <span key={tag} className="tag removable" onClick={() => removeTag(tag)}>
+              <span
+                key={tag}
+                className="tag removable"
+                onClick={() => removeTag(tag)}
+              >
                 #{tag} ×
               </span>
             ))}
             <input
               type="text"
               value={newArticle.tagInput}
-              onChange={(e) => setNewArticle({ ...newArticle, tagInput: e.target.value })}
+              onChange={(e) =>
+                setNewArticle({ ...newArticle, tagInput: e.target.value })
+              }
               onKeyDown={handleTagInputKeyDown}
               className="tag-input-field"
               placeholder="Add tag and press Enter..."
@@ -431,7 +455,9 @@ export const KnowledgePortal: React.FC<KnowledgePortalProps> = ({
           <label>Content</label>
           <textarea
             value={newArticle.content}
-            onChange={(e) => setNewArticle({ ...newArticle, content: e.target.value })}
+            onChange={(e) =>
+              setNewArticle({ ...newArticle, content: e.target.value })
+            }
             className="form-textarea"
             rows={15}
             placeholder="Write your article content here..."
@@ -442,7 +468,11 @@ export const KnowledgePortal: React.FC<KnowledgePortalProps> = ({
           <button type="submit" className="btn-primary">
             Create Article
           </button>
-          <button type="button" className="btn-secondary" onClick={() => setViewMode('browse')}>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => setViewMode('browse')}
+          >
             Cancel
           </button>
         </div>

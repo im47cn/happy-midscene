@@ -5,38 +5,59 @@
  * 一旦我被更新，务必更新我的开头注释，以及所属的文件夹的CLAUDE.md。
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { rootCauseAnalyzer } from '../rootCauseAnalyzer';
-import { evidenceCollector } from '../evidenceCollector';
-import { causeMatcher } from '../causeMatcher';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Anomaly, RootCause } from '../../types/anomaly';
+import { causeMatcher } from '../causeMatcher';
+import { evidenceCollector } from '../evidenceCollector';
+import { rootCauseAnalyzer } from '../rootCauseAnalyzer';
+import { anomalyStorage } from '../storage';
 
 // Mock dependencies
 vi.mock('../evidenceCollector', () => ({
   evidenceCollector: {
-    collectEvidence: vi.fn().mockResolvedValue({
-      logs: [],
-      screenshots: [],
-      networkRequests: [],
-      environmentInfo: {},
+    collect: vi.fn().mockReturnValue({
+      primary: [],
+      secondary: [],
       timeline: [],
-      changes: [],
+      environmentChanges: [],
+      correlations: [],
     }),
     analyzeEvidence: vi.fn().mockResolvedValue([]),
+    correlateChanges: vi.fn().mockReturnValue([]),
   },
 }));
 
 vi.mock('../causeMatcher', () => ({
   causeMatcher: {
-    match: vi.fn().mockResolvedValue([]),
+    match: vi.fn().mockReturnValue([]),
     getSuggestions: vi.fn().mockReturnValue([]),
-    findHistoricalPatterns: vi.fn().mockResolvedValue([]),
+    getHistoricalPatterns: vi.fn().mockReturnValue([]),
+    recordPattern: vi.fn(),
+  },
+}));
+
+vi.mock('../storage', () => ({
+  anomalyStorage: {
+    getAnomaly: vi.fn().mockResolvedValue(null),
+    saveAnomaly: vi.fn().mockResolvedValue(undefined),
   },
 }));
 
 describe('RootCauseAnalyzer', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Reset mock implementations after clearing
+    vi.mocked(evidenceCollector.collect).mockReturnValue({
+      primary: [],
+      secondary: [],
+      timeline: [],
+      environmentChanges: [],
+      correlations: [],
+    });
+    vi.mocked(causeMatcher.match).mockReturnValue([]);
+    vi.mocked(causeMatcher.getHistoricalPatterns).mockReturnValue([]);
+    vi.mocked(anomalyStorage.getAnomaly).mockResolvedValue(null);
+    vi.mocked(anomalyStorage.saveAnomaly).mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -46,7 +67,7 @@ describe('RootCauseAnalyzer', () => {
   describe('analyze', () => {
     const mockAnomaly: Anomaly = {
       id: 'anomaly-1',
-      type: 'pass_rate_drop',
+      type: 'success_rate_drop',
       severity: 'critical',
       detectedAt: Date.now(),
       status: 'active',
@@ -79,7 +100,7 @@ describe('RootCauseAnalyzer', () => {
     };
 
     it('should analyze anomaly and return root causes', async () => {
-      vi.mocked(causeMatcher.match).mockResolvedValue([
+      vi.mocked(causeMatcher.match).mockReturnValue([
         {
           id: 'cause-1',
           category: 'code_change',
@@ -94,12 +115,12 @@ describe('RootCauseAnalyzer', () => {
 
       expect(result).toBeDefined();
       expect(result.rootCauses.length).toBeGreaterThan(0);
-      expect(evidenceCollector.collectEvidence).toHaveBeenCalled();
+      expect(evidenceCollector.collect).toHaveBeenCalled();
       expect(causeMatcher.match).toHaveBeenCalled();
     });
 
     it('should return empty array when no causes found', async () => {
-      vi.mocked(causeMatcher.match).mockResolvedValue([]);
+      vi.mocked(causeMatcher.match).mockReturnValue([]);
 
       const result = await rootCauseAnalyzer.analyze(mockAnomaly);
 
@@ -107,19 +128,18 @@ describe('RootCauseAnalyzer', () => {
     });
 
     it('should include suggestions for each root cause', async () => {
-      vi.mocked(causeMatcher.match).mockResolvedValue([
+      vi.mocked(causeMatcher.match).mockReturnValue([
         {
           id: 'cause-1',
           category: 'timing_issue',
           description: 'Element timing issue detected',
           confidence: 75,
           evidence: [],
-          suggestions: [],
+          suggestions: [
+            { action: 'Increase wait timeout', priority: 1, effort: 'low' },
+            { action: 'Add explicit wait', priority: 2, effort: 'medium' },
+          ],
         },
-      ]);
-      vi.mocked(causeMatcher.getSuggestions).mockReturnValue([
-        { action: 'Increase wait timeout', priority: 1, effort: 'low' },
-        { action: 'Add explicit wait', priority: 2, effort: 'medium' },
       ]);
 
       const result = await rootCauseAnalyzer.analyze(mockAnomaly);
@@ -128,7 +148,7 @@ describe('RootCauseAnalyzer', () => {
     });
 
     it('should sort root causes by confidence', async () => {
-      vi.mocked(causeMatcher.match).mockResolvedValue([
+      vi.mocked(causeMatcher.match).mockReturnValue([
         {
           id: 'cause-1',
           category: 'data_issue',
@@ -165,9 +185,13 @@ describe('RootCauseAnalyzer', () => {
 
   describe('analyzeFailure', () => {
     it('should analyze a specific test failure', async () => {
-      vi.mocked(evidenceCollector.collectEvidence).mockResolvedValue({
+      vi.mocked(evidenceCollector.collect).mockReturnValue({
         logs: [
-          { level: 'error', message: 'Element not found: #submit-btn', timestamp: Date.now() },
+          {
+            level: 'error',
+            message: 'Element not found: #submit-btn',
+            timestamp: Date.now(),
+          },
         ],
         screenshots: [],
         networkRequests: [],
@@ -175,7 +199,7 @@ describe('RootCauseAnalyzer', () => {
         timeline: [],
         changes: [],
       });
-      vi.mocked(causeMatcher.match).mockResolvedValue([
+      vi.mocked(causeMatcher.match).mockReturnValue([
         {
           id: 'cause-1',
           category: 'locator_change',
@@ -186,12 +210,19 @@ describe('RootCauseAnalyzer', () => {
         },
       ]);
 
-      const result = await rootCauseAnalyzer.analyzeFailure({
-        caseId: 'test-1',
-        errorMessage: 'Element not found',
-        stackTrace: 'Error at line 42...',
-        timestamp: Date.now(),
-      });
+      const result = await rootCauseAnalyzer.analyzeFailure(
+        'test-1',
+        'exec-1',
+        {
+          caseId: 'test-1',
+          executionId: 'exec-1',
+          status: 'failed',
+          errorMessage: 'Element not found',
+          stackTrace: 'Error at line 42...',
+          startTime: Date.now() - 1000,
+          endTime: Date.now(),
+        },
+      );
 
       expect(result).toBeDefined();
       expect(result.rootCauses.length).toBeGreaterThan(0);
@@ -199,9 +230,13 @@ describe('RootCauseAnalyzer', () => {
     });
 
     it('should detect timing issues from error patterns', async () => {
-      vi.mocked(evidenceCollector.collectEvidence).mockResolvedValue({
+      vi.mocked(evidenceCollector.collect).mockReturnValue({
         logs: [
-          { level: 'error', message: 'Timeout waiting for element', timestamp: Date.now() },
+          {
+            level: 'error',
+            message: 'Timeout waiting for element',
+            timestamp: Date.now(),
+          },
         ],
         screenshots: [],
         networkRequests: [],
@@ -209,7 +244,7 @@ describe('RootCauseAnalyzer', () => {
         timeline: [],
         changes: [],
       });
-      vi.mocked(causeMatcher.match).mockResolvedValue([
+      vi.mocked(causeMatcher.match).mockReturnValue([
         {
           id: 'cause-1',
           category: 'timing_issue',
@@ -220,28 +255,40 @@ describe('RootCauseAnalyzer', () => {
         },
       ]);
 
-      const result = await rootCauseAnalyzer.analyzeFailure({
-        caseId: 'test-1',
-        errorMessage: 'Timeout waiting for element',
-        stackTrace: '',
-        timestamp: Date.now(),
-      });
+      const result = await rootCauseAnalyzer.analyzeFailure(
+        'test-1',
+        'exec-2',
+        {
+          caseId: 'test-1',
+          executionId: 'exec-2',
+          status: 'failed',
+          errorMessage: 'Timeout waiting for element',
+          stackTrace: '',
+          startTime: Date.now() - 1000,
+          endTime: Date.now(),
+        },
+      );
 
       expect(result.rootCauses[0].category).toBe('timing_issue');
     });
 
     it('should detect network issues', async () => {
-      vi.mocked(evidenceCollector.collectEvidence).mockResolvedValue({
+      vi.mocked(evidenceCollector.collect).mockReturnValue({
         logs: [],
         screenshots: [],
         networkRequests: [
-          { url: '/api/users', status: 500, duration: 5000, timestamp: Date.now() },
+          {
+            url: '/api/users',
+            status: 500,
+            duration: 5000,
+            timestamp: Date.now(),
+          },
         ],
         environmentInfo: {},
         timeline: [],
         changes: [],
       });
-      vi.mocked(causeMatcher.match).mockResolvedValue([
+      vi.mocked(causeMatcher.match).mockReturnValue([
         {
           id: 'cause-1',
           category: 'network_issue',
@@ -252,19 +299,26 @@ describe('RootCauseAnalyzer', () => {
         },
       ]);
 
-      const result = await rootCauseAnalyzer.analyzeFailure({
-        caseId: 'test-1',
-        errorMessage: 'API request failed',
-        stackTrace: '',
-        timestamp: Date.now(),
-      });
+      const result = await rootCauseAnalyzer.analyzeFailure(
+        'test-1',
+        'exec-3',
+        {
+          caseId: 'test-1',
+          executionId: 'exec-3',
+          status: 'failed',
+          errorMessage: 'API request failed',
+          stackTrace: '',
+          startTime: Date.now() - 1000,
+          endTime: Date.now(),
+        },
+      );
 
       expect(result.rootCauses[0].category).toBe('network_issue');
     });
   });
 
-  describe('getRecommendations', () => {
-    it('should generate actionable recommendations', async () => {
+  describe('getSuggestions', () => {
+    it('should generate actionable suggestions', () => {
       const rootCauses: RootCause[] = [
         {
           id: 'cause-1',
@@ -278,13 +332,13 @@ describe('RootCauseAnalyzer', () => {
         },
       ];
 
-      const recommendations = await rootCauseAnalyzer.getRecommendations(rootCauses);
+      const suggestions = rootCauseAnalyzer.getSuggestions(rootCauses);
 
-      expect(recommendations.length).toBeGreaterThan(0);
-      expect(recommendations[0].action).toBeDefined();
+      expect(suggestions.length).toBeGreaterThan(0);
+      expect(suggestions[0].action).toBeDefined();
     });
 
-    it('should prioritize recommendations by impact', async () => {
+    it('should prioritize suggestions by impact', () => {
       const rootCauses: RootCause[] = [
         {
           id: 'cause-1',
@@ -308,10 +362,10 @@ describe('RootCauseAnalyzer', () => {
         },
       ];
 
-      const recommendations = await rootCauseAnalyzer.getRecommendations(rootCauses);
+      const suggestions = rootCauseAnalyzer.getSuggestions(rootCauses);
 
       // Higher confidence cause should be prioritized
-      expect(recommendations[0].action).toContain('Rollback');
+      expect(suggestions[0].action).toContain('Rollback');
     });
   });
 
@@ -320,14 +374,35 @@ describe('RootCauseAnalyzer', () => {
       const anomalies: Anomaly[] = [
         {
           id: 'anomaly-1',
-          type: 'pass_rate_drop',
+          type: 'success_rate_drop',
           severity: 'critical',
           detectedAt: Date.now(),
           status: 'active',
-          metric: { name: 'passRate', currentValue: 70, unit: '%', timestamp: Date.now() },
-          baseline: { mean: 95, stdDev: 2, min: 90, max: 100, period: '7d', sampleCount: 100, lastUpdated: Date.now() },
-          deviation: { absoluteDeviation: -25, percentageDeviation: -26, zScore: -12.5 },
-          impact: { affectedCases: ['test-1'], affectedFeatures: [], estimatedScope: 'medium' },
+          metric: {
+            name: 'passRate',
+            currentValue: 70,
+            unit: '%',
+            timestamp: Date.now(),
+          },
+          baseline: {
+            mean: 95,
+            stdDev: 2,
+            min: 90,
+            max: 100,
+            period: '7d',
+            sampleCount: 100,
+            lastUpdated: Date.now(),
+          },
+          deviation: {
+            absoluteDeviation: -25,
+            percentageDeviation: -26,
+            zScore: -12.5,
+          },
+          impact: {
+            affectedCases: ['test-1'],
+            affectedFeatures: [],
+            estimatedScope: 'medium',
+          },
           rootCauses: [],
         },
         {
@@ -336,15 +411,36 @@ describe('RootCauseAnalyzer', () => {
           severity: 'warning',
           detectedAt: Date.now(),
           status: 'active',
-          metric: { name: 'avgDuration', currentValue: 5000, unit: 'ms', timestamp: Date.now() },
-          baseline: { mean: 1000, stdDev: 100, min: 800, max: 1200, period: '7d', sampleCount: 100, lastUpdated: Date.now() },
-          deviation: { absoluteDeviation: 4000, percentageDeviation: 400, zScore: 40 },
-          impact: { affectedCases: ['test-2'], affectedFeatures: [], estimatedScope: 'low' },
+          metric: {
+            name: 'avgDuration',
+            currentValue: 5000,
+            unit: 'ms',
+            timestamp: Date.now(),
+          },
+          baseline: {
+            mean: 1000,
+            stdDev: 100,
+            min: 800,
+            max: 1200,
+            period: '7d',
+            sampleCount: 100,
+            lastUpdated: Date.now(),
+          },
+          deviation: {
+            absoluteDeviation: 4000,
+            percentageDeviation: 400,
+            zScore: 40,
+          },
+          impact: {
+            affectedCases: ['test-2'],
+            affectedFeatures: [],
+            estimatedScope: 'low',
+          },
           rootCauses: [],
         },
       ];
 
-      vi.mocked(causeMatcher.match).mockResolvedValue([
+      vi.mocked(causeMatcher.match).mockReturnValue([
         {
           id: 'cause-1',
           category: 'code_change',
@@ -355,10 +451,10 @@ describe('RootCauseAnalyzer', () => {
         },
       ]);
 
-      const results = await rootCauseAnalyzer.analyzeBatch(anomalies);
+      const batchResult = await rootCauseAnalyzer.analyzeBatch(anomalies);
 
-      expect(results).toHaveLength(2);
-      results.forEach((result) => {
+      expect(batchResult.results).toHaveLength(2);
+      batchResult.results.forEach((result) => {
         expect(result.anomalyId).toBeDefined();
         expect(result.rootCauses).toBeDefined();
       });
@@ -371,14 +467,35 @@ describe('RootCauseAnalyzer', () => {
         severity: 'critical' as const,
         detectedAt: Date.now(),
         status: 'active' as const,
-        metric: { name: 'passRate', currentValue: 70, unit: '%', timestamp: Date.now() },
-        baseline: { mean: 95, stdDev: 2, min: 90, max: 100, period: '7d', sampleCount: 100, lastUpdated: Date.now() },
-        deviation: { absoluteDeviation: -25, percentageDeviation: -26, zScore: -12.5 },
-        impact: { affectedCases: [`test-${i}`], affectedFeatures: ['login'], estimatedScope: 'high' as const },
+        metric: {
+          name: 'passRate',
+          currentValue: 70,
+          unit: '%',
+          timestamp: Date.now(),
+        },
+        baseline: {
+          mean: 95,
+          stdDev: 2,
+          min: 90,
+          max: 100,
+          period: '7d',
+          sampleCount: 100,
+          lastUpdated: Date.now(),
+        },
+        deviation: {
+          absoluteDeviation: -25,
+          percentageDeviation: -26,
+          zScore: -12.5,
+        },
+        impact: {
+          affectedCases: [`test-${i}`],
+          affectedFeatures: ['login'],
+          estimatedScope: 'high' as const,
+        },
         rootCauses: [],
       }));
 
-      vi.mocked(causeMatcher.match).mockResolvedValue([
+      vi.mocked(causeMatcher.match).mockReturnValue([
         {
           id: 'cause-1',
           category: 'environment_change',
@@ -389,12 +506,11 @@ describe('RootCauseAnalyzer', () => {
         },
       ]);
 
-      const results = await rootCauseAnalyzer.analyzeBatch(anomalies);
-      const commonCauses = rootCauseAnalyzer.findCommonCauses(results);
+      const batchResult = await rootCauseAnalyzer.analyzeBatch(anomalies);
 
-      expect(commonCauses.length).toBeGreaterThan(0);
-      expect(commonCauses[0].category).toBe('environment_change');
-      expect(commonCauses[0].occurrenceCount).toBe(5);
+      expect(batchResult.commonCauses.length).toBeGreaterThan(0);
+      expect(batchResult.commonCauses[0].category).toBe('environment_change');
+      expect(batchResult.commonCauses[0].affectedAnomalies.length).toBe(5);
     });
   });
 });

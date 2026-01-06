@@ -40,7 +40,11 @@ describe('ResultAggregator', () => {
           },
           {
             instruction: 'Navigate to profile',
-            result: { success: false, duration: 200, error: 'Element not found' },
+            result: {
+              success: false,
+              duration: 200,
+              error: 'Element not found',
+            },
           },
         ],
         totalDuration: 800,
@@ -56,9 +60,7 @@ describe('ResultAggregator', () => {
       },
     ],
     sharedData: { userId: '123' },
-    errors: [
-      { deviceId: 'device2', step: 1, error: 'Element not found' },
-    ],
+    errors: [{ deviceId: 'device2', step: 1, error: 'Element not found' }],
     ...overrides,
   });
 
@@ -105,13 +107,17 @@ describe('ResultAggregator', () => {
           {
             deviceId: 'device1',
             deviceAlias: 'Fast',
-            steps: [{ instruction: 'Step', result: { success: true, duration: 100 } }],
+            steps: [
+              { instruction: 'Step', result: { success: true, duration: 100 } },
+            ],
             totalDuration: 100,
           },
           {
             deviceId: 'device2',
             deviceAlias: 'Slow',
-            steps: [{ instruction: 'Step', result: { success: true, duration: 500 } }],
+            steps: [
+              { instruction: 'Step', result: { success: true, duration: 500 } },
+            ],
             totalDuration: 500,
           },
         ],
@@ -130,8 +136,14 @@ describe('ResultAggregator', () => {
             deviceId: 'device1',
             deviceAlias: 'Stable',
             steps: [
-              { instruction: 'Step 1', result: { success: true, duration: 100 } },
-              { instruction: 'Step 2', result: { success: true, duration: 100 } },
+              {
+                instruction: 'Step 1',
+                result: { success: true, duration: 100 },
+              },
+              {
+                instruction: 'Step 2',
+                result: { success: true, duration: 100 },
+              },
             ],
             totalDuration: 200,
           },
@@ -139,8 +151,14 @@ describe('ResultAggregator', () => {
             deviceId: 'device2',
             deviceAlias: 'Unstable',
             steps: [
-              { instruction: 'Step 1', result: { success: false, duration: 100, error: 'Error 1' } },
-              { instruction: 'Step 2', result: { success: false, duration: 100, error: 'Error 2' } },
+              {
+                instruction: 'Step 1',
+                result: { success: false, duration: 100, error: 'Error 1' },
+              },
+              {
+                instruction: 'Step 2',
+                result: { success: false, duration: 100, error: 'Error 2' },
+              },
             ],
             totalDuration: 200,
           },
@@ -158,8 +176,12 @@ describe('ResultAggregator', () => {
       const result = createMockResult();
       const aggregated = aggregator.aggregate(result);
 
-      const browser = aggregated.deviceComparisons.find((d) => d.deviceAlias === 'Browser');
-      const mobile = aggregated.deviceComparisons.find((d) => d.deviceAlias === 'Mobile');
+      const browser = aggregated.deviceComparisons.find(
+        (d) => d.deviceAlias === 'Browser',
+      );
+      const mobile = aggregated.deviceComparisons.find(
+        (d) => d.deviceAlias === 'Mobile',
+      );
 
       expect(browser).toBeDefined();
       expect(browser?.successRate).toBe(100);
@@ -180,7 +202,14 @@ describe('ResultAggregator', () => {
             deviceId: 'device1',
             deviceAlias: 'Browser',
             steps: [
-              { instruction: 'Step', result: { success: false, duration: 100, error: 'Timeout waiting for element' } },
+              {
+                instruction: 'Step',
+                result: {
+                  success: false,
+                  duration: 100,
+                  error: 'Timeout waiting for element',
+                },
+              },
             ],
             totalDuration: 100,
           },
@@ -188,7 +217,14 @@ describe('ResultAggregator', () => {
             deviceId: 'device2',
             deviceAlias: 'Mobile',
             steps: [
-              { instruction: 'Step', result: { success: false, duration: 100, error: 'Timeout waiting for element' } },
+              {
+                instruction: 'Step',
+                result: {
+                  success: false,
+                  duration: 100,
+                  error: 'Timeout waiting for element',
+                },
+              },
             ],
             totalDuration: 100,
           },
@@ -198,8 +234,12 @@ describe('ResultAggregator', () => {
 
       expect(aggregated.failureCorrelations).toHaveLength(1);
       expect(aggregated.failureCorrelations[0].occurrences).toBe(2);
-      expect(aggregated.failureCorrelations[0].affectedDevices).toContain('Browser');
-      expect(aggregated.failureCorrelations[0].affectedDevices).toContain('Mobile');
+      expect(aggregated.failureCorrelations[0].affectedDevices).toContain(
+        'Browser',
+      );
+      expect(aggregated.failureCorrelations[0].affectedDevices).toContain(
+        'Mobile',
+      );
     });
 
     it('should infer potential causes', () => {
@@ -210,7 +250,14 @@ describe('ResultAggregator', () => {
             deviceId: 'device1',
             deviceAlias: 'Browser',
             steps: [
-              { instruction: 'Step', result: { success: false, duration: 100, error: 'Network request failed' } },
+              {
+                instruction: 'Step',
+                result: {
+                  success: false,
+                  duration: 100,
+                  error: 'Network request failed',
+                },
+              },
             ],
             totalDuration: 100,
           },
@@ -218,7 +265,9 @@ describe('ResultAggregator', () => {
       });
       const aggregated = aggregator.aggregate(result);
 
-      expect(aggregated.failureCorrelations[0].potentialCause).toBe('Network connectivity issue');
+      expect(aggregated.failureCorrelations[0].potentialCause).toBe(
+        'Network connectivity issue',
+      );
     });
   });
 

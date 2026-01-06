@@ -17,14 +17,14 @@ import type {
   ResourceOptimization,
   StabilityAnalysis,
 } from '../../types/optimization';
-import type { IOptimizationReport } from './interfaces';
 import { efficiencyAnalyzer } from './efficiencyAnalyzer';
-import { redundancyDetector } from './redundancyDetector';
 import { gapIdentifier } from './gapIdentifier';
-import { stabilityAnalyzer } from './stabilityAnalyzer';
+import { impactEstimator } from './impactEstimator';
+import type { IOptimizationReport } from './interfaces';
 import { maintainabilityAnalyzer } from './maintainabilityAnalyzer';
 import { recommendEngine } from './recommendEngine';
-import { impactEstimator } from './impactEstimator';
+import { redundancyDetector } from './redundancyDetector';
+import { stabilityAnalyzer } from './stabilityAnalyzer';
 
 class OptimizationReportGenerator implements IOptimizationReport {
   /**
@@ -57,7 +57,8 @@ class OptimizationReportGenerator implements IOptimizationReport {
           });
 
     // Generate resource optimizations
-    const resourceOptimizations = this.generateResourceOptimizations(efficiency);
+    const resourceOptimizations =
+      this.generateResourceOptimizations(efficiency);
 
     // Create summary
     const summary = this.createSummary(finalRecommendations, efficiency);
@@ -219,8 +220,9 @@ class OptimizationReportGenerator implements IOptimizationReport {
   </table>
 
   <h2>覆盖率缺口</h2>
-  ${report.coverageGaps.length > 0
-    ? `
+  ${
+    report.coverageGaps.length > 0
+      ? `
     <table>
       <tr><th>功能</th><th>当前覆盖</th><th>建议覆盖</th><th>风险等级</th></tr>
       ${report.coverageGaps
@@ -237,7 +239,8 @@ class OptimizationReportGenerator implements IOptimizationReport {
         .join('')}
     </table>
   `
-    : '<p>没有发现覆盖率缺口</p>'}
+      : '<p>没有发现覆盖率缺口</p>'
+  }
 
   <h2>稳定性分析</h2>
   <table>
@@ -298,7 +301,9 @@ class OptimizationReportGenerator implements IOptimizationReport {
     for (const rec of report.recommendations) {
       lines.push(`### ${priorityEmoji[rec.priority]} ${rec.title}`);
       lines.push('');
-      lines.push(`**类型**: ${rec.type} | **优先级**: ${rec.priority} | **工作量**: ${rec.effort}`);
+      lines.push(
+        `**类型**: ${rec.type} | **优先级**: ${rec.priority} | **工作量**: ${rec.effort}`,
+      );
       lines.push('');
       lines.push(rec.description);
       lines.push('');
@@ -318,18 +323,30 @@ class OptimizationReportGenerator implements IOptimizationReport {
     lines.push('');
     lines.push(`| 指标 | 值 |`);
     lines.push(`|------|-----|`);
-    lines.push(`| 总执行时间 | ${this.formatDuration(report.efficiencyAnalysis.totalDuration)} |`);
-    lines.push(`| 平均执行时间 | ${this.formatDuration(report.efficiencyAnalysis.averageDuration)} |`);
-    lines.push(`| 慢速用例数 | ${report.efficiencyAnalysis.slowestCases.length} |`);
-    lines.push(`| 瓶颈数量 | ${report.efficiencyAnalysis.bottlenecks.length} |`);
+    lines.push(
+      `| 总执行时间 | ${this.formatDuration(report.efficiencyAnalysis.totalDuration)} |`,
+    );
+    lines.push(
+      `| 平均执行时间 | ${this.formatDuration(report.efficiencyAnalysis.averageDuration)} |`,
+    );
+    lines.push(
+      `| 慢速用例数 | ${report.efficiencyAnalysis.slowestCases.length} |`,
+    );
+    lines.push(
+      `| 瓶颈数量 | ${report.efficiencyAnalysis.bottlenecks.length} |`,
+    );
     lines.push('');
 
     lines.push('## 冗余分析');
     lines.push('');
     lines.push(`| 指标 | 值 |`);
     lines.push(`|------|-----|`);
-    lines.push(`| 冗余组数 | ${report.redundancyReport.redundantGroups.length} |`);
-    lines.push(`| 重复步骤数 | ${report.redundancyReport.duplicateSteps.length} |`);
+    lines.push(
+      `| 冗余组数 | ${report.redundancyReport.redundantGroups.length} |`,
+    );
+    lines.push(
+      `| 重复步骤数 | ${report.redundancyReport.duplicateSteps.length} |`,
+    );
     lines.push(`| 重叠度评分 | ${report.redundancyReport.overlapScore}% |`);
     lines.push('');
 
@@ -339,7 +356,9 @@ class OptimizationReportGenerator implements IOptimizationReport {
       lines.push(`| 功能 | 当前覆盖 | 建议覆盖 | 风险等级 |`);
       lines.push(`|------|----------|----------|----------|`);
       for (const gap of report.coverageGaps) {
-        lines.push(`| ${gap.feature} | ${gap.currentCoverage}% | ${gap.recommendedCoverage}% | ${gap.riskLevel} |`);
+        lines.push(
+          `| ${gap.feature} | ${gap.currentCoverage}% | ${gap.recommendedCoverage}% | ${gap.riskLevel} |`,
+        );
       }
       lines.push('');
     }

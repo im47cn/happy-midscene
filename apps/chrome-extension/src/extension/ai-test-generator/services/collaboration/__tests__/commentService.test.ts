@@ -2,7 +2,7 @@
  * Comment Service Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { CommentService } from '../commentService';
 
 describe('CommentService', () => {
@@ -113,9 +113,9 @@ describe('CommentService', () => {
     });
 
     it('should throw error for non-existent comment', async () => {
-      await expect(
-        cs.updateComment('non-existent', 'content')
-      ).rejects.toThrow('Comment not found');
+      await expect(cs.updateComment('non-existent', 'content')).rejects.toThrow(
+        'Comment not found',
+      );
     });
   });
 
@@ -161,7 +161,7 @@ describe('CommentService', () => {
 
     it('should throw error for non-existent comment', async () => {
       await expect(cs.deleteComment('non-existent')).rejects.toThrow(
-        'Comment not found'
+        'Comment not found',
       );
     });
   });
@@ -183,9 +183,9 @@ describe('CommentService', () => {
     });
 
     it('should throw error for non-existent comment', async () => {
-      await expect(
-        cs.resolveComment('non-existent', 'user1')
-      ).rejects.toThrow('Comment not found');
+      await expect(cs.resolveComment('non-existent', 'user1')).rejects.toThrow(
+        'Comment not found',
+      );
     });
   });
 
@@ -208,7 +208,7 @@ describe('CommentService', () => {
 
     it('should throw error for non-existent comment', async () => {
       await expect(cs.unresolveComment('non-existent')).rejects.toThrow(
-        'Comment not found'
+        'Comment not found',
       );
     });
   });
@@ -280,7 +280,7 @@ describe('CommentService', () => {
 
       for (let i = 0; i < comments.length - 1; i++) {
         expect(comments[i].createdAt).toBeLessThanOrEqual(
-          comments[i + 1].createdAt
+          comments[i + 1].createdAt,
         );
       }
     });
@@ -510,7 +510,7 @@ describe('CommentService', () => {
 
       for (let i = 0; i < comments.length - 1; i++) {
         expect(comments[i].createdAt).toBeGreaterThanOrEqual(
-          comments[i + 1].createdAt
+          comments[i + 1].createdAt,
         );
       }
     });
@@ -647,9 +647,9 @@ describe('CommentService', () => {
       const results = await cs.searchComments('bug');
 
       expect(results.length).toBeGreaterThan(0);
-      expect(results.every((r) => r.content.toLowerCase().includes('bug'))).toBe(
-        true
-      );
+      expect(
+        results.every((r) => r.content.toLowerCase().includes('bug')),
+      ).toBe(true);
     });
 
     it('should search case insensitive', async () => {

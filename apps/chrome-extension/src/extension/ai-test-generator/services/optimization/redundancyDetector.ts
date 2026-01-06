@@ -13,8 +13,8 @@ import type {
   StepInfo,
   StepOccurrence,
 } from '../../types/optimization';
-import type { IRedundancyDetector } from './interfaces';
 import { analyticsStorage } from '../analytics/analyticsStorage';
+import type { IRedundancyDetector } from './interfaces';
 import { similarityCalculator } from './similarityCalculator';
 
 // Similarity threshold for considering cases as redundant
@@ -52,7 +52,9 @@ class RedundancyDetector implements IRedundancyDetector {
   /**
    * Find similar test cases
    */
-  async findSimilarCases(threshold = REDUNDANCY_THRESHOLD): Promise<RedundantGroup[]> {
+  async findSimilarCases(
+    threshold = REDUNDANCY_THRESHOLD,
+  ): Promise<RedundantGroup[]> {
     const caseStats = await analyticsStorage.getAllCaseStats();
     const executions = await analyticsStorage.getRecentExecutions(1000);
 
@@ -284,12 +286,10 @@ class RedundancyDetector implements IRedundancyDetector {
       const avgSimilarity = this.calculateGroupSimilarity(groupSteps);
 
       // Find common steps
-      const commonSteps = this.findCommonSteps(groupSteps).map(
-        (step, idx) => ({
-          index: idx,
-          description: step,
-        }),
-      );
+      const commonSteps = this.findCommonSteps(groupSteps).map((step, idx) => ({
+        index: idx,
+        description: step,
+      }));
 
       // Find differences
       const differences = this.findStepDifferences(groupSteps);
@@ -301,7 +301,10 @@ class RedundancyDetector implements IRedundancyDetector {
         commonSteps,
         differences,
         mergeRecommendation: {
-          action: avgSimilarity > HIGH_SIMILARITY_THRESHOLD ? 'merge' : 'parameterize',
+          action:
+            avgSimilarity > HIGH_SIMILARITY_THRESHOLD
+              ? 'merge'
+              : 'parameterize',
           reason:
             avgSimilarity > HIGH_SIMILARITY_THRESHOLD
               ? 'High similarity - consider merging'
@@ -402,7 +405,8 @@ class RedundancyDetector implements IRedundancyDetector {
     const action2 = similarityCalculator.extractActionType(step2);
 
     if (action1 !== action2) return 'action';
-    if (step1.includes('assert') || step1.includes('verify')) return 'assertion';
+    if (step1.includes('assert') || step1.includes('verify'))
+      return 'assertion';
     return 'target';
   }
 
@@ -464,17 +468,20 @@ class RedundancyDetector implements IRedundancyDetector {
     }
 
     const groupScore =
-      redundantGroups.reduce((sum, g) => sum + g.similarityScore * g.cases.length, 0) /
-      Math.max(1, redundantGroups.reduce((sum, g) => sum + g.cases.length, 0));
+      redundantGroups.reduce(
+        (sum, g) => sum + g.similarityScore * g.cases.length,
+        0,
+      ) /
+      Math.max(
+        1,
+        redundantGroups.reduce((sum, g) => sum + g.cases.length, 0),
+      );
 
     const duplicateScore =
       duplicateSteps.length > 0
         ? Math.min(
             100,
-            (duplicateSteps.reduce(
-              (sum, d) => sum + d.occurrences.length,
-              0,
-            ) /
+            (duplicateSteps.reduce((sum, d) => sum + d.occurrences.length, 0) /
               duplicateSteps.length) *
               10,
           )

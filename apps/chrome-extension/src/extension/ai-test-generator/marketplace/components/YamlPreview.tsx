@@ -3,11 +3,8 @@
  * Displays YAML content with syntax highlighting and copy functionality
  */
 
-import {
-  CheckOutlined,
-  CopyOutlined,
-} from '@ant-design/icons';
-import { Button, message, Tooltip, Typography } from 'antd';
+import { CheckOutlined, CopyOutlined } from '@ant-design/icons';
+import { Button, Tooltip, Typography, message } from 'antd';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -24,7 +21,10 @@ interface YamlPreviewProps {
 /**
  * Simple YAML syntax highlighting
  */
-function highlightYaml(yaml: string, highlightParams: boolean): React.ReactNode {
+function highlightYaml(
+  yaml: string,
+  highlightParams: boolean,
+): React.ReactNode {
   const lines = yaml.split('\n');
 
   return lines.map((line, index) => {
@@ -33,50 +33,47 @@ function highlightYaml(yaml: string, highlightParams: boolean): React.ReactNode 
     // Highlight keys (words before colon)
     highlighted = highlighted.replace(
       /^(\s*)([a-zA-Z_][a-zA-Z0-9_]*):/,
-      '$1<span class="yaml-key">$2</span>:'
+      '$1<span class="yaml-key">$2</span>:',
     );
 
     // Highlight strings
     highlighted = highlighted.replace(
       /"([^"]*)"$/,
-      '"<span class="yaml-string">$1</span>"'
+      '"<span class="yaml-string">$1</span>"',
     );
     highlighted = highlighted.replace(
       /'([^']*)'$/,
-      "'<span class=\"yaml-string\">$1</span>'"
+      '\'<span class="yaml-string">$1</span>\'',
     );
 
     // Highlight parameters ${...}
     if (highlightParams) {
       highlighted = highlighted.replace(
         /\$\{([^}]+)\}/g,
-        '<span class="yaml-param">${$1}</span>'
+        '<span class="yaml-param">${$1}</span>',
       );
     }
 
     // Highlight comments
     highlighted = highlighted.replace(
       /#(.*)$/,
-      '<span class="yaml-comment">#$1</span>'
+      '<span class="yaml-comment">#$1</span>',
     );
 
     // Highlight boolean and null
     highlighted = highlighted.replace(
       /:\s*(true|false|null)(\s|$)/gi,
-      ': <span class="yaml-boolean">$1</span>$2'
+      ': <span class="yaml-boolean">$1</span>$2',
     );
 
     // Highlight numbers
     highlighted = highlighted.replace(
       /:\s*(\d+)(\s|$)/,
-      ': <span class="yaml-number">$1</span>$2'
+      ': <span class="yaml-number">$1</span>$2',
     );
 
     return (
-      <span
-        key={index}
-        dangerouslySetInnerHTML={{ __html: highlighted }}
-      />
+      <span key={index} dangerouslySetInnerHTML={{ __html: highlighted }} />
     );
   });
 }
@@ -102,7 +99,10 @@ export const YamlPreview: React.FC<YamlPreviewProps> = ({
   }, [yaml]);
 
   const lines = useMemo(() => yaml.split('\n'), [yaml]);
-  const lineNumberWidth = useMemo(() => String(lines.length).length * 10 + 16, [lines.length]);
+  const lineNumberWidth = useMemo(
+    () => String(lines.length).length * 10 + 16,
+    [lines.length],
+  );
 
   return (
     <div className="yaml-preview">
@@ -118,14 +118,18 @@ export const YamlPreview: React.FC<YamlPreviewProps> = ({
           borderBottom: '1px solid #333',
         }}
       >
-        <Text style={{ color: '#888', fontSize: 12 }}>
-          {title || 'YAML'}
-        </Text>
+        <Text style={{ color: '#888', fontSize: 12 }}>{title || 'YAML'}</Text>
         <Tooltip title={copied ? 'Copied!' : 'Copy to clipboard'}>
           <Button
             type="text"
             size="small"
-            icon={copied ? <CheckOutlined style={{ color: '#52c41a' }} /> : <CopyOutlined />}
+            icon={
+              copied ? (
+                <CheckOutlined style={{ color: '#52c41a' }} />
+              ) : (
+                <CopyOutlined />
+              )
+            }
             onClick={handleCopy}
             style={{ color: '#888' }}
           />

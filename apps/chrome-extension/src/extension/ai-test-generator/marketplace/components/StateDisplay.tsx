@@ -11,7 +11,16 @@ import {
   SearchOutlined,
   WifiOutlined,
 } from '@ant-design/icons';
-import { Alert, Button, Empty, Result, Skeleton, Space, Spin, Typography } from 'antd';
+import {
+  Alert,
+  Button,
+  Empty,
+  Result,
+  Skeleton,
+  Space,
+  Spin,
+  Typography,
+} from 'antd';
 import type React from 'react';
 import { useCallback, useMemo } from 'react';
 import { useI18n } from '../../../../i18n';
@@ -89,7 +98,9 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
             }}
           >
             <Spin
-              indicator={<LoadingOutlined style={{ fontSize: spinnerSize }} spin />}
+              indicator={
+                <LoadingOutlined style={{ fontSize: spinnerSize }} spin />
+              }
               tip={loadingText}
             />
           </div>
@@ -109,7 +120,9 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
             }}
           >
             <Spin
-              indicator={<LoadingOutlined style={{ fontSize: spinnerSize }} spin />}
+              indicator={
+                <LoadingOutlined style={{ fontSize: spinnerSize }} spin />
+              }
             />
             {loadingText && <Text type="secondary">{loadingText}</Text>}
           </div>
@@ -144,7 +157,12 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
 /**
  * Error state types
  */
-export type ErrorType = 'network' | 'notFound' | 'permission' | 'server' | 'unknown';
+export type ErrorType =
+  | 'network'
+  | 'notFound'
+  | 'permission'
+  | 'server'
+  | 'unknown';
 
 interface ErrorStateProps {
   type?: ErrorType;
@@ -184,20 +202,32 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
         };
       case 'permission':
         return {
-          icon: <ExclamationCircleOutlined style={{ fontSize: 48, color: '#ff4d4f' }} />,
+          icon: (
+            <ExclamationCircleOutlined
+              style={{ fontSize: 48, color: '#ff4d4f' }}
+            />
+          ),
           defaultTitle: t('accessDenied'),
           defaultMessage: t('accessDeniedMessage'),
         };
       case 'server':
         return {
-          icon: <ExclamationCircleOutlined style={{ fontSize: 48, color: '#ff4d4f' }} />,
+          icon: (
+            <ExclamationCircleOutlined
+              style={{ fontSize: 48, color: '#ff4d4f' }}
+            />
+          ),
           defaultTitle: t('serverError'),
           defaultMessage: t('serverErrorMessage'),
         };
       case 'unknown':
       default:
         return {
-          icon: <ExclamationCircleOutlined style={{ fontSize: 48, color: '#faad14' }} />,
+          icon: (
+            <ExclamationCircleOutlined
+              style={{ fontSize: 48, color: '#faad14' }}
+            />
+          ),
           defaultTitle: t('somethingWentWrong'),
           defaultMessage: t('unexpectedError'),
         };
@@ -252,7 +282,12 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
 /**
  * Empty state types
  */
-export type EmptyType = 'default' | 'search' | 'favorites' | 'history' | 'templates';
+export type EmptyType =
+  | 'default'
+  | 'search'
+  | 'favorites'
+  | 'history'
+  | 'templates';
 
 interface EmptyStateProps {
   type?: EmptyType;

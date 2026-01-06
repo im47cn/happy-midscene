@@ -2,9 +2,9 @@
  * Comment Notifier Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { CommentNotifier, type Notification } from '../commentNotifier';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Comment } from '../../types/collaboration';
+import { CommentNotifier, type Notification } from '../commentNotifier';
 
 describe('CommentNotifier', () => {
   let cn: CommentNotifier;

@@ -2,7 +2,7 @@
  * Category Manager Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { CategoryManager } from '../categoryManager';
 
 describe('CategoryManager', () => {
@@ -73,7 +73,7 @@ describe('CategoryManager', () => {
           parentId: 'non-existent',
           createdBy: 'user1',
           workspaceId: 'workspace1',
-        })
+        }),
       ).rejects.toThrow('Parent category not found');
     });
 
@@ -177,13 +177,13 @@ describe('CategoryManager', () => {
       });
 
       await expect(
-        cm.updateCategory(cat.id, { parentId: cat.id })
+        cm.updateCategory(cat.id, { parentId: cat.id }),
       ).rejects.toThrow('Category cannot be its own parent');
     });
 
     it('should throw error for non-existent category', async () => {
       await expect(
-        cm.updateCategory('non-existent', { name: 'New Name' })
+        cm.updateCategory('non-existent', { name: 'New Name' }),
       ).rejects.toThrow('Category not found');
     });
 
@@ -195,7 +195,7 @@ describe('CategoryManager', () => {
       });
 
       await expect(
-        cm.updateCategory(category.id, { parentId: 'non-existent' })
+        cm.updateCategory(category.id, { parentId: 'non-existent' }),
       ).rejects.toThrow('Parent category not found');
     });
   });
@@ -229,13 +229,13 @@ describe('CategoryManager', () => {
       });
 
       await expect(cm.deleteCategory(parent.id)).rejects.toThrow(
-        'Cannot delete category with child categories'
+        'Cannot delete category with child categories',
       );
     });
 
     it('should throw error for non-existent category', async () => {
       await expect(cm.deleteCategory('non-existent')).rejects.toThrow(
-        'Category not found'
+        'Category not found',
       );
     });
   });
@@ -534,15 +534,15 @@ describe('CategoryManager', () => {
         workspaceId: 'workspace1',
       });
 
-      await expect(
-        cm.move(parent.id, child.id)
-      ).rejects.toThrow('Cannot move category into its own descendant');
+      await expect(cm.move(parent.id, child.id)).rejects.toThrow(
+        'Cannot move category into its own descendant',
+      );
     });
 
     it('should throw error for non-existent category', async () => {
-      await expect(
-        cm.move('non-existent', null)
-      ).rejects.toThrow('Category not found');
+      await expect(cm.move('non-existent', null)).rejects.toThrow(
+        'Category not found',
+      );
     });
   });
 

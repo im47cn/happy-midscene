@@ -2,7 +2,7 @@
  * Diff Engine Tests
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { DiffEngine } from '../diffEngine';
 
 describe('DiffEngine', () => {
@@ -36,7 +36,7 @@ describe('DiffEngine', () => {
     it('should detect mixed additions and deletions', () => {
       const result = engine.computeDiff(
         'line1\nline2\nline3',
-        'line1\nline2-modified\nline3\nline4'
+        'line1\nline2-modified\nline3\nline4',
       );
 
       expect(result.length).toBeGreaterThan(0);
@@ -45,7 +45,7 @@ describe('DiffEngine', () => {
     it('should handle multi-line content', () => {
       const result = engine.computeDiff(
         'function old() {\n  return 1;\n}',
-        'function new() {\n  return 2;\n  return 3;\n}'
+        'function new() {\n  return 2;\n  return 3;\n}',
       );
 
       expect(result.length).toBeGreaterThan(0);
@@ -66,7 +66,11 @@ describe('DiffEngine', () => {
 
   describe('toUnifiedDiff', () => {
     it('should generate unified diff format', () => {
-      const result = engine.toUnifiedDiff('line1\nline2', 'line1\nline2-modified', 'test.txt');
+      const result = engine.toUnifiedDiff(
+        'line1\nline2',
+        'line1\nline2-modified',
+        'test.txt',
+      );
 
       expect(result).toContain('--- a/test.txt');
       expect(result).toContain('+++ b/test.txt');
@@ -77,7 +81,7 @@ describe('DiffEngine', () => {
       const result = engine.toUnifiedDiff(
         'line1\nline2\nline3\nline4\nline5',
         'line1\nline2-modified\nline3\nline4\nline5',
-        'test.txt'
+        'test.txt',
       );
 
       expect(result).toContain('line1'); // Context
@@ -113,7 +117,7 @@ describe('DiffEngine', () => {
       const result = await engine.threeWayMerge(
         'line1\nline2\nline3',
         'line1\nline2-modified\nline3',
-        'line1\nline2\nline3-modified'
+        'line1\nline2\nline3-modified',
       );
 
       expect(result).not.toBeNull();
@@ -125,7 +129,7 @@ describe('DiffEngine', () => {
       const result = await engine.threeWayMerge(
         'line1\nline2\nline3',
         'line1\nline2-version-a\nline3',
-        'line1\nline2-version-b\nline3'
+        'line1\nline2-version-b\nline3',
       );
 
       expect(result).toBeNull();
@@ -135,7 +139,7 @@ describe('DiffEngine', () => {
       const result = await engine.threeWayMerge(
         'line1\nline2',
         'line1\nline2',
-        'line1\nline2\nline3'
+        'line1\nline2\nline3',
       );
 
       expect(result).not.toBeNull();
@@ -145,15 +149,27 @@ describe('DiffEngine', () => {
 
   describe('hasMergeConflicts', () => {
     it('should detect overlapping changes', () => {
-      const hunksA = engine.computeDiff('line1\nline2\nline3', 'line1\nline2-a\nline3');
-      const hunksB = engine.computeDiff('line1\nline2\nline3', 'line1\nline2-b\nline3');
+      const hunksA = engine.computeDiff(
+        'line1\nline2\nline3',
+        'line1\nline2-a\nline3',
+      );
+      const hunksB = engine.computeDiff(
+        'line1\nline2\nline3',
+        'line1\nline2-b\nline3',
+      );
 
       expect(engine.hasMergeConflicts(hunksA, hunksB)).toBe(true);
     });
 
     it('should not conflict for non-overlapping changes', () => {
-      const hunksA = engine.computeDiff('line1\nline2\nline3', 'line1-a\nline2\nline3');
-      const hunksB = engine.computeDiff('line1\nline2\nline3', 'line1\nline2\nline3-b');
+      const hunksA = engine.computeDiff(
+        'line1\nline2\nline3',
+        'line1-a\nline2\nline3',
+      );
+      const hunksB = engine.computeDiff(
+        'line1\nline2\nline3',
+        'line1\nline2\nline3-b',
+      );
 
       expect(engine.hasMergeConflicts(hunksA, hunksB)).toBe(false);
     });
@@ -185,7 +201,10 @@ describe('DiffEngine', () => {
     });
 
     it('should return less than 1 for partially different strings', () => {
-      const ratio = engine.getSimilarity('line1\nline2\nline3', 'line1\nline2-modified\nline3');
+      const ratio = engine.getSimilarity(
+        'line1\nline2\nline3',
+        'line1\nline2-modified\nline3',
+      );
       expect(ratio).toBeLessThan(1);
       expect(ratio).toBeGreaterThan(0);
     });

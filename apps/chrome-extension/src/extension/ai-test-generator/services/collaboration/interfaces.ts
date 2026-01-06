@@ -6,30 +6,30 @@
  */
 
 import type {
-  Workspace,
-  WorkspaceMember,
-  MemberRole,
-  WorkspaceSettings,
-  Review,
-  Reviewer,
-  ReviewResult,
-  ReviewerStatus,
-  Comment,
-  Version,
-  VersionDiff,
-  CollaborationSession,
-  Participant,
-  EditorOperation,
-  CursorPosition,
-  KnowledgeArticle,
-  SearchResult,
-  SearchOptions,
-  Invitation,
-  PermissionCheck,
-  Resource,
   Action,
   AuditEntry,
   Branch,
+  CollaborationSession,
+  Comment,
+  CursorPosition,
+  EditorOperation,
+  Invitation,
+  KnowledgeArticle,
+  MemberRole,
+  Participant,
+  PermissionCheck,
+  Resource,
+  Review,
+  ReviewResult,
+  Reviewer,
+  ReviewerStatus,
+  SearchOptions,
+  SearchResult,
+  Version,
+  VersionDiff,
+  Workspace,
+  WorkspaceMember,
+  WorkspaceSettings,
 } from '../types/collaboration';
 
 // =============================================================================
@@ -80,7 +80,11 @@ export interface IWorkspaceManager {
    * @param userId - User ID to add
    * @param role - Role to assign
    */
-  addMember(workspaceId: string, userId: string, role: MemberRole): Promise<void>;
+  addMember(
+    workspaceId: string,
+    userId: string,
+    role: MemberRole,
+  ): Promise<void>;
 
   /**
    * Remove a member from a workspace
@@ -95,7 +99,11 @@ export interface IWorkspaceManager {
    * @param userId - User ID
    * @param role - New role
    */
-  updateMemberRole(workspaceId: string, userId: string, role: MemberRole): Promise<void>;
+  updateMemberRole(
+    workspaceId: string,
+    userId: string,
+    role: MemberRole,
+  ): Promise<void>;
 
   /**
    * Get workspace settings
@@ -109,7 +117,10 @@ export interface IWorkspaceManager {
    * @param workspaceId - Workspace ID
    * @param settings - New settings
    */
-  updateSettings(workspaceId: string, settings: Partial<WorkspaceSettings>): Promise<void>;
+  updateSettings(
+    workspaceId: string,
+    settings: Partial<WorkspaceSettings>,
+  ): Promise<void>;
 }
 
 export interface CreateWorkspaceData {
@@ -145,7 +156,10 @@ export interface IMemberManager {
    * @param userId - User ID
    * @returns Member or null if not found
    */
-  getMember(workspaceId: string, userId: string): Promise<WorkspaceMember | null>;
+  getMember(
+    workspaceId: string,
+    userId: string,
+  ): Promise<WorkspaceMember | null>;
 
   /**
    * Check if a user is a member
@@ -160,7 +174,10 @@ export interface IMemberManager {
    * @param userId - User ID
    * @returns Role or null if not a member
    */
-  getMemberRole(workspaceId: string, userId: string): Promise<MemberRole | null>;
+  getMemberRole(
+    workspaceId: string,
+    userId: string,
+  ): Promise<MemberRole | null>;
 }
 
 // =============================================================================
@@ -248,7 +265,11 @@ export interface IPermissionEngine {
    * @param action - Action to perform
    * @returns Permission check result
    */
-  check(userId: string, resource: Resource, action: Action): Promise<PermissionCheck>;
+  check(
+    userId: string,
+    resource: Resource,
+    action: Action,
+  ): Promise<PermissionCheck>;
 
   /**
    * Check multiple permissions at once
@@ -258,7 +279,7 @@ export interface IPermissionEngine {
    */
   checkBatch(
     userId: string,
-    checks: Array<{ resource: Resource; action: Action }>
+    checks: Array<{ resource: Resource; action: Action }>,
   ): Promise<Map<string, PermissionCheck>>;
 
   /**
@@ -317,7 +338,7 @@ export interface IAccessControl {
   checkResourcePermission(
     userId: string,
     resource: Resource,
-    action: Action
+    action: Action,
   ): Promise<boolean>;
 
   /**
@@ -355,7 +376,10 @@ export interface IAuditLogger {
    * @param resourceId - Resource ID
    * @returns List of audit entries
    */
-  getByResource(resourceType: Resource['type'], resourceId: string): Promise<AuditEntry[]>;
+  getByResource(
+    resourceType: Resource['type'],
+    resourceId: string,
+  ): Promise<AuditEntry[]>;
 
   /**
    * Get audit entries for a user
@@ -458,10 +482,7 @@ export interface IReviewSystem {
    * @param filters - Optional filters
    * @returns List of reviews
    */
-  listReviews(
-    workspaceId: string,
-    filters?: ReviewFilters
-  ): Promise<Review[]>;
+  listReviews(workspaceId: string, filters?: ReviewFilters): Promise<Review[]>;
 
   /**
    * Add a comment to a review
@@ -532,7 +553,10 @@ export interface IReviewerManager {
    * @param fileIds - File IDs being changed
    * @returns List of suggested reviewer user IDs
    */
-  getSuggestedReviewers(workspaceId: string, fileIds: string[]): Promise<string[]>;
+  getSuggestedReviewers(
+    workspaceId: string,
+    fileIds: string[],
+  ): Promise<string[]>;
 
   /**
    * Check if a user can review
@@ -547,7 +571,10 @@ export interface IReviewerManager {
    * @param userId - User ID
    * @returns Reviewer status
    */
-  getReviewerStatus(reviewId: string, userId: string): Promise<ReviewerStatus | null>;
+  getReviewerStatus(
+    reviewId: string,
+    userId: string,
+  ): Promise<ReviewerStatus | null>;
 }
 
 // =============================================================================
@@ -568,7 +595,7 @@ export interface IChangeManager {
   collectChanges(
     fileId: string,
     fromVersion: string,
-    toVersion: string
+    toVersion: string,
   ): Promise<Review['changes']>;
 
   /**
@@ -642,7 +669,10 @@ export interface ICommentService {
    * @param options - Query options
    * @returns List of comments
    */
-  getFileComments(fileId: string, options?: CommentQueryOptions): Promise<Comment[]>;
+  getFileComments(
+    fileId: string,
+    options?: CommentQueryOptions,
+  ): Promise<Comment[]>;
 
   /**
    * Get comments for a review
@@ -724,7 +754,7 @@ export interface IVersionControl {
     fileId: string,
     content: string,
     message: string,
-    author: string
+    author: string,
   ): Promise<Version>;
 
   /**
@@ -810,7 +840,11 @@ export interface IDiffEngine {
    * @param yours - Your changes
    * @returns Merged text or null if conflict
    */
-  threeWayMerge(base: string, theirs: string, yours: string): Promise<string | null>;
+  threeWayMerge(
+    base: string,
+    theirs: string,
+    yours: string,
+  ): Promise<string | null>;
 }
 
 // =============================================================================
@@ -860,7 +894,10 @@ export interface IBranchManager {
    * @param branchId - Branch ID
    * @param resolutions - Conflict resolutions
    */
-  resolveConflicts(branchId: string, resolutions: ConflictResolution[]): Promise<void>;
+  resolveConflicts(
+    branchId: string,
+    resolutions: ConflictResolution[],
+  ): Promise<void>;
 }
 
 export interface CreateBranchData {
@@ -917,7 +954,7 @@ export interface ICollaborationHub {
     sessionId: string,
     userId: string,
     cursor: CursorPosition,
-    selection?: CursorPosition
+    selection?: CursorPosition,
   ): Promise<void>;
 
   /**
@@ -943,7 +980,7 @@ export interface ICollaborationHub {
   broadcast(
     sessionId: string,
     message: unknown,
-    excludeUserId?: string
+    excludeUserId?: string,
   ): Promise<void>;
 }
 
@@ -1157,7 +1194,7 @@ export interface ICategoryManager {
    */
   updateCategory(
     id: string,
-    data: Partial<Pick<KnowledgeCategory, 'name' | 'description' | 'parentId'>>
+    data: Partial<Pick<KnowledgeCategory, 'name' | 'description' | 'parentId'>>,
   ): Promise<void>;
 
   /**
@@ -1227,7 +1264,7 @@ export interface IStatisticsService {
    */
   getActivityTimeline(
     workspaceId: string,
-    options?: ActivityQueryOptions
+    options?: ActivityQueryOptions,
   ): Promise<ActivityDataPoint[]>;
 
   /**
@@ -1238,7 +1275,7 @@ export interface IStatisticsService {
    */
   getReviewMetrics(
     workspaceId: string,
-    options?: ReviewMetricsOptions
+    options?: ReviewMetricsOptions,
   ): Promise<ReviewMetrics>;
 }
 

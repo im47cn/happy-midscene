@@ -3,15 +3,17 @@
  * 控制节点 - IfElse, Loop, Parallel, Group
  */
 
+import { Handle, type NodeProps, Position } from '@xyflow/react';
 import React, { memo } from 'react';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
 
 /**
  * IfElse Node - 条件分支节点
  */
 export const IfElseNode = memo<NodeProps>((props) => {
   const { data, selected } = props;
-  const config = data.config as { condition?: string; trueLabel?: string; falseLabel?: string } | undefined;
+  const config = data.config as
+    | { condition?: string; trueLabel?: string; falseLabel?: string }
+    | undefined;
   const condition = config?.condition || '';
 
   return (
@@ -28,10 +30,15 @@ export const IfElseNode = memo<NodeProps>((props) => {
       <div className="px-3 py-2">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-lg">🔀</span>
-          <span className="font-medium text-sm">{String(data.label || '')}</span>
+          <span className="font-medium text-sm">
+            {String(data.label || '')}
+          </span>
         </div>
         {condition && (
-          <div className="text-xs text-indigo-700 truncate mb-2" title={condition}>
+          <div
+            className="text-xs text-indigo-700 truncate mb-2"
+            title={condition}
+          >
             {condition}
           </div>
         )}
@@ -51,7 +58,11 @@ export const IfElseNode = memo<NodeProps>((props) => {
           </span>
         </div>
       </div>
-      <Handle type="target" position={Position.Left} className="w-3 h-3 !bg-indigo-500" />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-3 h-3 !bg-indigo-500"
+      />
       <Handle
         type="source"
         position={Position.Right}
@@ -74,7 +85,14 @@ IfElseNode.displayName = 'IfElseNode';
  */
 export const LoopNode = memo<NodeProps>((props) => {
   const { data, selected } = props;
-  const config = data.config as { type?: string; count?: number; whileCondition?: string; loopType?: string } | undefined;
+  const config = data.config as
+    | {
+        type?: string;
+        count?: number;
+        whileCondition?: string;
+        loopType?: string;
+      }
+    | undefined;
   const type = config?.loopType || config?.type || 'count';
 
   return (
@@ -91,19 +109,28 @@ export const LoopNode = memo<NodeProps>((props) => {
       <div className="px-3 py-2">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-lg">🔁</span>
-          <span className="font-medium text-sm">{String(data.label || '')}</span>
+          <span className="font-medium text-sm">
+            {String(data.label || '')}
+          </span>
         </div>
         <div className="text-xs text-indigo-700 mb-1">类型: {type}</div>
         {type === 'count' && config?.count && (
           <div className="text-xs text-indigo-600">次数: {config.count}</div>
         )}
         {type === 'while' && config?.whileCondition && (
-          <div className="text-xs text-indigo-600 truncate" title={config.whileCondition}>
+          <div
+            className="text-xs text-indigo-600 truncate"
+            title={config.whileCondition}
+          >
             {config.whileCondition}
           </div>
         )}
       </div>
-      <Handle type="target" position={Position.Left} className="w-3 h-3 !bg-indigo-500" />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-3 h-3 !bg-indigo-500"
+      />
       <Handle
         type="source"
         position={Position.Right}
@@ -126,7 +153,9 @@ LoopNode.displayName = 'LoopNode';
  */
 export const ParallelNode = memo<NodeProps>((props) => {
   const { data, selected } = props;
-  const config = data.config as { branches?: number; waitAll?: boolean } | undefined;
+  const config = data.config as
+    | { branches?: number; waitAll?: boolean }
+    | undefined;
   const branches = config?.branches || 2;
 
   return (
@@ -143,7 +172,9 @@ export const ParallelNode = memo<NodeProps>((props) => {
       <div className="px-3 py-2">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-lg">⚡</span>
-          <span className="font-medium text-sm">{String(data.label || '')}</span>
+          <span className="font-medium text-sm">
+            {String(data.label || '')}
+          </span>
         </div>
         <div className="text-xs text-indigo-700">{branches} 个并行分支</div>
         {config?.waitAll !== undefined && (
@@ -152,8 +183,16 @@ export const ParallelNode = memo<NodeProps>((props) => {
           </div>
         )}
       </div>
-      <Handle type="target" position={Position.Left} className="w-3 h-3 !bg-indigo-500" />
-      <Handle type="source" position={Position.Right} className="w-3 h-3 !bg-indigo-500" />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-3 h-3 !bg-indigo-500"
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-3 h-3 !bg-indigo-500"
+      />
     </div>
   );
 });
@@ -164,7 +203,9 @@ ParallelNode.displayName = 'ParallelNode';
  */
 export const GroupNode = memo<NodeProps>((props) => {
   const { data, selected } = props;
-  const config = data.config as { label?: string; collapsed?: boolean; color?: string } | undefined;
+  const config = data.config as
+    | { label?: string; collapsed?: boolean; color?: string }
+    | undefined;
   const label = config?.label || '分组';
 
   return (

@@ -3,8 +3,8 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { TemplateApplier } from '../templateApplier';
 import type { ParameterDef, Template } from '../../types';
+import { TemplateApplier } from '../templateApplier';
 
 describe('TemplateApplier', () => {
   const applier = new TemplateApplier();
@@ -18,7 +18,9 @@ describe('TemplateApplier', () => {
         },
       } as Template;
 
-      const result = applier.apply(template, { loginUrl: 'https://example.com' });
+      const result = applier.apply(template, {
+        loginUrl: 'https://example.com',
+      });
       expect(result).toBe('url: "https://example.com"');
     });
 
@@ -65,7 +67,9 @@ describe('TemplateApplier', () => {
         { name: 'url', label: 'URL', type: 'url', required: true },
       ];
 
-      const result = applier.validateParams(params, { url: 'https://example.com' });
+      const result = applier.validateParams(params, {
+        url: 'https://example.com',
+      });
       expect(result.valid).toBe(true);
       expect(Object.keys(result.errors)).toHaveLength(0);
     });
@@ -125,7 +129,9 @@ describe('TemplateApplier', () => {
       const tooShort = applier.validateParams(params, { name: 'a' });
       expect(tooShort.valid).toBe(false);
 
-      const tooLong = applier.validateParams(params, { name: 'this is too long' });
+      const tooLong = applier.validateParams(params, {
+        name: 'this is too long',
+      });
       expect(tooLong.valid).toBe(false);
 
       const valid = applier.validateParams(params, { name: 'valid' });
@@ -134,7 +140,12 @@ describe('TemplateApplier', () => {
 
     it('should skip validation for optional empty params', () => {
       const params: ParameterDef[] = [
-        { name: 'optional', label: 'Optional', type: 'string', required: false },
+        {
+          name: 'optional',
+          label: 'Optional',
+          type: 'string',
+          required: false,
+        },
       ];
 
       const result = applier.validateParams(params, { optional: '' });
@@ -145,8 +156,20 @@ describe('TemplateApplier', () => {
   describe('getDefaultParams', () => {
     it('should return specified defaults', () => {
       const params: ParameterDef[] = [
-        { name: 'url', label: 'URL', type: 'string', required: true, default: 'https://default.com' },
-        { name: 'count', label: 'Count', type: 'number', required: true, default: 5 },
+        {
+          name: 'url',
+          label: 'URL',
+          type: 'string',
+          required: true,
+          default: 'https://default.com',
+        },
+        {
+          name: 'count',
+          label: 'Count',
+          type: 'number',
+          required: true,
+          default: 5,
+        },
       ];
 
       const result = applier.getDefaultParams(params);
@@ -170,7 +193,8 @@ describe('TemplateApplier', () => {
 
   describe('extractParameters', () => {
     it('should extract parameter names from YAML', () => {
-      const yaml = 'url: "${loginUrl}"\nuser: "${username}"\npass: "${password}"';
+      const yaml =
+        'url: "${loginUrl}"\nuser: "${username}"\npass: "${password}"';
       const params = applier.extractParameters(yaml);
 
       expect(params).toContain('loginUrl');
@@ -199,10 +223,17 @@ describe('TemplateApplier', () => {
     it('should return true when all required params are provided', () => {
       const params: ParameterDef[] = [
         { name: 'url', label: 'URL', type: 'string', required: true },
-        { name: 'optional', label: 'Optional', type: 'string', required: false },
+        {
+          name: 'optional',
+          label: 'Optional',
+          type: 'string',
+          required: false,
+        },
       ];
 
-      const result = applier.hasAllRequiredParams(params, { url: 'https://example.com' });
+      const result = applier.hasAllRequiredParams(params, {
+        url: 'https://example.com',
+      });
       expect(result).toBe(true);
     });
 

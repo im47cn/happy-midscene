@@ -9,15 +9,7 @@ import {
   LeftOutlined,
   RightOutlined,
 } from '@ant-design/icons';
-import {
-  Button,
-  Card,
-  message,
-  Result,
-  Space,
-  Steps,
-  Typography,
-} from 'antd';
+import { Button, Card, Result, Space, Steps, Typography, message } from 'antd';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { templateApplier } from '../services';
@@ -54,13 +46,15 @@ export const ApplyWizard: React.FC<ApplyWizardProps> = ({
 
   // Initialize default parameters
   useEffect(() => {
-    const defaults = templateApplier.getDefaultParams(template.content.parameters);
+    const defaults = templateApplier.getDefaultParams(
+      template.content.parameters,
+    );
     setParams(defaults);
   }, [template]);
 
   const currentStepIndex = useMemo(
     () => STEPS.findIndex((s) => s.key === currentStep),
-    [currentStep]
+    [currentStep],
   );
 
   const handleParamsChange = useCallback(
@@ -68,11 +62,11 @@ export const ApplyWizard: React.FC<ApplyWizardProps> = ({
       setParams(newParams);
       const validation = templateApplier.validateParams(
         template.content.parameters,
-        newParams
+        newParams,
       );
       setErrors(validation.errors);
     },
-    [template.content.parameters]
+    [template.content.parameters],
   );
 
   const handleNext = useCallback(() => {
@@ -90,7 +84,7 @@ export const ApplyWizard: React.FC<ApplyWizardProps> = ({
       case 'configure':
         const validation = templateApplier.validateParams(
           template.content.parameters,
-          params
+          params,
         );
         if (!validation.valid) {
           setErrors(validation.errors);
@@ -146,7 +140,11 @@ export const ApplyWizard: React.FC<ApplyWizardProps> = ({
             <Title level={4}>{template.name}</Title>
             <Paragraph>{template.description}</Paragraph>
 
-            <Card size="small" title="What this template does" style={{ marginBottom: 16 }}>
+            <Card
+              size="small"
+              title="What this template does"
+              style={{ marginBottom: 16 }}
+            >
               <ul style={{ margin: 0, paddingLeft: 20 }}>
                 <li>Category: {template.category}</li>
                 <li>Platforms: {template.platforms.join(', ')}</li>
@@ -178,7 +176,8 @@ export const ApplyWizard: React.FC<ApplyWizardProps> = ({
           <div>
             <Title level={4}>Configure Parameters</Title>
             <Paragraph type="secondary">
-              Fill in the required parameters to customize this template for your use case.
+              Fill in the required parameters to customize this template for
+              your use case.
             </Paragraph>
             <ParameterForm
               parameters={template.content.parameters}
@@ -194,7 +193,8 @@ export const ApplyWizard: React.FC<ApplyWizardProps> = ({
           <div>
             <Title level={4}>Preview Generated YAML</Title>
             <Paragraph type="secondary">
-              Review the generated YAML before applying. You can copy or modify it later.
+              Review the generated YAML before applying. You can copy or modify
+              it later.
             </Paragraph>
             <YamlPreview
               yaml={generatedYaml}
@@ -237,9 +237,10 @@ export const ApplyWizard: React.FC<ApplyWizardProps> = ({
         current={currentStepIndex}
         items={STEPS.map((step) => ({
           title: step.title,
-          icon: currentStepIndex > STEPS.findIndex((s) => s.key === step.key) ? (
-            <CheckCircleOutlined />
-          ) : undefined,
+          icon:
+            currentStepIndex > STEPS.findIndex((s) => s.key === step.key) ? (
+              <CheckCircleOutlined />
+            ) : undefined,
         }))}
         style={{ marginBottom: 24 }}
       />

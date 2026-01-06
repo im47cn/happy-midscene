@@ -6,18 +6,18 @@
 import type {
   CaseStats,
   ExecutionRecord,
-  RecommendReason,
+  PriorityWeights,
   ReasonType,
   RecommendContext,
-  PriorityWeights,
+  RecommendReason,
 } from '../../types/recommendation';
 
 /**
  * Time thresholds for scoring (in milliseconds)
  */
 const TIME_THRESHOLDS = {
-  RECENT_FAILURE: 7 * 24 * 60 * 60 * 1000,    // 7 days
-  LONG_NOT_RUN: 30 * 24 * 60 * 60 * 1000,     // 30 days
+  RECENT_FAILURE: 7 * 24 * 60 * 60 * 1000, // 7 days
+  LONG_NOT_RUN: 30 * 24 * 60 * 60 * 1000, // 30 days
   VERY_LONG_NOT_RUN: 90 * 24 * 60 * 60 * 1000, // 90 days
 };
 
@@ -97,7 +97,9 @@ export class ScoreCalculator {
     const stabilityRisk = 1 - caseStat.stabilityScore / 100;
 
     // Recent failure risk
-    const recentFailures = caseStat.recentResults.filter((r) => r === 'failed').length;
+    const recentFailures = caseStat.recentResults.filter(
+      (r) => r === 'failed',
+    ).length;
     const recentFailureRisk = Math.min(recentFailures / 5, 1);
 
     // Flaky test risk
@@ -186,9 +188,21 @@ export class ScoreCalculator {
 
     // Keywords indicating high business value
     const highValueKeywords = [
-      'login', 'auth', 'payment', 'checkout', 'checkout',
-      'purchase', 'signup', 'register', 'critical', 'smoke',
-      '登录', '认证', '支付', '购买', '注册',
+      'login',
+      'auth',
+      'payment',
+      'checkout',
+      'checkout',
+      'purchase',
+      'signup',
+      'register',
+      'critical',
+      'smoke',
+      '登录',
+      '认证',
+      '支付',
+      '购买',
+      '注册',
     ];
 
     const caseNameLower = caseStat.caseName.toLowerCase();
@@ -241,7 +255,9 @@ export class ScoreCalculator {
     }
 
     // Recent failures
-    const recentFailures = caseStat.recentResults.filter((r) => r === 'failed').length;
+    const recentFailures = caseStat.recentResults.filter(
+      (r) => r === 'failed',
+    ).length;
     if (recentFailures > 0) {
       reasons.push({
         type: 'recent_failure',
@@ -264,7 +280,9 @@ export class ScoreCalculator {
     if (!caseStat) return;
 
     const now = Date.now();
-    const daysSinceLastRun = Math.floor((now - caseStat.lastRun) / (24 * 60 * 60 * 1000));
+    const daysSinceLastRun = Math.floor(
+      (now - caseStat.lastRun) / (24 * 60 * 60 * 1000),
+    );
 
     if (daysSinceLastRun > 90) {
       reasons.push({
@@ -319,8 +337,13 @@ export class ScoreCalculator {
     const stabilityRisk = 1 - caseStat.stabilityScore / 100;
 
     // Recent failure risk
-    const recentFailures = caseStat.recentResults.filter((r) => r === 'failed').length;
-    const recentFailureRisk = Math.min(recentFailures / caseStat.recentResults.length, 1);
+    const recentFailures = caseStat.recentResults.filter(
+      (r) => r === 'failed',
+    ).length;
+    const recentFailureRisk = Math.min(
+      recentFailures / caseStat.recentResults.length,
+      1,
+    );
 
     // Flaky risk
     const flakyRisk = caseStat.isFlaky ? 0.5 : 0;

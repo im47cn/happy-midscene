@@ -42,7 +42,12 @@ export interface RegressionResult {
  */
 export function fitLinearRegression(data: DataPoint[]): LinearRegressionModel {
   if (data.length < 2) {
-    return { slope: 0, intercept: data[0]?.value ?? 0, r2: 0, standardError: 0 };
+    return {
+      slope: 0,
+      intercept: data[0]?.value ?? 0,
+      r2: 0,
+      standardError: 0,
+    };
   }
 
   const n = data.length;
@@ -104,8 +109,8 @@ export function predictLinear(
   model: LinearRegressionModel,
   baseTimestamp: number,
   horizonMs: number,
-  steps: number = 10,
-  minTimestamp: number = 0
+  steps = 10,
+  minTimestamp = 0,
 ): LinearPrediction[] {
   const predictions: LinearPrediction[] = [];
   const stepSize = horizonMs / steps;
@@ -118,7 +123,8 @@ export function predictLinear(
     predictions.push({
       timestamp,
       value,
-      standardError: model.standardError * Math.sqrt(1 + 1 / steps + (i / steps) ** 2),
+      standardError:
+        model.standardError * Math.sqrt(1 + 1 / steps + (i / steps) ** 2),
     });
   }
 
@@ -131,16 +137,23 @@ export function predictLinear(
 export function linearRegressionPredict(
   data: DataPoint[],
   horizonMs: number,
-  steps: number = 10
+  steps = 10,
 ): RegressionResult {
   const model = fitLinearRegression(data);
   const baseTimestamp = Math.max(...data.map((d) => d.timestamp));
   const minTimestamp = Math.min(...data.map((d) => d.timestamp));
-  const predictions = predictLinear(model, baseTimestamp, horizonMs, steps, minTimestamp);
+  const predictions = predictLinear(
+    model,
+    baseTimestamp,
+    horizonMs,
+    steps,
+    minTimestamp,
+  );
 
   // Calculate residuals for the training data
   const residuals = data.map((d) => {
-    const predicted = model.intercept + model.slope * (d.timestamp - minTimestamp);
+    const predicted =
+      model.intercept + model.slope * (d.timestamp - minTimestamp);
     return d.value - predicted;
   });
 
@@ -150,7 +163,9 @@ export function linearRegressionPredict(
 /**
  * Calculate prediction confidence based on model fit
  */
-export function calculateLinearConfidence(model: LinearRegressionModel): number {
+export function calculateLinearConfidence(
+  model: LinearRegressionModel,
+): number {
   // Combine R-squared with a penalty for high standard error
   const r2Weight = 0.7;
   const seWeight = 0.3;
@@ -166,7 +181,7 @@ export function calculateLinearConfidence(model: LinearRegressionModel): number 
  */
 export function detectTrendFromSlope(
   slope: number,
-  threshold: number = 0.001
+  threshold = 0.001,
 ): 'improving' | 'stable' | 'declining' {
   const normalizedSlope = slope * 3600 * 1000; // Convert to per-hour
 

@@ -9,24 +9,20 @@ import {
   ClockCircleOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
-import {
-  Button,
-  Card,
-  Collapse,
-  Space,
-  Steps,
-  Tag,
-  Typography,
-} from 'antd';
+import { Button, Card, Collapse, Space, Steps, Tag, Typography } from 'antd';
 import { useState } from 'react';
 
-import type { Priority, Recommendation, RecommendationType } from '../../types/optimization';
+import { recommendEngine } from '../../services/optimization';
+import type {
+  Priority,
+  Recommendation,
+  RecommendationType,
+} from '../../types/optimization';
 import {
   EFFORT_LABELS,
   PRIORITY_LABELS,
   RECOMMENDATION_TYPE_LABELS,
 } from '../../types/optimization';
-import { recommendEngine } from '../../services/optimization';
 
 const { Text, Paragraph } = Typography;
 

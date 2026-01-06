@@ -3,16 +3,16 @@
  * End-to-end tests for the optimization analysis system
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { CaseStats, ExecutionRecord } from '../../../types/analytics';
+import { analyticsStorage } from '../../analytics/analyticsStorage';
 import { efficiencyAnalyzer } from '../efficiencyAnalyzer';
-import { redundancyDetector } from '../redundancyDetector';
 import { gapIdentifier } from '../gapIdentifier';
-import { stabilityAnalyzer } from '../stabilityAnalyzer';
 import { maintainabilityAnalyzer } from '../maintainabilityAnalyzer';
 import { recommendEngine } from '../recommendEngine';
+import { redundancyDetector } from '../redundancyDetector';
 import { optimizationReport } from '../report';
-import { analyticsStorage } from '../../analytics/analyticsStorage';
-import type { ExecutionRecord, CaseStats } from '../../../types/analytics';
+import { stabilityAnalyzer } from '../stabilityAnalyzer';
 
 // Mock analytics storage
 vi.mock('../../analytics/analyticsStorage', () => ({
@@ -45,8 +45,13 @@ vi.stubGlobal('localStorage', localStorageMock);
 
 describe('Optimization Integration Tests', () => {
   // Helper to set up all mocks for a test
-  const setupMocks = (executions: ExecutionRecord[], caseStats: CaseStats[]) => {
-    vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+  const setupMocks = (
+    executions: ExecutionRecord[],
+    caseStats: CaseStats[],
+  ) => {
+    vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+      executions,
+    );
     vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
     vi.mocked(analyticsStorage.getFailedExecutions).mockResolvedValue(
       executions.filter((e) => e.status === 'failed'),
@@ -73,9 +78,27 @@ describe('Optimization Integration Tests', () => {
     duration: 30000,
     status: 'passed',
     steps: [
-      { index: 0, description: 'Open page', status: 'passed', duration: 1000, retryCount: 0 },
-      { index: 1, description: 'Click button', status: 'passed', duration: 500, retryCount: 0 },
-      { index: 2, description: 'Verify result', status: 'passed', duration: 200, retryCount: 0 },
+      {
+        index: 0,
+        description: 'Open page',
+        status: 'passed',
+        duration: 1000,
+        retryCount: 0,
+      },
+      {
+        index: 1,
+        description: 'Click button',
+        status: 'passed',
+        duration: 500,
+        retryCount: 0,
+      },
+      {
+        index: 2,
+        description: 'Verify result',
+        status: 'passed',
+        duration: 200,
+        retryCount: 0,
+      },
     ],
     environment: {
       browser: 'Chrome',
@@ -85,9 +108,7 @@ describe('Optimization Integration Tests', () => {
     ...overrides,
   });
 
-  const createCaseStats = (
-    overrides: Partial<CaseStats> = {},
-  ): CaseStats => ({
+  const createCaseStats = (overrides: Partial<CaseStats> = {}): CaseStats => ({
     caseId: 'case-1',
     caseName: 'Test Case',
     totalRuns: 10,
@@ -96,7 +117,10 @@ describe('Optimization Integration Tests', () => {
     lastRun: Date.now(),
     stabilityScore: 75,
     isFlaky: false,
-    recentResults: ['passed', 'passed', 'failed', 'passed', 'passed'] as ('passed' | 'failed')[],
+    recentResults: ['passed', 'passed', 'failed', 'passed', 'passed'] as (
+      | 'passed'
+      | 'failed'
+    )[],
     ...overrides,
   });
 
@@ -104,34 +128,63 @@ describe('Optimization Integration Tests', () => {
     it('should run complete optimization analysis pipeline', async () => {
       // Setup test data
       const executions = [
-        createExecution({ caseId: 'case-1', caseName: 'Login Test', duration: 60000 }),
-        createExecution({ caseId: 'case-2', caseName: 'Search Test', duration: 25000 }),
-        createExecution({ caseId: 'case-3', caseName: 'Checkout Test', duration: 45000 }),
+        createExecution({
+          caseId: 'case-1',
+          caseName: 'Login Test',
+          duration: 60000,
+        }),
+        createExecution({
+          caseId: 'case-2',
+          caseName: 'Search Test',
+          duration: 25000,
+        }),
+        createExecution({
+          caseId: 'case-3',
+          caseName: 'Checkout Test',
+          duration: 45000,
+        }),
         createExecution({
           caseId: 'case-1',
           caseName: 'Login Test',
           duration: 55000,
           status: 'failed',
         }),
-        createExecution({ caseId: 'case-2', caseName: 'Search Test', duration: 28000 }),
+        createExecution({
+          caseId: 'case-2',
+          caseName: 'Search Test',
+          duration: 28000,
+        }),
       ];
 
       const caseStats = [
-        createCaseStats({ caseId: 'case-1', caseName: 'Login Test', passRate: 80 }),
-        createCaseStats({ caseId: 'case-2', caseName: 'Search Test', passRate: 100 }),
-        createCaseStats({ caseId: 'case-3', caseName: 'Checkout Test', passRate: 90 }),
+        createCaseStats({
+          caseId: 'case-1',
+          caseName: 'Login Test',
+          passRate: 80,
+        }),
+        createCaseStats({
+          caseId: 'case-2',
+          caseName: 'Search Test',
+          passRate: 100,
+        }),
+        createCaseStats({
+          caseId: 'case-3',
+          caseName: 'Checkout Test',
+          passRate: 90,
+        }),
       ];
 
       setupMocks(executions, caseStats);
 
       // Run all analyzers
-      const [efficiency, redundancy, gaps, stability, maintainability] = await Promise.all([
-        efficiencyAnalyzer.analyze(),
-        redundancyDetector.detect(),
-        gapIdentifier.identify(),
-        stabilityAnalyzer.analyze(),
-        maintainabilityAnalyzer.analyze(),
-      ]);
+      const [efficiency, redundancy, gaps, stability, maintainability] =
+        await Promise.all([
+          efficiencyAnalyzer.analyze(),
+          redundancyDetector.detect(),
+          gapIdentifier.identify(),
+          stabilityAnalyzer.analyze(),
+          maintainabilityAnalyzer.analyze(),
+        ]);
 
       // Verify efficiency analysis
       expect(efficiency).toHaveProperty('totalDuration');
@@ -162,7 +215,11 @@ describe('Optimization Integration Tests', () => {
     it('should generate recommendations from all analysis results', async () => {
       const executions = [
         createExecution({ caseId: 'case-1', duration: 120000 }), // Slow case
-        createExecution({ caseId: 'case-1', duration: 115000, status: 'failed' }),
+        createExecution({
+          caseId: 'case-1',
+          duration: 115000,
+          status: 'failed',
+        }),
         createExecution({ caseId: 'case-1', duration: 118000 }),
         createExecution({ caseId: 'case-2', duration: 10000 }),
       ];
@@ -172,7 +229,10 @@ describe('Optimization Integration Tests', () => {
           caseId: 'case-1',
           passRate: 66,
           isFlaky: true,
-          recentResults: ['passed', 'failed', 'passed'] as ('passed' | 'failed')[],
+          recentResults: ['passed', 'failed', 'passed'] as (
+            | 'passed'
+            | 'failed'
+          )[],
         }),
         createCaseStats({ caseId: 'case-2', passRate: 100 }),
       ];
@@ -220,7 +280,11 @@ describe('Optimization Integration Tests', () => {
 
     it('should track recommendation adoption', async () => {
       // Track adoption
-      await recommendEngine.trackAdoption('rec-1', true, 'Improved test speed by 30%');
+      await recommendEngine.trackAdoption(
+        'rec-1',
+        true,
+        'Improved test speed by 30%',
+      );
       await recommendEngine.trackAdoption('rec-2', false, 'Not applicable');
 
       // Verify storage
@@ -348,9 +412,27 @@ describe('Optimization Integration Tests', () => {
             caseId: `case-${i}`,
             caseName: `Test Case ${i}`,
             steps: [
-              { index: 0, description: 'Open login page', status: 'passed', duration: 1000, retryCount: 0 },
-              { index: 1, description: `Enter username ${i}`, status: 'passed', duration: 500, retryCount: 0 },
-              { index: 2, description: 'Click submit', status: 'passed', duration: 300, retryCount: 0 },
+              {
+                index: 0,
+                description: 'Open login page',
+                status: 'passed',
+                duration: 1000,
+                retryCount: 0,
+              },
+              {
+                index: 1,
+                description: `Enter username ${i}`,
+                status: 'passed',
+                duration: 500,
+                retryCount: 0,
+              },
+              {
+                index: 2,
+                description: 'Click submit',
+                status: 'passed',
+                duration: 300,
+                retryCount: 0,
+              },
             ],
           }),
         );
@@ -385,7 +467,12 @@ describe('Optimization Integration Tests', () => {
           averageDuration: 100000 - i * 1000,
           percentile: 95 - i,
           slowSteps: [
-            { order: 1, description: 'Slow step', duration: 50000, averageDuration: 50000 },
+            {
+              order: 1,
+              description: 'Slow step',
+              duration: 50000,
+              averageDuration: 50000,
+            },
           ],
         })),
         bottlenecks: Array.from({ length: 5 }, (_, i) => ({
@@ -440,14 +527,20 @@ describe('Optimization Integration Tests', () => {
           caseName: 'Flaky Test',
           passRate: 60,
           isFlaky: true,
-          recentResults: ['passed', 'failed', 'passed', 'failed', 'passed'] as ('passed' | 'failed')[],
+          recentResults: ['passed', 'failed', 'passed', 'failed', 'passed'] as (
+            | 'passed'
+            | 'failed'
+          )[],
         }),
         createCaseStats({
           caseId: 'stable-1',
           caseName: 'Stable Test',
           passRate: 100,
           isFlaky: false,
-          recentResults: ['passed', 'passed', 'passed'] as ('passed' | 'failed')[],
+          recentResults: ['passed', 'passed', 'passed'] as (
+            | 'passed'
+            | 'failed'
+          )[],
         }),
       ];
 
@@ -457,10 +550,14 @@ describe('Optimization Integration Tests', () => {
 
       // Should identify flaky test
       expect(stability.flakyTests.length).toBeGreaterThan(0);
-      expect(stability.flakyTests.some((t) => t.caseId === 'flaky-1')).toBe(true);
+      expect(stability.flakyTests.some((t) => t.caseId === 'flaky-1')).toBe(
+        true,
+      );
 
       // Stable test should not be in flaky list
-      expect(stability.flakyTests.some((t) => t.caseId === 'stable-1')).toBe(false);
+      expect(stability.flakyTests.some((t) => t.caseId === 'stable-1')).toBe(
+        false,
+      );
     });
 
     it('should correctly calculate coverage gaps', async () => {
@@ -468,13 +565,25 @@ describe('Optimization Integration Tests', () => {
         createExecution({
           caseId: 'login-test',
           steps: [
-            { index: 0, description: 'Login with valid credentials', status: 'passed', duration: 1000, retryCount: 0 },
+            {
+              index: 0,
+              description: 'Login with valid credentials',
+              status: 'passed',
+              duration: 1000,
+              retryCount: 0,
+            },
           ],
         }),
         createExecution({
           caseId: 'search-test',
           steps: [
-            { index: 0, description: 'Search for product', status: 'passed', duration: 500, retryCount: 0 },
+            {
+              index: 0,
+              description: 'Search for product',
+              status: 'passed',
+              duration: 500,
+              retryCount: 0,
+            },
           ],
         }),
       ];
@@ -498,11 +607,31 @@ describe('Optimization Integration Tests', () => {
 
     it('should correctly identify slow cases', async () => {
       const executions = [
-        createExecution({ caseId: 'slow-1', caseName: 'Slow Test', duration: 180000 }),
-        createExecution({ caseId: 'slow-1', caseName: 'Slow Test', duration: 175000 }),
-        createExecution({ caseId: 'fast-1', caseName: 'Fast Test', duration: 5000 }),
-        createExecution({ caseId: 'fast-1', caseName: 'Fast Test', duration: 4500 }),
-        createExecution({ caseId: 'medium-1', caseName: 'Medium Test', duration: 30000 }),
+        createExecution({
+          caseId: 'slow-1',
+          caseName: 'Slow Test',
+          duration: 180000,
+        }),
+        createExecution({
+          caseId: 'slow-1',
+          caseName: 'Slow Test',
+          duration: 175000,
+        }),
+        createExecution({
+          caseId: 'fast-1',
+          caseName: 'Fast Test',
+          duration: 5000,
+        }),
+        createExecution({
+          caseId: 'fast-1',
+          caseName: 'Fast Test',
+          duration: 4500,
+        }),
+        createExecution({
+          caseId: 'medium-1',
+          caseName: 'Medium Test',
+          duration: 30000,
+        }),
       ];
 
       const caseStats = [

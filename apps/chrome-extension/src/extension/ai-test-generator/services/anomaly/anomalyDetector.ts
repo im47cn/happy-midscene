@@ -7,37 +7,34 @@
 
 import type {
   Anomaly,
-  AnomalyType,
   AnomalyStatus,
-  Severity,
+  AnomalyType,
   BaselineInfo,
   DetectionConfig,
+  Severity,
 } from '../../types/anomaly';
 import { DEFAULT_THRESHOLDS } from '../../types/anomaly';
-import { anomalyStorage } from './storage';
-import { baselineBuilder } from './baselineBuilder';
-import { severityEvaluator, type SeverityInput } from './severityEvaluator';
-import { dataPreprocessor, type DataPoint } from './dataPreprocessor';
 import {
-  detectZScoreAnomaly,
-  detectModifiedZScoreAnomaly,
-  type ZScoreDetectionOptions,
-} from './algorithms/zScore';
-import {
-  detectIQRAnomaly,
-  type IQRDetectionOptions,
-} from './algorithms/iqr';
-import {
-  detectMovingAverageAnomaly,
-  detectBollingerBandAnomalies,
-  type MovingAverageOptions,
-} from './algorithms/movingAverage';
-import {
+  type ExecutionResult,
   detectConsecutiveFailures,
   detectFlakyPattern,
   detectPassRateChange,
-  type ExecutionResult,
 } from './algorithms/consecutive';
+import { type IQRDetectionOptions, detectIQRAnomaly } from './algorithms/iqr';
+import {
+  type MovingAverageOptions,
+  detectBollingerBandAnomalies,
+  detectMovingAverageAnomaly,
+} from './algorithms/movingAverage';
+import {
+  type ZScoreDetectionOptions,
+  detectModifiedZScoreAnomaly,
+  detectZScoreAnomaly,
+} from './algorithms/zScore';
+import { baselineBuilder } from './baselineBuilder';
+import { type DataPoint, dataPreprocessor } from './dataPreprocessor';
+import { type SeverityInput, severityEvaluator } from './severityEvaluator';
+import { anomalyStorage } from './storage';
 
 // ============================================================================
 // Types
@@ -113,7 +110,10 @@ class AnomalyDetector {
     };
 
     if (!config.enabled) {
-      return { isAnomaly: false, details: { algorithm: 'none', deviation: 0, threshold: 0 } };
+      return {
+        isAnomaly: false,
+        details: { algorithm: 'none', deviation: 0, threshold: 0 },
+      };
     }
 
     const timestamp = options.timestamp ?? Date.now();
@@ -122,7 +122,11 @@ class AnomalyDetector {
     const baseline = await baselineBuilder.getBaseline(options.metricName);
 
     // If no baseline and historical values provided, use those for comparison
-    if (!baseline && (!options.historicalValues || options.historicalValues.length < config.minDataPoints)) {
+    if (
+      !baseline &&
+      (!options.historicalValues ||
+        options.historicalValues.length < config.minDataPoints)
+    ) {
       return {
         isAnomaly: false,
         details: {
@@ -138,7 +142,7 @@ class AnomalyDetector {
       options.value,
       baseline,
       options.historicalValues || [],
-      config
+      config,
     );
 
     // Combine results - anomaly if any algorithm flags it
@@ -157,14 +161,22 @@ class AnomalyDetector {
     }
 
     // Create anomaly record
-    const primaryResult = anomalyResults.sort((a, b) => Math.abs(b.deviation) - Math.abs(a.deviation))[0];
-    const anomalyType = this.determineAnomalyType(options.metricName, primaryResult.deviation);
+    const primaryResult = anomalyResults.sort(
+      (a, b) => Math.abs(b.deviation) - Math.abs(a.deviation),
+    )[0];
+    const anomalyType = this.determineAnomalyType(
+      options.metricName,
+      primaryResult.deviation,
+    );
 
     const severityInput: SeverityInput = {
       deviation: primaryResult.deviation,
       anomalyType,
       duration: 0,
-      isRegression: await this.checkIfRegression(options.metricName, options.caseId),
+      isRegression: await this.checkIfRegression(
+        options.metricName,
+        options.caseId,
+      ),
     };
 
     const severityResult = severityEvaluator.evaluate(severityInput);
@@ -177,11 +189,16 @@ class AnomalyDetector {
       detectedAt: timestamp,
       metric: options.metricName,
       currentValue: options.value,
-      expectedValue: baseline?.mean ?? this.calculateMean(options.historicalValues || []),
+      expectedValue:
+        baseline?.mean ?? this.calculateMean(options.historicalValues || []),
       deviation: primaryResult.deviation,
       caseId: options.caseId,
       caseName: options.caseName,
-      description: this.generateDescription(anomalyType, primaryResult.deviation, options.metricName),
+      description: this.generateDescription(
+        anomalyType,
+        primaryResult.deviation,
+        options.metricName,
+      ),
     };
 
     // Save to storage
@@ -205,7 +222,7 @@ class AnomalyDetector {
   async detectForCase(
     caseId: string,
     metrics: { name: string; value: number }[],
-    config?: Partial<DetectionConfig>
+    config?: Partial<DetectionConfig>,
   ): Promise<CaseDetectionResult> {
     const anomalies: Anomaly[] = [];
     const timestamp = Date.now();
@@ -226,7 +243,9 @@ class AnomalyDetector {
 
     // Determine overall status
     let overallStatus: 'normal' | 'warning' | 'critical' = 'normal';
-    if (anomalies.some((a) => a.severity === 'critical' || a.severity === 'high')) {
+    if (
+      anomalies.some((a) => a.severity === 'critical' || a.severity === 'high')
+    ) {
       overallStatus = 'critical';
     } else if (anomalies.length > 0) {
       overallStatus = 'warning';
@@ -242,7 +261,9 @@ class AnomalyDetector {
   /**
    * Batch detect anomalies for multiple metrics
    */
-  async detectBatch(options: BatchDetectionOptions): Promise<DetectionResult[]> {
+  async detectBatch(
+    options: BatchDetectionOptions,
+  ): Promise<DetectionResult[]> {
     const results: DetectionResult[] = [];
     const timestamp = options.timestamp ?? Date.now();
 
@@ -267,20 +288,22 @@ class AnomalyDetector {
   async detectPatterns(
     caseId: string,
     results: ExecutionResult[],
-    config?: Partial<DetectionConfig>
+    config?: Partial<DetectionConfig>,
   ): Promise<Anomaly[]> {
     const anomalies: Anomaly[] = [];
     const timestamp = Date.now();
 
     // Detect consecutive failures
-    const consecutiveResult = detectConsecutiveFailures(results, { failureThreshold: 3 });
+    const consecutiveResult = detectConsecutiveFailures(results, {
+      failureThreshold: 3,
+    });
     if (consecutiveResult.isAnomaly) {
       const anomaly = await this.createPatternAnomaly(
         caseId,
         'failure_spike',
         consecutiveResult.consecutiveFailures,
         `Detected ${consecutiveResult.consecutiveFailures} consecutive failures`,
-        timestamp
+        timestamp,
       );
       anomalies.push(anomaly);
     }
@@ -293,7 +316,7 @@ class AnomalyDetector {
         'flaky_pattern',
         flakyResult.alternations,
         `Flaky test pattern: ${(flakyResult.flakyScore * 100).toFixed(1)}% instability`,
-        timestamp
+        timestamp,
       );
       anomalies.push(anomaly);
     }
@@ -301,13 +324,14 @@ class AnomalyDetector {
     // Detect pass rate change (positional parameters: results, windowSize, changeThreshold)
     const passRateResult = detectPassRateChange(results, 10, 0.2);
     if (passRateResult.hasChange) {
-      const anomalyType = passRateResult.change < 0 ? 'success_rate_drop' : 'trend_change';
+      const anomalyType =
+        passRateResult.change < 0 ? 'success_rate_drop' : 'trend_change';
       const anomaly = await this.createPatternAnomaly(
         caseId,
         anomalyType,
         Math.abs(passRateResult.change),
         `Pass rate ${passRateResult.change < 0 ? 'dropped' : 'increased'} by ${(Math.abs(passRateResult.change) * 100).toFixed(1)}%`,
-        timestamp
+        timestamp,
       );
       anomalies.push(anomaly);
     }
@@ -326,7 +350,9 @@ class AnomalyDetector {
     let anomalies = await anomalyStorage.getActiveAnomalies();
 
     if (filters?.severity && filters.severity.length > 0) {
-      anomalies = anomalies.filter((a) => filters.severity!.includes(a.severity));
+      anomalies = anomalies.filter((a) =>
+        filters.severity!.includes(a.severity),
+      );
     }
 
     if (filters?.type && filters.type.length > 0) {
@@ -343,7 +369,10 @@ class AnomalyDetector {
   /**
    * Get anomalies by time range
    */
-  async getAnomaliesByTimeRange(startTime: number, endTime: number): Promise<Anomaly[]> {
+  async getAnomaliesByTimeRange(
+    startTime: number,
+    endTime: number,
+  ): Promise<Anomaly[]> {
     return anomalyStorage.getAnomaliesByTimeRange(startTime, endTime);
   }
 
@@ -401,14 +430,27 @@ class AnomalyDetector {
     let anomalies: Anomaly[];
 
     if (timeRange) {
-      anomalies = await this.getAnomaliesByTimeRange(timeRange.start, timeRange.end);
+      anomalies = await this.getAnomaliesByTimeRange(
+        timeRange.start,
+        timeRange.end,
+      );
     } else {
       anomalies = await anomalyStorage.getAllAnomalies();
     }
 
-    const bySeverity: Record<Severity, number> = { low: 0, medium: 0, high: 0, critical: 0 };
+    const bySeverity: Record<Severity, number> = {
+      low: 0,
+      medium: 0,
+      high: 0,
+      critical: 0,
+    };
     const byType: Partial<Record<AnomalyType, number>> = {};
-    const byStatus: Record<AnomalyStatus, number> = { new: 0, acknowledged: 0, investigating: 0, resolved: 0 };
+    const byStatus: Record<AnomalyStatus, number> = {
+      new: 0,
+      acknowledged: 0,
+      investigating: 0,
+      resolved: 0,
+    };
 
     for (const anomaly of anomalies) {
       bySeverity[anomaly.severity]++;
@@ -435,9 +477,15 @@ class AnomalyDetector {
     value: number,
     baseline: BaselineInfo | null,
     historicalValues: number[],
-    config: DetectionConfig
-  ): Promise<Array<{ algorithm: string; isAnomaly: boolean; deviation: number }>> {
-    const results: Array<{ algorithm: string; isAnomaly: boolean; deviation: number }> = [];
+    config: DetectionConfig,
+  ): Promise<
+    Array<{ algorithm: string; isAnomaly: boolean; deviation: number }>
+  > {
+    const results: Array<{
+      algorithm: string;
+      isAnomaly: boolean;
+      deviation: number;
+    }> = [];
     const threshold = this.getThreshold(config.sensitivity);
 
     // Z-Score detection
@@ -452,7 +500,11 @@ class AnomalyDetector {
 
     // Modified Z-Score (for robustness)
     if (config.algorithms.includes('zscore') && historicalValues.length >= 5) {
-      const modifiedResult = detectModifiedZScoreAnomaly(value, historicalValues, threshold + 0.5);
+      const modifiedResult = detectModifiedZScoreAnomaly(
+        value,
+        historicalValues,
+        threshold + 0.5,
+      );
       results.push({
         algorithm: 'modified_zscore',
         isAnomaly: modifiedResult.isAnomaly,
@@ -462,7 +514,9 @@ class AnomalyDetector {
 
     // IQR detection
     if (config.algorithms.includes('iqr') && historicalValues.length >= 4) {
-      const iqrResult = detectIQRAnomaly(value, historicalValues, { multiplier: 1.5 });
+      const iqrResult = detectIQRAnomaly(value, historicalValues, {
+        multiplier: 1.5,
+      });
       results.push({
         algorithm: 'iqr',
         isAnomaly: iqrResult.isAnomaly,
@@ -471,7 +525,10 @@ class AnomalyDetector {
     }
 
     // Moving Average detection
-    if (config.algorithms.includes('moving_average') && historicalValues.length >= 10) {
+    if (
+      config.algorithms.includes('moving_average') &&
+      historicalValues.length >= 10
+    ) {
       const maResult = detectMovingAverageAnomaly(value, historicalValues, {
         windowSize: Math.min(10, historicalValues.length),
         threshold,
@@ -479,7 +536,7 @@ class AnomalyDetector {
       results.push({
         algorithm: 'moving_average',
         isAnomaly: maResult.isAnomaly,
-        deviation: maResult.percentageDeviation / 100 * threshold,
+        deviation: (maResult.percentageDeviation / 100) * threshold,
       });
     }
 
@@ -501,7 +558,10 @@ class AnomalyDetector {
   /**
    * Determine anomaly type from metric name and deviation direction
    */
-  private determineAnomalyType(metricName: string, deviation: number): AnomalyType {
+  private determineAnomalyType(
+    metricName: string,
+    deviation: number,
+  ): AnomalyType {
     const lowerName = metricName.toLowerCase();
 
     if (lowerName.includes('duration') || lowerName.includes('time')) {
@@ -516,7 +576,11 @@ class AnomalyDetector {
       return deviation < 0 ? 'success_rate_drop' : 'trend_change';
     }
 
-    if (lowerName.includes('memory') || lowerName.includes('cpu') || lowerName.includes('resource')) {
+    if (
+      lowerName.includes('memory') ||
+      lowerName.includes('cpu') ||
+      lowerName.includes('resource')
+    ) {
       return 'resource_anomaly';
     }
 
@@ -526,7 +590,11 @@ class AnomalyDetector {
   /**
    * Generate human-readable description
    */
-  private generateDescription(type: AnomalyType, deviation: number, metricName: string): string {
+  private generateDescription(
+    type: AnomalyType,
+    deviation: number,
+    metricName: string,
+  ): string {
     const absDeviation = Math.abs(deviation);
     const direction = deviation > 0 ? 'above' : 'below';
 
@@ -541,15 +609,22 @@ class AnomalyDetector {
       seasonal_deviation: `Unusual deviation from seasonal pattern`,
     };
 
-    return typeDescriptions[type] || `${metricName} is ${absDeviation.toFixed(1)}σ ${direction} expected`;
+    return (
+      typeDescriptions[type] ||
+      `${metricName} is ${absDeviation.toFixed(1)}σ ${direction} expected`
+    );
   }
 
   /**
    * Check if this is a regression from previous good state
    */
-  private async checkIfRegression(metricName: string, caseId?: string): Promise<boolean> {
+  private async checkIfRegression(
+    metricName: string,
+    caseId?: string,
+  ): Promise<boolean> {
     // Get recent anomalies for this metric
-    const recentAnomalies = await anomalyStorage.getAnomaliesByMetric(metricName);
+    const recentAnomalies =
+      await anomalyStorage.getAnomaliesByMetric(metricName);
 
     if (recentAnomalies.length === 0) {
       return false;
@@ -557,7 +632,10 @@ class AnomalyDetector {
 
     // Check if there was a resolved anomaly recently
     const resolvedRecently = recentAnomalies.some(
-      (a) => a.status === 'resolved' && a.resolvedAt && Date.now() - a.resolvedAt < 7 * 24 * 60 * 60 * 1000
+      (a) =>
+        a.status === 'resolved' &&
+        a.resolvedAt &&
+        Date.now() - a.resolvedAt < 7 * 24 * 60 * 60 * 1000,
     );
 
     return resolvedRecently;
@@ -571,7 +649,7 @@ class AnomalyDetector {
     type: AnomalyType,
     deviation: number,
     description: string,
-    timestamp: number
+    timestamp: number,
   ): Promise<Anomaly> {
     const severityInput: SeverityInput = {
       deviation,
@@ -623,7 +701,9 @@ class AnomalyDetector {
   /**
    * Auto-resolve stale anomalies
    */
-  async autoResolveStale(maxAgeMs: number = 7 * 24 * 60 * 60 * 1000): Promise<number> {
+  async autoResolveStale(
+    maxAgeMs: number = 7 * 24 * 60 * 60 * 1000,
+  ): Promise<number> {
     const anomalies = await anomalyStorage.getActiveAnomalies();
     const now = Date.now();
     let resolvedCount = 0;

@@ -259,11 +259,7 @@ export class ScriptParser {
       const blocks: DeviceFlowStep[] = [];
 
       for (let i = 0; i < raw.blocks.length; i++) {
-        const blockResult = this.parseFlowStep(
-          raw.blocks[i],
-          deviceAliases,
-          i,
-        );
+        const blockResult = this.parseFlowStep(raw.blocks[i], deviceAliases, i);
         if (blockResult.errors.length > 0) {
           errors.push(...blockResult.errors);
         }

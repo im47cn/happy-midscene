@@ -4,7 +4,7 @@
  * Manages resource-level access control and inherited permissions.
  */
 
-import type { Resource, Action } from '../../types/collaboration';
+import type { Action, Resource } from '../../types/collaboration';
 import type { IAccessControl } from './interfaces';
 import { permissionEngine } from './permissionEngine';
 
@@ -32,7 +32,7 @@ export class AccessControl implements IAccessControl {
   async grant(
     resource: Resource,
     userId: string,
-    action: Action
+    action: Action,
   ): Promise<void> {
     permissionEngine.grantResourcePermission(resource.id, userId, action);
   }
@@ -43,7 +43,7 @@ export class AccessControl implements IAccessControl {
   async revoke(
     resource: Resource,
     userId: string,
-    action: Action
+    action: Action,
   ): Promise<void> {
     permissionEngine.revokeResourcePermission(resource.id, userId, action);
   }
@@ -54,7 +54,7 @@ export class AccessControl implements IAccessControl {
   async checkResourcePermission(
     userId: string,
     resource: Resource,
-    action: Action
+    action: Action,
   ): Promise<boolean> {
     // First check if explicitly denied at resource level
     const result = await permissionEngine.check(userId, resource, action);
@@ -77,10 +77,7 @@ export class AccessControl implements IAccessControl {
   /**
    * Set inherited permissions
    */
-  async setInherited(
-    resource: Resource,
-    inheritFrom: Resource
-  ): Promise<void> {
+  async setInherited(resource: Resource, inheritFrom: Resource): Promise<void> {
     this.inheritances.set(resource.id, {
       resourceId: resource.id,
       inheritFrom: inheritFrom.id,
@@ -153,7 +150,7 @@ export class AccessControl implements IAccessControl {
   async grantRecursive(
     resource: Resource,
     userId: string,
-    action: Action
+    action: Action,
   ): Promise<void> {
     await this.grant(resource, userId, action);
 
@@ -163,7 +160,7 @@ export class AccessControl implements IAccessControl {
       await this.grantRecursive(
         { ...resource, id: descendantId },
         userId,
-        action
+        action,
       );
     }
   }
@@ -174,7 +171,7 @@ export class AccessControl implements IAccessControl {
   async revokeRecursive(
     resource: Resource,
     userId: string,
-    action: Action
+    action: Action,
   ): Promise<void> {
     await this.revoke(resource, userId, action);
 
@@ -184,7 +181,7 @@ export class AccessControl implements IAccessControl {
       await this.revokeRecursive(
         { ...resource, id: descendantId },
         userId,
-        action
+        action,
       );
     }
   }
@@ -194,7 +191,7 @@ export class AccessControl implements IAccessControl {
    */
   async copyPermissions(
     fromResource: Resource,
-    toResource: Resource
+    toResource: Resource,
   ): Promise<void> {
     // In production, this would copy actual permissions
     // For now, we just set up inheritance

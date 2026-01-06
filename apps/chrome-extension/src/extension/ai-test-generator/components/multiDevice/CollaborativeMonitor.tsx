@@ -36,7 +36,8 @@ import {
   Tooltip,
   Typography,
 } from 'antd';
-import React, { useMemo } from 'react';
+import type React from 'react';
+import { useMemo } from 'react';
 import type {
   DeviceInfo,
   DeviceType,
@@ -271,8 +272,7 @@ export function CollaborativeMonitor({
   const canPause = status.state === 'running';
   const canResume = status.state === 'paused';
   const canStop = status.state === 'running' || status.state === 'paused';
-  const canRestart =
-    status.state === 'completed' || status.state === 'failed';
+  const canRestart = status.state === 'completed' || status.state === 'failed';
 
   return (
     <Card
@@ -338,8 +338,7 @@ export function CollaborativeMonitor({
             value={status.progress.percentage}
             suffix="%"
             valueStyle={{
-              color:
-                status.progress.percentage === 100 ? '#3f8600' : undefined,
+              color: status.progress.percentage === 100 ? '#3f8600' : undefined,
             }}
           />
         </Col>

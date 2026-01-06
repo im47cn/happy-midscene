@@ -48,7 +48,7 @@ export interface ArimaOptions {
 /**
  * Difference a time series
  */
-function difference(values: number[], d: number = 1): number[] {
+function difference(values: number[], d = 1): number[] {
   let result = [...values];
 
   for (let i = 0; i < d; i++) {
@@ -65,7 +65,11 @@ function difference(values: number[], d: number = 1): number[] {
 /**
  * Inverse difference to restore original scale
  */
-function inverseDifference(lastOriginal: number, predicted: number[], d: number = 1): number[] {
+function inverseDifference(
+  lastOriginal: number,
+  predicted: number[],
+  d = 1,
+): number[] {
   let result = [...predicted];
 
   for (let i = 0; i < d; i++) {
@@ -154,7 +158,10 @@ function calculateResiduals(values: number[], ar: number[]): number[] {
 /**
  * Fit a simplified ARIMA model
  */
-export function fitArimaModel(data: DataPoint[], options: ArimaOptions = {}): ArimaModel {
+export function fitArimaModel(
+  data: DataPoint[],
+  options: ArimaOptions = {},
+): ArimaModel {
   const { p = 1, d = 1, q = 1 } = options;
   const values = data.map((d) => d.value);
 
@@ -198,7 +205,9 @@ export function fitArimaModel(data: DataPoint[], options: ArimaOptions = {}): Ar
 
   // Calculate variance of residuals
   const variance =
-    residuals.length > 0 ? residuals.reduce((sum, r) => sum + r ** 2, 0) / residuals.length : 0;
+    residuals.length > 0
+      ? residuals.reduce((sum, r) => sum + r ** 2, 0) / residuals.length
+      : 0;
 
   return { ar, ma, d, mean, variance };
 }
@@ -210,7 +219,7 @@ export function predictArima(
   model: ArimaModel,
   data: DataPoint[],
   horizonMs: number,
-  steps: number = 10
+  steps = 10,
 ): ArimaPrediction[] {
   const values = data.map((d) => d.value);
   const baseTimestamp = Math.max(...data.map((d) => d.timestamp));
@@ -243,7 +252,11 @@ export function predictArima(
 
   // Inverse difference to get actual predictions
   const lastOriginal = values[values.length - 1];
-  const actualPredictions = inverseDifference(lastOriginal, diffPredictions, model.d);
+  const actualPredictions = inverseDifference(
+    lastOriginal,
+    diffPredictions,
+    model.d,
+  );
 
   // Create prediction objects
   const predictions: ArimaPrediction[] = actualPredictions.map((value, i) => ({
@@ -293,7 +306,7 @@ function calculateFittedValues(data: DataPoint[], model: ArimaModel): number[] {
  * Calculate AIC for model comparison
  */
 function calculateAIC(n: number, k: number, mse: number): number {
-  if (mse <= 0) return Infinity;
+  if (mse <= 0) return Number.POSITIVE_INFINITY;
   return n * Math.log(mse) + 2 * k;
 }
 
@@ -303,8 +316,8 @@ function calculateAIC(n: number, k: number, mse: number): number {
 export function arimaPredict(
   data: DataPoint[],
   horizonMs: number,
-  steps: number = 10,
-  options: ArimaOptions = {}
+  steps = 10,
+  options: ArimaOptions = {},
 ): ArimaResult {
   const model = fitArimaModel(data, options);
   const predictions = predictArima(model, data, horizonMs, steps);
@@ -328,7 +341,10 @@ export function arimaPredict(
 /**
  * Calculate confidence from ARIMA model
  */
-export function calculateArimaConfidence(model: ArimaModel, mse: number): number {
+export function calculateArimaConfidence(
+  model: ArimaModel,
+  mse: number,
+): number {
   if (mse <= 0) return 50;
 
   // Use coefficient of variation as quality measure

@@ -140,10 +140,14 @@ export function HealingConfirmDialog({
             </Tag>
           </Descriptions.Item>
           <Descriptions.Item label={t('attempts')}>
-            <Text>{healingResult.attemptsCount} {t('times')}</Text>
+            <Text>
+              {healingResult.attemptsCount} {t('times')}
+            </Text>
           </Descriptions.Item>
           <Descriptions.Item label={t('timeCost')}>
-            <Text>{(healingResult.timeCost / 1000).toFixed(2)} {t('seconds')}</Text>
+            <Text>
+              {(healingResult.timeCost / 1000).toFixed(2)} {t('seconds')}
+            </Text>
           </Descriptions.Item>
         </Descriptions>
 
@@ -188,7 +192,8 @@ export function HealingConfirmDialog({
         {healingResult.element && (
           <div className="element-info">
             <Text type="secondary">
-              {t('elementPosition')}：({Math.round(healingResult.element.center[0])},{' '}
+              {t('elementPosition')}：(
+              {Math.round(healingResult.element.center[0])},{' '}
               {Math.round(healingResult.element.center[1])})
             </Text>
           </div>

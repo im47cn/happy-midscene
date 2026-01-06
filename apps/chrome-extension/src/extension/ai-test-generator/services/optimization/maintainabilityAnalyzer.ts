@@ -10,8 +10,8 @@ import type {
   MaintainabilityIssue,
   Priority,
 } from '../../types/optimization';
-import type { IMaintainabilityAnalyzer } from './interfaces';
 import { analyticsStorage } from '../analytics/analyticsStorage';
+import type { IMaintainabilityAnalyzer } from './interfaces';
 
 // Thresholds for maintainability checks
 const MAX_STEPS_PER_CASE = 20;
@@ -100,10 +100,16 @@ class MaintainabilityAnalyzer implements IMaintainabilityAnalyzer {
     const steps = latestExec.steps;
 
     // Complexity factors
-    const stepCountScore = Math.min(100, (steps.length / MAX_STEPS_PER_CASE) * 100);
+    const stepCountScore = Math.min(
+      100,
+      (steps.length / MAX_STEPS_PER_CASE) * 100,
+    );
     const avgStepLength =
       steps.reduce((sum, s) => sum + s.description.length, 0) / steps.length;
-    const stepLengthScore = Math.min(100, (avgStepLength / MAX_STEP_LENGTH) * 100);
+    const stepLengthScore = Math.min(
+      100,
+      (avgStepLength / MAX_STEP_LENGTH) * 100,
+    );
 
     // Calculate weighted complexity
     return Math.round(stepCountScore * 0.6 + stepLengthScore * 0.4);
@@ -163,7 +169,9 @@ class MaintainabilityAnalyzer implements IMaintainabilityAnalyzer {
   /**
    * Identify maintainability issues
    */
-  private identifyIssues(executions: ExecutionRecord[]): MaintainabilityIssue[] {
+  private identifyIssues(
+    executions: ExecutionRecord[],
+  ): MaintainabilityIssue[] {
     const issues: MaintainabilityIssue[] = [];
 
     // Group by case
@@ -270,9 +278,7 @@ class MaintainabilityAnalyzer implements IMaintainabilityAnalyzer {
   /**
    * Check if execution has cleanup steps
    */
-  private hasCleanupStep(
-    steps: { description: string }[],
-  ): boolean {
+  private hasCleanupStep(steps: { description: string }[]): boolean {
     const cleanupKeywords = [
       'cleanup',
       'reset',
@@ -321,9 +327,7 @@ class MaintainabilityAnalyzer implements IMaintainabilityAnalyzer {
   /**
    * Find duplicate step patterns within a case
    */
-  private findDuplicateStepsInCase(
-    steps: { description: string }[],
-  ): string[] {
+  private findDuplicateStepsInCase(steps: { description: string }[]): string[] {
     const seen = new Map<string, number>();
     const duplicates: string[] = [];
 
@@ -439,7 +443,7 @@ class MaintainabilityAnalyzer implements IMaintainabilityAnalyzer {
     }
     if ((issueTypes.get('missing_cleanup') || 0) > 5) {
       suggestions.push(
-        'Implement a cleanup framework to ensure tests don\'t affect each other',
+        "Implement a cleanup framework to ensure tests don't affect each other",
       );
     }
 

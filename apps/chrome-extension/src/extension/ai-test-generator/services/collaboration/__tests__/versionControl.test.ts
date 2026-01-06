@@ -2,7 +2,7 @@
  * Version Control Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { VersionControl } from '../versionControl';
 
 describe('VersionControl', () => {
@@ -22,7 +22,7 @@ describe('VersionControl', () => {
         'file1',
         'Content line 1\nContent line 2',
         'Initial commit',
-        'user1'
+        'user1',
       );
 
       expect(version.id).toBeDefined();
@@ -36,7 +36,12 @@ describe('VersionControl', () => {
     it('should increment version numbers', async () => {
       const v1 = await vc.createVersion('file1', 'content', 'v1', 'user1');
       const v2 = await vc.createVersion('file1', 'new content', 'v2', 'user1');
-      const v3 = await vc.createVersion('file1', 'newer content', 'v3', 'user1');
+      const v3 = await vc.createVersion(
+        'file1',
+        'newer content',
+        'v3',
+        'user1',
+      );
 
       expect(v1.version).toBe('v1.0.0');
       expect(v2.version).toBe('v2.0.0');
@@ -61,7 +66,12 @@ describe('VersionControl', () => {
 
   describe('getVersion', () => {
     it('should retrieve version by ID', async () => {
-      const created = await vc.createVersion('file1', 'content', 'message', 'user1');
+      const created = await vc.createVersion(
+        'file1',
+        'content',
+        'message',
+        'user1',
+      );
       const retrieved = await vc.getVersion(created.id);
 
       expect(retrieved).toBeDefined();
@@ -151,8 +161,9 @@ describe('VersionControl', () => {
       const v1 = await vc.createVersion('file1', 'content1', 'first', 'user1');
       const v2 = await vc.createVersion('file1', 'content2', 'second', 'user1');
 
-      await expect(vc.deleteVersion(v2.id))
-        .rejects.toThrow('Cannot delete current version');
+      await expect(vc.deleteVersion(v2.id)).rejects.toThrow(
+        'Cannot delete current version',
+      );
     });
   });
 
@@ -172,8 +183,18 @@ describe('VersionControl', () => {
 
   describe('diff', () => {
     it('should compare two versions', async () => {
-      const v1 = await vc.createVersion('file1', 'line1\nline2\nline3', 'v1', 'user1');
-      const v2 = await vc.createVersion('file1', 'line1\nline2-modified\nline3\nline4', 'v2', 'user1');
+      const v1 = await vc.createVersion(
+        'file1',
+        'line1\nline2\nline3',
+        'v1',
+        'user1',
+      );
+      const v2 = await vc.createVersion(
+        'file1',
+        'line1\nline2-modified\nline3\nline4',
+        'v2',
+        'user1',
+      );
 
       const diff = await vc.diff(v1.id, v2.id);
 
@@ -199,8 +220,18 @@ describe('VersionControl', () => {
 
   describe('revert', () => {
     it('should revert to previous version', async () => {
-      const v1 = await vc.createVersion('file1', 'original content', 'v1', 'user1');
-      const v2 = await vc.createVersion('file1', 'modified content', 'v2', 'user1');
+      const v1 = await vc.createVersion(
+        'file1',
+        'original content',
+        'v1',
+        'user1',
+      );
+      const v2 = await vc.createVersion(
+        'file1',
+        'modified content',
+        'v2',
+        'user1',
+      );
 
       // revert takes fileId and versionId
       await vc.revert('file1', v1.id);
@@ -213,8 +244,9 @@ describe('VersionControl', () => {
       // First create a file so we can test revert to non-existent version
       await vc.createVersion('file1', 'content', 'v1', 'user1');
 
-      await expect(vc.revert('file1', 'non-existent-version'))
-        .rejects.toThrow('Version not found');
+      await expect(vc.revert('file1', 'non-existent-version')).rejects.toThrow(
+        'Version not found',
+      );
     });
   });
 

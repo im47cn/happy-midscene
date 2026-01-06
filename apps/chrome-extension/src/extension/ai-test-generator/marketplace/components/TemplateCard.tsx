@@ -60,7 +60,9 @@ function formatDownloads(count: number): string {
 function formatDate(timestamp: number): string {
   const date = new Date(timestamp);
   const now = new Date();
-  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+  const diffDays = Math.floor(
+    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
+  );
 
   if (diffDays === 0) return 'Today';
   if (diffDays === 1) return 'Yesterday';
@@ -91,7 +93,7 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
       cursor: onClick ? 'pointer' : 'default',
       transition: 'box-shadow 0.2s, transform 0.2s',
     }),
-    [onClick]
+    [onClick],
   );
 
   if (compact) {
@@ -111,7 +113,9 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
               </Text>
               {template.publisher.verified && (
                 <Tooltip title="Verified Publisher">
-                  <SafetyCertificateOutlined style={{ color: '#1890ff', fontSize: 12 }} />
+                  <SafetyCertificateOutlined
+                    style={{ color: '#1890ff', fontSize: 12 }}
+                  />
                 </Tooltip>
               )}
             </div>
@@ -121,7 +125,9 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
           </div>
           <Space size={4}>
             <StarFilled style={{ color: '#fadb14', fontSize: 12 }} />
-            <Text style={{ fontSize: 12 }}>{template.stats.rating.toFixed(1)}</Text>
+            <Text style={{ fontSize: 12 }}>
+              {template.stats.rating.toFixed(1)}
+            </Text>
           </Space>
         </div>
       </Card>
@@ -170,7 +176,9 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
         </Space>,
         <Space key="stats" size={4}>
           <DownloadOutlined />
-          <Text style={{ fontSize: 12 }}>{formatDownloads(template.stats.downloads)}</Text>
+          <Text style={{ fontSize: 12 }}>
+            {formatDownloads(template.stats.downloads)}
+          </Text>
         </Space>,
         <span key="favorite" onClick={handleFavoriteClick}>
           {isFavorite ? (
@@ -203,7 +211,13 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
               {template.shortDescription}
             </Paragraph>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
               <Space size={4}>
                 <StarFilled style={{ color: '#fadb14' }} />
                 <Text strong>{template.stats.rating.toFixed(1)}</Text>
@@ -215,13 +229,22 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
               </Text>
             </div>
 
-            <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div
+              style={{
+                marginTop: 8,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+              }}
+            >
               <Text type="secondary" style={{ fontSize: 12 }}>
                 by {template.publisher.name}
               </Text>
               {template.publisher.verified && (
                 <Tooltip title="Verified Publisher">
-                  <SafetyCertificateOutlined style={{ color: '#1890ff', fontSize: 12 }} />
+                  <SafetyCertificateOutlined
+                    style={{ color: '#1890ff', fontSize: 12 }}
+                  />
                 </Tooltip>
               )}
             </div>

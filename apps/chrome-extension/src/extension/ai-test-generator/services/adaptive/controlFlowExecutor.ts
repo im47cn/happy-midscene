@@ -4,22 +4,25 @@
  */
 
 import type {
-  AdaptiveStep,
   ExecutionContext as AdaptiveExecutionContext,
-  StepResult,
+  AdaptiveStep,
   ConditionExpression,
   LoopConfig,
   PathEntry,
+  StepResult,
 } from '../../types/adaptive';
-import { ConditionEngine, getConditionEngine } from './conditionEngine';
-import { LoopManager, getLoopManager } from './loopManager';
+import { type ConditionEngine, getConditionEngine } from './conditionEngine';
+import { type LoopManager, getLoopManager } from './loopManager';
 
 /**
  * AI Agent 接口 (Midscene)
  */
 interface AIAgent {
   aiLocate?(prompt: string, options?: { deepThink?: boolean }): Promise<any>;
-  describeElementAtPoint?(center: { x: number; y: number }, options?: any): Promise<any>;
+  describeElementAtPoint?(
+    center: { x: number; y: number },
+    options?: any,
+  ): Promise<any>;
   dump?: { executions?: any[] };
 }
 
@@ -73,7 +76,7 @@ export class ControlFlowExecutor {
   async executeStep(
     step: AdaptiveStep,
     context: AdaptiveExecutionContext,
-    executeAction?: (step: AdaptiveStep) => Promise<void>
+    executeAction?: (step: AdaptiveStep) => Promise<void>,
   ): Promise<ExtendedStepResult> {
     const startTime = performance.now();
 
@@ -137,7 +140,7 @@ export class ControlFlowExecutor {
   private async executeAction(
     step: AdaptiveStep,
     context: AdaptiveExecutionContext,
-    executeAction?: (step: AdaptiveStep) => Promise<void>
+    executeAction?: (step: AdaptiveStep) => Promise<void>,
   ): Promise<ExtendedStepResult> {
     const startTime = performance.now();
 
@@ -158,7 +161,7 @@ export class ControlFlowExecutor {
   private async executeCondition(
     step: AdaptiveStep,
     context: AdaptiveExecutionContext,
-    executeAction?: (step: AdaptiveStep) => Promise<void>
+    executeAction?: (step: AdaptiveStep) => Promise<void>,
   ): Promise<ExtendedStepResult> {
     const startTime = performance.now();
     const condition = step.condition;
@@ -175,7 +178,7 @@ export class ControlFlowExecutor {
     // Evaluate condition expression
     const evaluation = await this.conditionEngine.evaluate(
       condition.expression,
-      context
+      context,
     );
 
     if (!evaluation.success) {
@@ -198,7 +201,9 @@ export class ControlFlowExecutor {
 
     // Execute appropriate branch
     const branch = evaluation.value ? 'then' : 'else';
-    const stepsToExecute = evaluation.value ? condition.thenSteps : condition.elseSteps;
+    const stepsToExecute = evaluation.value
+      ? condition.thenSteps
+      : condition.elseSteps;
 
     if (!stepsToExecute || stepsToExecute.length === 0) {
       return {
@@ -238,7 +243,7 @@ export class ControlFlowExecutor {
   private async executeLoop(
     step: AdaptiveStep,
     context: AdaptiveExecutionContext,
-    executeAction?: (step: AdaptiveStep) => Promise<void>
+    executeAction?: (step: AdaptiveStep) => Promise<void>,
   ): Promise<ExtendedStepResult> {
     const startTime = performance.now();
     const loop = step.loop;
@@ -253,22 +258,30 @@ export class ControlFlowExecutor {
     }
 
     // Execute loop body
-    const loopResult = await this.loopManager.execute(loop, context, async (iteration, item) => {
-      // Record path entry
-      context.pathHistory.push({
-        stepId: step.id,
-        branch: 'loop',
-        timestamp: Date.now(),
-      });
+    const loopResult = await this.loopManager.execute(
+      loop,
+      context,
+      async (iteration, item) => {
+        // Record path entry
+        context.pathHistory.push({
+          stepId: step.id,
+          branch: 'loop',
+          timestamp: Date.now(),
+        });
 
-      // Execute all steps in loop body
-      for (const bodyStep of loop.body) {
-        const result = await this.executeStep(bodyStep, context, executeAction);
-        if (!result.success) {
-          throw result.error || new Error('Loop body step failed');
+        // Execute all steps in loop body
+        for (const bodyStep of loop.body) {
+          const result = await this.executeStep(
+            bodyStep,
+            context,
+            executeAction,
+          );
+          if (!result.success) {
+            throw result.error || new Error('Loop body step failed');
+          }
         }
-      }
-    });
+      },
+    );
 
     return {
       stepId: step.id,
@@ -288,7 +301,7 @@ export class ControlFlowExecutor {
    */
   private async executeVariable(
     step: AdaptiveStep,
-    context: AdaptiveExecutionContext
+    context: AdaptiveExecutionContext,
   ): Promise<ExtendedStepResult> {
     const startTime = performance.now();
     const variable = step.variable;
@@ -310,7 +323,10 @@ export class ControlFlowExecutor {
 
         case 'increment':
           const current = context.variables.get(variable.name) ?? 0;
-          context.variables.set(variable.name, typeof current === 'number' ? current + 1 : 1);
+          context.variables.set(
+            variable.name,
+            typeof current === 'number' ? current + 1 : 1,
+          );
           break;
 
         case 'extract':
@@ -325,7 +341,9 @@ export class ControlFlowExecutor {
           return {
             stepId: step.id,
             success: false,
-            error: new Error(`Unknown variable operation: ${variable.operation}`),
+            error: new Error(
+              `Unknown variable operation: ${variable.operation}`,
+            ),
             duration: performance.now() - startTime,
           };
       }
@@ -354,7 +372,7 @@ export class ControlFlowExecutor {
   async executeSteps(
     steps: AdaptiveStep[],
     context: AdaptiveExecutionContext,
-    executeAction?: (step: AdaptiveStep) => Promise<void>
+    executeAction?: (step: AdaptiveStep) => Promise<void>,
   ): Promise<ExtendedStepResult[]> {
     const results: ExtendedStepResult[] = [];
 
@@ -443,7 +461,7 @@ export async function executeStep(
   step: AdaptiveStep,
   context: AdaptiveExecutionContext,
   executeAction?: (step: AdaptiveStep) => Promise<void>,
-  agent?: AIAgent
+  agent?: AIAgent,
 ): Promise<ExtendedStepResult> {
   const executor = getControlFlowExecutor(agent);
   return executor.executeStep(step, context, executeAction);

@@ -4,8 +4,8 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { FeedbackTracker } from '../feedbackTracker';
 import type { Feedback } from '../../../types/recommendation';
+import { FeedbackTracker } from '../feedbackTracker';
 
 // Mock console.log to avoid cluttering test output
 const originalLog = console.log;
@@ -50,8 +50,14 @@ describe('FeedbackTracker', () => {
     });
 
     it('should allow multiple feedback entries for same case', async () => {
-      const feedback1 = createFeedback({ caseId: 'test-case', recommendationId: 'rec-1' });
-      const feedback2 = createFeedback({ caseId: 'test-case', recommendationId: 'rec-2' });
+      const feedback1 = createFeedback({
+        caseId: 'test-case',
+        recommendationId: 'rec-1',
+      });
+      const feedback2 = createFeedback({
+        caseId: 'test-case',
+        recommendationId: 'rec-2',
+      });
 
       await tracker.recordFeedback(feedback1);
       await tracker.recordFeedback(feedback2);
@@ -69,7 +75,10 @@ describe('FeedbackTracker', () => {
     });
 
     it('should return feedback for specific recommendation', async () => {
-      const feedback = createFeedback({ recommendationId: 'rec-123', caseId: 'case-1' });
+      const feedback = createFeedback({
+        recommendationId: 'rec-123',
+        caseId: 'case-1',
+      });
 
       await tracker.recordFeedback(feedback);
 
@@ -79,9 +88,15 @@ describe('FeedbackTracker', () => {
     });
 
     it('should find recommendation feedback across multiple cases', async () => {
-      await tracker.recordFeedback(createFeedback({ recommendationId: 'rec-shared', caseId: 'case-1' }));
-      await tracker.recordFeedback(createFeedback({ recommendationId: 'rec-shared', caseId: 'case-2' }));
-      await tracker.recordFeedback(createFeedback({ recommendationId: 'rec-other', caseId: 'case-1' }));
+      await tracker.recordFeedback(
+        createFeedback({ recommendationId: 'rec-shared', caseId: 'case-1' }),
+      );
+      await tracker.recordFeedback(
+        createFeedback({ recommendationId: 'rec-shared', caseId: 'case-2' }),
+      );
+      await tracker.recordFeedback(
+        createFeedback({ recommendationId: 'rec-other', caseId: 'case-1' }),
+      );
 
       const found = tracker.getFeedbackForRecommendation('rec-shared');
       expect(found).toHaveLength(2);
@@ -96,8 +111,12 @@ describe('FeedbackTracker', () => {
     });
 
     it('should return all feedback for a case', async () => {
-      await tracker.recordFeedback(createFeedback({ caseId: 'test-case', recommendationId: 'rec-1' }));
-      await tracker.recordFeedback(createFeedback({ caseId: 'test-case', recommendationId: 'rec-2' }));
+      await tracker.recordFeedback(
+        createFeedback({ caseId: 'test-case', recommendationId: 'rec-1' }),
+      );
+      await tracker.recordFeedback(
+        createFeedback({ caseId: 'test-case', recommendationId: 'rec-2' }),
+      );
 
       const caseFeedback = tracker.getFeedbackForCase('test-case');
       expect(caseFeedback).toHaveLength(2);
@@ -113,9 +132,15 @@ describe('FeedbackTracker', () => {
 
     it('should return all feedback sorted by timestamp', async () => {
       const baseTime = Date.now();
-      await tracker.recordFeedback(createFeedback({ timestamp: baseTime - 3000 }));
-      await tracker.recordFeedback(createFeedback({ timestamp: baseTime - 1000 }));
-      await tracker.recordFeedback(createFeedback({ timestamp: baseTime - 2000 }));
+      await tracker.recordFeedback(
+        createFeedback({ timestamp: baseTime - 3000 }),
+      );
+      await tracker.recordFeedback(
+        createFeedback({ timestamp: baseTime - 1000 }),
+      );
+      await tracker.recordFeedback(
+        createFeedback({ timestamp: baseTime - 2000 }),
+      );
 
       const all = tracker.getAllFeedback();
 
@@ -162,8 +187,12 @@ describe('FeedbackTracker', () => {
     });
 
     it('should handle feedback without ratings', async () => {
-      await tracker.recordFeedback(createFeedback({ rating: undefined, accepted: true }));
-      await tracker.recordFeedback(createFeedback({ rating: undefined, accepted: false }));
+      await tracker.recordFeedback(
+        createFeedback({ rating: undefined, accepted: true }),
+      );
+      await tracker.recordFeedback(
+        createFeedback({ rating: undefined, accepted: false }),
+      );
 
       const summary = tracker.analyzeFeedback();
 
@@ -179,13 +208,17 @@ describe('FeedbackTracker', () => {
       const adjustment = tracker.calculateWeightAdjustments();
 
       expect(adjustment.confidence).toBe(0);
-      expect(adjustment.reasoning.some((r) => r.includes('数据量不足'))).toBe(true);
+      expect(adjustment.reasoning.some((r) => r.includes('数据量不足'))).toBe(
+        true,
+      );
     });
 
     it('should increase confidence with more feedback', async () => {
       // Add 50 feedback entries
       for (let i = 0; i < 50; i++) {
-        await tracker.recordFeedback(createFeedback({ accepted: true, rating: 5 }));
+        await tracker.recordFeedback(
+          createFeedback({ accepted: true, rating: 5 }),
+        );
       }
 
       const adjustment = tracker.calculateWeightAdjustments();
@@ -195,23 +228,31 @@ describe('FeedbackTracker', () => {
 
     it('should suggest maintaining weights for high acceptance rate', async () => {
       for (let i = 0; i < 20; i++) {
-        await tracker.recordFeedback(createFeedback({ accepted: true, rating: 5 }));
+        await tracker.recordFeedback(
+          createFeedback({ accepted: true, rating: 5 }),
+        );
       }
 
       const adjustment = tracker.calculateWeightAdjustments();
 
-      const hasPositiveReasoning = adjustment.reasoning.some((r) => r.includes('良好'));
+      const hasPositiveReasoning = adjustment.reasoning.some((r) =>
+        r.includes('良好'),
+      );
       expect(hasPositiveReasoning).toBe(true);
     });
 
     it('should suggest adjusting weights for low acceptance rate', async () => {
       for (let i = 0; i < 20; i++) {
-        await tracker.recordFeedback(createFeedback({ accepted: false, rating: 2 }));
+        await tracker.recordFeedback(
+          createFeedback({ accepted: false, rating: 2 }),
+        );
       }
 
       const adjustment = tracker.calculateWeightAdjustments();
 
-      const hasAdjustmentReasoning = adjustment.reasoning.some((r) => r.includes('调整'));
+      const hasAdjustmentReasoning = adjustment.reasoning.some((r) =>
+        r.includes('调整'),
+      );
       expect(hasAdjustmentReasoning).toBe(true);
     });
 
@@ -236,7 +277,9 @@ describe('FeedbackTracker', () => {
 
     it('should respect default limit', async () => {
       for (let i = 0; i < 100; i++) {
-        await tracker.recordFeedback(createFeedback({ timestamp: Date.now() - i }));
+        await tracker.recordFeedback(
+          createFeedback({ timestamp: Date.now() - i }),
+        );
       }
 
       const recent = tracker.getRecentFeedback();
@@ -263,8 +306,12 @@ describe('FeedbackTracker', () => {
     });
 
     it('should return stats for case with feedback', async () => {
-      await tracker.recordFeedback(createFeedback({ caseId: 'test-case', accepted: true, rating: 5 }));
-      await tracker.recordFeedback(createFeedback({ caseId: 'test-case', accepted: false, rating: 2 }));
+      await tracker.recordFeedback(
+        createFeedback({ caseId: 'test-case', accepted: true, rating: 5 }),
+      );
+      await tracker.recordFeedback(
+        createFeedback({ caseId: 'test-case', accepted: false, rating: 2 }),
+      );
 
       const stats = tracker.getCaseStats('test-case');
 
@@ -306,7 +353,9 @@ describe('FeedbackTracker', () => {
 
   describe('exportImportFeedback', () => {
     it('should export feedback as JSON string', async () => {
-      await tracker.recordFeedback(createFeedback({ caseId: 'case-1', recommendationId: 'rec-1' }));
+      await tracker.recordFeedback(
+        createFeedback({ caseId: 'case-1', recommendationId: 'rec-1' }),
+      );
 
       const exported = tracker.exportFeedback();
 
@@ -315,7 +364,10 @@ describe('FeedbackTracker', () => {
     });
 
     it('should import feedback from JSON string', async () => {
-      const feedback = createFeedback({ caseId: 'case-1', recommendationId: 'rec-1' });
+      const feedback = createFeedback({
+        caseId: 'case-1',
+        recommendationId: 'rec-1',
+      });
       await tracker.recordFeedback(feedback);
 
       const exported = tracker.exportFeedback();
@@ -334,7 +386,9 @@ describe('FeedbackTracker', () => {
       await tracker.recordFeedback(createFeedback({ caseId: 'old-case' }));
       await tracker.recordFeedback(createFeedback({ caseId: 'keep-case' }));
 
-      const newData: Array<[string, Feedback[]]> = [['new-case', [createFeedback()]]];
+      const newData: Array<[string, Feedback[]]> = [
+        ['new-case', [createFeedback()]],
+      ];
       tracker.importFeedback(JSON.stringify(newData));
 
       // old-case should still have its feedback (import doesn't clear)
@@ -360,9 +414,15 @@ describe('FeedbackTracker', () => {
       const date1 = now - 2 * dayMs; // 2 days ago
       const date2 = now - 1 * dayMs; // 1 day ago
 
-      await tracker.recordFeedback(createFeedback({ timestamp: date1, accepted: true }));
-      await tracker.recordFeedback(createFeedback({ timestamp: date1, accepted: false }));
-      await tracker.recordFeedback(createFeedback({ timestamp: date2, accepted: true }));
+      await tracker.recordFeedback(
+        createFeedback({ timestamp: date1, accepted: true }),
+      );
+      await tracker.recordFeedback(
+        createFeedback({ timestamp: date1, accepted: false }),
+      );
+      await tracker.recordFeedback(
+        createFeedback({ timestamp: date2, accepted: true }),
+      );
 
       const trends = tracker.getFeedbackTrends(30);
 
@@ -376,9 +436,15 @@ describe('FeedbackTracker', () => {
       const now = Date.now();
       const dayMs = 24 * 60 * 60 * 1000;
 
-      await tracker.recordFeedback(createFeedback({ timestamp: now - 3 * dayMs }));
-      await tracker.recordFeedback(createFeedback({ timestamp: now - 1 * dayMs }));
-      await tracker.recordFeedback(createFeedback({ timestamp: now - 2 * dayMs }));
+      await tracker.recordFeedback(
+        createFeedback({ timestamp: now - 3 * dayMs }),
+      );
+      await tracker.recordFeedback(
+        createFeedback({ timestamp: now - 1 * dayMs }),
+      );
+      await tracker.recordFeedback(
+        createFeedback({ timestamp: now - 2 * dayMs }),
+      );
 
       const trends = tracker.getFeedbackTrends(30);
 

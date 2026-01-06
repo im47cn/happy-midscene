@@ -2,12 +2,12 @@
  * StateDisplay Components Tests
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import {
-  LoadingState,
-  ErrorState,
   EmptyState,
+  ErrorState,
+  LoadingState,
   StateDisplay,
 } from '../StateDisplay';
 
@@ -44,7 +44,9 @@ describe('ErrorState', () => {
     render(<ErrorState />);
 
     expect(screen.getByText('Something Went Wrong')).toBeInTheDocument();
-    expect(screen.getByText(/An unexpected error occurred/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/An unexpected error occurred/),
+    ).toBeInTheDocument();
   });
 
   it('should render network error type', () => {
@@ -73,12 +75,7 @@ describe('ErrorState', () => {
   });
 
   it('should render custom title and message', () => {
-    render(
-      <ErrorState
-        title="Custom Error"
-        message="Custom error message"
-      />
-    );
+    render(<ErrorState title="Custom Error" message="Custom error message" />);
 
     expect(screen.getByText('Custom Error')).toBeInTheDocument();
     expect(screen.getByText('Custom error message')).toBeInTheDocument();
@@ -98,7 +95,9 @@ describe('ErrorState', () => {
   it('should not render retry button when onRetry is not provided', () => {
     render(<ErrorState />);
 
-    expect(screen.queryByRole('button', { name: /Try Again/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /Try Again/i }),
+    ).not.toBeInTheDocument();
   });
 
   it('should show error details when showDetails is true', () => {
@@ -146,10 +145,7 @@ describe('EmptyState', () => {
 
   it('should render custom title and description', () => {
     render(
-      <EmptyState
-        title="Custom Title"
-        description="Custom description"
-      />
+      <EmptyState title="Custom Title" description="Custom description" />,
     );
 
     expect(screen.getByText('Custom Title')).toBeInTheDocument();
@@ -157,11 +153,11 @@ describe('EmptyState', () => {
   });
 
   it('should render action when provided', () => {
-    render(
-      <EmptyState action={<button>Add Template</button>} />
-    );
+    render(<EmptyState action={<button>Add Template</button>} />);
 
-    expect(screen.getByRole('button', { name: /Add Template/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /Add Template/i }),
+    ).toBeInTheDocument();
   });
 });
 
@@ -170,7 +166,7 @@ describe('StateDisplay', () => {
     render(
       <StateDisplay>
         <div>Content</div>
-      </StateDisplay>
+      </StateDisplay>,
     );
 
     expect(screen.getByText('Content')).toBeInTheDocument();
@@ -180,7 +176,7 @@ describe('StateDisplay', () => {
     render(
       <StateDisplay loading loadingText="Loading...">
         <div>Content</div>
-      </StateDisplay>
+      </StateDisplay>,
     );
 
     expect(screen.getByText('Loading...')).toBeInTheDocument();
@@ -192,7 +188,7 @@ describe('StateDisplay', () => {
     render(
       <StateDisplay error={error} errorType="server">
         <div>Content</div>
-      </StateDisplay>
+      </StateDisplay>,
     );
 
     expect(screen.getByText('Server Error')).toBeInTheDocument();
@@ -203,7 +199,7 @@ describe('StateDisplay', () => {
     render(
       <StateDisplay empty emptyType="search">
         <div>Content</div>
-      </StateDisplay>
+      </StateDisplay>,
     );
 
     expect(screen.getByText('No Results Found')).toBeInTheDocument();
@@ -215,7 +211,7 @@ describe('StateDisplay', () => {
     render(
       <StateDisplay loading error={error} empty>
         <div>Content</div>
-      </StateDisplay>
+      </StateDisplay>,
     );
 
     expect(screen.getByText('Loading...')).toBeInTheDocument();
@@ -226,7 +222,7 @@ describe('StateDisplay', () => {
     render(
       <StateDisplay error={error} empty>
         <div>Content</div>
-      </StateDisplay>
+      </StateDisplay>,
     );
 
     expect(screen.getByText('Something Went Wrong')).toBeInTheDocument();
@@ -239,7 +235,7 @@ describe('StateDisplay', () => {
     render(
       <StateDisplay error={error} onRetry={onRetry}>
         <div>Content</div>
-      </StateDisplay>
+      </StateDisplay>,
     );
 
     fireEvent.click(screen.getByRole('button', { name: /Try Again/i }));
@@ -250,9 +246,11 @@ describe('StateDisplay', () => {
     render(
       <StateDisplay empty emptyAction={<button>Create New</button>}>
         <div>Content</div>
-      </StateDisplay>
+      </StateDisplay>,
     );
 
-    expect(screen.getByRole('button', { name: /Create New/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /Create New/i }),
+    ).toBeInTheDocument();
   });
 });

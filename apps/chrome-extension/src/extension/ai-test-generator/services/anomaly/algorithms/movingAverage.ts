@@ -32,7 +32,9 @@ export interface MovingAverageResult {
  */
 export function calculateSMA(values: number[], windowSize: number): number[] {
   if (values.length < windowSize) {
-    return values.map(() => values.reduce((sum, v) => sum + v, 0) / values.length);
+    return values.map(
+      () => values.reduce((sum, v) => sum + v, 0) / values.length,
+    );
   }
 
   const result: number[] = [];
@@ -49,7 +51,7 @@ export function calculateSMA(values: number[], windowSize: number): number[] {
 /**
  * Calculate Exponential Moving Average (EMA)
  */
-export function calculateEMA(values: number[], alpha: number = 0.2): number[] {
+export function calculateEMA(values: number[], alpha = 0.2): number[] {
   if (values.length === 0) return [];
 
   const result: number[] = [values[0]];
@@ -64,10 +66,14 @@ export function calculateEMA(values: number[], alpha: number = 0.2): number[] {
 /**
  * Calculate Moving Standard Deviation
  */
-export function calculateMovingStdDev(values: number[], windowSize: number): number[] {
+export function calculateMovingStdDev(
+  values: number[],
+  windowSize: number,
+): number[] {
   if (values.length < windowSize) {
     const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
-    const variance = values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length;
+    const variance =
+      values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length;
     return values.map(() => Math.sqrt(variance));
   }
 
@@ -76,7 +82,8 @@ export function calculateMovingStdDev(values: number[], windowSize: number): num
     const start = Math.max(0, i - windowSize + 1);
     const window = values.slice(start, i + 1);
     const mean = window.reduce((sum, v) => sum + v, 0) / window.length;
-    const variance = window.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / window.length;
+    const variance =
+      window.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / window.length;
     result.push(Math.sqrt(variance));
   }
 
@@ -89,9 +96,14 @@ export function calculateMovingStdDev(values: number[], windowSize: number): num
 export function detectMovingAverageAnomaly(
   value: number,
   historicalValues: number[],
-  options: MovingAverageOptions = {}
+  options: MovingAverageOptions = {},
 ): MovingAverageResult {
-  const { windowSize = 10, threshold = 2, useExponential = false, alpha = 0.2 } = options;
+  const {
+    windowSize = 10,
+    threshold = 2,
+    useExponential = false,
+    alpha = 0.2,
+  } = options;
 
   if (historicalValues.length === 0) {
     return {
@@ -113,7 +125,8 @@ export function detectMovingAverageAnomaly(
   const stdDev = movingStdDevs[movingStdDevs.length - 1] || 0;
 
   const deviation = value - movingAverage;
-  const percentageDeviation = movingAverage !== 0 ? (deviation / movingAverage) * 100 : 0;
+  const percentageDeviation =
+    movingAverage !== 0 ? (deviation / movingAverage) * 100 : 0;
   const zScore = stdDev !== 0 ? deviation / stdDev : 0;
 
   return {
@@ -130,9 +143,14 @@ export function detectMovingAverageAnomaly(
  */
 export function detectMovingAverageAnomalies(
   data: DataPoint[],
-  options: MovingAverageOptions = {}
+  options: MovingAverageOptions = {},
 ): AnomalyPoint[] {
-  const { windowSize = 10, threshold = 2, useExponential = false, alpha = 0.2 } = options;
+  const {
+    windowSize = 10,
+    threshold = 2,
+    useExponential = false,
+    alpha = 0.2,
+  } = options;
 
   if (data.length < windowSize) {
     return [];
@@ -142,7 +160,9 @@ export function detectMovingAverageAnomalies(
   const anomalies: AnomalyPoint[] = [];
 
   // Calculate moving average and std dev
-  const ma = useExponential ? calculateEMA(values, alpha) : calculateSMA(values, windowSize);
+  const ma = useExponential
+    ? calculateEMA(values, alpha)
+    : calculateSMA(values, windowSize);
   const stdDevs = calculateMovingStdDev(values, windowSize);
 
   // Check each point after warm-up period
@@ -169,8 +189,8 @@ export function detectMovingAverageAnomalies(
  */
 export function calculateBollingerBands(
   values: number[],
-  windowSize: number = 20,
-  multiplier: number = 2
+  windowSize = 20,
+  multiplier = 2,
 ): { upper: number[]; middle: number[]; lower: number[] } {
   const middle = calculateSMA(values, windowSize);
   const stdDevs = calculateMovingStdDev(values, windowSize);
@@ -186,8 +206,8 @@ export function calculateBollingerBands(
  */
 export function detectBollingerBandAnomalies(
   data: DataPoint[],
-  windowSize: number = 20,
-  multiplier: number = 2
+  windowSize = 20,
+  multiplier = 2,
 ): AnomalyPoint[] {
   const values = data.map((d) => d.value);
   const bands = calculateBollingerBands(values, windowSize, multiplier);

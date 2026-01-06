@@ -3,7 +3,7 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { ScriptParser, createScriptParser } from '../scriptParser';
+import { type ScriptParser, createScriptParser } from '../scriptParser';
 
 describe('ScriptParser', () => {
   let parser: ScriptParser;
@@ -246,9 +246,7 @@ flow:
       expect(result.success).toBe(true);
 
       const errors = parser.validate(result.script!);
-      expect(errors).toContainEqual(
-        expect.stringContaining('undefinedVar'),
-      );
+      expect(errors).toContainEqual(expect.stringContaining('undefinedVar'));
     });
 
     it('should not warn for exported variables', () => {

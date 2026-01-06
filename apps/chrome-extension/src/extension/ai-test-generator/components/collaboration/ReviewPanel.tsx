@@ -4,8 +4,14 @@
  * Displays review requests, changes, and approval workflow.
  */
 
-import React, { useState, useEffect } from 'react';
-import type { Review, ReviewStatus, Change, Comment } from '../../types/collaboration';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import type {
+  Change,
+  Comment,
+  Review,
+  ReviewStatus,
+} from '../../types/collaboration';
 
 /**
  * Props for ReviewPanel
@@ -18,7 +24,12 @@ export interface ReviewPanelProps {
   /** Callback when review status changes */
   onStatusChange?: (reviewId: string, status: ReviewStatus) => void;
   /** Callback when comment is added */
-  onCommentAdd?: (reviewId: string, content: string, fileId?: string, lineNumber?: number) => void;
+  onCommentAdd?: (
+    reviewId: string,
+    content: string,
+    fileId?: string,
+    lineNumber?: number,
+  ) => void;
   /** Callback when change is viewed */
   onChangeView?: (changeId: string) => void;
 }
@@ -40,26 +51,36 @@ export const ReviewPanel: React.FC<ReviewPanelProps> = ({
   /**
    * Get current user's reviewer status
    */
-  const currentUserReviewer = review.reviewers.find((r) => r.userId === currentUserId);
+  const currentUserReviewer = review.reviewers.find(
+    (r) => r.userId === currentUserId,
+  );
 
   /**
    * Check if user can approve
    */
-  const canApprove = currentUserReviewer?.status === 'pending' ||
-                     review.author === currentUserId;
+  const canApprove =
+    currentUserReviewer?.status === 'pending' ||
+    review.author === currentUserId;
 
   /**
    * Get status badge color
    */
   const getStatusColor = (status: ReviewStatus): string => {
     switch (status) {
-      case 'draft': return 'gray';
-      case 'pending': return 'blue';
-      case 'changes_requested': return 'orange';
-      case 'approved': return 'green';
-      case 'merged': return 'purple';
-      case 'closed': return 'red';
-      default: return 'gray';
+      case 'draft':
+        return 'gray';
+      case 'pending':
+        return 'blue';
+      case 'changes_requested':
+        return 'orange';
+      case 'approved':
+        return 'green';
+      case 'merged':
+        return 'purple';
+      case 'closed':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
@@ -129,9 +150,13 @@ export const ReviewPanel: React.FC<ReviewPanelProps> = ({
     return (
       <div className="diff-view">
         {lines.map((line, idx) => {
-          const type = line.startsWith('@@') ? 'hunk' :
-                       line.startsWith('+') ? 'add' :
-                       line.startsWith('-') ? 'delete' : 'context';
+          const type = line.startsWith('@@')
+            ? 'hunk'
+            : line.startsWith('+')
+              ? 'add'
+              : line.startsWith('-')
+                ? 'delete'
+                : 'context';
           const content = line.replace(/^@@.*@@/, '').replace(/^[+-]/, '');
 
           if (type === 'hunk') {
@@ -210,7 +235,9 @@ export const ReviewPanel: React.FC<ReviewPanelProps> = ({
    */
   const renderComments = () => {
     const changeComments = review.comments.filter(
-      (c) => !selectedChangeIndex || c.fileId === review.changes[selectedChangeIndex]?.fileId
+      (c) =>
+        !selectedChangeIndex ||
+        c.fileId === review.changes[selectedChangeIndex]?.fileId,
     );
 
     return (
@@ -218,7 +245,10 @@ export const ReviewPanel: React.FC<ReviewPanelProps> = ({
         <h4>Comments ({changeComments.length})</h4>
         <div className="comment-list">
           {changeComments.map((comment) => (
-            <div key={comment.id} className={`comment ${comment.resolved ? 'resolved' : ''}`}>
+            <div
+              key={comment.id}
+              className={`comment ${comment.resolved ? 'resolved' : ''}`}
+            >
               <div className="comment-avatar">
                 {comment.author.charAt(0).toUpperCase()}
               </div>

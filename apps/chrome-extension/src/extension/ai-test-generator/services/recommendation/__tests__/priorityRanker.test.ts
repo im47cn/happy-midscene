@@ -62,9 +62,30 @@ describe('PriorityRanker', () => {
 
     it('should sort by priority then score', async () => {
       const caseStats = [
-        createCaseStats({ caseId: 'low', caseName: 'Basic Test', stabilityScore: 95, totalRuns: 5, passRate: 98, recentResults: ['passed', 'passed', 'passed', 'passed', 'passed'] }),
-        createCaseStats({ caseId: 'high', caseName: 'Login Test', stabilityScore: 60, totalRuns: 50, passRate: 60, recentResults: ['failed', 'failed', 'passed', 'passed', 'passed'] }),
-        createCaseStats({ caseId: 'critical', caseName: 'Payment Auth Test', isFlaky: true, passRate: 40, stabilityScore: 20, recentResults: ['failed', 'failed', 'failed', 'passed', 'passed'] }),
+        createCaseStats({
+          caseId: 'low',
+          caseName: 'Basic Test',
+          stabilityScore: 95,
+          totalRuns: 5,
+          passRate: 98,
+          recentResults: ['passed', 'passed', 'passed', 'passed', 'passed'],
+        }),
+        createCaseStats({
+          caseId: 'high',
+          caseName: 'Login Test',
+          stabilityScore: 60,
+          totalRuns: 50,
+          passRate: 60,
+          recentResults: ['failed', 'failed', 'passed', 'passed', 'passed'],
+        }),
+        createCaseStats({
+          caseId: 'critical',
+          caseName: 'Payment Auth Test',
+          isFlaky: true,
+          passRate: 40,
+          stabilityScore: 20,
+          recentResults: ['failed', 'failed', 'failed', 'passed', 'passed'],
+        }),
       ];
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
@@ -88,12 +109,20 @@ describe('PriorityRanker', () => {
       const ranked = await ranker.rankCases(['case-1', 'case-3']);
 
       expect(ranked.length).toBe(2);
-      expect(ranked.map((r) => r.caseId)).toEqual(expect.arrayContaining(['case-1', 'case-3']));
+      expect(ranked.map((r) => r.caseId)).toEqual(
+        expect.arrayContaining(['case-1', 'case-3']),
+      );
     });
 
     it('should calculate factors correctly', async () => {
       const caseStats = [
-        createCaseStats({ caseId: 'login-test', caseName: 'Login Authentication', passRate: 50, stabilityScore: 40, totalRuns: 100 }),
+        createCaseStats({
+          caseId: 'login-test',
+          caseName: 'Login Authentication',
+          passRate: 50,
+          stabilityScore: 40,
+          totalRuns: 100,
+        }),
       ];
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
@@ -109,7 +138,13 @@ describe('PriorityRanker', () => {
 
   describe('getPriority', () => {
     it('should return low priority for stable tests', async () => {
-      const caseStats = [createCaseStats({ caseId: 'stable-case', stabilityScore: 95, passRate: 98 })];
+      const caseStats = [
+        createCaseStats({
+          caseId: 'stable-case',
+          stabilityScore: 95,
+          passRate: 98,
+        }),
+      ];
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
       const priority = await ranker.getPriority('stable-case');
@@ -121,16 +156,18 @@ describe('PriorityRanker', () => {
       // Max score without changeImpact is 80 (weights sum to 0.9: 0.4+0.3+0.1+0.1)
       // Score = (risk * 0.4 + businessValue * 0.3 + recency * 0.1 + changeImpact * 0.1) * 100
       // High priority threshold is >= 70, critical is >= 90 (unreachable without changeImpact)
-      const caseStats = [createCaseStats({
-        caseId: 'flaky-case',
-        isFlaky: true,
-        passRate: 10,
-        stabilityScore: 5, // Very unstable - high risk
-        caseName: 'Critical Payment Login Auth',
-        totalRuns: 100, // High frequency = high business value
-        lastRun: Date.now() - 100 * 24 * 60 * 60 * 1000, // 100 days ago = high recency
-        recentResults: ['failed', 'failed', 'failed', 'failed', 'failed'],
-      })];
+      const caseStats = [
+        createCaseStats({
+          caseId: 'flaky-case',
+          isFlaky: true,
+          passRate: 10,
+          stabilityScore: 5, // Very unstable - high risk
+          caseName: 'Critical Payment Login Auth',
+          totalRuns: 100, // High frequency = high business value
+          lastRun: Date.now() - 100 * 24 * 60 * 60 * 1000, // 100 days ago = high recency
+          recentResults: ['failed', 'failed', 'failed', 'failed', 'failed'],
+        }),
+      ];
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
       const priority = await ranker.getPriority('flaky-case');
@@ -142,14 +179,16 @@ describe('PriorityRanker', () => {
     it('should return medium priority for login tests with moderate risk', async () => {
       // Login keyword gives businessValue boost
       // With moderate risk factors, should reach at least medium priority
-      const caseStats = [createCaseStats({
-        caseId: 'login',
-        caseName: 'User Login Authentication Test',
-        passRate: 50, // Low pass rate increases risk
-        stabilityScore: 40, // Low stability
-        totalRuns: 80, // High frequency = high business value
-        recentResults: ['failed', 'failed', 'passed', 'passed', 'passed'],
-      })];
+      const caseStats = [
+        createCaseStats({
+          caseId: 'login',
+          caseName: 'User Login Authentication Test',
+          passRate: 50, // Low pass rate increases risk
+          stabilityScore: 40, // Low stability
+          totalRuns: 80, // High frequency = high business value
+          recentResults: ['failed', 'failed', 'passed', 'passed', 'passed'],
+        }),
+      ];
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
       const priority = await ranker.getPriority('login');
@@ -169,7 +208,15 @@ describe('PriorityRanker', () => {
 
   describe('updateConfig', () => {
     it('should update weights', () => {
-      ranker.updateConfig({ weights: { riskFactor: 0.6, businessValue: 0.3, executionCost: 0, changeImpact: 0.05, recency: 0.05 } });
+      ranker.updateConfig({
+        weights: {
+          riskFactor: 0.6,
+          businessValue: 0.3,
+          executionCost: 0,
+          changeImpact: 0.05,
+          recency: 0.05,
+        },
+      });
 
       const config = ranker.getConfig();
       expect(config.weights.riskFactor).toBe(0.6);
@@ -177,7 +224,9 @@ describe('PriorityRanker', () => {
     });
 
     it('should update thresholds', () => {
-      ranker.updateConfig({ thresholds: { critical: 85, high: 65, medium: 45 } });
+      ranker.updateConfig({
+        thresholds: { critical: 85, high: 65, medium: 45 },
+      });
 
       const config = ranker.getConfig();
       expect(config.thresholds.critical).toBe(85);
@@ -212,11 +261,32 @@ describe('PriorityRanker', () => {
   describe('getPriorityDistribution', () => {
     it('should return distribution across priorities', async () => {
       const caseStats = [
-        createCaseStats({ caseId: 'critical', caseName: 'Payment Test', isFlaky: true }),
-        createCaseStats({ caseId: 'high1', caseName: 'Login Test', passRate: 70 }),
-        createCaseStats({ caseId: 'high2', caseName: 'Auth Test', passRate: 65 }),
-        createCaseStats({ caseId: 'medium', caseName: 'Search Test', passRate: 80 }),
-        createCaseStats({ caseId: 'low', caseName: 'About Page', stabilityScore: 95, passRate: 98 }),
+        createCaseStats({
+          caseId: 'critical',
+          caseName: 'Payment Test',
+          isFlaky: true,
+        }),
+        createCaseStats({
+          caseId: 'high1',
+          caseName: 'Login Test',
+          passRate: 70,
+        }),
+        createCaseStats({
+          caseId: 'high2',
+          caseName: 'Auth Test',
+          passRate: 65,
+        }),
+        createCaseStats({
+          caseId: 'medium',
+          caseName: 'Search Test',
+          passRate: 80,
+        }),
+        createCaseStats({
+          caseId: 'low',
+          caseName: 'About Page',
+          stabilityScore: 95,
+          passRate: 98,
+        }),
       ];
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
@@ -226,7 +296,12 @@ describe('PriorityRanker', () => {
       expect(distribution).toHaveProperty('high');
       expect(distribution).toHaveProperty('medium');
       expect(distribution).toHaveProperty('low');
-      expect(distribution.critical + distribution.high + distribution.medium + distribution.low).toBe(5);
+      expect(
+        distribution.critical +
+          distribution.high +
+          distribution.medium +
+          distribution.low,
+      ).toBe(5);
     });
 
     it('should filter distribution by caseIds', async () => {
@@ -237,9 +312,16 @@ describe('PriorityRanker', () => {
       ];
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
-      const distribution = await ranker.getPriorityDistribution(['case-1', 'case-2']);
+      const distribution = await ranker.getPriorityDistribution([
+        'case-1',
+        'case-2',
+      ]);
 
-      const total = distribution.critical + distribution.high + distribution.medium + distribution.low;
+      const total =
+        distribution.critical +
+        distribution.high +
+        distribution.medium +
+        distribution.low;
       expect(total).toBeLessThanOrEqual(2);
     });
   });
@@ -247,7 +329,11 @@ describe('PriorityRanker', () => {
   describe('business value calculation', () => {
     it('should increase priority for critical keywords', async () => {
       const caseStats = [
-        createCaseStats({ caseId: 'payment', caseName: 'Payment Checkout Test', passRate: 85 }),
+        createCaseStats({
+          caseId: 'payment',
+          caseName: 'Payment Checkout Test',
+          passRate: 85,
+        }),
       ];
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
@@ -259,7 +345,11 @@ describe('PriorityRanker', () => {
 
     it('should increase priority for high execution frequency', async () => {
       const caseStats = [
-        createCaseStats({ caseId: 'frequent', caseName: 'Frequently Run Test', totalRuns: 100 }),
+        createCaseStats({
+          caseId: 'frequent',
+          caseName: 'Frequently Run Test',
+          totalRuns: 100,
+        }),
       ];
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 

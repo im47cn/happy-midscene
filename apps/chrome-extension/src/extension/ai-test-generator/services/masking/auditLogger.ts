@@ -3,10 +3,7 @@
  * Records and retrieves masking operations for audit purposes
  */
 
-import type {
-  MaskingAuditEntry,
-  SensitiveCategory,
-} from '../../types/masking';
+import type { MaskingAuditEntry, SensitiveCategory } from '../../types/masking';
 
 const DB_NAME = 'midscene-masking-audit';
 const DB_VERSION = 1;

@@ -28,7 +28,12 @@ import {
   Typography,
 } from 'antd';
 import { useMemo, useState } from 'react';
-import type { Anomaly, AnomalyType, Severity, AnomalyStatus } from '../../types/anomaly';
+import type {
+  Anomaly,
+  AnomalyStatus,
+  AnomalyType,
+  Severity,
+} from '../../types/anomaly';
 
 const { Text } = Typography;
 
@@ -48,12 +53,20 @@ interface AnomalyListProps {
 // Helper Functions
 // ============================================================================
 
-function getSeverityConfig(severity: Severity): { color: string; icon: React.ReactNode; label: string } {
+function getSeverityConfig(severity: Severity): {
+  color: string;
+  icon: React.ReactNode;
+  label: string;
+} {
   switch (severity) {
     case 'critical':
       return { color: '#ff4d4f', icon: <AlertOutlined />, label: '严重' };
     case 'high':
-      return { color: '#fa541c', icon: <ExclamationCircleOutlined />, label: '高' };
+      return {
+        color: '#fa541c',
+        icon: <ExclamationCircleOutlined />,
+        label: '高',
+      };
     case 'medium':
       return { color: '#faad14', icon: <WarningOutlined />, label: '中' };
     case 'low':
@@ -62,7 +75,10 @@ function getSeverityConfig(severity: Severity): { color: string; icon: React.Rea
   }
 }
 
-function getStatusConfig(status: AnomalyStatus): { color: string; label: string } {
+function getStatusConfig(status: AnomalyStatus): {
+  color: string;
+  label: string;
+} {
   switch (status) {
     case 'new':
       return { color: 'red', label: '新建' };
@@ -113,12 +129,15 @@ export function AnomalyList({
   onResolve,
 }: AnomalyListProps) {
   const [severityFilter, setSeverityFilter] = useState<Severity | 'all'>('all');
-  const [statusFilter, setStatusFilter] = useState<AnomalyStatus | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState<AnomalyStatus | 'all'>(
+    'all',
+  );
   const [typeFilter, setTypeFilter] = useState<AnomalyType | 'all'>('all');
 
   const filteredAnomalies = useMemo(() => {
     return anomalies.filter((a) => {
-      if (severityFilter !== 'all' && a.severity !== severityFilter) return false;
+      if (severityFilter !== 'all' && a.severity !== severityFilter)
+        return false;
       if (statusFilter !== 'all' && a.status !== statusFilter) return false;
       if (typeFilter !== 'all' && a.type !== typeFilter) return false;
       return true;
@@ -232,7 +251,9 @@ export function AnomalyList({
                       <Button
                         type="text"
                         size="small"
-                        icon={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
+                        icon={
+                          <CheckCircleOutlined style={{ color: '#52c41a' }} />
+                        }
                         onClick={(e) => {
                           e.stopPropagation();
                           onResolve(anomaly.id);
@@ -273,14 +294,16 @@ export function AnomalyList({
                     <div>
                       <div style={{ marginBottom: 4 }}>
                         <Text type="secondary">
-                          {anomaly.metric}: {anomaly.currentValue.toFixed(2)}
-                          {' '}
-                          (偏差: {anomaly.deviation > 0 ? '+' : ''}{anomaly.deviation.toFixed(1)}%)
+                          {anomaly.metric}: {anomaly.currentValue.toFixed(2)}{' '}
+                          (偏差: {anomaly.deviation > 0 ? '+' : ''}
+                          {anomaly.deviation.toFixed(1)}%)
                         </Text>
                       </div>
                       <Space size="small" style={{ fontSize: 12 }}>
                         <Tag>{severityConfig.label}</Tag>
-                        <Text type="secondary">{formatTime(anomaly.detectedAt)}</Text>
+                        <Text type="secondary">
+                          {formatTime(anomaly.detectedAt)}
+                        </Text>
                       </Space>
                     </div>
                   }

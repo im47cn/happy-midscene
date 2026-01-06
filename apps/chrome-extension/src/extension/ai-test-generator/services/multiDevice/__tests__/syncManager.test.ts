@@ -3,7 +3,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { SyncManager, createSyncManager } from '../syncManager';
+import { type SyncManager, createSyncManager } from '../syncManager';
 
 describe('SyncManager', () => {
   let syncManager: SyncManager;
@@ -64,9 +64,9 @@ describe('SyncManager', () => {
     it('should throw for unexpected device', async () => {
       syncManager.registerSyncPoint('sync1', ['device1']);
 
-      await expect(
-        syncManager.waitForSync('sync1', 'device2'),
-      ).rejects.toThrow('Device device2 is not expected');
+      await expect(syncManager.waitForSync('sync1', 'device2')).rejects.toThrow(
+        'Device device2 is not expected',
+      );
     });
   });
 

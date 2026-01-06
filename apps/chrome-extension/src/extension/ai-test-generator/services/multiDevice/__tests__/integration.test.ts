@@ -5,14 +5,14 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  type DataChannel,
+  type DeviceConfig,
+  type Orchestrator,
+  type SyncManager,
+  type TestStep,
   createDataChannel,
   createOrchestrator,
   createSyncManager,
-  DataChannel,
-  Orchestrator,
-  SyncManager,
-  type DeviceConfig,
-  type TestStep,
 } from '..';
 
 /**
@@ -22,7 +22,8 @@ class MockDeviceSession {
   readonly id: string;
   readonly alias: string;
   readonly type = 'web' as const;
-  status: 'connecting' | 'ready' | 'busy' | 'error' | 'disconnected' = 'disconnected';
+  status: 'connecting' | 'ready' | 'busy' | 'error' | 'disconnected' =
+    'disconnected';
 
   private connected = false;
   private executedSteps: TestStep[] = [];
@@ -298,7 +299,9 @@ describe('Collaborative Scenario Tests', () => {
       const valueFromD1 = dataChannel.get('orderId');
       expect(valueFromD1).toBe('ORD-12345');
 
-      const interpolated = dataChannel.interpolate('Order ${orderId} confirmed');
+      const interpolated = dataChannel.interpolate(
+        'Order ${orderId} confirmed',
+      );
       expect(interpolated).toBe('Order ORD-12345 confirmed');
     });
   });
@@ -344,7 +347,10 @@ describe('Collaborative Scenario Tests', () => {
     it('should get waiting devices for sync point', () => {
       const syncPointId = 'waiting-sync';
 
-      syncManager.registerSyncPoint(syncPointId, devices.map((d) => d.id));
+      syncManager.registerSyncPoint(
+        syncPointId,
+        devices.map((d) => d.id),
+      );
 
       syncManager.waitForSync(syncPointId, devices[0].id);
 
@@ -357,7 +363,10 @@ describe('Collaborative Scenario Tests', () => {
     it('should get arrived devices for sync point', async () => {
       const syncPointId = 'arrived-sync';
 
-      syncManager.registerSyncPoint(syncPointId, devices.map((d) => d.id));
+      syncManager.registerSyncPoint(
+        syncPointId,
+        devices.map((d) => d.id),
+      );
 
       syncManager.waitForSync(syncPointId, devices[0].id);
 

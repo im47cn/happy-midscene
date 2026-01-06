@@ -3,8 +3,8 @@
  * 特殊节点 - Start, End, Comment, Subflow
  */
 
+import { Handle, type NodeProps, Position } from '@xyflow/react';
 import React, { memo } from 'react';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { BaseNode, type CompatibleNodeData } from './BaseNode';
 
 /**
@@ -28,7 +28,11 @@ export const StartNode = memo<NodeProps>((props) => {
         <span className="text-lg">🚀</span>
         <span className="font-medium text-sm">{String(data.label || '')}</span>
       </div>
-      <Handle type="source" position={Position.Right} className="w-3 h-3 !bg-green-500" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-3 h-3 !bg-green-500"
+      />
     </div>
   );
 });
@@ -55,7 +59,11 @@ export const EndNode = memo<NodeProps>((props) => {
         <span className="text-lg">🏁</span>
         <span className="font-medium text-sm">{String(data.label || '')}</span>
       </div>
-      <Handle type="target" position={Position.Left} className="w-3 h-3 !bg-red-500" />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-3 h-3 !bg-red-500"
+      />
     </div>
   );
 });
@@ -66,7 +74,9 @@ EndNode.displayName = 'EndNode';
  */
 export const CommentNode = memo<NodeProps>((props) => {
   const { data, selected } = props;
-  const config = data.config as { content?: string; color?: string } | undefined;
+  const config = data.config as
+    | { content?: string; color?: string }
+    | undefined;
   const content = config?.content || '';
 
   return (
@@ -82,7 +92,9 @@ export const CommentNode = memo<NodeProps>((props) => {
       <div className="flex items-start gap-2">
         <span className="text-lg">💬</span>
         <div className="flex-1">
-          <div className="font-medium text-sm text-yellow-800 mb-1">{String(data.label || '')}</div>
+          <div className="font-medium text-sm text-yellow-800 mb-1">
+            {String(data.label || '')}
+          </div>
           <div className="text-sm text-yellow-900 whitespace-pre-wrap break-words">
             {content}
           </div>

@@ -86,18 +86,20 @@ class SimilarityCalculator implements ISimilarityCalculator {
    * Normalize step for comparison
    */
   normalizeStep(step: string): string {
-    return step
-      .toLowerCase()
-      .trim()
-      // Remove specific values but keep structure
-      .replace(/"[^"]*"/g, '""')
-      .replace(/'[^']*'/g, "''")
-      // Normalize whitespace
-      .replace(/\s+/g, ' ')
-      // Remove common prefixes
-      .replace(/^(click|tap|type|input|enter|select|check|verify)\s+/i, '$1 ')
-      // Normalize numbers
-      .replace(/\d+/g, 'N');
+    return (
+      step
+        .toLowerCase()
+        .trim()
+        // Remove specific values but keep structure
+        .replace(/"[^"]*"/g, '""')
+        .replace(/'[^']*'/g, "''")
+        // Normalize whitespace
+        .replace(/\s+/g, ' ')
+        // Remove common prefixes
+        .replace(/^(click|tap|type|input|enter|select|check|verify)\s+/i, '$1 ')
+        // Normalize numbers
+        .replace(/\d+/g, 'N')
+    );
   }
 
   /**

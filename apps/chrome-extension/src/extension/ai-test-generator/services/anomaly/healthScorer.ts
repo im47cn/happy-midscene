@@ -6,12 +6,12 @@
  */
 
 import type {
-  HealthScore,
-  HealthDimension,
-  HealthFactor,
-  TrendDirection,
   Anomaly,
   BaselineInfo,
+  HealthDimension,
+  HealthFactor,
+  HealthScore,
+  TrendDirection,
 } from '../../types/anomaly';
 import { anomalyStorage } from './storage';
 
@@ -75,8 +75,8 @@ export interface ScoreTrendAnalysis {
 const DIMENSION_WEIGHTS = {
   reliability: 0.35,
   stability: 0.25,
-  efficiency: 0.20,
-  coverage: 0.20,
+  efficiency: 0.2,
+  coverage: 0.2,
 };
 
 // Score thresholds
@@ -112,11 +112,16 @@ class HealthScorer {
     const efficiency = this.calculateEfficiency(metrics);
     const coverage = this.calculateCoverage(metrics);
 
-    const dimensions: HealthDimension[] = [reliability, stability, efficiency, coverage];
+    const dimensions: HealthDimension[] = [
+      reliability,
+      stability,
+      efficiency,
+      coverage,
+    ];
 
     // Calculate weighted overall score
     const overall = Math.round(
-      dimensions.reduce((sum, d) => sum + d.score * d.weight, 0)
+      dimensions.reduce((sum, d) => sum + d.score * d.weight, 0),
     );
 
     // Get historical data for comparison
@@ -125,8 +130,12 @@ class HealthScorer {
       anomalyStorage.getHealthScoreHistory(30),
     ]);
 
-    const lastWeekAvg = this.calculateAverage(lastWeekScores.map((s) => s.overall));
-    const lastMonthAvg = this.calculateAverage(lastMonthScores.map((s) => s.overall));
+    const lastWeekAvg = this.calculateAverage(
+      lastWeekScores.map((s) => s.overall),
+    );
+    const lastMonthAvg = this.calculateAverage(
+      lastMonthScores.map((s) => s.overall),
+    );
 
     // Determine trend
     const trend = this.determineTrend(overall, lastWeekScores);
@@ -182,7 +191,7 @@ class HealthScorer {
   /**
    * Analyze score trends
    */
-  async analyzeTrends(days: number = 30): Promise<ScoreTrendAnalysis> {
+  async analyzeTrends(days = 30): Promise<ScoreTrendAnalysis> {
     const history = await this.getScoreHistory(days);
     const latest = history[0];
     const alerts: string[] = [];
@@ -192,8 +201,20 @@ class HealthScorer {
         overall: { direction: 'stable', change: 0, period: `${days} days` },
         dimensions: [],
         comparison: {
-          lastWeek: { current: 0, previous: 0, change: 0, changePercent: 0, improved: false },
-          lastMonth: { current: 0, previous: 0, change: 0, changePercent: 0, improved: false },
+          lastWeek: {
+            current: 0,
+            previous: 0,
+            change: 0,
+            changePercent: 0,
+            improved: false,
+          },
+          lastMonth: {
+            current: 0,
+            previous: 0,
+            change: 0,
+            changePercent: 0,
+            improved: false,
+          },
         },
         alerts: ['Insufficient data for trend analysis'],
       };
@@ -202,17 +223,18 @@ class HealthScorer {
     // Overall trend
     const overallTrend = this.calculateTrend(
       history.map((s) => s.overall),
-      `${days} days`
+      `${days} days`,
     );
 
     // Dimension trends
     const dimensionTrends: DimensionTrend[] = latest.dimensions.map((dim) => {
       const dimHistory = history.map(
-        (s) => s.dimensions.find((d) => d.name === dim.name)?.score ?? 0
+        (s) => s.dimensions.find((d) => d.name === dim.name)?.score ?? 0,
       );
       const trend = this.calculateTrend(dimHistory, `${days} days`);
 
-      const isAtRisk = dim.score < ALERT_THRESHOLDS.criticalScore ||
+      const isAtRisk =
+        dim.score < ALERT_THRESHOLDS.criticalScore ||
         trend.change < -ALERT_THRESHOLDS.dimensionDrop;
 
       let riskReason: string | undefined;
@@ -233,20 +255,26 @@ class HealthScorer {
     });
 
     // Comparisons
-    const weekAgo = history.find((s) =>
-      s.calculatedAt < Date.now() - 7 * 24 * 60 * 60 * 1000
+    const weekAgo = history.find(
+      (s) => s.calculatedAt < Date.now() - 7 * 24 * 60 * 60 * 1000,
     );
-    const monthAgo = history.find((s) =>
-      s.calculatedAt < Date.now() - 30 * 24 * 60 * 60 * 1000
+    const monthAgo = history.find(
+      (s) => s.calculatedAt < Date.now() - 30 * 24 * 60 * 60 * 1000,
     );
 
-    const lastWeekComparison = this.compareScores(latest.overall, weekAgo?.overall);
-    const lastMonthComparison = this.compareScores(latest.overall, monthAgo?.overall);
+    const lastWeekComparison = this.compareScores(
+      latest.overall,
+      weekAgo?.overall,
+    );
+    const lastMonthComparison = this.compareScores(
+      latest.overall,
+      monthAgo?.overall,
+    );
 
     // Check for significant drops
     if (lastWeekComparison.changePercent < -ALERT_THRESHOLDS.overallDrop) {
       alerts.push(
-        `Overall score dropped ${Math.abs(lastWeekComparison.changePercent).toFixed(1)}% from last week`
+        `Overall score dropped ${Math.abs(lastWeekComparison.changePercent).toFixed(1)}% from last week`,
       );
     }
 
@@ -282,7 +310,8 @@ class HealthScorer {
 
     // Pass rate factor (most important)
     const passRate = metrics.passRate ?? 100;
-    const passRateImpact = passRate < 95 ? 'negative' : passRate < 99 ? 'neutral' : 'positive';
+    const passRateImpact =
+      passRate < 95 ? 'negative' : passRate < 99 ? 'neutral' : 'positive';
     factors.push({
       name: 'Pass Rate',
       value: passRate,
@@ -332,7 +361,12 @@ class HealthScorer {
     const flakyPercent = (flakyCount / totalCases) * 100;
 
     if (flakyCount > 0) {
-      const flakyImpact = flakyPercent > 5 ? 'negative' : flakyPercent > 2 ? 'neutral' : 'positive';
+      const flakyImpact =
+        flakyPercent > 5
+          ? 'negative'
+          : flakyPercent > 2
+            ? 'neutral'
+            : 'positive';
       factors.push({
         name: 'Flaky Tests',
         value: flakyCount,
@@ -350,7 +384,12 @@ class HealthScorer {
     // Duration variance factor (stability indicator)
     const durationVariance = metrics.durationVariance ?? 0;
     const variancePercent = Math.min(100, durationVariance);
-    const varianceImpact = variancePercent > 30 ? 'negative' : variancePercent > 15 ? 'neutral' : 'positive';
+    const varianceImpact =
+      variancePercent > 30
+        ? 'negative'
+        : variancePercent > 15
+          ? 'neutral'
+          : 'positive';
     factors.push({
       name: 'Duration Variance',
       value: Math.round(variancePercent),
@@ -399,7 +438,8 @@ class HealthScorer {
 
     // Total cases factor (efficiency at scale)
     const totalCases = metrics.totalCases ?? 0;
-    const caseImpact = totalCases > 100 ? 'positive' : totalCases > 50 ? 'neutral' : 'negative';
+    const caseImpact =
+      totalCases > 100 ? 'positive' : totalCases > 50 ? 'neutral' : 'negative';
     factors.push({
       name: 'Total Test Cases',
       value: totalCases,
@@ -426,8 +466,14 @@ class HealthScorer {
     const coveredCases = metrics.coveredCases ?? 0;
 
     // Coverage percentage
-    const coveragePercent = totalCases > 0 ? (coveredCases / totalCases) * 100 : 0;
-    const coverageImpact = coveragePercent >= 80 ? 'positive' : coveragePercent >= 60 ? 'neutral' : 'negative';
+    const coveragePercent =
+      totalCases > 0 ? (coveredCases / totalCases) * 100 : 0;
+    const coverageImpact =
+      coveragePercent >= 80
+        ? 'positive'
+        : coveragePercent >= 60
+          ? 'neutral'
+          : 'negative';
 
     factors.push({
       name: 'Coverage %',
@@ -467,8 +513,12 @@ class HealthScorer {
     ]);
 
     // Calculate metrics from available data
-    const passRateBaseline = baselines.find((b) => b.metricName.includes('passRate'));
-    const durationBaseline = baselines.find((b) => b.metricName.includes('duration'));
+    const passRateBaseline = baselines.find((b) =>
+      b.metricName.includes('passRate'),
+    );
+    const durationBaseline = baselines.find((b) =>
+      b.metricName.includes('duration'),
+    );
 
     return {
       passRate: passRateBaseline?.baseline.mean ?? 95,
@@ -484,17 +534,17 @@ class HealthScorer {
 
   private countConsecutiveFailures(anomalies: Anomaly[]): number {
     const consecutiveAnomalies = anomalies.filter(
-      (a) => a.type === 'consecutive_failures'
+      (a) => a.type === 'consecutive_failures',
     );
     if (consecutiveAnomalies.length === 0) return 0;
 
     // Get max from metric values
-    return Math.max(
-      ...consecutiveAnomalies.map((a) => a.metric.currentValue)
-    );
+    return Math.max(...consecutiveAnomalies.map((a) => a.metric.currentValue));
   }
 
-  private estimateTotalCases(baselines: Array<{ metricName: string; baseline: BaselineInfo }>): number {
+  private estimateTotalCases(
+    baselines: Array<{ metricName: string; baseline: BaselineInfo }>,
+  ): number {
     // Estimate from unique case prefixes in baselines
     const caseIds = new Set<string>();
     for (const b of baselines) {
@@ -506,7 +556,9 @@ class HealthScorer {
     return Math.max(caseIds.size, 10); // Minimum 10 for reasonable scoring
   }
 
-  private estimateCoveredCases(baselines: Array<{ metricName: string; baseline: BaselineInfo }>): number {
+  private estimateCoveredCases(
+    baselines: Array<{ metricName: string; baseline: BaselineInfo }>,
+  ): number {
     // Cases with baselines are considered "covered"
     const caseIds = new Set<string>();
     for (const b of baselines) {
@@ -523,7 +575,10 @@ class HealthScorer {
     return Math.round(values.reduce((sum, v) => sum + v, 0) / values.length);
   }
 
-  private determineTrend(current: number, history: HealthScore[]): TrendDirection {
+  private determineTrend(
+    current: number,
+    history: HealthScore[],
+  ): TrendDirection {
     if (history.length < 2) return 'stable';
 
     const recent = history.slice(0, 3).map((s) => s.overall);
@@ -568,7 +623,7 @@ class HealthScorer {
 
   private generateRecommendations(
     dimensions: HealthDimension[],
-    metrics: MetricData
+    metrics: MetricData,
   ): string[] {
     const recommendations: string[] = [];
 
@@ -580,18 +635,27 @@ class HealthScorer {
     }
 
     // General recommendations based on overall state
-    const overallScore = dimensions.reduce((sum, d) => sum + d.score * d.weight, 0);
+    const overallScore = dimensions.reduce(
+      (sum, d) => sum + d.score * d.weight,
+      0,
+    );
 
     if (overallScore < SCORE_THRESHOLDS.poor) {
-      recommendations.push('Critical: Overall health score is very low. Prioritize fixing failing tests.');
+      recommendations.push(
+        'Critical: Overall health score is very low. Prioritize fixing failing tests.',
+      );
     }
 
     if (metrics.consecutiveFailures && metrics.consecutiveFailures >= 3) {
-      recommendations.push('High Priority: Multiple consecutive failures detected. Investigate root cause immediately.');
+      recommendations.push(
+        'High Priority: Multiple consecutive failures detected. Investigate root cause immediately.',
+      );
     }
 
     if (metrics.flakyCount && metrics.flakyCount > 5) {
-      recommendations.push('Address flaky tests to improve test reliability and team confidence.');
+      recommendations.push(
+        'Address flaky tests to improve test reliability and team confidence.',
+      );
     }
 
     // Limit recommendations
@@ -600,14 +664,16 @@ class HealthScorer {
 
   private getDimensionRecommendations(
     dimension: HealthDimension,
-    metrics: MetricData
+    metrics: MetricData,
   ): string[] {
     const recs: string[] = [];
 
     switch (dimension.name) {
       case 'Reliability':
         if ((metrics.passRate ?? 100) < 95) {
-          recs.push(`Improve pass rate from ${metrics.passRate?.toFixed(1)}% to at least 95%.`);
+          recs.push(
+            `Improve pass rate from ${metrics.passRate?.toFixed(1)}% to at least 95%.`,
+          );
         }
         if ((metrics.consecutiveFailures ?? 0) > 0) {
           recs.push('Fix consecutive failures to restore test reliability.');
@@ -616,16 +682,22 @@ class HealthScorer {
 
       case 'Stability':
         if ((metrics.flakyCount ?? 0) > 0) {
-          recs.push(`Reduce flaky tests (currently ${metrics.flakyCount}) by adding proper waits and retries.`);
+          recs.push(
+            `Reduce flaky tests (currently ${metrics.flakyCount}) by adding proper waits and retries.`,
+          );
         }
         if ((metrics.durationVariance ?? 0) > 30) {
-          recs.push('Investigate high duration variance - tests may have timing issues.');
+          recs.push(
+            'Investigate high duration variance - tests may have timing issues.',
+          );
         }
         break;
 
       case 'Efficiency':
         if ((metrics.avgDuration ?? 0) > 3000) {
-          recs.push(`Optimize test execution time (avg ${(metrics.avgDuration! / 1000).toFixed(1)}s is above target).`);
+          recs.push(
+            `Optimize test execution time (avg ${(metrics.avgDuration! / 1000).toFixed(1)}s is above target).`,
+          );
         }
         break;
 
@@ -635,7 +707,9 @@ class HealthScorer {
             ? (metrics.coveredCases / metrics.totalCases) * 100
             : 0;
         if (coveragePercent < 80) {
-          recs.push(`Increase test coverage from ${coveragePercent.toFixed(0)}% to at least 80%.`);
+          recs.push(
+            `Increase test coverage from ${coveragePercent.toFixed(0)}% to at least 80%.`,
+          );
         }
         break;
     }

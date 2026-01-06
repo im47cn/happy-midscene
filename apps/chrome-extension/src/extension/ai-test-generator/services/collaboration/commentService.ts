@@ -5,12 +5,12 @@
  */
 
 import type { Comment } from '../../types/collaboration';
-import type {
-  ICommentService,
-  CreateCommentData,
-  CommentQueryOptions,
-} from './interfaces';
 import { auditLogger } from './auditLogger';
+import type {
+  CommentQueryOptions,
+  CreateCommentData,
+  ICommentService,
+} from './interfaces';
 
 /**
  * In-memory storage for comments
@@ -41,7 +41,9 @@ export class CommentService implements ICommentService {
   /**
    * Add a comment
    */
-  async addComment(data: CreateCommentData & { reviewId?: string }): Promise<Comment> {
+  async addComment(
+    data: CreateCommentData & { reviewId?: string },
+  ): Promise<Comment> {
     const id = this.generateId();
     const now = Date.now();
 
@@ -112,7 +114,11 @@ export class CommentService implements ICommentService {
         this.storage.comments.delete(replyId);
         this.removeFromIndex(this.storage.byFile, comment.fileId, replyId);
         if (comment.reviewId) {
-          this.removeFromIndex(this.storage.byReview, comment.reviewId, replyId);
+          this.removeFromIndex(
+            this.storage.byReview,
+            comment.reviewId,
+            replyId,
+          );
         }
       }
       this.storage.byParent.delete(id);
@@ -161,7 +167,7 @@ export class CommentService implements ICommentService {
    */
   async getFileComments(
     fileId: string,
-    options?: CommentQueryOptions
+    options?: CommentQueryOptions,
   ): Promise<Comment[]> {
     const commentIds = this.storage.byFile.get(fileId);
     if (!commentIds) {
@@ -346,7 +352,7 @@ export class CommentService implements ICommentService {
   private addToIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     if (!index.has(key)) {
       index.set(key, new Set());
@@ -360,7 +366,7 @@ export class CommentService implements ICommentService {
   private removeFromIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     const set = index.get(key);
     if (set) {

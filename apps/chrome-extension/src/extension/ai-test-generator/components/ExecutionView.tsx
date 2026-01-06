@@ -37,6 +37,7 @@ import {
   message,
 } from 'antd';
 import { useEffect, useRef, useState } from 'react';
+import { useI18n } from '../../../i18n';
 import { getDevicePreset } from '../config/devicePresets';
 import {
   type DeviceEmulationConfig,
@@ -49,19 +50,23 @@ import { useGeneratorStore } from '../store';
 import type { TaskStep, TestCase } from '../types';
 import type { HealingResult } from '../types/healing';
 import { HealingConfirmDialog } from './HealingConfirmDialog';
+import { useI18n } from '../../../i18n';
+import { elementSelector, repairEngine } from '../services/elementRepair';
+import type {
+  RepairOptions,
+  RepairResult,
+  SelectedElement,
+} from '../types/elementRepair';
 import { ElementPicker } from './elementRepair/ElementPicker';
 import { RepairSuggestionPanel } from './elementRepair/RepairSuggestionPanel';
-import { useI18n } from '../../../i18n';
-import type { RepairOptions } from '../types/elementRepair';
-import type { SelectedElement } from '../types/elementRepair';
-import { repairEngine } from '../services/elementRepair';
-import { elementSelector } from '../services/elementRepair';
-import type { RepairResult } from '../types/elementRepair';
 
 const { Text, Title } = Typography;
 
 // Error type labels - now using i18n
-const getErrorTypeLabel = (type: ExecutionError['type'], t: (key: string) => string): string => {
+const getErrorTypeLabel = (
+  type: ExecutionError['type'],
+  t: (key: string) => string,
+): string => {
   const labels: Record<ExecutionError['type'], string> = {
     element_not_found: t('elementNotFound'),
     timeout: t('timeout'),
@@ -585,7 +590,9 @@ export function ExecutionView() {
 
       <Card size="small" className="execution-progress-card">
         <div className="case-info">
-          <Text strong>{t('currentCase')}: {currentCase.name}</Text>
+          <Text strong>
+            {t('currentCase')}: {currentCase.name}
+          </Text>
         </div>
         <Progress
           percent={totalProgress}

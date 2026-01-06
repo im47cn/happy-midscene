@@ -3,15 +3,14 @@
  * 自适应路径分析器组件 - 分析执行历史和路径覆盖
  */
 
-import React, { useMemo } from 'react';
 import {
   BranchesOutlined,
-  ClockCircleOutlined,
-  HeatMapOutlined,
-  RightCircleOutlined,
   CheckCircleOutlined,
+  ClockCircleOutlined,
   CloseCircleOutlined,
+  HeatMapOutlined,
   InfoCircleOutlined,
+  RightCircleOutlined,
 } from '@ant-design/icons';
 import {
   Card,
@@ -27,6 +26,7 @@ import {
   Typography,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import React, { useMemo } from 'react';
 
 const { Text, Title } = Typography;
 
@@ -78,27 +78,30 @@ interface AdaptivePathAnalyzerProps {
  */
 export function calculatePathStatistics(
   pathEntries: PathEntry[],
-  executionResults?: ExecutionResult[]
+  executionResults?: ExecutionResult[],
 ): PathStatistics {
   // Count branches
-  const branchCounts = pathEntries.reduce((acc, entry) => {
-    if (entry.branch) {
-      const key = `${entry.stepId}:${entry.branch}`;
-      acc[key] = (acc[key] || 0) + 1;
-    }
-    return acc;
-  }, {} as Record<string, number>);
+  const branchCounts = pathEntries.reduce(
+    (acc, entry) => {
+      if (entry.branch) {
+        const key = `${entry.stepId}:${entry.branch}`;
+        acc[key] = (acc[key] || 0) + 1;
+      }
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 
   // Calculate unique paths
   const pathStrings = pathEntries.map((e) =>
-    e.branch ? `${e.stepId}:${e.branch}` : e.stepId
+    e.branch ? `${e.stepId}:${e.branch}` : e.stepId,
   );
   const uniquePaths = Array.from(new Set(pathStrings));
 
   // Count iterations
   const totalIterations = pathEntries.reduce(
     (sum, entry) => sum + (entry.iteration || 0),
-    0
+    0,
   );
 
   // Calculate max depth
@@ -108,17 +111,20 @@ export function calculatePathStatistics(
   let branchCoverage = 0;
   if (executionResults) {
     const stepsWithBranches = executionResults.filter(
-      (r) => r.branch === 'then' || r.branch === 'else'
+      (r) => r.branch === 'then' || r.branch === 'else',
     ).length;
     const totalBranches = executionResults.length;
-    branchCoverage = totalBranches > 0 ? (stepsWithBranches / totalBranches) * 100 : 0;
+    branchCoverage =
+      totalBranches > 0 ? (stepsWithBranches / totalBranches) * 100 : 0;
   }
 
   // Find critical path (longest executed path)
   const criticalPath: string[] = [];
   let currentPath: string[] = [];
   for (const entry of pathEntries) {
-    currentPath.push(entry.branch ? `${entry.stepId}:${entry.branch}` : entry.stepId);
+    currentPath.push(
+      entry.branch ? `${entry.stepId}:${entry.branch}` : entry.stepId,
+    );
     if (entry.branch === 'loop' || entry.branch === 'else') {
       // Path might end here
       if (currentPath.length > criticalPath.length) {
@@ -148,11 +154,13 @@ export function calculatePathStatistics(
 function PathTimeline({ entries }: { entries: PathEntry[] }) {
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
-    return date.toLocaleTimeString('zh-CN', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    }) + `.${String(date.getMilliseconds()).padStart(3, '0')}`;
+    return (
+      date.toLocaleTimeString('zh-CN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      }) + `.${String(date.getMilliseconds()).padStart(3, '0')}`
+    );
   };
 
   const getBranchIcon = (branch?: string) => {
@@ -193,7 +201,10 @@ function PathTimeline({ entries }: { entries: PathEntry[] }) {
                 {entry.stepId}
               </Text>
               {entry.branch && (
-                <Tag color={getBranchColor(entry.branch)} style={{ fontSize: 10, margin: 0 }}>
+                <Tag
+                  color={getBranchColor(entry.branch)}
+                  style={{ fontSize: 10, margin: 0 }}
+                >
                   {entry.branch}
                 </Tag>
               )}
@@ -239,7 +250,10 @@ function CoverageTable({
 }) {
   // Build branch data
   const branchData = useMemo(() => {
-    const branchMap = new Map<string, { then: number; else: number; total: number }>();
+    const branchMap = new Map<
+      string,
+      { then: number; else: number; total: number }
+    >();
 
     for (const entry of entries) {
       if (!entry.branch) continue;
@@ -259,11 +273,14 @@ function CoverageTable({
       then: data.then,
       else: data.else,
       total: data.total,
-      coverage: data.then > 0 && data.else > 0 ? 100 : Math.round((data.then + data.else) / 2 * 100),
+      coverage:
+        data.then > 0 && data.else > 0
+          ? 100
+          : Math.round(((data.then + data.else) / 2) * 100),
     }));
   }, [entries]);
 
-  const columns: ColumnsType<typeof branchData[0]> = [
+  const columns: ColumnsType<(typeof branchData)[0]> = [
     {
       title: 'Step ID',
       dataIndex: 'stepId',
@@ -330,7 +347,7 @@ export function AdaptivePathAnalyzer({
 }: AdaptivePathAnalyzerProps) {
   const stats = useMemo(
     () => calculatePathStatistics(pathEntries, executionResults),
-    [pathEntries, executionResults]
+    [pathEntries, executionResults],
   );
 
   // Get critical path visualization
@@ -338,7 +355,14 @@ export function AdaptivePathAnalyzer({
     if (!stats.criticalPath || stats.criticalPath.length === 0) return null;
 
     return (
-      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 8,
+        }}
+      >
         {stats.criticalPath.map((path, idx) => (
           <React.Fragment key={`${path}-${idx}`}>
             <Tag color="blue" style={{ margin: 0 }}>
@@ -393,7 +417,12 @@ export function AdaptivePathAnalyzer({
               prefix={<HeatMapOutlined />}
               valueStyle={{
                 fontSize: 20,
-                color: stats.branchCoverage >= 80 ? '#22c55e' : stats.branchCoverage >= 50 ? '#f59e0b' : '#ef4444',
+                color:
+                  stats.branchCoverage >= 80
+                    ? '#22c55e'
+                    : stats.branchCoverage >= 50
+                      ? '#f59e0b'
+                      : '#ef4444',
               }}
               precision={0}
             />
@@ -440,14 +469,17 @@ export function AdaptivePathAnalyzer({
               value={
                 executionResults && executionResults.length > 0
                   ? Math.round(
-                      (executionResults.filter((r) => r.success).length / executionResults.length) * 100
+                      (executionResults.filter((r) => r.success).length /
+                        executionResults.length) *
+                        100,
                     )
                   : 0
               }
               suffix="%"
               prefix={
                 executionResults &&
-                executionResults.filter((r) => r.success).length === executionResults.length ? (
+                executionResults.filter((r) => r.success).length ===
+                  executionResults.length ? (
                   <CheckCircleOutlined />
                 ) : (
                   <InfoCircleOutlined />
@@ -457,7 +489,8 @@ export function AdaptivePathAnalyzer({
                 fontSize: 18,
                 color:
                   executionResults &&
-                  executionResults.filter((r) => r.success).length === executionResults.length
+                  executionResults.filter((r) => r.success).length ===
+                    executionResults.length
                     ? '#22c55e'
                     : '#f59e0b',
               }}

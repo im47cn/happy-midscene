@@ -170,9 +170,15 @@ export class ScreenshotCompressor {
       }
 
       if (width !== bitmap.width || height !== bitmap.height) {
-        const resizedBitmap = await createImageBitmap(bitmap, { width, height });
+        const resizedBitmap = await createImageBitmap(bitmap, {
+          width,
+          height,
+        });
         bitmap.close();
-        return await this.bitmapToBase64(resizedBitmap, this.config.format || 'jpeg');
+        return await this.bitmapToBase64(
+          resizedBitmap,
+          this.config.format || 'jpeg',
+        );
       }
 
       bitmap.close();
@@ -654,7 +660,9 @@ export class PerformanceMonitor {
   /**
    * Get statistics for a metric
    */
-  getStats(name: string): { min: number; max: number; avg: number; count: number } | null {
+  getStats(
+    name: string,
+  ): { min: number; max: number; avg: number; count: number } | null {
     const samples = this.metrics.get(name);
     if (!samples || samples.length === 0) {
       return null;

@@ -3,8 +3,8 @@
  * 基础节点组件 - 所有节点类型的通用 UI
  */
 
+import { Handle, type NodeProps, Position } from '@xyflow/react';
 import React, { memo } from 'react';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { DesignerNodeData, NodeCategory } from '../../types/designer';
 
 /**
@@ -34,7 +34,10 @@ export interface BaseNodeProps extends Omit<NodeProps, 'data'> {
 /**
  * 节点颜色配置
  */
-const NODE_COLORS: Record<NodeCategory, { bg: string; border: string; text: string }> = {
+const NODE_COLORS: Record<
+  NodeCategory,
+  { bg: string; border: string; text: string }
+> = {
   special: { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' },
   action: { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af' },
   validation: { bg: '#dcfce7', border: '#22c55e', text: '#166534' },
@@ -87,7 +90,11 @@ export const BaseNode = memo<BaseNodeProps>(({ data, selected, type }) => {
       } ${hasErrors ? 'border-red-500' : hasWarnings ? 'border-yellow-500' : ''}`}
       style={{
         backgroundColor: colors.bg,
-        borderColor: hasErrors ? '#ef4444' : hasWarnings ? '#eab308' : colors.border,
+        borderColor: hasErrors
+          ? '#ef4444'
+          : hasWarnings
+            ? '#eab308'
+            : colors.border,
         color: colors.text,
       }}
     >
@@ -107,14 +114,20 @@ export const BaseNode = memo<BaseNodeProps>(({ data, selected, type }) => {
           <span className="text-lg" aria-label="node-icon">
             {icon}
           </span>
-          <span className="font-medium text-sm truncate flex-1" title={data.label}>
+          <span
+            className="font-medium text-sm truncate flex-1"
+            title={data.label}
+          >
             {data.label}
           </span>
         </div>
 
         {/* 节点描述 */}
         {data.description && (
-          <div className="text-xs opacity-75 truncate mb-1" title={data.description}>
+          <div
+            className="text-xs opacity-75 truncate mb-1"
+            title={data.description}
+          >
             {data.description}
           </div>
         )}

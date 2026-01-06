@@ -100,7 +100,8 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
               padding: '8px 12px',
               cursor: 'pointer',
               borderRadius: 6,
-              background: selectedCategory === cat.id ? '#e6f7ff' : 'transparent',
+              background:
+                selectedCategory === cat.id ? '#e6f7ff' : 'transparent',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -114,7 +115,8 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
               <Badge
                 count={cat.count}
                 style={{
-                  backgroundColor: selectedCategory === cat.id ? '#1890ff' : '#d9d9d9',
+                  backgroundColor:
+                    selectedCategory === cat.id ? '#1890ff' : '#d9d9d9',
                 }}
               />
             )}

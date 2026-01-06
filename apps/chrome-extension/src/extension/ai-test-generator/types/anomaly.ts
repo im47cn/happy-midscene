@@ -18,9 +18,12 @@ export type AnomalyType =
   | 'flaky_pattern' // Flaky test detected
   | 'performance_degradation' // Performance degradation
   | 'success_rate_drop' // Success rate drop
+  | 'pass_rate_drop' // Pass rate drop (similar to success rate but different metric)
   | 'resource_anomaly' // Resource consumption anomaly
   | 'trend_change' // Trend change
-  | 'seasonal_deviation'; // Seasonal deviation
+  | 'seasonal_deviation' // Seasonal deviation
+  | 'consecutive_failures' // Consecutive test failures
+  | 'flaky_detected'; // Flaky test behavior detected
 
 /**
  * Severity level
@@ -30,7 +33,11 @@ export type Severity = 'low' | 'medium' | 'high' | 'critical';
 /**
  * Anomaly status
  */
-export type AnomalyStatus = 'new' | 'acknowledged' | 'investigating' | 'resolved';
+export type AnomalyStatus =
+  | 'new'
+  | 'acknowledged'
+  | 'investigating'
+  | 'resolved';
 
 /**
  * Metric information

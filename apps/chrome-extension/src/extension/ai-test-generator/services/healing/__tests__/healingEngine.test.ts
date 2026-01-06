@@ -3,8 +3,8 @@
  * Tests the core healing logic without browser dependencies
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ChromeExtensionProxyPageAgent } from '@midscene/web/chrome-extension';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
   SelfHealingConfig,
   SemanticFingerprint,

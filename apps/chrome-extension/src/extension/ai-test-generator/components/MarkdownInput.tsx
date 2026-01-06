@@ -10,8 +10,8 @@ import {
 } from '@ant-design/icons';
 import { Alert, Button, Input, Space, Typography, Upload, message } from 'antd';
 import type { UploadProps } from 'antd';
-import { useGeneratorStore } from '../store';
 import { useI18n } from '../../../i18n';
+import { useGeneratorStore } from '../store';
 
 const { TextArea } = Input;
 const { Text, Title } = Typography;
@@ -103,9 +103,7 @@ export function MarkdownInput() {
       </div>
 
       <div className="input-hint">
-        <Text type="secondary">
-          {t('inputPlaceholder').split('\n')[0]}
-        </Text>
+        <Text type="secondary">{t('inputPlaceholder').split('\n')[0]}</Text>
       </div>
 
       <TextArea

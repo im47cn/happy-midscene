@@ -4,7 +4,8 @@
  * Displays file version history with diff viewer.
  */
 
-import React, { useState, useEffect } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import type { Version, VersionDiff } from '../../types/collaboration';
 
 /**
@@ -114,7 +115,7 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
     if (other) {
       generateDiff(
         side === 'left' ? version.id : other.id,
-        side === 'left' ? other.id : version.id
+        side === 'left' ? other.id : version.id,
       );
     }
   };
@@ -225,10 +226,7 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
     return (
       <div className="version-detail">
         <div className="detail-header">
-          <button
-            className="btn-back"
-            onClick={() => setViewMode('list')}
-          >
+          <button className="btn-back" onClick={() => setViewMode('list')}>
             ← Back to history
           </button>
           <div className="detail-actions">
@@ -265,7 +263,8 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
         </button>
         {compareSelection.left && compareSelection.right && (
           <div className="compare-info">
-            Comparing {compareSelection.left.version} → {compareSelection.right.version}
+            Comparing {compareSelection.left.version} →{' '}
+            {compareSelection.right.version}
           </div>
         )}
       </div>
@@ -295,8 +294,12 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
             ← Back
           </button>
           <div className="diff-stats">
-            <span className="diff-additions">+{currentDiff.additions} lines</span>
-            <span className="diff-deletions">-{currentDiff.deletions} lines</span>
+            <span className="diff-additions">
+              +{currentDiff.additions} lines
+            </span>
+            <span className="diff-deletions">
+              -{currentDiff.deletions} lines
+            </span>
           </div>
         </div>
         <div className="diff-hunks">
@@ -310,8 +313,12 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
                   key={lineIdx}
                   className={`diff-line diff-line-${line.type}`}
                 >
-                  <span className="line-number-a">{line.lineNumberA || ''}</span>
-                  <span className="line-number-b">{line.lineNumberB || ''}</span>
+                  <span className="line-number-a">
+                    {line.lineNumberA || ''}
+                  </span>
+                  <span className="line-number-b">
+                    {line.lineNumberB || ''}
+                  </span>
                   <span className="line-content">{line.content}</span>
                 </div>
               ))}

@@ -2,11 +2,11 @@
  * Reviewer Manager Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { ReviewerManager } from '../reviewerManager';
-import { reviewSystem } from '../reviewSystem';
-import { workspaceManager } from '../workspaceManager';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Change } from '../../types/collaboration';
+import { reviewSystem } from '../reviewSystem';
+import { ReviewerManager } from '../reviewerManager';
+import { workspaceManager } from '../workspaceManager';
 
 describe('ReviewerManager', () => {
   let rm: ReviewerManager;
@@ -59,7 +59,9 @@ describe('ReviewerManager', () => {
 
   describe('getSuggestedReviewers', () => {
     it('should return empty array when no contributions', async () => {
-      const suggested = await rm.getSuggestedReviewers(testWorkspaceId, ['file1']);
+      const suggested = await rm.getSuggestedReviewers(testWorkspaceId, [
+        'file1',
+      ]);
 
       expect(suggested).toEqual([]);
     });
@@ -69,7 +71,9 @@ describe('ReviewerManager', () => {
       await rm.recordContribution('file1', 'editor1', 10);
       await rm.recordContribution('file1', 'editor2', 5);
 
-      const suggested = await rm.getSuggestedReviewers(testWorkspaceId, ['file1']);
+      const suggested = await rm.getSuggestedReviewers(testWorkspaceId, [
+        'file1',
+      ]);
 
       expect(suggested).toHaveLength(2);
       expect(suggested[0]).toBe('editor1'); // Higher score first
@@ -79,7 +83,9 @@ describe('ReviewerManager', () => {
     it('should only include editable members', async () => {
       await rm.recordContribution('file1', 'viewer1', 10);
 
-      const suggested = await rm.getSuggestedReviewers(testWorkspaceId, ['file1']);
+      const suggested = await rm.getSuggestedReviewers(testWorkspaceId, [
+        'file1',
+      ]);
 
       expect(suggested).not.toContain('viewer1');
     });
@@ -89,14 +95,20 @@ describe('ReviewerManager', () => {
       // Note: editor1 and editor2 already exist from beforeEach
       for (let i = 3; i <= 9; i++) {
         try {
-          await workspaceManager.addMember(testWorkspaceId, `editor${i}`, 'editor');
+          await workspaceManager.addMember(
+            testWorkspaceId,
+            `editor${i}`,
+            'editor',
+          );
         } catch {
           // Member already exists, skip
         }
         await rm.recordContribution('file1', `editor${i}`, i);
       }
 
-      const suggested = await rm.getSuggestedReviewers(testWorkspaceId, ['file1']);
+      const suggested = await rm.getSuggestedReviewers(testWorkspaceId, [
+        'file1',
+      ]);
 
       expect(suggested.length).toBeLessThanOrEqual(5);
     });
@@ -182,7 +194,7 @@ describe('ReviewerManager', () => {
 
     it('should throw error for non-existent review', async () => {
       await expect(
-        rm.assignReviewers('non-existent', ['editor1'])
+        rm.assignReviewers('non-existent', ['editor1']),
       ).rejects.toThrow('Review not found');
     });
 
@@ -266,9 +278,9 @@ describe('ReviewerManager', () => {
     });
 
     it('should throw error for non-existent review', async () => {
-      await expect(
-        rm.autoAssignReviewers('non-existent', 2)
-      ).rejects.toThrow('Review not found');
+      await expect(rm.autoAssignReviewers('non-existent', 2)).rejects.toThrow(
+        'Review not found',
+      );
     });
 
     it('should respect count parameter', async () => {
@@ -355,7 +367,9 @@ describe('ReviewerManager', () => {
       // Simulate approval by directly updating the review
       const retrieved = await reviewSystem.getReview(review.id);
       if (retrieved) {
-        const reviewer = retrieved.reviewers.find((r) => r.userId === 'editor1');
+        const reviewer = retrieved.reviewers.find(
+          (r) => r.userId === 'editor1',
+        );
         if (reviewer) {
           reviewer.status = 'approved';
           reviewer.reviewedAt = Date.now();

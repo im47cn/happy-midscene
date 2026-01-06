@@ -5,10 +5,10 @@
 
 import type {
   CategoryInfo,
+  SearchResult,
   Template,
   TemplateSummary,
   TemplateVersion,
-  SearchResult,
 } from '../types';
 
 const CACHE_VERSION = 1;
@@ -52,14 +52,20 @@ class OfflineDatabase {
 
         // Templates store
         if (!db.objectStoreNames.contains('templates')) {
-          const templateStore = db.createObjectStore('templates', { keyPath: 'id' });
+          const templateStore = db.createObjectStore('templates', {
+            keyPath: 'id',
+          });
           templateStore.createIndex('category', 'category', { unique: false });
-          templateStore.createIndex('timestamp', 'timestamp', { unique: false });
+          templateStore.createIndex('timestamp', 'timestamp', {
+            unique: false,
+          });
         }
 
         // Template summaries store
         if (!db.objectStoreNames.contains('summaries')) {
-          const summaryStore = db.createObjectStore('summaries', { keyPath: 'id' });
+          const summaryStore = db.createObjectStore('summaries', {
+            keyPath: 'id',
+          });
           summaryStore.createIndex('category', 'category', { unique: false });
         }
 
@@ -95,7 +101,11 @@ class OfflineDatabase {
     });
   }
 
-  async getAll<T>(storeName: string, indexName?: string, query?: IDBKeyRange): Promise<T[]> {
+  async getAll<T>(
+    storeName: string,
+    indexName?: string,
+    query?: IDBKeyRange,
+  ): Promise<T[]> {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
@@ -179,14 +189,20 @@ export class OfflineSupport {
       timestamp: Date.now(),
       version: CACHE_VERSION,
     };
-    await this.db.put('templates', { ...template, timestamp: cached.timestamp });
+    await this.db.put('templates', {
+      ...template,
+      timestamp: cached.timestamp,
+    });
   }
 
   /**
    * Get cached template
    */
   async getCachedTemplate(id: string): Promise<Template | null> {
-    const cached = await this.db.get<Template & { timestamp: number }>('templates', id);
+    const cached = await this.db.get<Template & { timestamp: number }>(
+      'templates',
+      id,
+    );
     if (!cached || this.isExpired(cached.timestamp)) {
       return null;
     }
@@ -211,14 +227,18 @@ export class OfflineSupport {
     let summaries: Array<TemplateSummary & { timestamp: number }>;
 
     if (category) {
-      summaries = await this.db.getAll('summaries', 'category', IDBKeyRange.only(category));
+      summaries = await this.db.getAll(
+        'summaries',
+        'category',
+        IDBKeyRange.only(category),
+      );
     } else {
       summaries = await this.db.getAll('summaries');
     }
 
     // Filter out expired entries
     return summaries
-      .filter(s => !this.isExpired(s.timestamp))
+      .filter((s) => !this.isExpired(s.timestamp))
       .map(({ timestamp, ...summary }) => summary as TemplateSummary);
   }
 
@@ -236,16 +256,20 @@ export class OfflineSupport {
    * Get cached categories
    */
   async getCachedCategories(): Promise<CategoryInfo[]> {
-    const categories = await this.db.getAll<CategoryInfo & { timestamp: number }>('categories');
+    const categories = await this.db.getAll<
+      CategoryInfo & { timestamp: number }
+    >('categories');
     return categories
-      .filter(c => !this.isExpired(c.timestamp))
+      .filter((c) => !this.isExpired(c.timestamp))
       .map(({ timestamp, ...category }) => category as CategoryInfo);
   }
 
   /**
    * Queue an offline action
    */
-  async queueAction(action: Omit<OfflineQueueItem, 'id' | 'timestamp' | 'retryCount'>): Promise<void> {
+  async queueAction(
+    action: Omit<OfflineQueueItem, 'id' | 'timestamp' | 'retryCount'>,
+  ): Promise<void> {
     const item: OfflineQueueItem = {
       id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       ...action,
@@ -265,7 +289,9 @@ export class OfflineSupport {
   /**
    * Process offline queue
    */
-  async processQueue(onlineCallback: (item: OfflineQueueItem) => Promise<boolean>): Promise<void> {
+  async processQueue(
+    onlineCallback: (item: OfflineQueueItem) => Promise<boolean>,
+  ): Promise<void> {
     if (this.syncInProgress) return;
 
     this.syncInProgress = true;
@@ -363,7 +389,9 @@ export class OfflineSupport {
   /**
    * Prefetch popular templates for offline use
    */
-  async prefetchPopular(fetchCallback: () => Promise<TemplateSummary[]>): Promise<void> {
+  async prefetchPopular(
+    fetchCallback: () => Promise<TemplateSummary[]>,
+  ): Promise<void> {
     try {
       const popular = await fetchCallback();
       await this.cacheSummaries(popular);
@@ -377,9 +405,12 @@ export class OfflineSupport {
    */
   private startPeriodicSync(): void {
     // Clean up expired cache every hour
-    this.syncInterval = setInterval(() => {
-      this.cleanupExpiredCache();
-    }, 60 * 60 * 1000);
+    this.syncInterval = setInterval(
+      () => {
+        this.cleanupExpiredCache();
+      },
+      60 * 60 * 1000,
+    );
 
     // Listen to online/offline events
     window.addEventListener('online', () => {

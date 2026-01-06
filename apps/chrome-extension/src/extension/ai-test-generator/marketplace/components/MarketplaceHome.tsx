@@ -6,17 +6,11 @@
 import {
   AppstoreOutlined,
   FireOutlined,
-  HistoryOutlined,
   HeartOutlined,
+  HistoryOutlined,
   RocketOutlined,
 } from '@ant-design/icons';
-import {
-  Col,
-  Row,
-  Segmented,
-  Space,
-  Typography,
-} from 'antd';
+import { Col, Row, Segmented, Space, Typography } from 'antd';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useI18n } from '../../../../i18n';
@@ -41,7 +35,13 @@ import { UserProfile } from './UserProfile';
 
 const { Title } = Typography;
 
-type ViewMode = 'browse' | 'featured' | 'popular' | 'latest' | 'favorites' | 'downloaded';
+type ViewMode =
+  | 'browse'
+  | 'featured'
+  | 'popular'
+  | 'latest'
+  | 'favorites'
+  | 'downloaded';
 
 interface MarketplaceHomeProps {
   onBack?: () => void;
@@ -57,12 +57,16 @@ export const MarketplaceHome: React.FC<MarketplaceHomeProps> = ({
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<TemplateCategory>();
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
+    null,
+  );
   const [loading, setLoading] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [localTemplates, setLocalTemplates] = useState<LocalTemplate[]>([]);
-  const [authState, setAuthState] = useState<AuthState>(githubAuth.getAuthState());
+  const [authState, setAuthState] = useState<AuthState>(
+    githubAuth.getAuthState(),
+  );
 
   // Load initial data
   useEffect(() => {
@@ -149,7 +153,9 @@ export const MarketplaceHome: React.FC<MarketplaceHomeProps> = ({
             break;
           case 'browse':
           default:
-            const searchResult = await marketplaceAPI.getTemplates({ category: selectedCategory });
+            const searchResult = await marketplaceAPI.getTemplates({
+              category: selectedCategory,
+            });
             result = searchResult.templates;
         }
         setTemplates(result);
@@ -162,20 +168,23 @@ export const MarketplaceHome: React.FC<MarketplaceHomeProps> = ({
     loadTemplates();
   }, [viewMode, selectedCategory, selectedTemplate]);
 
-  const handleSearch = useCallback(async (query: SearchQuery) => {
-    setLoading(true);
-    try {
-      const result = await marketplaceAPI.searchTemplates({
-        ...query,
-        category: selectedCategory,
-      });
-      setTemplates(result.templates);
-    } catch (error) {
-      console.error('Search failed:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedCategory]);
+  const handleSearch = useCallback(
+    async (query: SearchQuery) => {
+      setLoading(true);
+      try {
+        const result = await marketplaceAPI.searchTemplates({
+          ...query,
+          category: selectedCategory,
+        });
+        setTemplates(result.templates);
+      } catch (error) {
+        console.error('Search failed:', error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [selectedCategory],
+  );
 
   const handleTemplateClick = useCallback(async (template: TemplateSummary) => {
     setDetailLoading(true);
@@ -189,36 +198,42 @@ export const MarketplaceHome: React.FC<MarketplaceHomeProps> = ({
     }
   }, []);
 
-  const handleFavoriteClick = useCallback(async (template: TemplateSummary, isFavorite: boolean) => {
-    try {
-      const fullTemplate = await marketplaceAPI.getTemplate(template.id);
-      await templateStorage.saveTemplate(fullTemplate);
-      await templateStorage.setFavorite(template.id, isFavorite);
+  const handleFavoriteClick = useCallback(
+    async (template: TemplateSummary, isFavorite: boolean) => {
+      try {
+        const fullTemplate = await marketplaceAPI.getTemplate(template.id);
+        await templateStorage.saveTemplate(fullTemplate);
+        await templateStorage.setFavorite(template.id, isFavorite);
 
-      setFavorites((prev) => {
-        const next = new Set(prev);
-        if (isFavorite) {
-          next.add(template.id);
-        } else {
-          next.delete(template.id);
-        }
-        return next;
-      });
-    } catch (error) {
-      console.error('Failed to update favorite:', error);
-    }
-  }, []);
+        setFavorites((prev) => {
+          const next = new Set(prev);
+          if (isFavorite) {
+            next.add(template.id);
+          } else {
+            next.delete(template.id);
+          }
+          return next;
+        });
+      } catch (error) {
+        console.error('Failed to update favorite:', error);
+      }
+    },
+    [],
+  );
 
   const handleBackFromDetail = useCallback(() => {
     setSelectedTemplate(null);
   }, []);
 
-  const handleApplyTemplate = useCallback((yaml: string, template: Template) => {
-    if (onApplyTemplate) {
-      onApplyTemplate(yaml, template);
-    }
-    setSelectedTemplate(null);
-  }, [onApplyTemplate]);
+  const handleApplyTemplate = useCallback(
+    (yaml: string, template: Template) => {
+      if (onApplyTemplate) {
+        onApplyTemplate(yaml, template);
+      }
+      setSelectedTemplate(null);
+    },
+    [onApplyTemplate],
+  );
 
   const handleAuthChange = useCallback((state: AuthState) => {
     setAuthState(state);
@@ -249,7 +264,14 @@ export const MarketplaceHome: React.FC<MarketplaceHomeProps> = ({
   return (
     <div className="marketplace-home" style={{ padding: '0 8px' }}>
       {/* Header */}
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div
+        style={{
+          marginBottom: 16,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <Title level={4} style={{ margin: 0 }}>
           {t('templateMarketplace')}
         </Title>
@@ -276,10 +298,18 @@ export const MarketplaceHome: React.FC<MarketplaceHomeProps> = ({
           onChange={(value) => setViewMode(value as ViewMode)}
           options={[
             { value: 'browse', label: t('browse'), icon: <AppstoreOutlined /> },
-            { value: 'featured', label: t('featured'), icon: <RocketOutlined /> },
+            {
+              value: 'featured',
+              label: t('featured'),
+              icon: <RocketOutlined />,
+            },
             { value: 'popular', label: t('popular'), icon: <FireOutlined /> },
             { value: 'latest', label: t('latest'), icon: <HistoryOutlined /> },
-            { value: 'favorites', label: t('favorites'), icon: <HeartOutlined /> },
+            {
+              value: 'favorites',
+              label: t('favorites'),
+              icon: <HeartOutlined />,
+            },
           ]}
         />
       </div>
@@ -300,7 +330,13 @@ export const MarketplaceHome: React.FC<MarketplaceHomeProps> = ({
         <LoadingState type="spinner" text={t('loadingTemplates')} />
       ) : templates.length === 0 ? (
         <EmptyState
-          type={viewMode === 'favorites' ? 'favorites' : viewMode === 'browse' ? 'search' : 'templates'}
+          type={
+            viewMode === 'favorites'
+              ? 'favorites'
+              : viewMode === 'browse'
+                ? 'search'
+                : 'templates'
+          }
         />
       ) : (
         <Row gutter={[16, 16]}>
@@ -323,7 +359,9 @@ export const MarketplaceHome: React.FC<MarketplaceHomeProps> = ({
 /**
  * Wrapped MarketplaceHome with ErrorBoundary
  */
-const MarketplaceHomeWithErrorBoundary: React.FC<MarketplaceHomeProps> = (props) => (
+const MarketplaceHomeWithErrorBoundary: React.FC<MarketplaceHomeProps> = (
+  props,
+) => (
   <MarketplaceErrorBoundary>
     <MarketplaceHome {...props} />
   </MarketplaceErrorBoundary>

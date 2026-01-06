@@ -62,7 +62,9 @@ export const PublishPreview: React.FC<PublishPreviewProps> = ({
   isSubmitting = false,
 }) => {
   const parameterCount = draft.content.parameters.length;
-  const requiredParams = draft.content.parameters.filter((p) => p.required).length;
+  const requiredParams = draft.content.parameters.filter(
+    (p) => p.required,
+  ).length;
   const optionalParams = parameterCount - requiredParams;
 
   const previewStats = useMemo(
@@ -71,7 +73,7 @@ export const PublishPreview: React.FC<PublishPreviewProps> = ({
       rating: 0,
       reviews: 0,
     }),
-    []
+    [],
   );
 
   return (
@@ -228,7 +230,11 @@ export const PublishPreview: React.FC<PublishPreviewProps> = ({
           </Card>
 
           {/* Stats Preview */}
-          <Card size="small" title="Statistics (Preview)" style={{ marginBottom: 16 }}>
+          <Card
+            size="small"
+            title="Statistics (Preview)"
+            style={{ marginBottom: 16 }}
+          >
             <Row gutter={8}>
               <Col span={8}>
                 <Statistic
@@ -283,18 +289,12 @@ export const PublishPreview: React.FC<PublishPreviewProps> = ({
         message="Publishing Guidelines"
         description={
           <ul style={{ margin: 0, paddingLeft: 20 }}>
-            <li>
-              Your template will be publicly available after publishing.
-            </li>
-            <li>
-              Make sure you have the rights to share this content.
-            </li>
+            <li>Your template will be publicly available after publishing.</li>
+            <li>Make sure you have the rights to share this content.</li>
             <li>
               Templates will be reviewed for security before being featured.
             </li>
-            <li>
-              You can update your template by publishing a new version.
-            </li>
+            <li>You can update your template by publishing a new version.</li>
           </ul>
         }
         showIcon

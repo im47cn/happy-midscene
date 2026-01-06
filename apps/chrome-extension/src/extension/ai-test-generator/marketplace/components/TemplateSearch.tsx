@@ -3,24 +3,17 @@
  * Search and filter templates in the marketplace
  */
 
-import {
-  FilterOutlined,
-  SearchOutlined,
-} from '@ant-design/icons';
-import {
-  Button,
-  Col,
-  Dropdown,
-  Input,
-  Row,
-  Select,
-  Space,
-  Tag,
-} from 'antd';
+import { FilterOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Col, Dropdown, Input, Row, Select, Space, Tag } from 'antd';
 import type React from 'react';
 import { useCallback, useState } from 'react';
 import { useI18n } from '../../../../i18n';
-import type { LicenseType, PlatformType, SearchQuery, TemplateCategory } from '../types';
+import type {
+  LicenseType,
+  PlatformType,
+  SearchQuery,
+  TemplateCategory,
+} from '../types';
 
 const { Option } = Select;
 
@@ -92,7 +85,9 @@ export const TemplateSearch: React.FC<TemplateSearchProps> = ({
       key: 'platforms',
       label: (
         <div style={{ padding: '8px 0' }}>
-          <div style={{ marginBottom: 8, fontWeight: 500 }}>{t('platforms')}</div>
+          <div style={{ marginBottom: 8, fontWeight: 500 }}>
+            {t('platforms')}
+          </div>
           <Select
             mode="multiple"
             placeholder={t('selectPlatforms')}
@@ -114,7 +109,9 @@ export const TemplateSearch: React.FC<TemplateSearchProps> = ({
       key: 'rating',
       label: (
         <div style={{ padding: '8px 0' }}>
-          <div style={{ marginBottom: 8, fontWeight: 500 }}>{t('minimumRating')}</div>
+          <div style={{ marginBottom: 8, fontWeight: 500 }}>
+            {t('minimumRating')}
+          </div>
           <Select
             placeholder={t('anyRating')}
             value={minRating}
@@ -175,10 +172,7 @@ export const TemplateSearch: React.FC<TemplateSearchProps> = ({
             trigger={['click']}
             placement="bottomRight"
           >
-            <Button
-              icon={<FilterOutlined />}
-              disabled={loading}
-            >
+            <Button icon={<FilterOutlined />} disabled={loading}>
               {t('filters')}
               {activeFiltersCount > 0 && (
                 <Tag color="blue" style={{ marginLeft: 4, marginRight: 0 }}>

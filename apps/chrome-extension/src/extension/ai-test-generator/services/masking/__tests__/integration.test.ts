@@ -111,7 +111,8 @@ describe('Data Masking Integration', () => {
     it('should mask sensitive data in log messages', () => {
       // LogMasker uses simplified sync patterns for performance
       // It masks password=xxx patterns but not standalone emails in message text
-      const message = 'User login: password=secret123, apiKey=abcd1234567890abcdefgh';
+      const message =
+        'User login: password=secret123, apiKey=abcd1234567890abcdefgh';
 
       const result = logMasker.mask(message);
 
@@ -135,8 +136,12 @@ describe('Data Masking Integration', () => {
       expect(result.data).toBeDefined();
       // Keys with sensitive names are masked
       expect((result.data as any).password).not.toBe('MySecret123');
-      expect((result.data as any).apiKey).not.toBe('sk-1234567890abcdefghijklmnopqrstuvwxyz');
-      expect((result.data as any).nested.token).not.toBe('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test.signature');
+      expect((result.data as any).apiKey).not.toBe(
+        'sk-1234567890abcdefghijklmnopqrstuvwxyz',
+      );
+      expect((result.data as any).nested.token).not.toBe(
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test.signature',
+      );
       // Non-sensitive data is preserved
       expect((result.data as any).username).toBe('testuser');
     });
@@ -191,19 +196,25 @@ steps:
         expect(result.suggestions[0].replacement).toMatch(/\{\{.+\}\}/);
 
         // Verify the suggestion can be applied
-        const applied = yamlChecker.applySuggestions(yamlContent, result.suggestions);
+        const applied = yamlChecker.applySuggestions(
+          yamlContent,
+          result.suggestions,
+        );
         expect(applied).toMatch(/\{\{.+\}\}/);
         expect(applied).not.toContain('MySecret123');
       }
     });
 
     it('should detect API keys in YAML', async () => {
-      const yamlContent = 'api_key: sk-proj-1234567890abcdefghijklmnopqrstuvwxyz';
+      const yamlContent =
+        'api_key: sk-proj-1234567890abcdefghijklmnopqrstuvwxyz';
 
       const result = await yamlChecker.check(yamlContent);
 
       expect(result.hasSensitiveData).toBe(true);
-      expect(result.warnings.some((w) => w.category === 'credential')).toBe(true);
+      expect(result.warnings.some((w) => w.category === 'credential')).toBe(
+        true,
+      );
     });
   });
 

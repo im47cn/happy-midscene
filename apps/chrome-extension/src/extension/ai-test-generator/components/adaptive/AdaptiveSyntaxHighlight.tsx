@@ -3,8 +3,8 @@
  * 自适应语法高亮组件 - 高亮显示自适应测试语法
  */
 
-import React, { useMemo } from 'react';
 import { Tag, Typography } from 'antd';
+import React, { useMemo } from 'react';
 
 const { Text } = Typography;
 
@@ -67,7 +67,8 @@ const tokenPatterns: Array<{ regex: RegExp; type: TokenType }> = [
 
   // Keywords
   {
-    regex: /\b(if|then|else|endif|while|endwhile|repeat|until|foreach|endfor|in)\b/gi,
+    regex:
+      /\b(if|then|else|endif|while|endwhile|repeat|until|foreach|endfor|in)\b/gi,
     type: 'keyword',
   },
 
@@ -86,7 +87,10 @@ const tokenPatterns: Array<{ regex: RegExp; type: TokenType }> = [
   { regex: /(===|!==|==|!=|>=|<=|&&|\|\||[+\-*/%<>!&|])/g, type: 'operator' },
 
   // Condition expressions
-  { regex: /\b(condition|when|where|exists|contains|matches)\b/gi, type: 'condition' },
+  {
+    regex: /\b(condition|when|where|exists|contains|matches)\b/gi,
+    type: 'condition',
+  },
 ];
 
 /**
@@ -94,11 +98,16 @@ const tokenPatterns: Array<{ regex: RegExp; type: TokenType }> = [
  */
 export function tokenizeAdaptiveSyntax(text: string): SyntaxToken[] {
   const tokens: SyntaxToken[] = [];
-  let remainingText = text;
-  let position = 0;
+  const remainingText = text;
+  const position = 0;
 
   // Sort patterns by position
-  const matches: Array<{ regex: RegExp; type: TokenType; match: RegExpExecArray; index: number }> = [];
+  const matches: Array<{
+    regex: RegExp;
+    type: TokenType;
+    match: RegExpExecArray;
+    index: number;
+  }> = [];
 
   for (const pattern of tokenPatterns) {
     let match: RegExpExecArray | null;
@@ -263,7 +272,8 @@ export function AdaptiveSyntaxHighlight({
           fontSize: 13,
           lineHeight: 1.6,
           overflowX: 'auto',
-          fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace",
+          fontFamily:
+            "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace",
         }}
       >
         {displayLines.map((lineTokens, lineIndex) => (

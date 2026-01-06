@@ -21,7 +21,6 @@ import {
   Col,
   Descriptions,
   Divider,
-  message,
   Row,
   Space,
   Spin,
@@ -29,10 +28,11 @@ import {
   Tag,
   Tooltip,
   Typography,
+  message,
 } from 'antd';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
-import { templateApplier, templateStorage, ratingSystem } from '../services';
+import { ratingSystem, templateApplier, templateStorage } from '../services';
 import type { PlatformType, Template, TemplateReview } from '../types';
 import { ParameterForm } from './ParameterForm';
 import { ReviewForm } from './ReviewForm';
@@ -95,7 +95,9 @@ export const TemplateDetail: React.FC<TemplateDetailProps> = ({
 
   // Initialize default parameters
   useEffect(() => {
-    const defaults = templateApplier.getDefaultParams(template.content.parameters);
+    const defaults = templateApplier.getDefaultParams(
+      template.content.parameters,
+    );
     setParams(defaults);
   }, [template]);
 
@@ -126,15 +128,24 @@ export const TemplateDetail: React.FC<TemplateDetailProps> = ({
     loadReviews();
   }, [template.id]);
 
-  const handleParamsChange = useCallback((newParams: Record<string, unknown>) => {
-    setParams(newParams);
-    // Validate on change
-    const validation = templateApplier.validateParams(template.content.parameters, newParams);
-    setErrors(validation.errors);
-  }, [template.content.parameters]);
+  const handleParamsChange = useCallback(
+    (newParams: Record<string, unknown>) => {
+      setParams(newParams);
+      // Validate on change
+      const validation = templateApplier.validateParams(
+        template.content.parameters,
+        newParams,
+      );
+      setErrors(validation.errors);
+    },
+    [template.content.parameters],
+  );
 
   const handleApply = useCallback(() => {
-    const validation = templateApplier.validateParams(template.content.parameters, params);
+    const validation = templateApplier.validateParams(
+      template.content.parameters,
+      params,
+    );
     if (!validation.valid) {
       setErrors(validation.errors);
       message.error('Please fix the errors before applying');
@@ -156,7 +167,9 @@ export const TemplateDetail: React.FC<TemplateDetailProps> = ({
     await templateStorage.saveTemplate(template);
     await templateStorage.setFavorite(template.id, !isFavorite);
     setIsFavorite(!isFavorite);
-    message.success(isFavorite ? 'Removed from favorites' : 'Added to favorites');
+    message.success(
+      isFavorite ? 'Removed from favorites' : 'Added to favorites',
+    );
   }, [template, isFavorite]);
 
   const handleCopyYaml = useCallback(async () => {
@@ -165,30 +178,36 @@ export const TemplateDetail: React.FC<TemplateDetailProps> = ({
     message.success('YAML copied to clipboard');
   }, [template, params]);
 
-  const handleReviewSubmit = useCallback(async (rating: number, comment: string) => {
-    await ratingSystem.submitReview({
-      templateId: template.id,
-      userId: 'current-user', // TODO: Get from auth
-      userName: 'You',
-      rating: rating as 1 | 2 | 3 | 4 | 5,
-      comment,
-    });
+  const handleReviewSubmit = useCallback(
+    async (rating: number, comment: string) => {
+      await ratingSystem.submitReview({
+        templateId: template.id,
+        userId: 'current-user', // TODO: Get from auth
+        userName: 'You',
+        rating: rating as 1 | 2 | 3 | 4 | 5,
+        comment,
+      });
 
-    // Refresh reviews
-    const [reviewList, stats] = await Promise.all([
-      ratingSystem.getTemplateReviews(template.id),
-      ratingSystem.getReviewStats(template.id),
-    ]);
-    setReviews(reviewList);
-    setReviewStats(stats);
-  }, [template.id]);
+      // Refresh reviews
+      const [reviewList, stats] = await Promise.all([
+        ratingSystem.getTemplateReviews(template.id),
+        ratingSystem.getReviewStats(template.id),
+      ]);
+      setReviews(reviewList);
+      setReviewStats(stats);
+    },
+    [template.id],
+  );
 
-  const handleVoteHelpful = useCallback(async (reviewId: string, helpful: boolean) => {
-    await ratingSystem.voteHelpful(reviewId, helpful);
-    // Refresh reviews
-    const reviewList = await ratingSystem.getTemplateReviews(template.id);
-    setReviews(reviewList);
-  }, [template.id]);
+  const handleVoteHelpful = useCallback(
+    async (reviewId: string, helpful: boolean) => {
+      await ratingSystem.voteHelpful(reviewId, helpful);
+      // Refresh reviews
+      const reviewList = await ratingSystem.getTemplateReviews(template.id);
+      setReviews(reviewList);
+    },
+    [template.id],
+  );
 
   const previewYaml = templateApplier.previewYaml(template, params);
 
@@ -219,30 +238,40 @@ export const TemplateDetail: React.FC<TemplateDetailProps> = ({
               </Title>
               {template.verified && (
                 <Tooltip title="Verified Template">
-                  <SafetyCertificateOutlined style={{ color: '#1890ff', fontSize: 18 }} />
+                  <SafetyCertificateOutlined
+                    style={{ color: '#1890ff', fontSize: 18 }}
+                  />
                 </Tooltip>
               )}
-              {template.featured && (
-                <Tag color="gold">Featured</Tag>
-              )}
+              {template.featured && <Tag color="gold">Featured</Tag>}
             </Space>
             <Space style={{ marginTop: 8 }}>
               <Space size={4}>
                 <StarFilled style={{ color: '#fadb14' }} />
                 <Text strong>{template.stats.rating.toFixed(1)}</Text>
-                <Text type="secondary">({template.stats.ratingCount} reviews)</Text>
+                <Text type="secondary">
+                  ({template.stats.ratingCount} reviews)
+                </Text>
               </Space>
               <Divider type="vertical" />
               <Space size={4}>
                 <DownloadOutlined />
-                <Text>{template.stats.downloads.toLocaleString()} downloads</Text>
+                <Text>
+                  {template.stats.downloads.toLocaleString()} downloads
+                </Text>
               </Space>
             </Space>
           </Col>
           <Col>
             <Space>
               <Button
-                icon={isFavorite ? <HeartFilled style={{ color: '#ff4d4f' }} /> : <HeartOutlined />}
+                icon={
+                  isFavorite ? (
+                    <HeartFilled style={{ color: '#ff4d4f' }} />
+                  ) : (
+                    <HeartOutlined />
+                  )
+                }
                 onClick={handleFavoriteClick}
               >
                 {isFavorite ? 'Favorited' : 'Favorite'}
@@ -261,13 +290,21 @@ export const TemplateDetail: React.FC<TemplateDetailProps> = ({
           <Row gutter={24}>
             <Col span={16}>
               {/* Description */}
-              <Card title="Description" size="small" style={{ marginBottom: 16 }}>
+              <Card
+                title="Description"
+                size="small"
+                style={{ marginBottom: 16 }}
+              >
                 <Paragraph>{template.description}</Paragraph>
               </Card>
 
               {/* Parameters */}
               {template.content.parameters.length > 0 && (
-                <Card title="Configure Parameters" size="small" style={{ marginBottom: 16 }}>
+                <Card
+                  title="Configure Parameters"
+                  size="small"
+                  style={{ marginBottom: 16 }}
+                >
                   <ParameterForm
                     parameters={template.content.parameters}
                     values={params}
@@ -282,7 +319,11 @@ export const TemplateDetail: React.FC<TemplateDetailProps> = ({
                 title="YAML Preview"
                 size="small"
                 extra={
-                  <Button type="text" icon={<CopyOutlined />} onClick={handleCopyYaml}>
+                  <Button
+                    type="text"
+                    icon={<CopyOutlined />}
+                    onClick={handleCopyYaml}
+                  >
                     Copy
                   </Button>
                 }
@@ -349,7 +390,9 @@ export const TemplateDetail: React.FC<TemplateDetailProps> = ({
                     <Space size={4}>
                       <Text strong>{template.publisher.name}</Text>
                       {template.publisher.verified && (
-                        <SafetyCertificateOutlined style={{ color: '#1890ff' }} />
+                        <SafetyCertificateOutlined
+                          style={{ color: '#1890ff' }}
+                        />
                       )}
                     </Space>
                     {template.publisher.bio && (

@@ -5,11 +5,11 @@
  * 一旦我被更新，务必更新我的开头注释，以及所属的文件夹的CLAUDE.md。
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Anomaly, BaselineInfo } from '../../../types/anomaly';
 import { anomalyDetector } from '../anomalyDetector';
-import { anomalyStorage } from '../storage';
 import { baselineBuilder } from '../baselineBuilder';
-import type { BaselineInfo, Anomaly } from '../../../types/anomaly';
+import { anomalyStorage } from '../storage';
 
 // Mock dependencies
 vi.mock('../storage', () => ({
@@ -205,12 +205,9 @@ describe('AnomalyDetector', () => {
 
       vi.mocked(baselineBuilder.getBaseline).mockResolvedValue(mockBaseline);
 
-      const result = await anomalyDetector.detectForCase(
-        'test-1',
-        [
-          { name: 'duration', value: 5000 }, // 40 sigma deviation
-        ]
-      );
+      const result = await anomalyDetector.detectForCase('test-1', [
+        { name: 'duration', value: 5000 }, // 40 sigma deviation
+      ]);
 
       expect(result.caseId).toBe('test-1');
       expect(Array.isArray(result.anomalies)).toBe(true);
@@ -247,7 +244,9 @@ describe('AnomalyDetector', () => {
         },
       ];
 
-      vi.mocked(anomalyStorage.getActiveAnomalies).mockResolvedValue(mockAnomalies);
+      vi.mocked(anomalyStorage.getActiveAnomalies).mockResolvedValue(
+        mockAnomalies,
+      );
 
       const result = await anomalyDetector.getActiveAnomalies({
         severity: ['critical'],
@@ -285,7 +284,9 @@ describe('AnomalyDetector', () => {
         },
       ];
 
-      vi.mocked(anomalyStorage.getActiveAnomalies).mockResolvedValue(mockAnomalies);
+      vi.mocked(anomalyStorage.getActiveAnomalies).mockResolvedValue(
+        mockAnomalies,
+      );
 
       const result = await anomalyDetector.getActiveAnomalies({
         type: ['duration_spike'],
@@ -319,7 +320,7 @@ describe('AnomalyDetector', () => {
         expect.objectContaining({
           id: 'anomaly-1',
           status: 'acknowledged',
-        })
+        }),
       );
     });
 
@@ -346,7 +347,7 @@ describe('AnomalyDetector', () => {
           id: 'anomaly-1',
           status: 'resolved',
           resolvedAt: expect.any(Number),
-        })
+        }),
       );
     });
   });
@@ -380,7 +381,9 @@ describe('AnomalyDetector', () => {
         },
       ];
 
-      vi.mocked(anomalyStorage.getAllAnomalies).mockResolvedValue(mockAnomalies);
+      vi.mocked(anomalyStorage.getAllAnomalies).mockResolvedValue(
+        mockAnomalies,
+      );
 
       const stats = await anomalyDetector.getStatistics();
 
@@ -410,7 +413,9 @@ describe('AnomalyDetector', () => {
         },
       ];
 
-      vi.mocked(anomalyStorage.getActiveAnomalies).mockResolvedValue(mockAnomalies);
+      vi.mocked(anomalyStorage.getActiveAnomalies).mockResolvedValue(
+        mockAnomalies,
+      );
       vi.mocked(anomalyStorage.getAnomaly).mockResolvedValue(mockAnomalies[0]);
 
       const resolved = await anomalyDetector.autoResolveStale();
@@ -436,7 +441,9 @@ describe('AnomalyDetector', () => {
         },
       ];
 
-      vi.mocked(anomalyStorage.getActiveAnomalies).mockResolvedValue(mockAnomalies);
+      vi.mocked(anomalyStorage.getActiveAnomalies).mockResolvedValue(
+        mockAnomalies,
+      );
 
       const resolved = await anomalyDetector.autoResolveStale();
 

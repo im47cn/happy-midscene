@@ -7,19 +7,19 @@
 
 import type {
   Anomaly,
+  Evidence,
   RootCause,
   RootCauseCategory,
   Suggestion,
-  Evidence,
 } from '../../types/anomaly';
-import { anomalyStorage } from './storage';
+import { type HistoricalPattern, causeMatcher } from './causeMatcher';
 import {
-  evidenceCollector,
-  type ExecutionContext,
-  type CollectedEvidence,
   type ChangeInfo,
+  type CollectedEvidence,
+  type ExecutionContext,
+  evidenceCollector,
 } from './evidenceCollector';
-import { causeMatcher, type HistoricalPattern } from './causeMatcher';
+import { anomalyStorage } from './storage';
 
 // ============================================================================
 // Types
@@ -91,7 +91,7 @@ class RootCauseAnalyzer {
   async analyze(
     anomaly: Anomaly,
     context?: ExecutionContext,
-    options: AnalysisOptions = {}
+    options: AnalysisOptions = {},
   ): Promise<AnalysisResult> {
     const startTime = Date.now();
     const opts = { ...this.defaultOptions, ...options };
@@ -103,7 +103,12 @@ class RootCauseAnalyzer {
     let rootCauses = causeMatcher.match(evidence, anomaly, context);
 
     // Filter by confidence
-    rootCauses = rootCauses.filter((rc) => rc.confidence >= (opts.minConfidence ?? 40));
+    rootCauses = rootCauses.filter(
+      (rc) => rc.confidence >= (opts.minConfidence ?? 40),
+    );
+
+    // Sort by confidence (highest first)
+    rootCauses.sort((a, b) => b.confidence - a.confidence);
 
     // Limit number of root causes
     rootCauses = rootCauses.slice(0, opts.maxRootCauses ?? 5);
@@ -118,7 +123,7 @@ class RootCauseAnalyzer {
     if (opts.correlateChanges && opts.recentChanges) {
       correlatedChanges = evidenceCollector.correlateChanges(
         anomaly.detectedAt,
-        opts.recentChanges
+        opts.recentChanges,
       );
     }
 
@@ -126,7 +131,11 @@ class RootCauseAnalyzer {
     await this.updateAnomalyRootCauses(anomaly.id, rootCauses);
 
     // Generate summary
-    const summary = this.generateAnalysisSummary(rootCauses, evidence, correlatedChanges);
+    const summary = this.generateAnalysisSummary(
+      rootCauses,
+      evidence,
+      correlatedChanges,
+    );
 
     return {
       anomalyId: anomaly.id,
@@ -144,7 +153,7 @@ class RootCauseAnalyzer {
   async analyzeFailure(
     caseId: string,
     executionId: string,
-    context: ExecutionContext
+    context: ExecutionContext,
   ): Promise<FailureAnalysisResult> {
     // Create a synthetic anomaly for the failure
     const syntheticAnomaly: Anomaly = {
@@ -171,7 +180,11 @@ class RootCauseAnalyzer {
     const recommendations = this.generateRecommendations(rootCauses, evidence);
 
     // Generate summary
-    const summary = this.generateFailureSummary(context, rootCauses, recommendations);
+    const summary = this.generateFailureSummary(
+      context,
+      rootCauses,
+      recommendations,
+    );
 
     return {
       caseId,
@@ -187,7 +200,8 @@ class RootCauseAnalyzer {
    * Get suggestions for a list of root causes
    */
   getSuggestions(rootCauses: RootCause[]): Suggestion[] {
-    const allSuggestions: Map<string, Suggestion & { score: number }> = new Map();
+    const allSuggestions: Map<string, Suggestion & { score: number }> =
+      new Map();
 
     for (const rootCause of rootCauses) {
       const confidenceMultiplier = rootCause.confidence / 100;
@@ -218,7 +232,7 @@ class RootCauseAnalyzer {
    */
   async analyzeBatch(
     anomalies: Anomaly[],
-    options: AnalysisOptions = {}
+    options: AnalysisOptions = {},
   ): Promise<BatchAnalysisResult> {
     const results: AnalysisResult[] = [];
 
@@ -259,7 +273,7 @@ class RootCauseAnalyzer {
   async learnFromResolution(
     anomalyId: string,
     resolutionTime: number,
-    fix: string
+    fix: string,
   ): Promise<void> {
     const anomaly = await anomalyStorage.getAnomaly(anomalyId);
     if (!anomaly || anomaly.rootCauses.length === 0) {
@@ -274,7 +288,7 @@ class RootCauseAnalyzer {
       primaryCause.category,
       evidence,
       resolutionTime,
-      fix
+      fix,
     );
   }
 
@@ -297,7 +311,7 @@ class RootCauseAnalyzer {
 
     return rootCauses.map((rootCause) => {
       const relevantPatterns = historicalPatterns.filter(
-        (p) => p.category === rootCause.category
+        (p) => p.category === rootCause.category,
       );
 
       if (relevantPatterns.length > 0) {
@@ -307,11 +321,13 @@ class RootCauseAnalyzer {
           .filter((fix, index, arr) => arr.indexOf(fix) === index);
 
         if (historicalFixes.length > 0) {
-          const historicalSuggestions: Suggestion[] = historicalFixes.map((fix, index) => ({
-            action: `Previously successful fix: ${fix}`,
-            priority: rootCause.suggestions.length + index + 1,
-            effort: 'low' as const,
-          }));
+          const historicalSuggestions: Suggestion[] = historicalFixes.map(
+            (fix, index) => ({
+              action: `Previously successful fix: ${fix}`,
+              priority: rootCause.suggestions.length + index + 1,
+              effort: 'low' as const,
+            }),
+          );
 
           return {
             ...rootCause,
@@ -327,7 +343,10 @@ class RootCauseAnalyzer {
   /**
    * Update anomaly with root causes
    */
-  private async updateAnomalyRootCauses(anomalyId: string, rootCauses: RootCause[]): Promise<void> {
+  private async updateAnomalyRootCauses(
+    anomalyId: string,
+    rootCauses: RootCause[],
+  ): Promise<void> {
     const anomaly = await anomalyStorage.getAnomaly(anomalyId);
     if (anomaly) {
       anomaly.rootCauses = rootCauses;
@@ -340,7 +359,7 @@ class RootCauseAnalyzer {
    */
   private generateRecommendations(
     rootCauses: RootCause[],
-    evidence: CollectedEvidence
+    evidence: CollectedEvidence,
   ): Recommendation[] {
     const recommendations: Recommendation[] = [];
 
@@ -368,7 +387,9 @@ class RootCauseAnalyzer {
   /**
    * Map confidence to priority
    */
-  private mapConfidenceToPriority(confidence: number): Recommendation['priority'] {
+  private mapConfidenceToPriority(
+    confidence: number,
+  ): Recommendation['priority'] {
     if (confidence >= 80) return 'immediate';
     if (confidence >= 60) return 'high';
     if (confidence >= 40) return 'medium';
@@ -379,10 +400,13 @@ class RootCauseAnalyzer {
    * Find common causes across multiple analyses
    */
   private findCommonCauses(results: AnalysisResult[]): CommonCause[] {
-    const categoryMap: Map<RootCauseCategory, {
-      rootCauses: RootCause[];
-      anomalyIds: string[];
-    }> = new Map();
+    const categoryMap: Map<
+      RootCauseCategory,
+      {
+        rootCauses: RootCause[];
+        anomalyIds: string[];
+      }
+    > = new Map();
 
     // Group by category
     for (const result of results) {
@@ -413,12 +437,14 @@ class RootCauseAnalyzer {
 
         // Calculate average confidence
         const avgConfidence = Math.round(
-          data.rootCauses.reduce((sum, rc) => sum + rc.confidence, 0) / data.rootCauses.length
+          data.rootCauses.reduce((sum, rc) => sum + rc.confidence, 0) /
+            data.rootCauses.length,
         );
 
         // Get most common description
         const descriptions = data.rootCauses.map((rc) => rc.description);
-        const description = this.getMostCommon(descriptions) ?? `${category} related issue`;
+        const description =
+          this.getMostCommon(descriptions) ?? `${category} related issue`;
 
         commonCauses.push({
           category,
@@ -430,7 +456,9 @@ class RootCauseAnalyzer {
       }
     }
 
-    return commonCauses.sort((a, b) => b.affectedAnomalies.length - a.affectedAnomalies.length);
+    return commonCauses.sort(
+      (a, b) => b.affectedAnomalies.length - a.affectedAnomalies.length,
+    );
   }
 
   /**
@@ -473,23 +501,29 @@ class RootCauseAnalyzer {
   private generateAnalysisSummary(
     rootCauses: RootCause[],
     evidence: CollectedEvidence,
-    changes: ChangeInfo[]
+    changes: ChangeInfo[],
   ): string {
     const parts: string[] = [];
 
     if (rootCauses.length > 0) {
       const primary = rootCauses[0];
-      parts.push(`Most likely cause: ${primary.description} (${primary.confidence}% confidence)`);
+      parts.push(
+        `Most likely cause: ${primary.description} (${primary.confidence}% confidence)`,
+      );
 
       if (rootCauses.length > 1) {
-        parts.push(`${rootCauses.length - 1} additional potential cause(s) identified`);
+        parts.push(
+          `${rootCauses.length - 1} additional potential cause(s) identified`,
+        );
       }
     } else {
       parts.push('No specific root cause identified');
     }
 
     if (evidence.primary.length > 0) {
-      parts.push(`Based on ${evidence.primary.length} primary evidence item(s)`);
+      parts.push(
+        `Based on ${evidence.primary.length} primary evidence item(s)`,
+      );
     }
 
     if (changes.length > 0) {
@@ -505,7 +539,7 @@ class RootCauseAnalyzer {
   private generateFailureSummary(
     context: ExecutionContext,
     rootCauses: RootCause[],
-    recommendations: Recommendation[]
+    recommendations: Recommendation[],
   ): string {
     const parts: string[] = [];
 
@@ -513,11 +547,15 @@ class RootCauseAnalyzer {
 
     if (context.errorMessage) {
       const shortError = context.errorMessage.slice(0, 100);
-      parts.push(`Error: ${shortError}${context.errorMessage.length > 100 ? '...' : ''}`);
+      parts.push(
+        `Error: ${shortError}${context.errorMessage.length > 100 ? '...' : ''}`,
+      );
     }
 
     if (rootCauses.length > 0) {
-      parts.push(`Primary cause: ${rootCauses[0].category} - ${rootCauses[0].description}`);
+      parts.push(
+        `Primary cause: ${rootCauses[0].category} - ${rootCauses[0].description}`,
+      );
     }
 
     if (recommendations.length > 0) {
@@ -530,18 +568,28 @@ class RootCauseAnalyzer {
   /**
    * Generate batch summary
    */
-  private generateBatchSummary(results: AnalysisResult[], commonCauses: CommonCause[]): string {
+  private generateBatchSummary(
+    results: AnalysisResult[],
+    commonCauses: CommonCause[],
+  ): string {
     const parts: string[] = [];
 
     parts.push(`Analyzed ${results.length} anomalies`);
 
-    const totalRootCauses = results.reduce((sum, r) => sum + r.rootCauses.length, 0);
+    const totalRootCauses = results.reduce(
+      (sum, r) => sum + r.rootCauses.length,
+      0,
+    );
     parts.push(`Identified ${totalRootCauses} total root causes`);
 
     if (commonCauses.length > 0) {
-      parts.push(`Found ${commonCauses.length} common cause(s) affecting multiple anomalies`);
+      parts.push(
+        `Found ${commonCauses.length} common cause(s) affecting multiple anomalies`,
+      );
       const topCommon = commonCauses[0];
-      parts.push(`Most prevalent: ${topCommon.category} (${topCommon.affectedAnomalies.length} anomalies)`);
+      parts.push(
+        `Most prevalent: ${topCommon.category} (${topCommon.affectedAnomalies.length} anomalies)`,
+      );
     }
 
     return parts.join('. ');

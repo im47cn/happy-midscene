@@ -5,7 +5,11 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CaseStats, ExecutionRecord } from '../../../types/analytics';
-import type { RecommendOptions, ChangeInfo, RegressionType } from '../../../types/recommendation';
+import type {
+  ChangeInfo,
+  RecommendOptions,
+  RegressionType,
+} from '../../../types/recommendation';
 import { RecommendEngine } from '../recommendEngine';
 
 // Mock analyticsStorage
@@ -93,26 +97,51 @@ describe('RecommendEngine', () => {
 
     it('should sort by score descending', async () => {
       const caseStats = [
-        createCaseStats({ caseId: 'case-low', stabilityScore: 30, passRate: 50 }),
-        createCaseStats({ caseId: 'case-high', stabilityScore: 95, passRate: 98 }),
-        createCaseStats({ caseId: 'case-medium', stabilityScore: 70, passRate: 75 }),
+        createCaseStats({
+          caseId: 'case-low',
+          stabilityScore: 30,
+          passRate: 50,
+        }),
+        createCaseStats({
+          caseId: 'case-high',
+          stabilityScore: 95,
+          passRate: 98,
+        }),
+        createCaseStats({
+          caseId: 'case-medium',
+          stabilityScore: 70,
+          passRate: 75,
+        }),
       ];
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
       vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue([]);
 
       const recommendations = await engine.getRecommendations();
 
-      expect(recommendations[0].score).toBeGreaterThanOrEqual(recommendations[1].score);
-      expect(recommendations[1].score).toBeGreaterThanOrEqual(recommendations[2].score);
+      expect(recommendations[0].score).toBeGreaterThanOrEqual(
+        recommendations[1].score,
+      );
+      expect(recommendations[1].score).toBeGreaterThanOrEqual(
+        recommendations[2].score,
+      );
     });
   });
 
   describe('getRecommendationsForChange', () => {
     it('should return only cases affected by changes', async () => {
       const caseStats = [
-        createCaseStats({ caseId: 'case-login', caseName: 'Login Authentication Test' }),
-        createCaseStats({ caseId: 'case-payment', caseName: 'Payment Checkout Test' }),
-        createCaseStats({ caseId: 'case-search', caseName: 'Search Functionality Test' }),
+        createCaseStats({
+          caseId: 'case-login',
+          caseName: 'Login Authentication Test',
+        }),
+        createCaseStats({
+          caseId: 'case-payment',
+          caseName: 'Payment Checkout Test',
+        }),
+        createCaseStats({
+          caseId: 'case-search',
+          caseName: 'Search Functionality Test',
+        }),
       ];
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
       vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue([]);
@@ -133,12 +162,16 @@ describe('RecommendEngine', () => {
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
       vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue([]);
 
-      const changes: ChangeInfo[] = [{ type: 'file', target: 'login', description: 'Login module' }];
+      const changes: ChangeInfo[] = [
+        { type: 'file', target: 'login', description: 'Login module' },
+      ];
 
       const recommendations = await engine.getRecommendationsForChange(changes);
 
       if (recommendations.length > 0) {
-        const hasChangeImpact = recommendations[0].reasons.some((r) => r.type === 'change_impact');
+        const hasChangeImpact = recommendations[0].reasons.some(
+          (r) => r.type === 'change_impact',
+        );
         expect(hasChangeImpact).toBe(true);
       }
     });
@@ -147,8 +180,16 @@ describe('RecommendEngine', () => {
   describe('getRegressionSet', () => {
     it('should return critical and recently failed for minimal set', async () => {
       const caseStats = [
-        createCaseStats({ caseId: 'case-critical', stabilityScore: 20, isFlaky: true }),
-        createCaseStats({ caseId: 'case-stable', stabilityScore: 95, isFlaky: false }),
+        createCaseStats({
+          caseId: 'case-critical',
+          stabilityScore: 20,
+          isFlaky: true,
+        }),
+        createCaseStats({
+          caseId: 'case-stable',
+          stabilityScore: 95,
+          isFlaky: false,
+        }),
       ];
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
       vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue([]);
@@ -270,14 +311,24 @@ describe('RecommendEngine', () => {
 
   describe('updateConfig', () => {
     it('should update weights', () => {
-      engine.updateConfig({ weights: { riskFactor: 0.5, businessValue: 0.2, executionCost: 0.1, changeImpact: 0.1, recency: 0.1 } });
+      engine.updateConfig({
+        weights: {
+          riskFactor: 0.5,
+          businessValue: 0.2,
+          executionCost: 0.1,
+          changeImpact: 0.1,
+          recency: 0.1,
+        },
+      });
 
       const config = engine.getConfig();
       expect(config.weights.riskFactor).toBe(0.5);
     });
 
     it('should update thresholds', () => {
-      engine.updateConfig({ thresholds: { critical: 90, high: 70, medium: 50 } });
+      engine.updateConfig({
+        thresholds: { critical: 90, high: 70, medium: 50 },
+      });
 
       const config = engine.getConfig();
       expect(config.thresholds.critical).toBe(90);

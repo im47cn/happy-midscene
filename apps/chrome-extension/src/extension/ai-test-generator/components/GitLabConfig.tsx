@@ -198,7 +198,11 @@ export function GitLabConfigModal({ visible, onClose }: GitLabConfigProps) {
 
         {testResult && (
           <Alert
-            message={testResult.success ? t('connectionSuccess') : t('connectionFailed')}
+            message={
+              testResult.success
+                ? t('connectionSuccess')
+                : t('connectionFailed')
+            }
             description={testResult.message}
             type={testResult.success ? 'success' : 'error'}
             showIcon

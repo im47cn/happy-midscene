@@ -3,26 +3,45 @@
  * 自适应流程可视化组件 - 可视化条件分支和循环执行流程
  */
 
-import React, { useMemo } from 'react';
 import {
-  BranchesOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  ClockCircleOutlined,
   ArrowDownOutlined,
   ArrowRightOutlined,
-  SyncOutlined,
+  BranchesOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  CloseCircleOutlined,
   CodeOutlined,
+  SyncOutlined,
 } from '@ant-design/icons';
-import { Card, Collapse, Space, Tag, Timeline, Tooltip, Typography } from 'antd';
+import {
+  Card,
+  Collapse,
+  Space,
+  Tag,
+  Timeline,
+  Tooltip,
+  Typography,
+} from 'antd';
+import React, { useMemo } from 'react';
 
 const { Text } = Typography;
 
 // Flow node types
-export type FlowNodeType = 'action' | 'condition' | 'loop' | 'variable' | 'start' | 'end';
+export type FlowNodeType =
+  | 'action'
+  | 'condition'
+  | 'loop'
+  | 'variable'
+  | 'start'
+  | 'end';
 
 // Flow node status
-export type FlowNodeStatus = 'pending' | 'running' | 'success' | 'failed' | 'skipped';
+export type FlowNodeStatus =
+  | 'pending'
+  | 'running'
+  | 'success'
+  | 'failed'
+  | 'skipped';
 
 // Flow node interface
 export interface FlowNode {
@@ -66,21 +85,53 @@ function getNodeIcon(type: FlowNodeType, status: FlowNodeStatus) {
 
   switch (type) {
     case 'condition':
-      return <BranchesOutlined {...iconProps} style={{ color: '#f59e0b', ...iconProps.style }} />;
+      return (
+        <BranchesOutlined
+          {...iconProps}
+          style={{ color: '#f59e0b', ...iconProps.style }}
+        />
+      );
     case 'loop':
-      return <SyncOutlined spin={status === 'running'} {...iconProps} style={{ color: '#10b981', ...iconProps.style }} />;
+      return (
+        <SyncOutlined
+          spin={status === 'running'}
+          {...iconProps}
+          style={{ color: '#10b981', ...iconProps.style }}
+        />
+      );
     case 'variable':
-      return <CodeOutlined {...iconProps} style={{ color: '#3b82f6', ...iconProps.style }} />;
+      return (
+        <CodeOutlined
+          {...iconProps}
+          style={{ color: '#3b82f6', ...iconProps.style }}
+        />
+      );
     case 'start':
-      return <CheckCircleOutlined {...iconProps} style={{ color: '#6b7280', ...iconProps.style }} />;
+      return (
+        <CheckCircleOutlined
+          {...iconProps}
+          style={{ color: '#6b7280', ...iconProps.style }}
+        />
+      );
     case 'end':
       return status === 'success' ? (
-        <CheckCircleOutlined {...iconProps} style={{ color: '#22c55e', ...iconProps.style }} />
+        <CheckCircleOutlined
+          {...iconProps}
+          style={{ color: '#22c55e', ...iconProps.style }}
+        />
       ) : (
-        <CloseCircleOutlined {...iconProps} style={{ color: '#ef4444', ...iconProps.style }} />
+        <CloseCircleOutlined
+          {...iconProps}
+          style={{ color: '#ef4444', ...iconProps.style }}
+        />
       );
     default:
-      return <ArrowDownOutlined {...iconProps} style={{ color: '#6b7280', ...iconProps.style }} />;
+      return (
+        <ArrowDownOutlined
+          {...iconProps}
+          style={{ color: '#6b7280', ...iconProps.style }}
+        />
+      );
   }
 }
 
@@ -166,7 +217,10 @@ function FlowNodeItem({
             </Tag>
           )}
           {node.branch && (
-            <Tag color={node.branch === 'then' ? 'green' : 'orange'} style={{ fontSize: 10 }}>
+            <Tag
+              color={node.branch === 'then' ? 'green' : 'orange'}
+              style={{ fontSize: 10 }}
+            >
               {node.branch}
             </Tag>
           )}
@@ -203,7 +257,12 @@ function FlowNodeItem({
                       </Space>
                     </div>
                   )}
-                  <FlowNodeItem node={child} depth={depth + 1} compact={compact} maxDepth={maxDepth} />
+                  <FlowNodeItem
+                    node={child}
+                    depth={depth + 1}
+                    compact={compact}
+                    maxDepth={maxDepth}
+                  />
                 </div>
               ))}
             </>
@@ -255,11 +314,14 @@ export function testCaseToFlowNodes(
       elseSteps?: any[];
     }>;
   },
-  executionResults?: Array<{ stepId: string; success: boolean; branch?: string; iterations?: number }>
+  executionResults?: Array<{
+    stepId: string;
+    success: boolean;
+    branch?: string;
+    iterations?: number;
+  }>,
 ): FlowNode[] {
-  const resultMap = new Map(
-    executionResults?.map((r) => [r.stepId, r]) || []
-  );
+  const resultMap = new Map(executionResults?.map((r) => [r.stepId, r]) || []);
 
   return testCase.steps.map((step) => {
     const result = resultMap.get(step.id);
@@ -284,22 +346,26 @@ export function testCaseToFlowNodes(
         ...baseNode,
         type: 'condition',
         children: [
-          ...(step.thenSteps || []).map((s, i): FlowNode => ({
-            id: `${step.id}-then-${i}`,
-            type: 'action' as FlowNodeType,
-            status,
-            label: s.description || 'Then action',
-            branch: 'then',
-            depth: 1,
-          })),
-          ...(step.elseSteps || []).map((s, i): FlowNode => ({
-            id: `${step.id}-else-${i}`,
-            type: 'action' as FlowNodeType,
-            status: 'skipped',
-            label: s.description || 'Else action',
-            branch: 'else',
-            depth: 1,
-          })),
+          ...(step.thenSteps || []).map(
+            (s, i): FlowNode => ({
+              id: `${step.id}-then-${i}`,
+              type: 'action' as FlowNodeType,
+              status,
+              label: s.description || 'Then action',
+              branch: 'then',
+              depth: 1,
+            }),
+          ),
+          ...(step.elseSteps || []).map(
+            (s, i): FlowNode => ({
+              id: `${step.id}-else-${i}`,
+              type: 'action' as FlowNodeType,
+              status: 'skipped',
+              label: s.description || 'Else action',
+              branch: 'else',
+              depth: 1,
+            }),
+          ),
         ],
       };
     }
@@ -309,13 +375,15 @@ export function testCaseToFlowNodes(
       return {
         ...baseNode,
         type: 'loop',
-        children: step.loop.body.map((s: any, i: number): FlowNode => ({
-          id: `${step.id}-loop-${i}`,
-          type: 'action' as FlowNodeType,
-          status,
-          label: s.description || 'Loop action',
-          depth: 1,
-        })),
+        children: step.loop.body.map(
+          (s: any, i: number): FlowNode => ({
+            id: `${step.id}-loop-${i}`,
+            type: 'action' as FlowNodeType,
+            status,
+            label: s.description || 'Loop action',
+            depth: 1,
+          }),
+        ),
       };
     }
 
@@ -335,19 +403,25 @@ export function AdaptiveFlowVisualization({
 }: AdaptiveFlowVisualizationProps) {
   // Calculate statistics
   const stats = useMemo(() => {
-    const countByType = nodes.reduce((acc, node) => {
-      acc[node.type] = (acc[node.type] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const countByType = nodes.reduce(
+      (acc, node) => {
+        acc[node.type] = (acc[node.type] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-    const countByStatus = nodes.reduce((acc, node) => {
-      acc[node.status] = (acc[node.status] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const countByStatus = nodes.reduce(
+      (acc, node) => {
+        acc[node.status] = (acc[node.status] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     const totalIterations = nodes.reduce(
       (sum, node) => sum + (node.iteration || 0),
-      0
+      0,
     );
 
     return { countByType, countByStatus, totalIterations };
@@ -408,12 +482,18 @@ export function AdaptiveFlowVisualization({
           )}
           {stats.countByStatus.success > 0 && (
             <Text type="secondary">
-              Success: <Text style={{ color: '#22c55e' }}>{stats.countByStatus.success}</Text>
+              Success:{' '}
+              <Text style={{ color: '#22c55e' }}>
+                {stats.countByStatus.success}
+              </Text>
             </Text>
           )}
           {stats.countByStatus.failed > 0 && (
             <Text type="secondary">
-              Failed: <Text style={{ color: '#ef4444' }}>{stats.countByStatus.failed}</Text>
+              Failed:{' '}
+              <Text style={{ color: '#ef4444' }}>
+                {stats.countByStatus.failed}
+              </Text>
             </Text>
           )}
         </Space>
@@ -441,7 +521,11 @@ export function AdaptiveFlowVisualization({
                       <Tooltip title={path}>
                         <Text
                           ellipsis
-                          style={{ maxWidth: 400, fontSize: 12, fontFamily: 'monospace' }}
+                          style={{
+                            maxWidth: 400,
+                            fontSize: 12,
+                            fontFamily: 'monospace',
+                          }}
                         >
                           {path}
                         </Text>

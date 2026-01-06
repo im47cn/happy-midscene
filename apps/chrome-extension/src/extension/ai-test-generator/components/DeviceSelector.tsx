@@ -64,9 +64,17 @@ function DeviceInfoTooltip({ device }: { device: DevicePreset }) {
       <div>
         {t('resolution')}: {device.width}×{device.height}
       </div>
-      <div>{t('scale')}: {device.deviceScaleFactor}x</div>
-      <div>{t('touch')}: {device.hasTouch ? t('yes') : t('no')}</div>
-      {device.isMobile && <div>{t('mobile')}: {t('yes')}</div>}
+      <div>
+        {t('scale')}: {device.deviceScaleFactor}x
+      </div>
+      <div>
+        {t('touch')}: {device.hasTouch ? t('yes') : t('no')}
+      </div>
+      {device.isMobile && (
+        <div>
+          {t('mobile')}: {t('yes')}
+        </div>
+      )}
     </div>
   );
 }

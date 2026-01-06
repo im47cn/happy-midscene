@@ -2,9 +2,9 @@
  * Audit Logger Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { AuditLogger } from '../auditLogger';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { AuditEntry } from '../../../types/collaboration';
+import { AuditLogger } from '../auditLogger';
 
 describe('AuditLogger', () => {
   let al: AuditLogger;
@@ -111,26 +111,38 @@ describe('AuditLogger', () => {
     });
 
     it('should filter by userId', async () => {
-      const user1Entries = await al.query({ workspaceId: 'ws1', userId: 'user1' });
+      const user1Entries = await al.query({
+        workspaceId: 'ws1',
+        userId: 'user1',
+      });
 
       expect(user1Entries).toHaveLength(1);
       expect(user1Entries[0].userId).toBe('user1');
     });
 
     it('should filter by resourceType', async () => {
-      const fileEntries = await al.query({ workspaceId: 'ws1', resourceType: 'file' });
+      const fileEntries = await al.query({
+        workspaceId: 'ws1',
+        resourceType: 'file',
+      });
 
       expect(fileEntries).toHaveLength(2);
     });
 
     it('should filter by resourceId', async () => {
-      const file1Entries = await al.query({ workspaceId: 'ws1', resourceId: 'file1' });
+      const file1Entries = await al.query({
+        workspaceId: 'ws1',
+        resourceId: 'file1',
+      });
 
       expect(file1Entries).toHaveLength(2);
     });
 
     it('should filter by action', async () => {
-      const createEntries = await al.query({ workspaceId: 'ws1', action: 'create' });
+      const createEntries = await al.query({
+        workspaceId: 'ws1',
+        action: 'create',
+      });
 
       expect(createEntries).toHaveLength(1);
       expect(createEntries[0].action).toBe('create');
@@ -453,7 +465,9 @@ describe('AuditLogger', () => {
       // Just verify we get 5 entries and they're sorted by timestamp descending
       expect(entries).toHaveLength(5);
       for (let i = 0; i < entries.length - 1; i++) {
-        expect(entries[i].timestamp).toBeGreaterThanOrEqual(entries[i + 1].timestamp);
+        expect(entries[i].timestamp).toBeGreaterThanOrEqual(
+          entries[i + 1].timestamp,
+        );
       }
     });
   });

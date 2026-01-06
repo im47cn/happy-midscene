@@ -3,6 +3,7 @@
  * Analyzes test coverage and identifies gaps
  */
 
+import type { CaseStats, ExecutionRecord } from '../../types/analytics';
 import type {
   CoverageData,
   CoverageGap,
@@ -10,14 +11,22 @@ import type {
   PageCoverage,
   PathCoverage,
 } from '../../types/recommendation';
-import type { CaseStats, ExecutionRecord } from '../../types/analytics';
 import { analyticsStorage } from '../analytics/analyticsStorage';
 
 /**
  * Feature keywords for categorization
  */
 const FEATURE_KEYWORDS: Record<string, string[]> = {
-  authentication: ['login', 'logout', 'auth', 'signin', 'signout', '登录', '登出', '认证'],
+  authentication: [
+    'login',
+    'logout',
+    'auth',
+    'signin',
+    'signout',
+    '登录',
+    '登出',
+    '认证',
+  ],
   registration: ['signup', 'register', '注册', '创建账户'],
   checkout: ['checkout', 'payment', '支付', '结账', '购买'],
   search: ['search', '查找', '搜索'],
@@ -41,7 +50,7 @@ const URL_PATTERNS: Record<string, RegExp[]> = {
  */
 export class CoverageAnalyzer {
   private cachedCoverage: CoverageData | null = null;
-  private cacheTime: number = 0;
+  private cacheTime = 0;
   private readonly CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
 
   /**
@@ -73,8 +82,12 @@ export class CoverageAnalyzer {
         const stat = allStats.find((s) => s.caseId === caseId);
         if (stat) totalPassRate += stat.passRate;
       }
-      const avgPassRate = coveredCases.length > 0 ? totalPassRate / coveredCases.length : 0;
-      const coveragePercent = Math.min(100, avgPassRate * (1 + Math.log10(coveredCases.length) * 0.1));
+      const avgPassRate =
+        coveredCases.length > 0 ? totalPassRate / coveredCases.length : 0;
+      const coveragePercent = Math.min(
+        100,
+        avgPassRate * (1 + Math.log10(coveredCases.length) * 0.1),
+      );
 
       featureCoverage.push({
         featureId,
@@ -125,7 +138,10 @@ export class CoverageAnalyzer {
       }
 
       const avgPassRate = validCount > 0 ? totalPassRate / validCount : 0;
-      const coveragePercent = Math.min(100, avgPassRate * (1 + Math.log10(coveredCases.length) * 0.1));
+      const coveragePercent = Math.min(
+        100,
+        avgPassRate * (1 + Math.log10(coveredCases.length) * 0.1),
+      );
 
       pageCoverage.push({
         url,
@@ -145,7 +161,10 @@ export class CoverageAnalyzer {
    */
   async analyzePathCoverage(): Promise<PathCoverage[]> {
     const executions = await analyticsStorage.getRecentExecutions(100);
-    const pathMap = new Map<string, { cases: Set<string>; steps: Set<string> }>();
+    const pathMap = new Map<
+      string,
+      { cases: Set<string>; steps: Set<string> }
+    >();
 
     // Extract paths from execution steps
     for (const exec of executions) {
@@ -269,7 +288,8 @@ export class CoverageAnalyzer {
     // Calculate overall score
     const featureScore =
       features.length > 0
-        ? features.reduce((sum, f) => sum + f.coveragePercent, 0) / features.length
+        ? features.reduce((sum, f) => sum + f.coveragePercent, 0) /
+          features.length
         : 100;
     const pageScore =
       pages.length > 0
@@ -280,7 +300,9 @@ export class CoverageAnalyzer {
         ? paths.reduce((sum, p) => sum + p.coveragePercent, 0) / paths.length
         : 100;
 
-    const overallScore = Math.round((featureScore * 0.4 + pageScore * 0.3 + pathScore * 0.3));
+    const overallScore = Math.round(
+      featureScore * 0.4 + pageScore * 0.3 + pathScore * 0.3,
+    );
 
     this.cachedCoverage = {
       features,
@@ -305,14 +327,19 @@ export class CoverageAnalyzer {
   /**
    * Identify features from case name
    */
-  private identifyFeatures(caseName: string): Array<{ id: string; name: string }> {
+  private identifyFeatures(
+    caseName: string,
+  ): Array<{ id: string; name: string }> {
     const lowerName = caseName.toLowerCase();
     const features: Array<{ id: string; name: string }> = [];
 
     for (const [featureId, keywords] of Object.entries(FEATURE_KEYWORDS)) {
       for (const keyword of keywords) {
         if (lowerName.includes(keyword)) {
-          features.push({ id: featureId, name: this.getFeatureName(featureId) });
+          features.push({
+            id: featureId,
+            name: this.getFeatureName(featureId),
+          });
           break;
         }
       }
@@ -380,7 +407,9 @@ export class CoverageAnalyzer {
    */
   private extractPathId(exec: ExecutionRecord): string {
     // Create a simple path signature from the first few steps
-    const stepDescriptions = exec.steps.slice(0, 3).map((s) => s.description.toLowerCase());
+    const stepDescriptions = exec.steps
+      .slice(0, 3)
+      .map((s) => s.description.toLowerCase());
     return stepDescriptions.join('->').slice(0, 50) || 'unknown-path';
   }
 

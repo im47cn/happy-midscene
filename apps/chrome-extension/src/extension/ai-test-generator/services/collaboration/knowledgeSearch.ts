@@ -46,17 +46,97 @@ export class KnowledgeSearch implements IKnowledgeSearch {
   constructor() {
     this.index = new Map();
     this.stopwords = new Set([
-      'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from',
-      'has', 'he', 'in', 'is', 'it', 'its', 'of', 'on', 'that', 'the',
-      'to', 'was', 'were', 'will', 'with', 'the', 'this', 'but', 'they',
-      'have', 'had', 'what', 'when', 'where', 'who', 'which', 'why', 'how',
-      'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other',
-      'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so',
-      'than', 'too', 'very', 'can', 'just', 'should', 'now',
+      'a',
+      'an',
+      'and',
+      'are',
+      'as',
+      'at',
+      'be',
+      'by',
+      'for',
+      'from',
+      'has',
+      'he',
+      'in',
+      'is',
+      'it',
+      'its',
+      'of',
+      'on',
+      'that',
+      'the',
+      'to',
+      'was',
+      'were',
+      'will',
+      'with',
+      'the',
+      'this',
+      'but',
+      'they',
+      'have',
+      'had',
+      'what',
+      'when',
+      'where',
+      'who',
+      'which',
+      'why',
+      'how',
+      'all',
+      'each',
+      'every',
+      'both',
+      'few',
+      'more',
+      'most',
+      'other',
+      'some',
+      'such',
+      'no',
+      'nor',
+      'not',
+      'only',
+      'own',
+      'same',
+      'so',
+      'than',
+      'too',
+      'very',
+      'can',
+      'just',
+      'should',
+      'now',
       // Common Chinese stopwords
-      '的', '了', '在', '是', '我', '有', '和', '就', '不', '人',
-      '都', '一', '一个', '上', '也', '很', '到', '说', '要', '去',
-      '你', '会', '着', '没有', '看', '好', '自己', '这',
+      '的',
+      '了',
+      '在',
+      '是',
+      '我',
+      '有',
+      '和',
+      '就',
+      '不',
+      '人',
+      '都',
+      '一',
+      '一个',
+      '上',
+      '也',
+      '很',
+      '到',
+      '说',
+      '要',
+      '去',
+      '你',
+      '会',
+      '着',
+      '没有',
+      '看',
+      '好',
+      '自己',
+      '这',
     ]);
   }
 
@@ -138,7 +218,10 @@ export class KnowledgeSearch implements IKnowledgeSearch {
           // Generate highlight
           const positions = docIndex.termPositions.get(term);
           if (positions && positions.length > 0) {
-            const highlight = this.generateHighlight(docIndex.content, positions[0]);
+            const highlight = this.generateHighlight(
+              docIndex.content,
+              positions[0],
+            );
             if (highlight && !highlights.includes(highlight)) {
               highlights.push(highlight);
             }
@@ -206,7 +289,10 @@ export class KnowledgeSearch implements IKnowledgeSearch {
 
       if (sharedTerms > 0) {
         // Jaccard-like similarity
-        const otherTotal = Array.from(otherDoc.terms.values()).reduce((a, b) => a + b, 0);
+        const otherTotal = Array.from(otherDoc.terms.values()).reduce(
+          (a, b) => a + b,
+          0,
+        );
         const score = sharedTerms / (totalTerms + otherTotal - sharedTerms);
         similarities.push({ id, score });
       }

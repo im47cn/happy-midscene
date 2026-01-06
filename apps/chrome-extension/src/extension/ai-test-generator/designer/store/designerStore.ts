@@ -117,7 +117,10 @@ export const useDesignerStore = create<DesignerStore>()(
           return {
             flow: newFlow,
             history: {
-              past: [...state.history.past, state.history.present || state.flow],
+              past: [
+                ...state.history.past,
+                state.history.present || state.flow,
+              ],
               present: newFlow,
               future: [],
             },
@@ -130,7 +133,7 @@ export const useDesignerStore = create<DesignerStore>()(
           if (!state.flow) return state;
 
           const newNodes = state.flow.nodes.map((node) =>
-            node.id === nodeId ? { ...node, ...updates } : node
+            node.id === nodeId ? { ...node, ...updates } : node,
           );
 
           const newFlow = {
@@ -145,7 +148,10 @@ export const useDesignerStore = create<DesignerStore>()(
           return {
             flow: newFlow,
             history: {
-              past: [...state.history.past, state.history.present || state.flow],
+              past: [
+                ...state.history.past,
+                state.history.present || state.flow,
+              ],
               present: newFlow,
               future: [],
             },
@@ -157,9 +163,11 @@ export const useDesignerStore = create<DesignerStore>()(
         set((state) => {
           if (!state.flow) return state;
 
-          const newNodes = state.flow.nodes.filter((node) => node.id !== nodeId);
+          const newNodes = state.flow.nodes.filter(
+            (node) => node.id !== nodeId,
+          );
           const newEdges = state.flow.edges.filter(
-            (edge) => edge.source !== nodeId && edge.target !== nodeId
+            (edge) => edge.source !== nodeId && edge.target !== nodeId,
           );
 
           const newFlow = {
@@ -176,7 +184,10 @@ export const useDesignerStore = create<DesignerStore>()(
             flow: newFlow,
             selectedNodes: state.selectedNodes.filter((id) => id !== nodeId),
             history: {
-              past: [...state.history.past, state.history.present || state.flow],
+              past: [
+                ...state.history.past,
+                state.history.present || state.flow,
+              ],
               present: newFlow,
               future: [],
             },
@@ -217,7 +228,10 @@ export const useDesignerStore = create<DesignerStore>()(
             flow: newFlow,
             selectedNodes: [newNode.id],
             history: {
-              past: [...state.history.past, state.history.present || state.flow],
+              past: [
+                ...state.history.past,
+                state.history.present || state.flow,
+              ],
               present: newFlow,
               future: [],
             },
@@ -242,7 +256,10 @@ export const useDesignerStore = create<DesignerStore>()(
           return {
             flow: newFlow,
             history: {
-              past: [...state.history.past, state.history.present || state.flow],
+              past: [
+                ...state.history.past,
+                state.history.present || state.flow,
+              ],
               present: newFlow,
               future: [],
             },
@@ -254,7 +271,9 @@ export const useDesignerStore = create<DesignerStore>()(
         set((state) => {
           if (!state.flow) return state;
 
-          const newEdges = state.flow.edges.filter((edge) => edge.id !== edgeId);
+          const newEdges = state.flow.edges.filter(
+            (edge) => edge.id !== edgeId,
+          );
 
           const newFlow = {
             ...state.flow,
@@ -269,7 +288,10 @@ export const useDesignerStore = create<DesignerStore>()(
             flow: newFlow,
             selectedEdges: state.selectedEdges.filter((id) => id !== edgeId),
             history: {
-              past: [...state.history.past, state.history.present || state.flow],
+              past: [
+                ...state.history.past,
+                state.history.present || state.flow,
+              ],
               present: newFlow,
               future: [],
             },
@@ -304,7 +326,10 @@ export const useDesignerStore = create<DesignerStore>()(
               past: newPast,
               present: previous,
               future: state.history.present
-                ? ([state.history.present, ...state.history.future] as TestFlow[])
+                ? ([
+                    state.history.present,
+                    ...state.history.future,
+                  ] as TestFlow[])
                 : state.history.future,
             },
           };
@@ -395,7 +420,11 @@ export const useDesignerStore = create<DesignerStore>()(
         });
 
         flow.nodes.forEach((node) => {
-          if (node.type !== 'start' && node.type !== 'end' && node.type !== 'comment') {
+          if (
+            node.type !== 'start' &&
+            node.type !== 'end' &&
+            node.type !== 'comment'
+          ) {
             if (!connectedNodeIds.has(node.id)) {
               warnings.push({
                 type: 'usability',
@@ -420,7 +449,10 @@ export const useDesignerStore = create<DesignerStore>()(
         });
 
         // 检查循环依赖
-        const hasCycle = detectCycle(flow.nodes.map((n) => n.id), flow.edges);
+        const hasCycle = detectCycle(
+          flow.nodes.map((n) => n.id),
+          flow.edges,
+        );
         if (hasCycle) {
           errors.push({ type: 'cycle', message: '流程中存在循环依赖' });
         }
@@ -449,8 +481,8 @@ export const useDesignerStore = create<DesignerStore>()(
         set(createInitialState());
       },
     }),
-    { name: 'DesignerStore' }
-  )
+    { name: 'DesignerStore' },
+  ),
 );
 
 /**
@@ -500,11 +532,14 @@ function detectCycle(nodeIds: string[], edges: DesignerEdge[]): boolean {
  * 选择器 hooks
  */
 export const useFlow = () => useDesignerStore((state) => state.flow);
-export const useSelectedNodes = () => useDesignerStore((state) => state.selectedNodes);
-export const useValidationResult = () => useDesignerStore((state) => state.validationResult);
-export const useViewportSettings = () => useDesignerStore((state) => ({
-  zoom: state.zoom,
-  viewport: state.viewport,
-  showMinimap: state.showMinimap,
-  showGrid: state.showGrid,
-}));
+export const useSelectedNodes = () =>
+  useDesignerStore((state) => state.selectedNodes);
+export const useValidationResult = () =>
+  useDesignerStore((state) => state.validationResult);
+export const useViewportSettings = () =>
+  useDesignerStore((state) => ({
+    zoom: state.zoom,
+    viewport: state.viewport,
+    showMinimap: state.showMinimap,
+    showGrid: state.showGrid,
+  }));

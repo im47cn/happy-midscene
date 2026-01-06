@@ -2,10 +2,10 @@
  * Knowledge Base Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { KnowledgeBase } from '../knowledgeBase';
-import { categoryManager } from '../categoryManager';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { CreateArticleData } from '../../../types/collaboration';
+import { categoryManager } from '../categoryManager';
+import { KnowledgeBase } from '../knowledgeBase';
 
 describe('KnowledgeBase', () => {
   let kb: KnowledgeBase;
@@ -101,7 +101,7 @@ describe('KnowledgeBase', () => {
           content: 'Content',
           categoryId: 'non-existent',
           author: 'user1',
-        })
+        }),
       ).rejects.toThrow('Category not found');
     });
   });
@@ -157,7 +157,7 @@ describe('KnowledgeBase', () => {
 
     it('should throw error for non-existent article', async () => {
       await expect(
-        kb.updateArticle('non-existent', { title: 'New Title' })
+        kb.updateArticle('non-existent', { title: 'New Title' }),
       ).rejects.toThrow('Article not found');
     });
   });
@@ -177,8 +177,9 @@ describe('KnowledgeBase', () => {
     });
 
     it('should throw error for non-existent article', async () => {
-      await expect(kb.deleteArticle('non-existent'))
-        .rejects.toThrow('Article not found');
+      await expect(kb.deleteArticle('non-existent')).rejects.toThrow(
+        'Article not found',
+      );
     });
   });
 

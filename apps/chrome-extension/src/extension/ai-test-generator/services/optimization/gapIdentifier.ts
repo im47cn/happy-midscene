@@ -12,8 +12,8 @@ import type {
   RiskLevel,
   SuggestedCase,
 } from '../../types/optimization';
-import type { IGapIdentifier } from './interfaces';
 import { analyticsStorage } from '../analytics/analyticsStorage';
+import type { IGapIdentifier } from './interfaces';
 
 // Common features to check for coverage
 const COMMON_FEATURES: Feature[] = [
@@ -84,13 +84,20 @@ const FEATURE_KEYWORDS: Record<string, string[]> = {
   'auth-login': ['login', '登录', 'sign in', 'signin', '认证', 'authenticate'],
   'auth-logout': ['logout', '登出', 'sign out', 'signout', '退出'],
   'auth-password-reset': ['password', 'reset', '密码', '重置', 'forgot'],
-  'form-validation': ['validate', '验证', 'required', 'error', '必填', 'invalid'],
+  'form-validation': [
+    'validate',
+    '验证',
+    'required',
+    'error',
+    '必填',
+    'invalid',
+  ],
   'error-handling': ['error', '错误', 'fail', '失败', 'exception', '异常'],
-  'navigation': ['navigate', '导航', 'menu', '菜单', 'link', 'route'],
-  'search': ['search', '搜索', 'find', '查找', 'filter', '筛选'],
-  'pagination': ['page', '分页', 'next', 'previous', '上一页', '下一页'],
-  'responsive': ['mobile', '移动', 'tablet', 'viewport', '视口', 'responsive'],
-  'accessibility': ['a11y', 'aria', 'screen reader', 'keyboard', '无障碍'],
+  navigation: ['navigate', '导航', 'menu', '菜单', 'link', 'route'],
+  search: ['search', '搜索', 'find', '查找', 'filter', '筛选'],
+  pagination: ['page', '分页', 'next', 'previous', '上一页', '下一页'],
+  responsive: ['mobile', '移动', 'tablet', 'viewport', '视口', 'responsive'],
+  accessibility: ['a11y', 'aria', 'screen reader', 'keyboard', '无障碍'],
 };
 
 class GapIdentifier implements IGapIdentifier {
@@ -114,7 +121,10 @@ class GapIdentifier implements IGapIdentifier {
           currentCoverage: coverage,
           recommendedCoverage: feature.requiredCoverage,
           missingScenarios: [],
-          riskLevel: this.calculateRiskLevel(feature.requiredCoverage, coverage),
+          riskLevel: this.calculateRiskLevel(
+            feature.requiredCoverage,
+            coverage,
+          ),
         });
 
         gaps.push({
@@ -122,7 +132,10 @@ class GapIdentifier implements IGapIdentifier {
           currentCoverage: coverage,
           recommendedCoverage: feature.requiredCoverage,
           missingScenarios,
-          riskLevel: this.calculateRiskLevel(feature.requiredCoverage, coverage),
+          riskLevel: this.calculateRiskLevel(
+            feature.requiredCoverage,
+            coverage,
+          ),
         });
       }
     }
@@ -176,7 +189,10 @@ class GapIdentifier implements IGapIdentifier {
    * Assess risk level for a gap
    */
   async assessRisk(gap: CoverageGap): Promise<RiskLevel> {
-    return this.calculateRiskLevel(gap.recommendedCoverage, gap.currentCoverage);
+    return this.calculateRiskLevel(
+      gap.recommendedCoverage,
+      gap.currentCoverage,
+    );
   }
 
   /**
@@ -200,7 +216,9 @@ class GapIdentifier implements IGapIdentifier {
       const allText = stepDescriptions.join(' ');
 
       for (const [featureId, keywords] of Object.entries(FEATURE_KEYWORDS)) {
-        if (keywords.some((keyword) => allText.includes(keyword.toLowerCase()))) {
+        if (
+          keywords.some((keyword) => allText.includes(keyword.toLowerCase()))
+        ) {
           featureExecutions.get(featureId)?.add(exec.caseId);
         }
       }
@@ -256,9 +274,7 @@ class GapIdentifier implements IGapIdentifier {
   /**
    * Get scenario templates for a feature
    */
-  private getScenarioTemplates(
-    featureId: string,
-  ): {
+  private getScenarioTemplates(featureId: string): {
     name: string;
     description: string;
     steps: string[];
@@ -266,7 +282,12 @@ class GapIdentifier implements IGapIdentifier {
   }[] {
     const templates: Record<
       string,
-      { name: string; description: string; steps: string[]; priority: Priority }[]
+      {
+        name: string;
+        description: string;
+        steps: string[];
+        priority: Priority;
+      }[]
     > = {
       'auth-login': [
         {
@@ -296,11 +317,7 @@ class GapIdentifier implements IGapIdentifier {
         {
           name: '登录失败 - 空字段验证',
           description: '不填写任何字段尝试登录',
-          steps: [
-            '打开登录页面',
-            '点击登录按钮',
-            '验证必填字段提示',
-          ],
+          steps: ['打开登录页面', '点击登录按钮', '验证必填字段提示'],
           priority: 'medium',
         },
       ],
@@ -373,11 +390,7 @@ class GapIdentifier implements IGapIdentifier {
         {
           name: '长度限制验证',
           description: '验证输入长度限制',
-          steps: [
-            '打开表单',
-            '输入超长文本',
-            '验证长度限制提示',
-          ],
+          steps: ['打开表单', '输入超长文本', '验证长度限制提示'],
           priority: 'medium',
         },
       ],
@@ -396,23 +409,15 @@ class GapIdentifier implements IGapIdentifier {
         {
           name: '服务器错误处理',
           description: '验证服务器错误时的处理',
-          steps: [
-            '触发服务器错误',
-            '验证错误页面或提示',
-            '验证错误可以恢复',
-          ],
+          steps: ['触发服务器错误', '验证错误页面或提示', '验证错误可以恢复'],
           priority: 'high',
         },
       ],
-      'navigation': [
+      navigation: [
         {
           name: '主导航功能',
           description: '验证主要导航链接',
-          steps: [
-            '打开首页',
-            '点击导航菜单项',
-            '验证跳转到正确页面',
-          ],
+          steps: ['打开首页', '点击导航菜单项', '验证跳转到正确页面'],
           priority: 'medium',
         },
         {
@@ -427,30 +432,21 @@ class GapIdentifier implements IGapIdentifier {
           priority: 'low',
         },
       ],
-      'search': [
+      search: [
         {
           name: '基本搜索',
           description: '验证搜索功能',
-          steps: [
-            '打开搜索页面',
-            '输入搜索关键词',
-            '执行搜索',
-            '验证搜索结果',
-          ],
+          steps: ['打开搜索页面', '输入搜索关键词', '执行搜索', '验证搜索结果'],
           priority: 'high',
         },
         {
           name: '空搜索结果',
           description: '验证无搜索结果时的处理',
-          steps: [
-            '输入不存在的关键词',
-            '执行搜索',
-            '验证空结果提示',
-          ],
+          steps: ['输入不存在的关键词', '执行搜索', '验证空结果提示'],
           priority: 'medium',
         },
       ],
-      'pagination': [
+      pagination: [
         {
           name: '分页导航',
           description: '验证分页功能',
@@ -464,27 +460,19 @@ class GapIdentifier implements IGapIdentifier {
           priority: 'medium',
         },
       ],
-      'responsive': [
+      responsive: [
         {
           name: '移动端布局',
           description: '验证移动端响应式布局',
-          steps: [
-            '设置移动端视口',
-            '验证页面布局正确',
-            '验证导航菜单可用',
-          ],
+          steps: ['设置移动端视口', '验证页面布局正确', '验证导航菜单可用'],
           priority: 'medium',
         },
       ],
-      'accessibility': [
+      accessibility: [
         {
           name: '键盘导航',
           description: '验证键盘可访问性',
-          steps: [
-            '使用Tab键导航',
-            '验证焦点可见',
-            '使用Enter键激活',
-          ],
+          steps: ['使用Tab键导航', '验证焦点可见', '使用Enter键激活'],
           priority: 'medium',
         },
       ],

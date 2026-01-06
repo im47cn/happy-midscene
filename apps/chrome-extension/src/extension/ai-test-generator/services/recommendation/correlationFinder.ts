@@ -3,16 +3,16 @@
  * Discovers relationships between test cases based on execution patterns
  */
 
+import type { ExecutionRecord } from '../../types/analytics';
 import type {
   CaseCorrelation,
-  CorrelationType,
+  CorrelationCluster,
+  CorrelationEdge,
+  CorrelationEvidence,
   CorrelationGraph,
   CorrelationNode,
-  CorrelationEdge,
-  CorrelationCluster,
-  CorrelationEvidence,
+  CorrelationType,
 } from '../../types/recommendation';
-import type { ExecutionRecord } from '../../types/analytics';
 import { analyticsStorage } from '../analytics/analyticsStorage';
 
 /**
@@ -25,7 +25,7 @@ const MIN_CORRELATION_STRENGTH = 0.3;
  */
 export class CorrelationFinder {
   private correlations: Map<string, CaseCorrelation[]> = new Map();
-  private lastRefresh: number = 0;
+  private lastRefresh = 0;
   private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
   /**
@@ -53,7 +53,10 @@ export class CorrelationFinder {
         const correlations = this.correlations.get(id) ?? [];
         for (const corr of correlations) {
           const otherId = corr.caseId1 === id ? corr.caseId2 : corr.caseId1;
-          if (!visited.has(otherId) && corr.strength >= MIN_CORRELATION_STRENGTH) {
+          if (
+            !visited.has(otherId) &&
+            corr.strength >= MIN_CORRELATION_STRENGTH
+          ) {
             visited.add(otherId);
             nextLevel.add(otherId);
           }
@@ -149,7 +152,9 @@ export class CorrelationFinder {
   /**
    * Calculate correlations from execution records
    */
-  private async calculateCorrelations(executions: ExecutionRecord[]): Promise<Map<string, CaseCorrelation[]>> {
+  private async calculateCorrelations(
+    executions: ExecutionRecord[],
+  ): Promise<Map<string, CaseCorrelation[]>> {
     const correlations = new Map<string, CaseCorrelation[]>();
     const caseIds = Array.from(new Set(executions.map((e) => e.caseId)));
 
@@ -227,7 +232,9 @@ export class CorrelationFinder {
     if (sequence.strength > 0) {
       totalStrength += sequence.strength * 0.2;
       evidence.push(sequence.evidence);
-      if (sequence.strength > Math.max(coFailure.strength, sameFeature.strength)) {
+      if (
+        sequence.strength > Math.max(coFailure.strength, sameFeature.strength)
+      ) {
         maxType = 'execution_sequence';
       }
     }
@@ -296,7 +303,10 @@ export class CorrelationFinder {
   /**
    * Check if cases are for the same feature
    */
-  private checkSameFeature(caseId1: string, caseId2: string): { strength: number; evidence: CorrelationEvidence } {
+  private checkSameFeature(
+    caseId1: string,
+    caseId2: string,
+  ): { strength: number; evidence: CorrelationEvidence } {
     const name1 = caseId1.toLowerCase();
     const name2 = caseId2.toLowerCase();
 
@@ -304,14 +314,18 @@ export class CorrelationFinder {
     const words1 = name1.split(/[-_\s]/).filter(Boolean);
     const words2 = name2.split(/[-_\s]/).filter(Boolean);
 
-    const commonWords = words1.filter((w) => words2.includes(w) && w.length > 2);
-    const strength = commonWords.length / Math.max(words1.length, words2.length);
+    const commonWords = words1.filter(
+      (w) => words2.includes(w) && w.length > 2,
+    );
+    const strength =
+      commonWords.length / Math.max(words1.length, words2.length);
 
     return {
       strength,
       evidence: {
         type: 'same_feature',
-        description: commonWords.length > 0 ? `共同关键词: ${commonWords.join(', ')}` : '',
+        description:
+          commonWords.length > 0 ? `共同关键词: ${commonWords.join(', ')}` : '',
         timestamp: Date.now(),
       },
     };
@@ -330,7 +344,10 @@ export class CorrelationFinder {
 
     for (const e1 of execs1) {
       for (const e2 of execs2) {
-        if (0 < e2.startTime - e1.startTime && e2.startTime - e1.startTime < sequenceWindow) {
+        if (
+          0 < e2.startTime - e1.startTime &&
+          e2.startTime - e1.startTime < sequenceWindow
+        ) {
           sequenceCount++;
         } else if (
           0 < e1.startTime - e2.startTime &&
@@ -341,7 +358,9 @@ export class CorrelationFinder {
       }
     }
 
-    const strength = Math.max(sequenceCount, reverseSequenceCount) / Math.max(execs1.length, execs2.length);
+    const strength =
+      Math.max(sequenceCount, reverseSequenceCount) /
+      Math.max(execs1.length, execs2.length);
 
     return {
       strength,
@@ -401,12 +420,17 @@ export class CorrelationFinder {
   /**
    * Calculate risk level based on correlations
    */
-  private calculateRiskLevel(correlations: CaseCorrelation[]): CorrelationNode['riskLevel'] {
+  private calculateRiskLevel(
+    correlations: CaseCorrelation[],
+  ): CorrelationNode['riskLevel'] {
     if (correlations.length === 0) return 'low';
 
     const avgStrength =
-      correlations.reduce((sum, c) => sum + c.strength, 0) / correlations.length;
-    const coFailureCount = correlations.filter((c) => c.correlationType === 'co_failure').length;
+      correlations.reduce((sum, c) => sum + c.strength, 0) /
+      correlations.length;
+    const coFailureCount = correlations.filter(
+      (c) => c.correlationType === 'co_failure',
+    ).length;
 
     if (avgStrength > 0.7 || coFailureCount > 2) return 'high';
     if (avgStrength > 0.4 || coFailureCount > 0) return 'medium';
@@ -416,7 +440,10 @@ export class CorrelationFinder {
   /**
    * Find clusters in the correlation graph
    */
-  private findClusters(nodes: CorrelationNode[], edges: CorrelationEdge[]): CorrelationCluster[] {
+  private findClusters(
+    nodes: CorrelationNode[],
+    edges: CorrelationEdge[],
+  ): CorrelationCluster[] {
     const clusters: CorrelationCluster[] = [];
     const visited = new Set<string>();
 
@@ -477,7 +504,10 @@ export class CorrelationFinder {
    */
   private async ensureFreshCorrelations(): Promise<void> {
     const now = Date.now();
-    if (now - this.lastRefresh > this.CACHE_DURATION || this.correlations.size === 0) {
+    if (
+      now - this.lastRefresh > this.CACHE_DURATION ||
+      this.correlations.size === 0
+    ) {
       await this.refreshCorrelations();
     }
   }

@@ -207,7 +207,8 @@ export function HistoryView({ onBack }: HistoryViewProps) {
 
           <div className="history-item-summary">
             <Text ellipsis style={{ maxWidth: '100%' }}>
-              {item.testCases.length} {t('cases')} · {item.totalSteps} {t('steps')}
+              {item.testCases.length} {t('cases')} · {item.totalSteps}{' '}
+              {t('steps')}
             </Text>
           </div>
 

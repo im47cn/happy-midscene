@@ -78,7 +78,9 @@ class ReportGenerator {
     const title = this.generateTitle(type, dateRange);
 
     // Apply masking to case names if needed
-    const maskedCaseStats = await this.maskCaseStats(this.getTopCases(caseStats));
+    const maskedCaseStats = await this.maskCaseStats(
+      this.getTopCases(caseStats),
+    );
 
     const report: Report = {
       id: `report-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,

@@ -4,7 +4,8 @@
  * Displays threaded comments with reply functionality.
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Comment } from '../../types/collaboration';
 
 /**
@@ -58,7 +59,9 @@ export const CommentThread: React.FC<CommentThreadProps> = ({
   const [editContent, setEditContent] = useState('');
   const [newContent, setNewContent] = useState('');
   const [replyContent, setReplyContent] = useState('');
-  const [mentionSuggestions, setMentionSuggestions] = useState<MentionSuggestion[]>([]);
+  const [mentionSuggestions, setMentionSuggestions] = useState<
+    MentionSuggestion[]
+  >([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestionFilter, setSuggestionFilter] = useState('');
 
@@ -92,7 +95,7 @@ export const CommentThread: React.FC<CommentThreadProps> = ({
   const handleInputChange = (
     value: string,
     isReply = false,
-    commentId?: string
+    commentId?: string,
   ) => {
     if (isReply) {
       setReplyContent(value);
@@ -118,7 +121,11 @@ export const CommentThread: React.FC<CommentThreadProps> = ({
   /**
    * Insert mention
    */
-  const insertMention = (username: string, isReply = false, commentId?: string) => {
+  const insertMention = (
+    username: string,
+    isReply = false,
+    commentId?: string,
+  ) => {
     const mention = `@${username} `;
     if (isReply) {
       setReplyContent(replyContent.replace(/@\w*$/, mention));
@@ -217,7 +224,9 @@ export const CommentThread: React.FC<CommentThreadProps> = ({
           </div>
           <div className="comment-meta">
             <span className="comment-author">{comment.author}</span>
-            <span className="comment-time">{formatTime(comment.createdAt)}</span>
+            <span className="comment-time">
+              {formatTime(comment.createdAt)}
+            </span>
             {comment.resolved && (
               <span className="comment-resolved-badge">✓ Resolved</span>
             )}
@@ -267,7 +276,9 @@ export const CommentThread: React.FC<CommentThreadProps> = ({
                 if (el) replyRefs.current.set(comment.id, el);
               }}
               value={editContent}
-              onChange={(e) => handleInputChange(e.target.value, false, comment.id)}
+              onChange={(e) =>
+                handleInputChange(e.target.value, false, comment.id)
+              }
               className="comment-textarea"
               rows={3}
               autoFocus
@@ -347,7 +358,9 @@ export const CommentThread: React.FC<CommentThreadProps> = ({
                 onClick={() => {
                   setReplyTo(comment.id);
                   setTimeout(() => {
-                    const textarea = replyRefs.current.get(`reply-${comment.id}`);
+                    const textarea = replyRefs.current.get(
+                      `reply-${comment.id}`,
+                    );
                     textarea?.focus();
                   }, 0);
                 }}
@@ -370,14 +383,21 @@ export const CommentThread: React.FC<CommentThreadProps> = ({
           <div className="mention-suggestions">
             {mentionSuggestions
               .filter((s) =>
-                s.username.toLowerCase().includes(suggestionFilter.toLowerCase())
+                s.username
+                  .toLowerCase()
+                  .includes(suggestionFilter.toLowerCase()),
               )
               .slice(0, 5)
               .map((suggestion) => (
                 <div
                   key={suggestion.userId}
                   className="mention-suggestion-item"
-                  onClick={() => insertMention(suggestion.username, replyTo !== null || editingId !== null)}
+                  onClick={() =>
+                    insertMention(
+                      suggestion.username,
+                      replyTo !== null || editingId !== null,
+                    )
+                  }
                 >
                   @{suggestion.username}
                 </div>
@@ -424,9 +444,7 @@ export const CommentThread: React.FC<CommentThreadProps> = ({
             }}
           />
           <div className="comment-new-actions">
-            <span className="comment-hint">
-              Press Ctrl+Enter to submit
-            </span>
+            <span className="comment-hint">Press Ctrl+Enter to submit</span>
             <button
               className="btn-primary"
               onClick={handleNewCommentSubmit}

@@ -3,25 +3,33 @@
  * Tests the integration between marketplace services
  */
 
-import { describe, expect, it, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Template, TemplateDraft } from '../../types';
 import { marketplaceAPI } from '../marketplaceAPI';
-import { templateStorage } from '../templateStorage';
+import { offlineManager } from '../offlineManager';
+import { ratingSystem } from '../ratingSystem';
 import { templateApplier } from '../templateApplier';
 import { templateAuditor } from '../templateAuditor';
-import { ratingSystem } from '../ratingSystem';
-import { offlineManager } from '../offlineManager';
-import type { Template, TemplateDraft } from '../../types';
+import { templateStorage } from '../templateStorage';
 
 // Mock localStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
   return {
     getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => { store[key] = value; },
-    removeItem: (key: string) => { delete store[key]; },
-    clear: () => { store = {}; },
+    setItem: (key: string, value: string) => {
+      store[key] = value;
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
     key: (index: number) => Object.keys(store)[index] || null,
-    get length() { return Object.keys(store).length; },
+    get length() {
+      return Object.keys(store).length;
+    },
   };
 })();
 
@@ -58,7 +66,7 @@ describe('Marketplace Integration', () => {
       });
 
       expect(result.templates).toBeInstanceOf(Array);
-      result.templates.forEach(template => {
+      result.templates.forEach((template) => {
         expect(template.category).toBe('authentication');
       });
     });
@@ -86,10 +94,12 @@ describe('Marketplace Integration', () => {
       // Save to local storage
       await templateStorage.saveTemplate(template);
       const downloaded = await templateStorage.getDownloadedTemplates();
-      expect(downloaded.some(t => t.id === templateId)).toBe(true);
+      expect(downloaded.some((t) => t.id === templateId)).toBe(true);
 
       // Apply with parameters
-      const params = templateApplier.getDefaultParams(template.content.parameters);
+      const params = templateApplier.getDefaultParams(
+        template.content.parameters,
+      );
       const yaml = templateApplier.apply(template, params);
       expect(yaml).toBeTruthy();
       expect(typeof yaml).toBe('string');
@@ -97,7 +107,7 @@ describe('Marketplace Integration', () => {
       // Record usage
       await templateStorage.recordUsage(templateId, params, yaml);
       const history = await templateStorage.getUsageHistory(10);
-      expect(history.some(h => h.templateId === templateId)).toBe(true);
+      expect(history.some((h) => h.templateId === templateId)).toBe(true);
     });
 
     it('should handle favorite templates', async () => {
@@ -110,12 +120,12 @@ describe('Marketplace Integration', () => {
       await templateStorage.setFavorite(templateId, true);
 
       const favorites = await templateStorage.getFavoriteTemplates();
-      expect(favorites.some(f => f.id === templateId)).toBe(true);
+      expect(favorites.some((f) => f.id === templateId)).toBe(true);
 
       // Unfavorite
       await templateStorage.setFavorite(templateId, false);
       const updatedFavorites = await templateStorage.getFavoriteTemplates();
-      expect(updatedFavorites.some(f => f.id === templateId)).toBe(false);
+      expect(updatedFavorites.some((f) => f.id === templateId)).toBe(false);
     });
   });
 
@@ -175,7 +185,7 @@ flow:
 
       const result = await templateAuditor.audit(invalidDraft);
       expect(result.passed).toBe(false);
-      expect(result.reasons.some(r => r.includes('Sensitive'))).toBe(true);
+      expect(result.reasons.some((r) => r.includes('Sensitive'))).toBe(true);
     });
 
     it('should reject template with malicious code', async () => {
@@ -200,7 +210,7 @@ flow:
 
       const result = await templateAuditor.audit(maliciousDraft);
       expect(result.passed).toBe(false);
-      expect(result.reasons.some(r => r.includes('malicious'))).toBe(true);
+      expect(result.reasons.some((r) => r.includes('malicious'))).toBe(true);
     });
   });
 
@@ -331,8 +341,18 @@ flow:
     it('should validate required parameters', () => {
       const parameters = [
         { name: 'url', label: 'URL', type: 'url' as const, required: true },
-        { name: 'username', label: 'Username', type: 'string' as const, required: true },
-        { name: 'optional', label: 'Optional', type: 'string' as const, required: false },
+        {
+          name: 'username',
+          label: 'Username',
+          type: 'string' as const,
+          required: true,
+        },
+        {
+          name: 'optional',
+          label: 'Optional',
+          type: 'string' as const,
+          required: false,
+        },
       ];
 
       // Missing required parameter
@@ -353,7 +373,12 @@ flow:
 
     it('should validate URL format', () => {
       const parameters = [
-        { name: 'website', label: 'Website', type: 'url' as const, required: true },
+        {
+          name: 'website',
+          label: 'Website',
+          type: 'url' as const,
+          required: true,
+        },
       ];
 
       const invalidResult = templateApplier.validateParams(parameters, {
@@ -369,7 +394,12 @@ flow:
 
     it('should validate email is provided when required', () => {
       const parameters = [
-        { name: 'email', label: 'Email', type: 'email' as const, required: true },
+        {
+          name: 'email',
+          label: 'Email',
+          type: 'email' as const,
+          required: true,
+        },
       ];
 
       // Missing email should fail

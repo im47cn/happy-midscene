@@ -2,10 +2,10 @@
  * Permission Engine Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { Action, Resource } from '../../../types/collaboration';
 import { PermissionEngine } from '../permissionEngine';
 import { workspaceManager } from '../workspaceManager';
-import type { Resource, Action } from '../../../types/collaboration';
 
 describe('PermissionEngine', () => {
   let pe: PermissionEngine;
@@ -44,7 +44,11 @@ describe('PermissionEngine', () => {
     });
 
     it('should deny non-member', async () => {
-      const result = await pe.check('nonexistent', testResource, 'view' as Action);
+      const result = await pe.check(
+        'nonexistent',
+        testResource,
+        'view' as Action,
+      );
 
       expect(result.allowed).toBe(false);
       expect(result.reason).toContain('not a member');
@@ -149,11 +153,7 @@ describe('PermissionEngine', () => {
       // Grant edit permission on specific resource
       pe.grantResourcePermission('resource1', 'viewer1', 'edit' as Action);
 
-      const result = await pe.check(
-        'viewer1',
-        testResource,
-        'edit' as Action
-      );
+      const result = await pe.check('viewer1', testResource, 'edit' as Action);
 
       expect(result.allowed).toBe(true);
     });
@@ -164,8 +164,16 @@ describe('PermissionEngine', () => {
       pe.grantResourcePermission('resource1', 'viewer1', 'edit' as Action);
       pe.grantResourcePermission('resource1', 'viewer1', 'delete' as Action);
 
-      const editResult = await pe.check('viewer1', testResource, 'edit' as Action);
-      const deleteResult = await pe.check('viewer1', testResource, 'delete' as Action);
+      const editResult = await pe.check(
+        'viewer1',
+        testResource,
+        'edit' as Action,
+      );
+      const deleteResult = await pe.check(
+        'viewer1',
+        testResource,
+        'delete' as Action,
+      );
 
       expect(editResult.allowed).toBe(true);
       expect(deleteResult.allowed).toBe(true);
@@ -185,7 +193,7 @@ describe('PermissionEngine', () => {
       const result = await pe.check(
         'editor1',
         testResource,
-        'delete' as Action
+        'delete' as Action,
       );
 
       expect(result.allowed).toBe(false);
@@ -240,7 +248,9 @@ describe('PermissionEngine', () => {
 
   describe('compareRoles', () => {
     it('should return positive when roleA > roleB', () => {
-      expect(PermissionEngine.compareRoles('admin', 'viewer')).toBeGreaterThan(0);
+      expect(PermissionEngine.compareRoles('admin', 'viewer')).toBeGreaterThan(
+        0,
+      );
     });
 
     it('should return negative when roleA < roleB', () => {

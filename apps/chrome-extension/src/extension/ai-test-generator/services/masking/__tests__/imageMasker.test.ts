@@ -3,11 +3,8 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  ImageMasker,
-  createMaskRegionsFromElements,
-} from '../imageMasker';
 import type { MaskRegion } from '../../../types/masking';
+import { ImageMasker, createMaskRegionsFromElements } from '../imageMasker';
 
 // Mock canvas and image APIs for Node.js environment
 class MockImageData {
@@ -15,7 +12,11 @@ class MockImageData {
   width: number;
   height: number;
 
-  constructor(data: Uint8ClampedArray | number, width: number, height?: number) {
+  constructor(
+    data: Uint8ClampedArray | number,
+    width: number,
+    height?: number,
+  ) {
     if (typeof data === 'number') {
       // Constructor: new ImageData(width, height)
       this.width = data;
@@ -46,22 +47,21 @@ class MockOffscreenCanvas {
   }
 
   getContext(_type: string) {
-    const self = this;
     return {
       putImageData: (data: MockImageData, _x: number, _y: number) => {
-        self.imageData = data;
+        this.imageData = data;
       },
       getImageData: (x: number, y: number, width: number, height: number) => {
         // Return a subset of image data
         const data = new Uint8ClampedArray(width * height * 4);
         for (let row = 0; row < height; row++) {
           for (let col = 0; col < width; col++) {
-            const srcIdx = ((y + row) * self.width + (x + col)) * 4;
+            const srcIdx = ((y + row) * this.width + (x + col)) * 4;
             const dstIdx = (row * width + col) * 4;
-            data[dstIdx] = self.imageData.data[srcIdx] || 0;
-            data[dstIdx + 1] = self.imageData.data[srcIdx + 1] || 0;
-            data[dstIdx + 2] = self.imageData.data[srcIdx + 2] || 0;
-            data[dstIdx + 3] = self.imageData.data[srcIdx + 3] || 255;
+            data[dstIdx] = this.imageData.data[srcIdx] || 0;
+            data[dstIdx + 1] = this.imageData.data[srcIdx + 1] || 0;
+            data[dstIdx + 2] = this.imageData.data[srcIdx + 2] || 0;
+            data[dstIdx + 3] = this.imageData.data[srcIdx + 3] || 255;
           }
         }
         return new MockImageData(data, width, height);
@@ -111,7 +111,11 @@ describe('ImageMasker', () => {
         { x: 10, y: 10, width: 20, height: 20, type: 'blur' },
       ];
 
-      const result = await masker.maskScreenshot(imageData, 'standard', regions);
+      const result = await masker.maskScreenshot(
+        imageData,
+        'standard',
+        regions,
+      );
 
       expect(result.result.regions).toHaveLength(1);
       expect(result.result.regions[0].type).toBe('blur');
@@ -123,7 +127,11 @@ describe('ImageMasker', () => {
         { x: 10, y: 10, width: 20, height: 20, type: 'fill' },
       ];
 
-      const result = await masker.maskScreenshot(imageData, 'standard', regions);
+      const result = await masker.maskScreenshot(
+        imageData,
+        'standard',
+        regions,
+      );
 
       expect(result.result.regions).toHaveLength(1);
       expect(result.result.regions[0].type).toBe('fill');
@@ -132,9 +140,23 @@ describe('ImageMasker', () => {
     it('should handle multiple regions', async () => {
       const imageData = new MockImageData(200, 200) as unknown as ImageData;
       const regions: MaskRegion[] = [
-        { x: 10, y: 10, width: 30, height: 30, type: 'blur', category: 'credential' },
+        {
+          x: 10,
+          y: 10,
+          width: 30,
+          height: 30,
+          type: 'blur',
+          category: 'credential',
+        },
         { x: 50, y: 50, width: 40, height: 20, type: 'fill', category: 'pii' },
-        { x: 100, y: 100, width: 50, height: 50, type: 'blur', category: 'financial' },
+        {
+          x: 100,
+          y: 100,
+          width: 50,
+          height: 50,
+          type: 'blur',
+          category: 'financial',
+        },
       ];
 
       const result = await masker.maskScreenshot(imageData, 'strict', regions);
@@ -158,7 +180,11 @@ describe('ImageMasker', () => {
       ];
 
       // Should not throw
-      const result = await masker.maskScreenshot(imageData, 'standard', regions);
+      const result = await masker.maskScreenshot(
+        imageData,
+        'standard',
+        regions,
+      );
 
       expect(result.result.regions).toHaveLength(1);
     });
@@ -170,7 +196,11 @@ describe('ImageMasker', () => {
         { x: 200, y: 200, width: 50, height: 50, type: 'blur' },
       ];
 
-      const result = await masker.maskScreenshot(imageData, 'standard', regions);
+      const result = await masker.maskScreenshot(
+        imageData,
+        'standard',
+        regions,
+      );
 
       // Region should be processed but effectively skipped due to clamping
       expect(result.result.regions).toHaveLength(1);
@@ -180,7 +210,13 @@ describe('ImageMasker', () => {
   describe('blurRegion', () => {
     it('should blur a region with default radius', async () => {
       const imageData = new MockImageData(50, 50) as unknown as ImageData;
-      const region: MaskRegion = { x: 10, y: 10, width: 20, height: 20, type: 'blur' };
+      const region: MaskRegion = {
+        x: 10,
+        y: 10,
+        width: 20,
+        height: 20,
+        type: 'blur',
+      };
 
       const result = await masker.blurRegion(imageData, region);
 
@@ -191,7 +227,13 @@ describe('ImageMasker', () => {
 
     it('should blur a region with custom radius', async () => {
       const imageData = new MockImageData(50, 50) as unknown as ImageData;
-      const region: MaskRegion = { x: 5, y: 5, width: 15, height: 15, type: 'blur' };
+      const region: MaskRegion = {
+        x: 5,
+        y: 5,
+        width: 15,
+        height: 15,
+        type: 'blur',
+      };
 
       const result = await masker.blurRegion(imageData, region, 5);
 
@@ -202,7 +244,13 @@ describe('ImageMasker', () => {
   describe('fillRegion', () => {
     it('should fill a region with default color', async () => {
       const imageData = new MockImageData(50, 50) as unknown as ImageData;
-      const region: MaskRegion = { x: 10, y: 10, width: 20, height: 20, type: 'fill' };
+      const region: MaskRegion = {
+        x: 10,
+        y: 10,
+        width: 20,
+        height: 20,
+        type: 'fill',
+      };
 
       const result = await masker.fillRegion(imageData, region);
 
@@ -213,7 +261,13 @@ describe('ImageMasker', () => {
 
     it('should fill a region with custom color', async () => {
       const imageData = new MockImageData(50, 50) as unknown as ImageData;
-      const region: MaskRegion = { x: 5, y: 5, width: 10, height: 10, type: 'fill' };
+      const region: MaskRegion = {
+        x: 5,
+        y: 5,
+        width: 10,
+        height: 10,
+        type: 'fill',
+      };
 
       const result = await masker.fillRegion(imageData, region, '#FF0000');
 
@@ -232,31 +286,35 @@ describe('ImageMasker', () => {
         height: 10,
       };
 
-      vi.stubGlobal('Image', class {
-        onload: (() => void) | null = null;
-        onerror: (() => void) | null = null;
-        _src = '';
+      vi.stubGlobal(
+        'Image',
+        class {
+          onload: (() => void) | null = null;
+          onerror: (() => void) | null = null;
+          _src = '';
 
-        get src() {
-          return this._src;
-        }
-        set src(value: string) {
-          this._src = value;
-          // Simulate async load
-          setTimeout(() => {
-            if (this.onload) {
-              // Mock successful load
-              Object.defineProperty(this, 'width', { value: 10 });
-              Object.defineProperty(this, 'height', { value: 10 });
-              this.onload();
-            }
-          }, 0);
-        }
-        width = 10;
-        height = 10;
-      });
+          get src() {
+            return this._src;
+          }
+          set src(value: string) {
+            this._src = value;
+            // Simulate async load
+            setTimeout(() => {
+              if (this.onload) {
+                // Mock successful load
+                Object.defineProperty(this, 'width', { value: 10 });
+                Object.defineProperty(this, 'height', { value: 10 });
+                this.onload();
+              }
+            }, 0);
+          }
+          width = 10;
+          height = 10;
+        },
+      );
 
-      const base64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      const base64 =
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
       const result = await masker.base64ToImageData(base64);
 
@@ -266,29 +324,33 @@ describe('ImageMasker', () => {
     });
 
     it('should handle base64 without data URL prefix', async () => {
-      vi.stubGlobal('Image', class {
-        onload: (() => void) | null = null;
-        onerror: (() => void) | null = null;
-        _src = '';
+      vi.stubGlobal(
+        'Image',
+        class {
+          onload: (() => void) | null = null;
+          onerror: (() => void) | null = null;
+          _src = '';
 
-        get src() {
-          return this._src;
-        }
-        set src(value: string) {
-          this._src = value;
-          setTimeout(() => {
-            if (this.onload) {
-              Object.defineProperty(this, 'width', { value: 5 });
-              Object.defineProperty(this, 'height', { value: 5 });
-              this.onload();
-            }
-          }, 0);
-        }
-        width = 5;
-        height = 5;
-      });
+          get src() {
+            return this._src;
+          }
+          set src(value: string) {
+            this._src = value;
+            setTimeout(() => {
+              if (this.onload) {
+                Object.defineProperty(this, 'width', { value: 5 });
+                Object.defineProperty(this, 'height', { value: 5 });
+                this.onload();
+              }
+            }, 0);
+          }
+          width = 5;
+          height = 5;
+        },
+      );
 
-      const base64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      const base64 =
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
       const result = await masker.base64ToImageData(base64);
 
@@ -296,22 +358,27 @@ describe('ImageMasker', () => {
     });
 
     it('should reject on image load error', async () => {
-      vi.stubGlobal('Image', class {
-        onload: (() => void) | null = null;
-        onerror: (() => void) | null = null;
-        _src = '';
+      vi.stubGlobal(
+        'Image',
+        class {
+          onload: (() => void) | null = null;
+          onerror: (() => void) | null = null;
+          _src = '';
 
-        set src(value: string) {
-          this._src = value;
-          setTimeout(() => {
-            if (this.onerror) {
-              this.onerror();
-            }
-          }, 0);
-        }
-      });
+          set src(value: string) {
+            this._src = value;
+            setTimeout(() => {
+              if (this.onerror) {
+                this.onerror();
+              }
+            }, 0);
+          }
+        },
+      );
 
-      await expect(masker.base64ToImageData('invalid')).rejects.toThrow('Failed to load image');
+      await expect(masker.base64ToImageData('invalid')).rejects.toThrow(
+        'Failed to load image',
+      );
     });
   });
 
@@ -337,8 +404,14 @@ describe('ImageMasker', () => {
 describe('createMaskRegionsFromElements', () => {
   it('should create mask regions from element array', () => {
     const elements = [
-      { rect: { x: 10, y: 20, width: 100, height: 30 }, type: 'password' as const },
-      { rect: { x: 50, y: 100, width: 200, height: 40 }, type: 'sensitive' as const },
+      {
+        rect: { x: 10, y: 20, width: 100, height: 30 },
+        type: 'password' as const,
+      },
+      {
+        rect: { x: 50, y: 100, width: 200, height: 40 },
+        type: 'sensitive' as const,
+      },
     ];
 
     const regions = createMaskRegionsFromElements(elements);
@@ -363,9 +436,7 @@ describe('createMaskRegionsFromElements', () => {
   });
 
   it('should default to pii category for unknown types', () => {
-    const elements = [
-      { rect: { x: 0, y: 0, width: 50, height: 50 } },
-    ];
+    const elements = [{ rect: { x: 0, y: 0, width: 50, height: 50 } }];
 
     const regions = createMaskRegionsFromElements(elements);
 
@@ -380,7 +451,10 @@ describe('createMaskRegionsFromElements', () => {
 
   it('should map password type to credential category', () => {
     const elements = [
-      { rect: { x: 0, y: 0, width: 100, height: 20 }, type: 'password' as const },
+      {
+        rect: { x: 0, y: 0, width: 100, height: 20 },
+        type: 'password' as const,
+      },
     ];
 
     const regions = createMaskRegionsFromElements(elements);
@@ -391,11 +465,14 @@ describe('createMaskRegionsFromElements', () => {
   it('should use blur type for all regions', () => {
     const elements = [
       { rect: { x: 0, y: 0, width: 50, height: 50 }, type: 'pii' as const },
-      { rect: { x: 100, y: 100, width: 50, height: 50 }, type: 'password' as const },
+      {
+        rect: { x: 100, y: 100, width: 50, height: 50 },
+        type: 'password' as const,
+      },
     ];
 
     const regions = createMaskRegionsFromElements(elements);
 
-    expect(regions.every(r => r.type === 'blur')).toBe(true);
+    expect(regions.every((r) => r.type === 'blur')).toBe(true);
   });
 });

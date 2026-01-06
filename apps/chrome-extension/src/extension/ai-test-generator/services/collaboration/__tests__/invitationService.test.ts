@@ -2,11 +2,11 @@
  * Invitation Service Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { InvitationService } from '../invitationService';
-import { workspaceManager } from '../workspaceManager';
-import { memberManager } from '../memberManager';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { CreateInvitationData } from '../../types/collaboration';
+import { InvitationService } from '../invitationService';
+import { memberManager } from '../memberManager';
+import { workspaceManager } from '../workspaceManager';
 
 describe('InvitationService', () => {
   let is: InvitationService;
@@ -165,7 +165,9 @@ describe('InvitationService', () => {
       const pending = await is.getPendingForEmail('user@example.com');
 
       expect(pending).toHaveLength(2);
-      expect(pending.every((inv) => inv.email === 'user@example.com')).toBe(true);
+      expect(pending.every((inv) => inv.email === 'user@example.com')).toBe(
+        true,
+      );
     });
 
     it('should be case insensitive for email', async () => {
@@ -196,7 +198,7 @@ describe('InvitationService', () => {
 
     it('should throw error for non-existent invitation', async () => {
       await expect(is.accept('non-existent', 'user1')).rejects.toThrow(
-        'Invitation not found'
+        'Invitation not found',
       );
     });
 
@@ -211,7 +213,7 @@ describe('InvitationService', () => {
       await is.accept(invitation.id, 'user1');
 
       await expect(is.accept(invitation.id, 'user1')).rejects.toThrow(
-        'not pending'
+        'not pending',
       );
     });
   });
@@ -233,7 +235,7 @@ describe('InvitationService', () => {
 
     it('should throw error for non-existent invitation', async () => {
       await expect(is.decline('non-existent')).rejects.toThrow(
-        'Invitation not found'
+        'Invitation not found',
       );
     });
   });
@@ -264,7 +266,7 @@ describe('InvitationService', () => {
       await is.decline(invitation.id);
 
       await expect(is.cancel(invitation.id)).rejects.toThrow(
-        'Can only cancel pending'
+        'Can only cancel pending',
       );
     });
   });
@@ -392,13 +394,19 @@ describe('InvitationService', () => {
         role: 'editor',
       });
 
-      const exists = await is.existsForWorkspace(testWorkspaceId, 'user@example.com');
+      const exists = await is.existsForWorkspace(
+        testWorkspaceId,
+        'user@example.com',
+      );
 
       expect(exists).toBe(true);
     });
 
     it('should return false if no invitation exists', async () => {
-      const exists = await is.existsForWorkspace(testWorkspaceId, 'nonexistent@example.com');
+      const exists = await is.existsForWorkspace(
+        testWorkspaceId,
+        'nonexistent@example.com',
+      );
 
       expect(exists).toBe(false);
     });

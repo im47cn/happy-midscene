@@ -5,24 +5,41 @@
 
 import {
   CheckCircleOutlined,
-  CloseCircleOutlined,
   ClockCircleOutlined,
+  CloseCircleOutlined,
   FireOutlined,
   ThunderboltOutlined,
   WarningOutlined,
 } from '@ant-design/icons';
-import { Alert, Badge, Button, Card, List, Space, Tag, Tooltip, Progress } from 'antd';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  List,
+  Progress,
+  Space,
+  Tag,
+  Tooltip,
+} from 'antd';
 import type { ReactNode } from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  feedbackTracker,
+  recommendEngine,
+} from '../../services/recommendation';
 import type {
-  Recommendation,
-  RecommendCategory,
-  Priority,
-  RecommendOptions,
   Feedback,
+  Priority,
+  RecommendCategory,
+  RecommendOptions,
+  Recommendation,
 } from '../../types/recommendation';
-import { recommendEngine, feedbackTracker } from '../../services/recommendation';
-import { CATEGORY_LABELS, PRIORITY_LABELS, REASON_TYPE_LABELS } from '../../types/recommendation';
+import {
+  CATEGORY_LABELS,
+  PRIORITY_LABELS,
+  REASON_TYPE_LABELS,
+} from '../../types/recommendation';
 
 interface RecommendationPanelProps {
   onSelect?: (caseIds: string[]) => void;
@@ -44,7 +61,9 @@ export function RecommendationPanel({
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<RecommendCategory | 'all'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<
+    RecommendCategory | 'all'
+  >('all');
 
   useEffect(() => {
     loadRecommendations();
@@ -95,7 +114,10 @@ export function RecommendationPanel({
     }
   };
 
-  const handleFeedback = async (recommendation: Recommendation, accepted: boolean) => {
+  const handleFeedback = async (
+    recommendation: Recommendation,
+    accepted: boolean,
+  ) => {
     if (onFeedback) {
       await onFeedback({
         recommendationId: recommendation.id,
@@ -111,7 +133,10 @@ export function RecommendationPanel({
     });
   };
 
-  const filterByCategory = (recs: Recommendation[], category: RecommendCategory | 'all') => {
+  const filterByCategory = (
+    recs: Recommendation[],
+    category: RecommendCategory | 'all',
+  ) => {
     if (category === 'all') return recs;
     return recs.filter((r) => r.category === category);
   };
@@ -140,7 +165,10 @@ export function RecommendationPanel({
   );
 
   const getTotalEstimatedTime = () => {
-    return filteredRecommendations.reduce((sum, r) => sum + r.estimatedDuration, 0);
+    return filteredRecommendations.reduce(
+      (sum, r) => sum + r.estimatedDuration,
+      0,
+    );
   };
 
   const getSelectedEstimatedTime = () => {
@@ -180,7 +208,9 @@ export function RecommendationPanel({
     if (seconds < 60) return `${seconds}s`;
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return remainingSeconds > 0 ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`;
+    return remainingSeconds > 0
+      ? `${minutes}m ${remainingSeconds}s`
+      : `${minutes}m`;
   };
 
   return (
@@ -245,7 +275,10 @@ export function RecommendationPanel({
 
       {/* Selection actions */}
       {filteredRecommendations.length > 0 && (
-        <div className="selection-actions" style={{ marginTop: 12, marginBottom: 12 }}>
+        <div
+          className="selection-actions"
+          style={{ marginTop: 12, marginBottom: 12 }}
+        >
           <Space>
             <Button size="small" onClick={handleSelectAll}>
               全选当前
@@ -289,11 +322,15 @@ export function RecommendationPanel({
               style={{
                 padding: '12px',
                 borderBottom: '1px solid #f0f0f0',
-                backgroundColor: selectedIds.has(item.caseId) ? '#e6f7ff' : undefined,
+                backgroundColor: selectedIds.has(item.caseId)
+                  ? '#e6f7ff'
+                  : undefined,
               }}
             >
               <div style={{ width: '100%' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                <div
+                  style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}
+                >
                   {/* Checkbox */}
                   <input
                     type="checkbox"
@@ -304,16 +341,32 @@ export function RecommendationPanel({
 
                   {/* Content */}
                   <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        marginBottom: 4,
+                      }}
+                    >
                       {getPriorityIcon(item.priority)}
                       <strong>{item.caseName}</strong>
-                      <Tag color={getCategoryColor(item.category)} style={{ margin: 0 }}>
+                      <Tag
+                        color={getCategoryColor(item.category)}
+                        style={{ margin: 0 }}
+                      >
                         {CATEGORY_LABELS[item.category]}
                       </Tag>
                       <Tag style={{ margin: 0 }}>
                         {PRIORITY_LABELS[item.priority]}
                       </Tag>
-                      <span style={{ marginLeft: 'auto', color: '#8c8c8c', fontSize: 12 }}>
+                      <span
+                        style={{
+                          marginLeft: 'auto',
+                          color: '#8c8c8c',
+                          fontSize: 12,
+                        }}
+                      >
                         评分: {item.score}
                       </span>
                     </div>
@@ -322,7 +375,13 @@ export function RecommendationPanel({
                     <Progress
                       percent={item.score}
                       size="small"
-                      strokeColor={item.score >= 80 ? '#52c41a' : item.score >= 60 ? '#faad14' : '#ff4d4f'}
+                      strokeColor={
+                        item.score >= 80
+                          ? '#52c41a'
+                          : item.score >= 60
+                            ? '#faad14'
+                            : '#ff4d4f'
+                      }
                       showInfo={false}
                       style={{ marginBottom: 8 }}
                     />
@@ -330,29 +389,46 @@ export function RecommendationPanel({
                     {/* Reasons */}
                     <div style={{ marginBottom: 8 }}>
                       {item.reasons.map((reason, idx) => (
-                        <Tag key={idx} color="blue" style={{ fontSize: 11, marginBottom: 2 }}>
-                          {REASON_TYPE_LABELS[reason.type]}: {reason.description}
+                        <Tag
+                          key={idx}
+                          color="blue"
+                          style={{ fontSize: 11, marginBottom: 2 }}
+                        >
+                          {REASON_TYPE_LABELS[reason.type]}:{' '}
+                          {reason.description}
                         </Tag>
                       ))}
                     </div>
 
                     {/* Metadata */}
-                    <div style={{ display: 'flex', gap: 16, fontSize: 12, color: '#8c8c8c' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        gap: 16,
+                        fontSize: 12,
+                        color: '#8c8c8c',
+                      }}
+                    >
                       <span>
                         <ClockCircleOutlined style={{ marginRight: 4 }} />
                         预计: {formatDuration(item.estimatedDuration)}
                       </span>
                       {item.lastExecuted && (
                         <span>
-                          上次执行: {new Date(item.lastExecuted).toLocaleDateString()}
+                          上次执行:{' '}
+                          {new Date(item.lastExecuted).toLocaleDateString()}
                         </span>
                       )}
                       {item.lastResult && (
                         <span>
                           {item.lastResult === 'passed' ? (
-                            <CheckCircleOutlined style={{ color: '#52c41a', marginRight: 4 }} />
+                            <CheckCircleOutlined
+                              style={{ color: '#52c41a', marginRight: 4 }}
+                            />
                           ) : (
-                            <CloseCircleOutlined style={{ color: '#ff4d4f', marginRight: 4 }} />
+                            <CloseCircleOutlined
+                              style={{ color: '#ff4d4f', marginRight: 4 }}
+                            />
                           )}
                           {item.lastResult === 'passed' ? '通过' : '失败'}
                         </span>
@@ -388,16 +464,25 @@ export function RecommendationPanel({
 
       {/* Summary footer */}
       {filteredRecommendations.length > 0 && (
-        <div style={{ marginTop: 16, padding: '12px', backgroundColor: '#fafafa', borderRadius: 4 }}>
+        <div
+          style={{
+            marginTop: 16,
+            padding: '12px',
+            backgroundColor: '#fafafa',
+            borderRadius: 4,
+          }}
+        >
           <Space split={<span style={{ color: '#d9d9d9' }}>|</span>}>
             <span>
               总用例数: <strong>{filteredRecommendations.length}</strong>
             </span>
             <span>
-              预计总耗时: <strong>{formatDuration(getTotalEstimatedTime())}</strong>
+              预计总耗时:{' '}
+              <strong>{formatDuration(getTotalEstimatedTime())}</strong>
             </span>
             <span>
-              平均评分: <strong>
+              平均评分:{' '}
+              <strong>
                 {Math.round(
                   filteredRecommendations.reduce((sum, r) => sum + r.score, 0) /
                     filteredRecommendations.length,

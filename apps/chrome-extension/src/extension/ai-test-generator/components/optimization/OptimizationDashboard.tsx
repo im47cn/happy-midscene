@@ -26,6 +26,7 @@ import {
 } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 
+import { optimizationReport } from '../../services/optimization';
 import type {
   OptimizationReport,
   Priority,
@@ -36,9 +37,8 @@ import {
   PRIORITY_LABELS,
   RECOMMENDATION_TYPE_LABELS,
 } from '../../types/optimization';
-import { optimizationReport } from '../../services/optimization';
-import { RecommendationCard } from './RecommendationCard';
 import { AnalysisOverview } from './AnalysisOverview';
+import { RecommendationCard } from './RecommendationCard';
 
 const priorityColors: Record<Priority, string> = {
   critical: '#ff4d4f',
@@ -60,7 +60,9 @@ export function OptimizationDashboard() {
       const newReport = await optimizationReport.generate([]);
       setReport(newReport);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate report');
+      setError(
+        err instanceof Error ? err.message : 'Failed to generate report',
+      );
     } finally {
       setLoading(false);
     }
@@ -133,7 +135,9 @@ export function OptimizationDashboard() {
           <Col>
             <Space>
               <RocketOutlined style={{ fontSize: 24, color: '#1890ff' }} />
-              <span style={{ fontSize: 18, fontWeight: 600 }}>测试优化建议</span>
+              <span style={{ fontSize: 18, fontWeight: 600 }}>
+                测试优化建议
+              </span>
               {(criticalCount > 0 || highCount > 0) && (
                 <Tag color="red" icon={<WarningOutlined />}>
                   {criticalCount + highCount} 个高优先问题
@@ -143,10 +147,7 @@ export function OptimizationDashboard() {
           </Col>
           <Col>
             <Space>
-              <Button
-                icon={<DownloadOutlined />}
-                onClick={handleExportHTML}
-              >
+              <Button icon={<DownloadOutlined />} onClick={handleExportHTML}>
                 导出 HTML
               </Button>
               <Button onClick={handleExportMarkdown}>导出 Markdown</Button>
@@ -177,7 +178,9 @@ export function OptimizationDashboard() {
           <Card size="small">
             <Statistic
               title="预计节省时间"
-              value={Math.round(report.summary.estimatedTotalSavings.time / 1000)}
+              value={Math.round(
+                report.summary.estimatedTotalSavings.time / 1000,
+              )}
               suffix="秒"
             />
           </Card>
@@ -365,7 +368,8 @@ function EfficiencyDetails({
             >
               <div style={{ fontWeight: 500 }}>{c.caseName}</div>
               <div style={{ color: '#666', fontSize: 12 }}>
-                平均 {Math.round(c.averageDuration / 1000)} 秒 | 比 {c.percentile}% 的测试慢
+                平均 {Math.round(c.averageDuration / 1000)} 秒 | 比{' '}
+                {c.percentile}% 的测试慢
               </div>
             </div>
           ))}
@@ -424,7 +428,8 @@ function StabilityDetails({
             >
               <div style={{ fontWeight: 500 }}>{test.caseName}</div>
               <div style={{ color: '#666', fontSize: 12 }}>
-                Flaky 率: {Math.round(test.flakyRate * 100)}% | 执行 {test.totalRuns} 次
+                Flaky 率: {Math.round(test.flakyRate * 100)}% | 执行{' '}
+                {test.totalRuns} 次
               </div>
               <div style={{ marginTop: 4 }}>
                 {test.recommendations.slice(0, 2).map((rec, idx) => (

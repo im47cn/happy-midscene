@@ -59,7 +59,7 @@ export const VersionSelector: React.FC<VersionSelectorProps> = ({
         onVersionChange(version);
       }
     },
-    [currentVersion, onVersionChange]
+    [currentVersion, onVersionChange],
   );
 
   const menuItems: MenuProps['items'] = useMemo(() => {
@@ -110,8 +110,7 @@ export const VersionSelector: React.FC<VersionSelectorProps> = ({
           <Dropdown menu={{ items: menuItems }} trigger={['click']}>
             <Button size="small">
               <Space>
-                <HistoryOutlined />
-                v{currentVersion}
+                <HistoryOutlined />v{currentVersion}
                 {!isLatest && (
                   <Tooltip title="Newer version available">
                     <Badge status="warning" />
@@ -144,9 +143,7 @@ export const VersionSelector: React.FC<VersionSelectorProps> = ({
                 items={currentVersionInfo.changelog.map((change, index) => ({
                   key: index,
                   color: getChangeColor(change),
-                  children: (
-                    <Text style={{ fontSize: 12 }}>{change}</Text>
-                  ),
+                  children: <Text style={{ fontSize: 12 }}>{change}</Text>,
                 }))}
               />
             )}
@@ -183,10 +180,18 @@ function getChangeColor(change: string): string {
   if (lower.startsWith('fix') || lower.includes('bug')) {
     return 'red';
   }
-  if (lower.startsWith('add') || lower.includes('new') || lower.includes('feature')) {
+  if (
+    lower.startsWith('add') ||
+    lower.includes('new') ||
+    lower.includes('feature')
+  ) {
     return 'green';
   }
-  if (lower.startsWith('improve') || lower.includes('update') || lower.includes('enhance')) {
+  if (
+    lower.startsWith('improve') ||
+    lower.includes('update') ||
+    lower.includes('enhance')
+  ) {
     return 'blue';
   }
   if (lower.startsWith('break') || lower.includes('deprecated')) {

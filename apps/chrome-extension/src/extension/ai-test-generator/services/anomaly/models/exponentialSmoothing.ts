@@ -48,7 +48,11 @@ export interface SmoothingOptions {
 /**
  * Initialize Holt's model using first few data points
  */
-function initializeHoltModel(data: DataPoint[], alpha: number, beta: number): HoltModel {
+function initializeHoltModel(
+  data: DataPoint[],
+  alpha: number,
+  beta: number,
+): HoltModel {
   if (data.length < 2) {
     return {
       level: data[0]?.value ?? 0,
@@ -76,7 +80,7 @@ function initializeHoltModel(data: DataPoint[], alpha: number, beta: number): Ho
  */
 export function fitHoltModel(
   data: DataPoint[],
-  options: SmoothingOptions = {}
+  options: SmoothingOptions = {},
 ): { model: HoltModel; fittedValues: number[] } {
   const { alpha = 0.3, beta = 0.1 } = options;
 
@@ -89,9 +93,11 @@ export function fitHoltModel(
 
   // Optionally optimize parameters
   const finalAlpha = options.optimizeParams ? optimizeAlpha(data, beta) : alpha;
-  const finalBeta = options.optimizeParams ? optimizeBeta(data, finalAlpha) : beta;
+  const finalBeta = options.optimizeParams
+    ? optimizeBeta(data, finalAlpha)
+    : beta;
 
-  let model = initializeHoltModel(data, finalAlpha, finalBeta);
+  const model = initializeHoltModel(data, finalAlpha, finalBeta);
   const fittedValues: number[] = [model.level];
 
   // Update model for each data point
@@ -101,10 +107,12 @@ export function fitHoltModel(
     const prevTrend = model.trend;
 
     // Update level
-    model.level = model.alpha * value + (1 - model.alpha) * (prevLevel + prevTrend);
+    model.level =
+      model.alpha * value + (1 - model.alpha) * (prevLevel + prevTrend);
 
     // Update trend
-    model.trend = model.beta * (model.level - prevLevel) + (1 - model.beta) * prevTrend;
+    model.trend =
+      model.beta * (model.level - prevLevel) + (1 - model.beta) * prevTrend;
 
     fittedValues.push(model.level);
   }
@@ -117,13 +125,17 @@ export function fitHoltModel(
  */
 function optimizeAlpha(data: DataPoint[], beta: number): number {
   let bestAlpha = 0.3;
-  let bestMse = Infinity;
+  let bestMse = Number.POSITIVE_INFINITY;
 
   for (let alpha = 0.1; alpha <= 0.9; alpha += 0.1) {
-    const { fittedValues } = fitHoltModel(data, { alpha, beta, optimizeParams: false });
+    const { fittedValues } = fitHoltModel(data, {
+      alpha,
+      beta,
+      optimizeParams: false,
+    });
     const mse = calculateMSE(
       data.map((d) => d.value),
-      fittedValues
+      fittedValues,
     );
 
     if (mse < bestMse) {
@@ -140,13 +152,17 @@ function optimizeAlpha(data: DataPoint[], beta: number): number {
  */
 function optimizeBeta(data: DataPoint[], alpha: number): number {
   let bestBeta = 0.1;
-  let bestMse = Infinity;
+  let bestMse = Number.POSITIVE_INFINITY;
 
   for (let beta = 0.05; beta <= 0.5; beta += 0.05) {
-    const { fittedValues } = fitHoltModel(data, { alpha, beta, optimizeParams: false });
+    const { fittedValues } = fitHoltModel(data, {
+      alpha,
+      beta,
+      optimizeParams: false,
+    });
     const mse = calculateMSE(
       data.map((d) => d.value),
-      fittedValues
+      fittedValues,
     );
 
     if (mse < bestMse) {
@@ -163,7 +179,7 @@ function optimizeBeta(data: DataPoint[], alpha: number): number {
  */
 function calculateMSE(actual: number[], predicted: number[]): number {
   if (actual.length !== predicted.length || actual.length === 0) {
-    return Infinity;
+    return Number.POSITIVE_INFINITY;
   }
 
   let sumSquaredError = 0;
@@ -181,13 +197,13 @@ export function predictHolt(
   model: HoltModel,
   baseTimestamp: number,
   horizonMs: number,
-  steps: number = 10
+  steps = 10,
 ): SmoothingPrediction[] {
   const predictions: SmoothingPrediction[] = [];
   const stepSize = horizonMs / steps;
 
-  let level = model.level;
-  let trend = model.trend;
+  const level = model.level;
+  const trend = model.trend;
 
   for (let i = 1; i <= steps; i++) {
     const timestamp = baseTimestamp + i * stepSize;
@@ -213,8 +229,8 @@ export function predictHolt(
 export function exponentialSmoothingPredict(
   data: DataPoint[],
   horizonMs: number,
-  steps: number = 10,
-  options: SmoothingOptions = {}
+  steps = 10,
+  options: SmoothingOptions = {},
 ): SmoothingResult {
   const { model, fittedValues } = fitHoltModel(data, options);
   const baseTimestamp = Math.max(...data.map((d) => d.timestamp));
@@ -222,7 +238,7 @@ export function exponentialSmoothingPredict(
 
   const mse = calculateMSE(
     data.map((d) => d.value),
-    fittedValues
+    fittedValues,
   );
 
   return { model, predictions, fittedValues, mse };
@@ -231,7 +247,10 @@ export function exponentialSmoothingPredict(
 /**
  * Calculate confidence based on model fit
  */
-export function calculateSmoothingConfidence(mse: number, dataRange: number): number {
+export function calculateSmoothingConfidence(
+  mse: number,
+  dataRange: number,
+): number {
   if (dataRange === 0) return 50;
 
   // Normalize MSE by data range
@@ -248,7 +267,7 @@ export function calculateSmoothingConfidence(mse: number, dataRange: number): nu
  */
 export function detectTrendFromHolt(
   model: HoltModel,
-  threshold: number = 0.01
+  threshold = 0.01,
 ): 'improving' | 'stable' | 'declining' {
   const normalizedTrend = model.trend / Math.abs(model.level || 1);
 

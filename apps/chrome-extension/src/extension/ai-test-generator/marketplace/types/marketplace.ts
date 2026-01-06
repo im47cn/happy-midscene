@@ -22,7 +22,13 @@ export type TemplateCategory =
 /**
  * License types
  */
-export type LicenseType = 'MIT' | 'Apache-2.0' | 'GPL-3.0' | 'BSD-3-Clause' | 'CC-BY-4.0' | 'Proprietary';
+export type LicenseType =
+  | 'MIT'
+  | 'Apache-2.0'
+  | 'GPL-3.0'
+  | 'BSD-3-Clause'
+  | 'CC-BY-4.0'
+  | 'Proprietary';
 
 /**
  * Platform types
@@ -32,7 +38,13 @@ export type PlatformType = 'web' | 'android' | 'ios';
 /**
  * Parameter types for template configuration
  */
-export type ParameterType = 'string' | 'number' | 'boolean' | 'select' | 'url' | 'password';
+export type ParameterType =
+  | 'string'
+  | 'number'
+  | 'boolean'
+  | 'select'
+  | 'url'
+  | 'password';
 
 /**
  * Parameter definition for template configuration
@@ -308,15 +320,46 @@ export const DEFAULT_MARKETPLACE_CONFIG: MarketplaceConfig = {
 /**
  * Category metadata
  */
-export const CATEGORY_METADATA: Record<TemplateCategory, { name: string; description: string; icon: string }> = {
-  authentication: { name: 'Authentication', description: 'Login/Logout flows', icon: 'lock' },
+export const CATEGORY_METADATA: Record<
+  TemplateCategory,
+  { name: string; description: string; icon: string }
+> = {
+  authentication: {
+    name: 'Authentication',
+    description: 'Login/Logout flows',
+    icon: 'lock',
+  },
   form: { name: 'Form', description: 'Form submissions', icon: 'form' },
-  search: { name: 'Search', description: 'Search functionality', icon: 'search' },
-  shopping: { name: 'Shopping', description: 'E-commerce flows', icon: 'shopping-cart' },
-  payment: { name: 'Payment', description: 'Payment processing', icon: 'credit-card' },
-  navigation: { name: 'Navigation', description: 'Menu and navigation', icon: 'menu' },
-  'data-entry': { name: 'Data Entry', description: 'Data input forms', icon: 'edit' },
-  crud: { name: 'CRUD', description: 'Create/Read/Update/Delete', icon: 'database' },
+  search: {
+    name: 'Search',
+    description: 'Search functionality',
+    icon: 'search',
+  },
+  shopping: {
+    name: 'Shopping',
+    description: 'E-commerce flows',
+    icon: 'shopping-cart',
+  },
+  payment: {
+    name: 'Payment',
+    description: 'Payment processing',
+    icon: 'credit-card',
+  },
+  navigation: {
+    name: 'Navigation',
+    description: 'Menu and navigation',
+    icon: 'menu',
+  },
+  'data-entry': {
+    name: 'Data Entry',
+    description: 'Data input forms',
+    icon: 'edit',
+  },
+  crud: {
+    name: 'CRUD',
+    description: 'Create/Read/Update/Delete',
+    icon: 'database',
+  },
   social: { name: 'Social', description: 'Social interactions', icon: 'team' },
   media: { name: 'Media', description: 'Media handling', icon: 'picture' },
   utility: { name: 'Utility', description: 'Utility operations', icon: 'tool' },
@@ -330,11 +373,18 @@ export interface IMarketplaceAPI {
   searchTemplates(query: SearchQuery): Promise<SearchResult>;
   getTemplate(id: string): Promise<Template>;
   getTemplateVersions(id: string): Promise<TemplateVersion[]>;
-  getTemplateReviews(id: string, page?: number, limit?: number): Promise<TemplateReview[]>;
+  getTemplateReviews(
+    id: string,
+    page?: number,
+    limit?: number,
+  ): Promise<TemplateReview[]>;
   getPublisher(id: string): Promise<Publisher>;
   getCategories(): Promise<CategoryInfo[]>;
   getFeatured(): Promise<TemplateSummary[]>;
-  getPopular(category?: TemplateCategory, limit?: number): Promise<TemplateSummary[]>;
+  getPopular(
+    category?: TemplateCategory,
+    limit?: number,
+  ): Promise<TemplateSummary[]>;
   getLatest(limit?: number): Promise<TemplateSummary[]>;
 }
 
@@ -347,7 +397,11 @@ export interface ITemplateStorage {
   getDownloadedTemplates(): Promise<LocalTemplate[]>;
   getFavoriteTemplates(): Promise<LocalTemplate[]>;
   setFavorite(id: string, isFavorite: boolean): Promise<void>;
-  recordUsage(id: string, parameters: Record<string, unknown>, generatedYaml: string): Promise<void>;
+  recordUsage(
+    id: string,
+    parameters: Record<string, unknown>,
+    generatedYaml: string,
+  ): Promise<void>;
   getUsageHistory(limit?: number): Promise<TemplateUsageHistory[]>;
   deleteTemplate(id: string): Promise<void>;
   clearCache(): Promise<void>;
@@ -358,7 +412,10 @@ export interface ITemplateStorage {
  */
 export interface ITemplateApplier {
   apply(template: Template, params: Record<string, unknown>): string;
-  validateParams(parameters: ParameterDef[], values: Record<string, unknown>): { valid: boolean; errors: Record<string, string> };
+  validateParams(
+    parameters: ParameterDef[],
+    values: Record<string, unknown>,
+  ): { valid: boolean; errors: Record<string, string> };
   getDefaultParams(parameters: ParameterDef[]): Record<string, unknown>;
   previewYaml(template: Template, params: Record<string, unknown>): string;
 }
@@ -377,10 +434,21 @@ export interface ITemplateAuditor {
  * Interface for rating system
  */
 export interface IRatingSystem {
-  submitReview(review: Omit<TemplateReview, 'id' | 'createdAt' | 'helpful' | 'notHelpful'>): Promise<TemplateReview>;
+  submitReview(
+    review: Omit<TemplateReview, 'id' | 'createdAt' | 'helpful' | 'notHelpful'>,
+  ): Promise<TemplateReview>;
   voteHelpful(reviewId: string, helpful: boolean): Promise<void>;
-  getUserReview(templateId: string, userId: string): Promise<TemplateReview | null>;
-  getReviewStats(templateId: string): Promise<{ average: number; count: number; distribution: Record<number, number> }>;
+  getUserReview(
+    templateId: string,
+    userId: string,
+  ): Promise<TemplateReview | null>;
+  getReviewStats(
+    templateId: string,
+  ): Promise<{
+    average: number;
+    count: number;
+    distribution: Record<number, number>;
+  }>;
 }
 
 // ============================================
@@ -522,7 +590,10 @@ export interface ICollaborativeMarketplaceAPI extends IMarketplaceAPI {
   deleteTemplate(id: string): Promise<void>;
 
   // Collaborative reviews
-  submitReview(templateId: string, review: ReviewInput): Promise<TemplateReview>;
+  submitReview(
+    templateId: string,
+    review: ReviewInput,
+  ): Promise<TemplateReview>;
   updateReview(reviewId: string, review: ReviewInput): Promise<TemplateReview>;
   deleteReview(reviewId: string): Promise<void>;
 

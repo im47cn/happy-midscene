@@ -22,7 +22,13 @@ import {
   Tooltip,
   Typography,
 } from 'antd';
-import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
+import React, {
+  useMemo,
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+} from 'react';
 import type {
   DeviceExecutionResult,
   SyncPointTiming,
@@ -188,7 +194,7 @@ export function ExecutionTimeline({
   const handleEntryClick = useCallback(
     (entry: TimelineEntry) => {
       if (entry.type === 'step' && onStepClick) {
-        const stepIndex = parseInt(entry.id.split('_step_')[1], 10);
+        const stepIndex = Number.parseInt(entry.id.split('_step_')[1], 10);
         onStepClick(entry.deviceId, stepIndex);
       } else if (entry.type === 'sync' && onSyncPointClick) {
         onSyncPointClick(entry.label);
@@ -307,11 +313,7 @@ export function ExecutionTimeline({
             }}
           >
             <Badge color={color} />
-            <Text
-              ellipsis
-              style={{ fontSize: 12 }}
-              title={device.deviceAlias}
-            >
+            <Text ellipsis style={{ fontSize: 12 }} title={device.deviceAlias}>
               {device.deviceAlias}
             </Text>
           </div>
@@ -403,7 +405,8 @@ export function ExecutionTimeline({
               key={index}
               style={{
                 flex: 1,
-                textAlign: index === 0 ? 'left' : index === marks ? 'right' : 'center',
+                textAlign:
+                  index === 0 ? 'left' : index === marks ? 'right' : 'center',
               }}
             >
               <Text type="secondary" style={{ fontSize: 10 }}>
@@ -475,7 +478,9 @@ export function ExecutionTimeline({
       </div>
 
       {/* Legend */}
-      <div style={{ marginTop: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+      <div
+        style={{ marginTop: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}
+      >
         {devices.map((device, index) => (
           <Space key={device.deviceId} size={4}>
             <Badge color={getDeviceColor(device.deviceId, index)} />

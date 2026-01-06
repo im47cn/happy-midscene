@@ -4,12 +4,12 @@
  */
 
 import type {
-  AdaptiveTestCase,
   AdaptiveStep,
-  ValidationResult,
-  ValidationError,
-  ValidationWarning,
+  AdaptiveTestCase,
   SyntaxNode,
+  ValidationError,
+  ValidationResult,
+  ValidationWarning,
 } from '../../types/adaptive';
 
 /**
@@ -179,7 +179,7 @@ export class SyntaxValidator {
    * 移除验证规则
    */
   removeRule(name: string): void {
-    this.customRules = this.customRules.filter(r => r.name !== name);
+    this.customRules = this.customRules.filter((r) => r.name !== name);
   }
 
   /**
@@ -193,13 +193,19 @@ export class SyntaxValidator {
     const variables = new Set<string>(Object.keys(testCase.variables));
 
     // Run validation recursively
-    this.validateSteps(testCase.steps, testCase, {
+    this.validateSteps(
+      testCase.steps,
       testCase,
-      depth: 0,
-      loopCount: 0,
-      variables,
-      path: [],
-    }, errors, warnings);
+      {
+        testCase,
+        depth: 0,
+        loopCount: 0,
+        variables,
+        path: [],
+      },
+      errors,
+      warnings,
+    );
 
     return {
       valid: errors.length === 0,
@@ -216,7 +222,7 @@ export class SyntaxValidator {
     testCase: AdaptiveTestCase,
     context: ValidationContext,
     errors: ValidationError[],
-    warnings: ValidationWarning[]
+    warnings: ValidationWarning[],
   ): void {
     for (const step of steps) {
       const stepContext: ValidationContext = {
@@ -254,8 +260,20 @@ export class SyntaxValidator {
 
       // Recursively validate nested steps
       if (step.type === 'condition') {
-        this.validateSteps(step.condition?.thenSteps || [], testCase, stepContext, errors, warnings);
-        this.validateSteps(step.condition?.elseSteps || [], testCase, stepContext, errors, warnings);
+        this.validateSteps(
+          step.condition?.thenSteps || [],
+          testCase,
+          stepContext,
+          errors,
+          warnings,
+        );
+        this.validateSteps(
+          step.condition?.elseSteps || [],
+          testCase,
+          stepContext,
+          errors,
+          warnings,
+        );
       }
 
       if (step.type === 'loop') {
@@ -273,7 +291,13 @@ export class SyntaxValidator {
           });
         }
 
-        this.validateSteps(step.loop?.body || [], testCase, loopContext, errors, warnings);
+        this.validateSteps(
+          step.loop?.body || [],
+          testCase,
+          loopContext,
+          errors,
+          warnings,
+        );
       }
     }
   }
@@ -313,11 +337,25 @@ export function validateConditionExpression(expression: string): {
 
   // Check for valid operators
   const hasValidOperator = [
-    'element', 'is', 'exists', 'visible', 'enabled', 'selected',
-    'text', 'contains', 'matches', 'equals',
-    'state', 'logged_in', 'loading', 'error', 'empty',
-    'and', 'or', 'not',
-  ].some(op => expression.toLowerCase().includes(op));
+    'element',
+    'is',
+    'exists',
+    'visible',
+    'enabled',
+    'selected',
+    'text',
+    'contains',
+    'matches',
+    'equals',
+    'state',
+    'logged_in',
+    'loading',
+    'error',
+    'empty',
+    'and',
+    'or',
+    'not',
+  ].some((op) => expression.toLowerCase().includes(op));
 
   if (!hasValidOperator && !expression.match(/^\w+\s*[=!<>]+\s*/)) {
     return { valid: false, error: 'No valid condition operator found' };
@@ -342,7 +380,7 @@ export function validateLoopExpression(expression: string): {
   // Count loop
   const countMatch = lower.match(/^repeat\s+(\d+)\s+times?$/);
   if (countMatch) {
-    const count = parseInt(countMatch[1], 10);
+    const count = Number.parseInt(countMatch[1], 10);
     if (count <= 0) {
       return { valid: false, error: 'Loop count must be positive' };
     }
@@ -365,7 +403,10 @@ export function validateLoopExpression(expression: string): {
       return { valid: false, error: 'ForEach loop must specify a collection' };
     }
     if (!forEachMatch[2]) {
-      return { valid: false, error: 'ForEach loop must specify an item variable name' };
+      return {
+        valid: false,
+        error: 'ForEach loop must specify an item variable name',
+      };
     }
     return { valid: true };
   }
@@ -424,7 +465,7 @@ export function validateVariableExpression(expression: string): {
  */
 export function getSyntaxSuggestions(
   testCase: AdaptiveTestCase,
-  validation: ValidationResult
+  validation: ValidationResult,
 ): string[] {
   const suggestions: string[] = [];
 
@@ -435,17 +476,23 @@ export function getSyntaxSuggestions(
 
     // Generate contextual suggestions
     if (warning.type === 'complexity' && warning.message.includes('depth')) {
-      suggestions.push('Consider extracting nested conditions into separate test cases');
+      suggestions.push(
+        'Consider extracting nested conditions into separate test cases',
+      );
     }
 
     if (warning.type === 'performance' && warning.message.includes('loop')) {
-      suggestions.push('Use "break" conditions or add guards to prevent infinite loops');
+      suggestions.push(
+        'Use "break" conditions or add guards to prevent infinite loops',
+      );
     }
   }
 
   // Add general best practices
   if (testCase.steps.length > 20) {
-    suggestions.push('Consider splitting large test cases into smaller, focused tests');
+    suggestions.push(
+      'Consider splitting large test cases into smaller, focused tests',
+    );
   }
 
   return Array.from(new Set(suggestions));
@@ -456,14 +503,16 @@ export function getSyntaxSuggestions(
  */
 export function formatValidationResult(
   validation: ValidationResult,
-  includeSuggestions = true
+  includeSuggestions = true,
 ): string {
   const lines: string[] = [];
 
   if (validation.valid) {
     lines.push('✅ Validation passed');
   } else {
-    lines.push(`❌ Validation failed with ${validation.errors.length} error(s)`);
+    lines.push(
+      `❌ Validation failed with ${validation.errors.length} error(s)`,
+    );
   }
 
   if (validation.errors.length > 0) {

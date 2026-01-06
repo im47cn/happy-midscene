@@ -4,7 +4,7 @@
  * Manages workspace members and their roles.
  */
 
-import type { WorkspaceMember, MemberRole } from '../../types/collaboration';
+import type { MemberRole, WorkspaceMember } from '../../types/collaboration';
 import type { IMemberManager } from './interfaces';
 import { workspaceManager } from './workspaceManager';
 
@@ -29,7 +29,7 @@ export class MemberManager implements IMemberManager {
    */
   async getMember(
     workspaceId: string,
-    userId: string
+    userId: string,
   ): Promise<WorkspaceMember | null> {
     const workspace = await workspaceManager.get(workspaceId);
     if (!workspace) {
@@ -52,7 +52,7 @@ export class MemberManager implements IMemberManager {
    */
   async getMemberRole(
     workspaceId: string,
-    userId: string
+    userId: string,
   ): Promise<MemberRole | null> {
     const member = await this.getMember(workspaceId, userId);
     return member ? member.role : null;
@@ -63,7 +63,7 @@ export class MemberManager implements IMemberManager {
    */
   async getMembersByRole(
     workspaceId: string,
-    role: MemberRole
+    role: MemberRole,
   ): Promise<WorkspaceMember[]> {
     const members = await this.getMembers(workspaceId);
     return members.filter((m) => m.role === role);
@@ -72,10 +72,7 @@ export class MemberManager implements IMemberManager {
   /**
    * Count members by role
    */
-  async countByRole(
-    workspaceId: string,
-    role: MemberRole
-  ): Promise<number> {
+  async countByRole(workspaceId: string, role: MemberRole): Promise<number> {
     const members = await this.getMembersByRole(workspaceId, role);
     return members.length;
   }
@@ -93,8 +90,8 @@ export class MemberManager implements IMemberManager {
    */
   async getEditableMembers(workspaceId: string): Promise<WorkspaceMember[]> {
     const members = await this.getMembers(workspaceId);
-    return members.filter((m) =>
-      m.role === 'editor' || m.role === 'admin' || m.role === 'owner'
+    return members.filter(
+      (m) => m.role === 'editor' || m.role === 'admin' || m.role === 'owner',
     );
   }
 
@@ -119,15 +116,13 @@ export class MemberManager implements IMemberManager {
    */
   async searchMembers(
     workspaceId: string,
-    query: string
+    query: string,
   ): Promise<WorkspaceMember[]> {
     const members = await this.getMembers(workspaceId);
     const lowerQuery = query.toLowerCase();
 
     // In production, would search actual user names/emails
-    return members.filter((m) =>
-      m.userId.toLowerCase().includes(lowerQuery)
-    );
+    return members.filter((m) => m.userId.toLowerCase().includes(lowerQuery));
   }
 
   /**
@@ -135,7 +130,7 @@ export class MemberManager implements IMemberManager {
    */
   async bulkCheckMembers(
     workspaceId: string,
-    userIds: string[]
+    userIds: string[],
   ): Promise<Map<string, boolean>> {
     const result = new Map<string, boolean>();
     const members = await this.getMembers(workspaceId);
@@ -151,9 +146,7 @@ export class MemberManager implements IMemberManager {
   /**
    * Get member statistics
    */
-  async getMemberStats(
-    workspaceId: string
-  ): Promise<{
+  async getMemberStats(workspaceId: string): Promise<{
     total: number;
     owners: number;
     admins: number;

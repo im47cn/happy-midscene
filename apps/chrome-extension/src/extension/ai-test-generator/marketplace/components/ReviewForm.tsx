@@ -4,13 +4,7 @@
  */
 
 import { StarFilled, StarOutlined } from '@ant-design/icons';
-import {
-  Button,
-  Form,
-  Input,
-  message,
-  Space,
-} from 'antd';
+import { Button, Form, Input, Space, message } from 'antd';
 import type React from 'react';
 import { useCallback, useState } from 'react';
 
@@ -64,10 +58,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
     <div style={{ padding: '16px 0', borderTop: '1px solid #f0f0f0' }}>
       <Form layout="vertical">
         {/* Rating */}
-        <Form.Item
-          label="Your Rating"
-          required
-        >
+        <Form.Item label="Your Rating" required>
           <Space size={4}>
             {[1, 2, 3, 4, 5].map((star) => (
               <span
@@ -86,17 +77,18 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
             ))}
             {displayRating > 0 && (
               <span style={{ marginLeft: 8, color: '#8c8c8c' }}>
-                {['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'][displayRating]}
+                {
+                  ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'][
+                    displayRating
+                  ]
+                }
               </span>
             )}
           </Space>
         </Form.Item>
 
         {/* Comment */}
-        <Form.Item
-          label="Your Review"
-          required
-        >
+        <Form.Item label="Your Review" required>
           <TextArea
             value={comment}
             onChange={(e) => setComment(e.target.value)}

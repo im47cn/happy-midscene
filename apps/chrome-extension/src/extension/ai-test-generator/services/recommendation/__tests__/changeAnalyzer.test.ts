@@ -50,7 +50,10 @@ describe('ChangeAnalyzer', () => {
     it('should analyze impact for each change', async () => {
       const caseStats = [
         createCaseStats({ caseId: 'login-1', caseName: 'User Login Test' }),
-        createCaseStats({ caseId: 'search-1', caseName: 'Search Functionality Test' }),
+        createCaseStats({
+          caseId: 'search-1',
+          caseName: 'Search Functionality Test',
+        }),
       ];
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
@@ -93,7 +96,9 @@ describe('ChangeAnalyzer', () => {
       // High impact should come before low impact
       if (impacts.length > 1) {
         const levelOrder = { high: 0, medium: 1, low: 2 };
-        expect(levelOrder[impacts[0].impactLevel]).toBeLessThanOrEqual(levelOrder[impacts[1].impactLevel]);
+        expect(levelOrder[impacts[0].impactLevel]).toBeLessThanOrEqual(
+          levelOrder[impacts[1].impactLevel],
+        );
       }
     });
   });
@@ -153,7 +158,7 @@ describe('ChangeAnalyzer', () => {
 
     it('should respect limit parameter', async () => {
       const caseStats = Array.from({ length: 20 }, (_, i) =>
-        createCaseStats({ caseId: `case-${i}`, caseName: `Test ${i}` })
+        createCaseStats({ caseId: `case-${i}`, caseName: `Test ${i}` }),
       );
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
@@ -179,11 +184,20 @@ describe('ChangeAnalyzer', () => {
     it('should use custom mappings in analysis', async () => {
       analyzer.addCustomMapping('custom-api', ['custom-test-case']);
 
-      const caseStats = [createCaseStats({ caseId: 'custom-test-case', caseName: 'Custom API Test' })];
+      const caseStats = [
+        createCaseStats({
+          caseId: 'custom-test-case',
+          caseName: 'Custom API Test',
+        }),
+      ];
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
       const changes: ChangeInfo[] = [
-        { type: 'file', target: 'custom-api', description: 'Custom API change' },
+        {
+          type: 'file',
+          target: 'custom-api',
+          description: 'Custom API change',
+        },
       ];
 
       const impacts = await analyzer.analyzeImpact(changes);
@@ -228,7 +242,7 @@ describe('ChangeAnalyzer', () => {
     it('should return medium impact for moderate affected cases', async () => {
       // Need to create case stats that match the change target
       const caseStats = Array.from({ length: 8 }, (_, i) =>
-        createCaseStats({ caseName: `Feature Test ${i}` })
+        createCaseStats({ caseName: `Feature Test ${i}` }),
       );
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
@@ -273,7 +287,9 @@ describe('ChangeAnalyzer', () => {
       const impacts = await analyzer.analyzeImpact(changes);
 
       if (impacts[0].impactLevel === 'high') {
-        const hasRegressionWarning = impacts[0].reasoning.some((r) => r.includes('回归'));
+        const hasRegressionWarning = impacts[0].reasoning.some((r) =>
+          r.includes('回归'),
+        );
         expect(hasRegressionWarning).toBe(true);
       }
     });
@@ -283,12 +299,18 @@ describe('ChangeAnalyzer', () => {
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
       const changes: ChangeInfo[] = [
-        { type: 'component', target: 'Button', description: 'Button component' },
+        {
+          type: 'component',
+          target: 'Button',
+          description: 'Button component',
+        },
       ];
 
       const impacts = await analyzer.analyzeImpact(changes);
 
-      const hasComponentReasoning = impacts[0].reasoning.some((r) => r.includes('组件'));
+      const hasComponentReasoning = impacts[0].reasoning.some((r) =>
+        r.includes('组件'),
+      );
       expect(hasComponentReasoning).toBe(true);
     });
 
@@ -302,7 +324,9 @@ describe('ChangeAnalyzer', () => {
 
       const impacts = await analyzer.analyzeImpact(changes);
 
-      const hasFeatureReasoning = impacts[0].reasoning.some((r) => r.includes('业务'));
+      const hasFeatureReasoning = impacts[0].reasoning.some((r) =>
+        r.includes('业务'),
+      );
       expect(hasFeatureReasoning).toBe(true);
     });
   });
@@ -355,13 +379,17 @@ diff --git a/src/pages/Login.tsx b/src/pages/Login.tsx`;
 
     describe('inferChangeType', () => {
       it('should infer component type from path', () => {
-        const type = ChangeAnalyzer.inferChangeType('src/components/Button.tsx');
+        const type = ChangeAnalyzer.inferChangeType(
+          'src/components/Button.tsx',
+        );
 
         expect(type).toBe('component');
       });
 
       it('should infer feature type from path', () => {
-        const type = ChangeAnalyzer.inferChangeType('src/features/search/index.ts');
+        const type = ChangeAnalyzer.inferChangeType(
+          'src/features/search/index.ts',
+        );
 
         expect(type).toBe('feature');
       });
@@ -382,11 +410,17 @@ diff --git a/src/pages/Login.tsx b/src/pages/Login.tsx`;
 
   describe('file mapping patterns', () => {
     it('should match login tests to login changes', async () => {
-      const caseStats = [createCaseStats({ caseId: 'login-test', caseName: 'User Login Test' })];
+      const caseStats = [
+        createCaseStats({ caseId: 'login-test', caseName: 'User Login Test' }),
+      ];
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
       const changes: ChangeInfo[] = [
-        { type: 'file', target: 'src/auth/login.ts', description: 'Login module' },
+        {
+          type: 'file',
+          target: 'src/auth/login.ts',
+          description: 'Login module',
+        },
       ];
 
       const impacts = await analyzer.analyzeImpact(changes);
@@ -395,11 +429,17 @@ diff --git a/src/pages/Login.tsx b/src/pages/Login.tsx`;
     });
 
     it('should match checkout tests to payment changes', async () => {
-      const caseStats = [createCaseStats({ caseId: 'checkout-test', caseName: 'Checkout Test' })];
+      const caseStats = [
+        createCaseStats({ caseId: 'checkout-test', caseName: 'Checkout Test' }),
+      ];
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
       const changes: ChangeInfo[] = [
-        { type: 'file', target: 'src/payment/processor.ts', description: 'Payment module' },
+        {
+          type: 'file',
+          target: 'src/payment/processor.ts',
+          description: 'Payment module',
+        },
       ];
 
       const impacts = await analyzer.analyzeImpact(changes);
@@ -410,7 +450,10 @@ diff --git a/src/pages/Login.tsx b/src/pages/Login.tsx`;
     it('should match component dependencies', async () => {
       const caseStats = [
         createCaseStats({ caseId: 'form-test', caseName: 'Form Test' }),
-        createCaseStats({ caseId: 'dashboard-test', caseName: 'Dashboard Test' }),
+        createCaseStats({
+          caseId: 'dashboard-test',
+          caseName: 'Dashboard Test',
+        }),
       ];
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
@@ -433,7 +476,11 @@ diff --git a/src/pages/Login.tsx b/src/pages/Login.tsx`;
       vi.mocked(analyticsStorage.getAllCaseStats).mockResolvedValue(caseStats);
 
       const changes: ChangeInfo[] = [
-        { type: 'component', target: 'Button', description: 'Button component' },
+        {
+          type: 'component',
+          target: 'Button',
+          description: 'Button component',
+        },
       ];
 
       const impacts = await analyzer.analyzeImpact(changes);

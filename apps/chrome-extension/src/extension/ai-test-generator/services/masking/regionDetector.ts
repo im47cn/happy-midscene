@@ -165,7 +165,11 @@ const BUILT_IN_SELECTORS: DetectionSelector[] = [
 /**
  * Label patterns for detecting sensitive fields by their labels
  */
-const LABEL_PATTERNS: { patterns: RegExp[]; type: SensitiveElementType; category: SensitiveCategory }[] = [
+const LABEL_PATTERNS: {
+  patterns: RegExp[];
+  type: SensitiveElementType;
+  category: SensitiveCategory;
+}[] = [
   {
     patterns: [/password/i, /密码/i, /口令/i],
     type: 'password',
@@ -436,7 +440,9 @@ export class RegionDetector {
    * Remove a custom selector
    */
   removeSelector(selectorString: string): boolean {
-    const index = this.config.customSelectors.findIndex((s) => s.selector === selectorString);
+    const index = this.config.customSelectors.findIndex(
+      (s) => s.selector === selectorString,
+    );
     if (index !== -1) {
       this.config.customSelectors.splice(index, 1);
       // Rebuild selectors
@@ -481,7 +487,9 @@ export const regionDetector = new RegionDetector();
  * @param root - Root element to search within
  * @returns Array of mask regions
  */
-export function detectScreenshotMaskRegions(root: Document | Element = document): MaskRegion[] {
+export function detectScreenshotMaskRegions(
+  root: Document | Element = document,
+): MaskRegion[] {
   const scrollOffset = {
     x: window.scrollX || 0,
     y: window.scrollY || 0,

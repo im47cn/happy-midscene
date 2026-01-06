@@ -125,8 +125,7 @@ export class iOSSession extends BaseDeviceSession {
       this.setStatus('ready');
       this.lastError = undefined;
     } catch (error) {
-      this.lastError =
-        error instanceof Error ? error.message : String(error);
+      this.lastError = error instanceof Error ? error.message : String(error);
       this.setStatus('error');
       this.emit('error', { error: this.lastError });
       throw error;
@@ -533,7 +532,11 @@ export class iOSSession extends BaseDeviceSession {
    * Set orientation
    */
   async setOrientation(
-    orientation: 'PORTRAIT' | 'PORTRAIT_UPSIDEDOWN' | 'LANDSCAPE' | 'LANDSCAPE_RIGHT',
+    orientation:
+      | 'PORTRAIT'
+      | 'PORTRAIT_UPSIDEDOWN'
+      | 'LANDSCAPE'
+      | 'LANDSCAPE_RIGHT',
   ): Promise<void> {
     if (this.agent?.setOrientation) {
       await this.agent.setOrientation(orientation);

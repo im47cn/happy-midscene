@@ -66,7 +66,7 @@ const T_SCORES: Record<number, Record<number, number>> = {
 export function calculateZConfidenceInterval(
   mean: number,
   standardError: number,
-  level: number = 0.95
+  level = 0.95,
 ): ConfidenceInterval {
   const z = Z_SCORES[level] ?? 1.96; // Default to 95%
   const margin = z * standardError;
@@ -86,7 +86,7 @@ export function calculateTConfidenceInterval(
   mean: number,
   standardError: number,
   sampleSize: number,
-  level: number = 0.95
+  level = 0.95,
 ): ConfidenceInterval {
   const df = sampleSize - 1;
 
@@ -120,7 +120,7 @@ export function calculatePredictionInterval(
   mean: number,
   standardError: number,
   residualStdDev: number,
-  level: number = 0.95
+  level = 0.95,
 ): ConfidenceInterval {
   const z = Z_SCORES[level] ?? 1.96;
 
@@ -144,7 +144,8 @@ export function calculateStandardError(values: number[]): number {
 
   const n = values.length;
   const mean = values.reduce((sum, v) => sum + v, 0) / n;
-  const variance = values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / (n - 1);
+  const variance =
+    values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / (n - 1);
 
   return Math.sqrt(variance / n);
 }
@@ -154,7 +155,7 @@ export function calculateStandardError(values: number[]): number {
  */
 export function calculateUncertaintyMetrics(
   values: number[],
-  level: number = 0.95
+  level = 0.95,
 ): UncertaintyMetrics {
   if (values.length === 0) {
     return {
@@ -168,13 +169,24 @@ export function calculateUncertaintyMetrics(
 
   const n = values.length;
   const mean = values.reduce((sum, v) => sum + v, 0) / n;
-  const variance = n > 1 ? values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / (n - 1) : 0;
+  const variance =
+    n > 1 ? values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / (n - 1) : 0;
   const stdDev = Math.sqrt(variance);
   const standardError = stdDev / Math.sqrt(n);
   const cv = mean !== 0 ? stdDev / Math.abs(mean) : 0;
 
-  const confidence = calculateTConfidenceInterval(mean, standardError, n, level);
-  const predictionInterval = calculatePredictionInterval(mean, standardError, stdDev, level);
+  const confidence = calculateTConfidenceInterval(
+    mean,
+    standardError,
+    n,
+    level,
+  );
+  const predictionInterval = calculatePredictionInterval(
+    mean,
+    standardError,
+    stdDev,
+    level,
+  );
 
   return {
     pointEstimate: mean,
@@ -194,8 +206,8 @@ export function calculateUncertaintyMetrics(
  */
 export function bootstrapConfidenceInterval(
   values: number[],
-  iterations: number = 1000,
-  level: number = 0.95
+  iterations = 1000,
+  level = 0.95,
 ): BootstrapResult {
   if (values.length === 0) {
     return {
@@ -225,7 +237,8 @@ export function bootstrapConfidenceInterval(
   // Calculate statistics
   const mean = bootstrapMeans.reduce((sum, v) => sum + v, 0) / iterations;
   const variance =
-    bootstrapMeans.reduce((sum, v) => sum + (v - mean) ** 2, 0) / (iterations - 1);
+    bootstrapMeans.reduce((sum, v) => sum + (v - mean) ** 2, 0) /
+    (iterations - 1);
   const standardError = Math.sqrt(variance);
 
   // Calculate percentiles
@@ -242,8 +255,8 @@ export function bootstrapConfidenceInterval(
   const lowerPercentile = alpha * 100;
   const upperPercentile = (1 - alpha) * 100;
 
-  const lowerIdx = Math.floor(lowerPercentile * iterations / 100);
-  const upperIdx = Math.floor(upperPercentile * iterations / 100);
+  const lowerIdx = Math.floor((lowerPercentile * iterations) / 100);
+  const upperIdx = Math.floor((upperPercentile * iterations) / 100);
 
   const confidence: ConfidenceInterval = {
     lower: bootstrapMeans[lowerIdx],
@@ -270,7 +283,7 @@ export function bootstrapConfidenceInterval(
 export function assessIntervalQuality(
   interval: ConfidenceInterval,
   sampleSize: number,
-  dataRange: number
+  dataRange: number,
 ): {
   reliability: 'high' | 'medium' | 'low';
   score: number;
@@ -306,7 +319,9 @@ export function assessIntervalQuality(
   // Check confidence level
   if (interval.level < 0.9) {
     score -= 10;
-    concerns.push(`Low confidence level (${(interval.level * 100).toFixed(0)}%)`);
+    concerns.push(
+      `Low confidence level (${(interval.level * 100).toFixed(0)}%)`,
+    );
   }
 
   // Determine reliability
@@ -331,7 +346,7 @@ export function assessIntervalQuality(
  */
 export function calculateIntervalOverlap(
   interval1: ConfidenceInterval,
-  interval2: ConfidenceInterval
+  interval2: ConfidenceInterval,
 ): {
   overlaps: boolean;
   overlapAmount: number;
@@ -345,7 +360,8 @@ export function calculateIntervalOverlap(
 
   // Calculate as percentage of smaller interval
   const smallerWidth = Math.min(interval1.width, interval2.width);
-  const overlapPercentage = smallerWidth > 0 ? (overlapAmount / smallerWidth) * 100 : 0;
+  const overlapPercentage =
+    smallerWidth > 0 ? (overlapAmount / smallerWidth) * 100 : 0;
 
   return {
     overlaps,
@@ -358,7 +374,7 @@ export function calculateIntervalOverlap(
  * Combine multiple confidence intervals (for meta-analysis)
  */
 export function combineIntervals(
-  intervals: Array<{ mean: number; standardError: number; weight?: number }>
+  intervals: Array<{ mean: number; standardError: number; weight?: number }>,
 ): { mean: number; standardError: number; confidence: ConfidenceInterval } {
   if (intervals.length === 0) {
     return {
@@ -377,7 +393,8 @@ export function combineIntervals(
   const totalWeight = weightedData.reduce((sum, d) => sum + d.weight, 0);
 
   // Weighted mean
-  const mean = weightedData.reduce((sum, d) => sum + d.mean * d.weight, 0) / totalWeight;
+  const mean =
+    weightedData.reduce((sum, d) => sum + d.mean * d.weight, 0) / totalWeight;
 
   // Combined standard error
   const standardError = Math.sqrt(1 / totalWeight);

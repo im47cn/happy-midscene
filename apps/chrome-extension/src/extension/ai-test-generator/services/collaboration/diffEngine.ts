@@ -50,17 +50,20 @@ export class DiffEngine implements IDiffEngine {
       // Hunk header
       const oldLen = hunk.lines.reduce(
         (sum, l) => sum + (l.type !== 'addition' ? 1 : 0),
-        0
+        0,
       );
       const newLen = hunk.lines.reduce(
         (sum, l) => sum + (l.type !== 'deletion' ? 1 : 0),
-        0
+        0,
       );
-      lines.push(`@@ -${hunk.startLineA},${oldLen} +${hunk.startLineB},${newLen} @@`);
+      lines.push(
+        `@@ -${hunk.startLineA},${oldLen} +${hunk.startLineB},${newLen} @@`,
+      );
 
       // Hunk content
       for (const line of hunk.lines) {
-        const prefix = line.type === 'context' ? ' ' : line.type === 'addition' ? '+' : '-';
+        const prefix =
+          line.type === 'context' ? ' ' : line.type === 'addition' ? '+' : '-';
         lines.push(`${prefix}${line.content}`);
       }
     }
@@ -88,9 +91,9 @@ export class DiffEngine implements IDiffEngine {
       // Parse hunk header
       const hunkMatch = line.match(/^@@ -(\d+),?(\d+)? \+(\d+),?(\d+)? @@/);
       if (hunkMatch) {
-        const oldStart = parseInt(hunkMatch[1], 10) - 1;
-        const oldLen = hunkMatch[2] ? parseInt(hunkMatch[2], 10) : 1;
-        const newStart = parseInt(hunkMatch[3], 10) - 1;
+        const oldStart = Number.parseInt(hunkMatch[1], 10) - 1;
+        const oldLen = hunkMatch[2] ? Number.parseInt(hunkMatch[2], 10) : 1;
+        const newStart = Number.parseInt(hunkMatch[3], 10) - 1;
 
         // Skip to hunk location
         while (currentLine < oldStart && currentLine < lines.length) {
@@ -98,13 +101,18 @@ export class DiffEngine implements IDiffEngine {
         }
 
         // Apply hunk changes
-        let oldIdx = 0;
-        let newIdx = 0;
+        const oldIdx = 0;
+        const newIdx = 0;
         const newLines: string[] = [];
         let consumedOld = 0;
 
         i++;
-        while (i < patchLines.length && !patchLines[i].startsWith('@@') && !patchLines[i].startsWith('---') && !patchLines[i].startsWith('+++')) {
+        while (
+          i < patchLines.length &&
+          !patchLines[i].startsWith('@@') &&
+          !patchLines[i].startsWith('---') &&
+          !patchLines[i].startsWith('+++')
+        ) {
           const patchLine = patchLines[i];
 
           if (patchLine.startsWith(' ')) {
@@ -136,12 +144,19 @@ export class DiffEngine implements IDiffEngine {
    * Perform three-way merge
    * Applies non-conflicting changes from both branches to the base
    */
-  async threeWayMerge(base: string, theirs: string, yours: string): Promise<string | null> {
+  async threeWayMerge(
+    base: string,
+    theirs: string,
+    yours: string,
+  ): Promise<string | null> {
     const hunksBaseTheirs = this.computeDiff(base, theirs);
     const hunksBaseYours = this.computeDiff(base, yours);
 
     // Check for conflicts
-    const hasConflicts = this.hasMergeConflicts(hunksBaseTheirs, hunksBaseYours);
+    const hasConflicts = this.hasMergeConflicts(
+      hunksBaseTheirs,
+      hunksBaseYours,
+    );
 
     if (hasConflicts) {
       return null; // Conflict detected
@@ -149,13 +164,19 @@ export class DiffEngine implements IDiffEngine {
 
     // Apply changes from both sides simultaneously to base
     // This is more reliable than sequential application
-    return this.applyMultipleHunks(base, [...hunksBaseTheirs, ...hunksBaseYours]);
+    return this.applyMultipleHunks(base, [
+      ...hunksBaseTheirs,
+      ...hunksBaseYours,
+    ]);
   }
 
   /**
    * Apply multiple hunks to text in a single pass
    */
-  private applyMultipleHunks(text: string, hunks: VersionDiff['hunks']): string {
+  private applyMultipleHunks(
+    text: string,
+    hunks: VersionDiff['hunks'],
+  ): string {
     if (hunks.length === 0) return text;
 
     const lines = text.split('\n');
@@ -181,10 +202,16 @@ export class DiffEngine implements IDiffEngine {
           i++;
         } else if (line.type === 'context') {
           // For context, verify line matches expected content before adding
-          if (line.lineNumberA !== undefined && line.lineNumberA - 1 < lines.length) {
+          if (
+            line.lineNumberA !== undefined &&
+            line.lineNumberA - 1 < lines.length
+          ) {
             const expectedLine = lines[line.lineNumberA - 1];
             // Only add if we haven't already added this line (avoid duplication)
-            if (result.length === 0 || result[result.length - 1] !== expectedLine) {
+            if (
+              result.length === 0 ||
+              result[result.length - 1] !== expectedLine
+            ) {
               result.push(expectedLine);
             }
           }
@@ -207,7 +234,7 @@ export class DiffEngine implements IDiffEngine {
    */
   hasMergeConflicts(
     hunksA: VersionDiff['hunks'],
-    hunksB: VersionDiff['hunks']
+    hunksB: VersionDiff['hunks'],
   ): boolean {
     // Get all line ranges changed in each
     const rangesA = this.getHunkRanges(hunksA);
@@ -233,7 +260,9 @@ export class DiffEngine implements IDiffEngine {
     const n = arr2.length;
 
     // Build LCS table
-    const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+    const dp: number[][] = Array.from({ length: m + 1 }, () =>
+      Array(n + 1).fill(0),
+    );
 
     for (let i = 1; i <= m; i++) {
       for (let j = 1; j <= n; j++) {
@@ -289,10 +318,10 @@ export class DiffEngine implements IDiffEngine {
   private editScriptToHunks(
     editScript: EditOp[],
     linesA: string[],
-    linesB: string[]
+    linesB: string[],
   ): VersionDiff['hunks'] {
     const hunks: VersionDiff['hunks'] = [];
-    let currentHunk: typeof hunks[0] | null = null;
+    let currentHunk: (typeof hunks)[0] | null = null;
     const contextSize = 3;
 
     for (const op of editScript) {
@@ -314,7 +343,10 @@ export class DiffEngine implements IDiffEngine {
           const trailingContext = this.countTrailingContext(currentHunk.lines);
           if (trailingContext >= contextSize) {
             // Trim excess context
-            currentHunk.lines = this.trimContext(currentHunk.lines, contextSize);
+            currentHunk.lines = this.trimContext(
+              currentHunk.lines,
+              contextSize,
+            );
             hunks.push(currentHunk);
             currentHunk = null;
           }
@@ -367,7 +399,9 @@ export class DiffEngine implements IDiffEngine {
   /**
    * Count trailing context lines in a hunk
    */
-  private countTrailingContext(lines: VersionDiff['hunks'][0]['lines']): number {
+  private countTrailingContext(
+    lines: VersionDiff['hunks'][0]['lines'],
+  ): number {
     let count = 0;
     for (let i = lines.length - 1; i >= 0; i--) {
       if (lines[i].type === 'context') {
@@ -384,7 +418,7 @@ export class DiffEngine implements IDiffEngine {
    */
   private trimContext(
     lines: VersionDiff['hunks'][0]['lines'],
-    contextSize: number
+    contextSize: number,
   ): VersionDiff['hunks'][0]['lines'] {
     // Keep leading context
     let leadingContext = 0;
@@ -419,7 +453,9 @@ export class DiffEngine implements IDiffEngine {
    * Get line ranges affected by hunks
    * Only considers actual changes (additions/deletions), not context lines
    */
-  private getHunkRanges(hunks: VersionDiff['hunks']): Array<{ start: number; end: number }> {
+  private getHunkRanges(
+    hunks: VersionDiff['hunks'],
+  ): Array<{ start: number; end: number }> {
     const ranges: Array<{ start: number; end: number }> = [];
 
     for (const hunk of hunks) {
@@ -454,7 +490,7 @@ export class DiffEngine implements IDiffEngine {
    */
   private rangesOverlap(
     a: { start: number; end: number },
-    b: { start: number; end: number }
+    b: { start: number; end: number },
   ): boolean {
     return a.start <= b.end && b.start <= a.end;
   }
@@ -479,7 +515,10 @@ export class DiffEngine implements IDiffEngine {
       switch (line.type) {
         case 'context':
         case 'deletion':
-          if (line.lineNumberA !== undefined && line.lineNumberA - 1 < lines.length) {
+          if (
+            line.lineNumberA !== undefined &&
+            line.lineNumberA - 1 < lines.length
+          ) {
             result.push(lines[line.lineNumberA - 1]);
           }
           i++;
@@ -539,7 +578,10 @@ export class DiffEngine implements IDiffEngine {
       }
     }
 
-    const totalLines = Math.max(textA.split('\n').length, textB.split('\n').length);
+    const totalLines = Math.max(
+      textA.split('\n').length,
+      textB.split('\n').length,
+    );
 
     // Clamp the result between 0 and 1
     if (totalLines === 0) return 0;

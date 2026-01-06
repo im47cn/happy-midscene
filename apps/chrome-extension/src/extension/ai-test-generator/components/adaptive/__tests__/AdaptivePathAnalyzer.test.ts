@@ -5,10 +5,10 @@
 
 import { describe, expect, it } from 'vitest';
 import {
-  calculatePathStatistics,
+  type ExecutionResult,
   type PathEntry,
   type PathStatistics,
-  type ExecutionResult,
+  calculatePathStatistics,
 } from '../AdaptivePathAnalyzer';
 
 describe('calculatePathStatistics', () => {
@@ -141,8 +141,18 @@ describe('calculatePathStatistics', () => {
 
   it('should handle entries with conditions', () => {
     const entries: PathEntry[] = [
-      { stepId: 'step-1', timestamp: 1000, branch: 'then', condition: '${x} === true' },
-      { stepId: 'step-2', timestamp: 2000, branch: 'else', condition: '${x} === false' },
+      {
+        stepId: 'step-1',
+        timestamp: 1000,
+        branch: 'then',
+        condition: '${x} === true',
+      },
+      {
+        stepId: 'step-2',
+        timestamp: 2000,
+        branch: 'else',
+        condition: '${x} === false',
+      },
     ];
     const stats = calculatePathStatistics(entries);
     expect(stats.totalPaths).toBe(2);
@@ -189,7 +199,11 @@ describe('PathEntry edge cases', () => {
 
     const stats = calculatePathStatistics(entries);
     expect(stats.totalPaths).toBe(3);
-    expect(stats.uniquePaths).toEqual(['step-1:then', 'step-2:else', 'step-3:loop']);
+    expect(stats.uniquePaths).toEqual([
+      'step-1:then',
+      'step-2:else',
+      'step-3:loop',
+    ]);
   });
 
   it('should handle negative depth values (edge case)', () => {

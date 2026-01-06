@@ -226,11 +226,7 @@ export class DataChannel {
   /**
    * Transform a value
    */
-  transform(
-    value: any,
-    transformer: DataTransformer,
-    arg?: string,
-  ): any {
+  transform(value: any, transformer: DataTransformer, arg?: string): any {
     switch (transformer) {
       case 'trim':
         return String(value).trim();

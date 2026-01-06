@@ -5,8 +5,8 @@
 
 import type {
   Feedback,
-  RecommendReason,
   PriorityWeights,
+  RecommendReason,
 } from '../../types/recommendation';
 
 /**
@@ -105,7 +105,9 @@ export class FeedbackTracker {
 
     const rated = all.filter((f) => f.rating !== undefined);
     const averageRating =
-      rated.length > 0 ? rated.reduce((sum, f) => sum + (f.rating ?? 0), 0) / rated.length : 0;
+      rated.length > 0
+        ? rated.reduce((sum, f) => sum + (f.rating ?? 0), 0) / rated.length
+        : 0;
 
     // Group by reason type
     const byReasonType = new Map<string, FeedbackStats>();
@@ -198,7 +200,9 @@ export class FeedbackTracker {
 
     const rated = caseFeedback.filter((f) => f.rating !== undefined);
     const averageRating =
-      rated.length > 0 ? rated.reduce((sum, f) => sum + (f.rating ?? 0), 0) / rated.length : 0;
+      rated.length > 0
+        ? rated.reduce((sum, f) => sum + (f.rating ?? 0), 0) / rated.length
+        : 0;
 
     return { total, accepted, averageRating };
   }
@@ -243,7 +247,9 @@ export class FeedbackTracker {
   /**
    * Get feedback trends over time
    */
-  getFeedbackTrends(days = 30): Array<{ date: string; acceptanceRate: number; count: number }> {
+  getFeedbackTrends(
+    days = 30,
+  ): Array<{ date: string; acceptanceRate: number; count: number }> {
     const all = this.getAllFeedback();
     const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
 
@@ -261,7 +267,8 @@ export class FeedbackTracker {
     return Array.from(byDate.entries())
       .map(([date, stats]) => ({
         date,
-        acceptanceRate: stats.total > 0 ? (stats.accepted / stats.total) * 100 : 0,
+        acceptanceRate:
+          stats.total > 0 ? (stats.accepted / stats.total) * 100 : 0,
         count: stats.total,
       }))
       .sort((a, b) => a.date.localeCompare(b.date));

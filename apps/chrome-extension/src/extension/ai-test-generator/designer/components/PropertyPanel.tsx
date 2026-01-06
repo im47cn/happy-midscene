@@ -3,10 +3,11 @@
  * 属性面板 - 编辑选中节点的配置
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { useDesignerStore } from '../store';
-import { nodeRegistry, validateNodeConfig } from '../services/nodeRegistry';
+import type React from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import type { DesignerNode, NodeConfig } from '../../types/designer';
+import { nodeRegistry, validateNodeConfig } from '../services/nodeRegistry';
+import { useDesignerStore } from '../store';
 
 export interface PropertyPanelProps {
   /** 自定义样式类名 */
@@ -127,7 +128,12 @@ interface SelectFieldProps {
   options: Array<{ value: string | number; label: string }>;
 }
 
-const SelectField: React.FC<SelectFieldProps> = ({ label, value, onChange, options }) => {
+const SelectField: React.FC<SelectFieldProps> = ({
+  label,
+  value,
+  onChange,
+  options,
+}) => {
   return (
     <div className="mb-3">
       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -157,7 +163,11 @@ interface BooleanFieldProps {
   onChange: (value: boolean) => void;
 }
 
-const BooleanField: React.FC<BooleanFieldProps> = ({ label, value, onChange }) => {
+const BooleanField: React.FC<BooleanFieldProps> = ({
+  label,
+  value,
+  onChange,
+}) => {
   return (
     <div className="mb-3 flex items-center gap-2">
       <input
@@ -198,42 +208,47 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
   /**
    * 处理配置更新
    */
-  const handleConfigChange = useCallback((
-    key: string,
-    value: any
-  ) => {
-    if (!selectedNode) return;
+  const handleConfigChange = useCallback(
+    (key: string, value: any) => {
+      if (!selectedNode) return;
 
-    const currentConfig = selectedNode.data.config || {};
-    const newConfig = {
-      ...currentConfig,
-      [key]: value,
-    };
+      const currentConfig = selectedNode.data.config || {};
+      const newConfig = {
+        ...currentConfig,
+        [key]: value,
+      };
 
-    updateNode(selectedNode.id, {
-      data: {
-        ...selectedNode.data,
-        config: newConfig,
-      },
-    });
+      updateNode(selectedNode.id, {
+        data: {
+          ...selectedNode.data,
+          config: newConfig,
+        },
+      });
 
-    // 验证节点配置
-    const validation = validateNodeConfig(selectedNode.type as any, newConfig as NodeConfig);
-    updateNode(selectedNode.id, {
-      data: {
-        ...selectedNode.data,
-        errors: validation.valid ? [] : validation.errors.map((e) => e.message),
-      },
-    });
+      // 验证节点配置
+      const validation = validateNodeConfig(
+        selectedNode.type as any,
+        newConfig as NodeConfig,
+      );
+      updateNode(selectedNode.id, {
+        data: {
+          ...selectedNode.data,
+          errors: validation.valid
+            ? []
+            : validation.errors.map((e) => e.message),
+        },
+      });
 
-    // 验证整个流程
-    setTimeout(() => validateFlow(), 100);
+      // 验证整个流程
+      setTimeout(() => validateFlow(), 100);
 
-    // 外部回调
-    if (onConfigChange) {
-      onConfigChange(selectedNode.id, newConfig as NodeConfig);
-    }
-  }, [selectedNode, updateNode, validateFlow, onConfigChange]);
+      // 外部回调
+      if (onConfigChange) {
+        onConfigChange(selectedNode.id, newConfig as NodeConfig);
+      }
+    },
+    [selectedNode, updateNode, validateFlow, onConfigChange],
+  );
 
   // 当节点类型变化时，验证配置
   useEffect(() => {
@@ -246,7 +261,9 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
       updateNode(selectedNode.id, {
         data: {
           ...selectedNode.data,
-          errors: validation.valid ? [] : validation.errors.map((e) => e.message),
+          errors: validation.valid
+            ? []
+            : validation.errors.map((e) => e.message),
         },
       });
     }
@@ -771,7 +788,9 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
   // 没有选中节点
   if (!selectedNode) {
     return (
-      <div className={`property-panel bg-white border-l border-gray-200 p-4 ${className}`}>
+      <div
+        className={`property-panel bg-white border-l border-gray-200 p-4 ${className}`}
+      >
         <h3 className="text-sm font-semibold text-gray-700 mb-3">属性面板</h3>
         <p className="text-sm text-gray-500 text-center py-8">
           点击节点查看和编辑属性
@@ -781,7 +800,9 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
   }
 
   return (
-    <div className={`property-panel bg-white border-l border-gray-200 overflow-y-auto ${className}`}>
+    <div
+      className={`property-panel bg-white border-l border-gray-200 overflow-y-auto ${className}`}
+    >
       <div className="p-4">
         {/* 节点标题 */}
         <div className="flex items-center gap-2 mb-4 pb-3 border-b">
@@ -809,7 +830,9 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
 
         {/* 配置表单 */}
         <div className="mt-4">
-          <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">配置</h4>
+          <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
+            配置
+          </h4>
           {renderConfigForm()}
         </div>
 
@@ -817,12 +840,16 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
         {(selectedNode.data.errors as string[] | undefined)?.length &&
           (selectedNode.data.errors as string[]).length > 0 && (
             <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-              <h4 className="text-xs font-medium text-red-700 mb-2">❌ 配置错误</h4>
-              {(selectedNode.data.errors as string[]).map((error: string, i: number) => (
-                <p key={i} className="text-xs text-red-600">
-                  • {error}
-                </p>
-              ))}
+              <h4 className="text-xs font-medium text-red-700 mb-2">
+                ❌ 配置错误
+              </h4>
+              {(selectedNode.data.errors as string[]).map(
+                (error: string, i: number) => (
+                  <p key={i} className="text-xs text-red-600">
+                    • {error}
+                  </p>
+                ),
+              )}
             </div>
           )}
 
@@ -830,12 +857,16 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
         {(selectedNode.data.warnings as string[] | undefined)?.length &&
           (selectedNode.data.warnings as string[]).length > 0 && (
             <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-              <h4 className="text-xs font-medium text-yellow-700 mb-2">⚠️ 警告</h4>
-              {(selectedNode.data.warnings as string[]).map((warning: string, i: number) => (
-                <p key={i} className="text-xs text-yellow-600">
-                  • {warning}
-                </p>
-              ))}
+              <h4 className="text-xs font-medium text-yellow-700 mb-2">
+                ⚠️ 警告
+              </h4>
+              {(selectedNode.data.warnings as string[]).map(
+                (warning: string, i: number) => (
+                  <p key={i} className="text-xs text-yellow-600">
+                    • {warning}
+                  </p>
+                ),
+              )}
             </div>
           )}
 

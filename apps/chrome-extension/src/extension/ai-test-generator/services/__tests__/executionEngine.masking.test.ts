@@ -11,7 +11,11 @@ vi.mock('../masking', () => ({
   imageMasker: {
     maskScreenshot: vi.fn().mockResolvedValue({
       imageData: null,
-      result: { originalSize: { width: 100, height: 100 }, regions: [], processingTime: 10 },
+      result: {
+        originalSize: { width: 100, height: 100 },
+        regions: [],
+        processingTime: 10,
+      },
     }),
   },
   logMasker: {
@@ -98,7 +102,9 @@ describe('ExecutionEngine Masking Integration', () => {
 
       engine.setMaskingConfig({ logMasking: false });
 
-      expect(maskerEngine.setConfig).toHaveBeenCalledWith({ logMasking: false });
+      expect(maskerEngine.setConfig).toHaveBeenCalledWith({
+        logMasking: false,
+      });
     });
   });
 
@@ -114,17 +120,22 @@ describe('ExecutionEngine Masking Integration', () => {
         dump: { executions: [] },
       };
 
-      const engine = new ExecutionEngine(
-        () => mockAgent,
-        undefined,
-        { enabled: true, logMasking: true },
-      );
+      const engine = new ExecutionEngine(() => mockAgent, undefined, {
+        enabled: true,
+        logMasking: true,
+      });
 
       // Start execution (which should wrap console)
       const testCase = {
         id: 'test-1',
         name: 'Test Case',
-        steps: [{ id: 'step-1', originalText: 'Click button', status: 'pending' as const }],
+        steps: [
+          {
+            id: 'step-1',
+            originalText: 'Click button',
+            status: 'pending' as const,
+          },
+        ],
         potentialParams: [],
       };
 
@@ -149,16 +160,21 @@ describe('ExecutionEngine Masking Integration', () => {
         dump: { executions: [] },
       };
 
-      const engine = new ExecutionEngine(
-        () => mockAgent,
-        undefined,
-        { enabled: true, logMasking: false },
-      );
+      const engine = new ExecutionEngine(() => mockAgent, undefined, {
+        enabled: true,
+        logMasking: false,
+      });
 
       const testCase = {
         id: 'test-1',
         name: 'Test Case',
-        steps: [{ id: 'step-1', originalText: 'Click button', status: 'pending' as const }],
+        steps: [
+          {
+            id: 'step-1',
+            originalText: 'Click button',
+            status: 'pending' as const,
+          },
+        ],
         potentialParams: [],
       };
 
@@ -184,17 +200,22 @@ describe('ExecutionEngine Masking Integration', () => {
         dump: { executions: [] },
       };
 
-      const engine = new ExecutionEngine(
-        () => mockAgent,
-        undefined,
-        { enabled: true, screenshotMasking: 'standard' },
-      );
+      const engine = new ExecutionEngine(() => mockAgent, undefined, {
+        enabled: true,
+        screenshotMasking: 'standard',
+      });
 
       // Access the agent via executeTestCase flow
       const testCase = {
         id: 'test-1',
         name: 'Test Case',
-        steps: [{ id: 'step-1', originalText: 'Click button', status: 'pending' as const }],
+        steps: [
+          {
+            id: 'step-1',
+            originalText: 'Click button',
+            status: 'pending' as const,
+          },
+        ],
         potentialParams: [],
       };
 
@@ -220,16 +241,21 @@ describe('ExecutionEngine Masking Integration', () => {
         dump: { executions: [] },
       };
 
-      const engine = new ExecutionEngine(
-        () => mockAgent,
-        undefined,
-        { enabled: true, screenshotMasking: 'off' },
-      );
+      const engine = new ExecutionEngine(() => mockAgent, undefined, {
+        enabled: true,
+        screenshotMasking: 'off',
+      });
 
       const testCase = {
         id: 'test-1',
         name: 'Test Case',
-        steps: [{ id: 'step-1', originalText: 'Click button', status: 'pending' as const }],
+        steps: [
+          {
+            id: 'step-1',
+            originalText: 'Click button',
+            status: 'pending' as const,
+          },
+        ],
         potentialParams: [],
       };
 
@@ -265,7 +291,9 @@ describe('ExecutionEngine Masking Integration', () => {
 
       const engine = new ExecutionEngine(() => null);
 
-      const result = await engine.checkYamlForSensitiveData('password: secret123');
+      const result = await engine.checkYamlForSensitiveData(
+        'password: secret123',
+      );
 
       expect(result.hasSensitiveData).toBe(true);
       expect(result.warnings).toHaveLength(1);

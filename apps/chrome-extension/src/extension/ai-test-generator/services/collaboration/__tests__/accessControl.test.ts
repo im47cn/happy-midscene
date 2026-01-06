@@ -2,11 +2,11 @@
  * Access Control Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { Action, Resource } from '../../../types/collaboration';
 import { AccessControl } from '../accessControl';
 import { permissionEngine } from '../permissionEngine';
 import { workspaceManager } from '../workspaceManager';
-import type { Resource, Action } from '../../../types/collaboration';
 
 describe('AccessControl', () => {
   let ac: AccessControl;
@@ -58,7 +58,7 @@ describe('AccessControl', () => {
       const result = await permissionEngine.check(
         'user1',
         parentResource,
-        'edit' as Action
+        'edit' as Action,
       );
 
       expect(result.allowed).toBe(true);
@@ -74,7 +74,7 @@ describe('AccessControl', () => {
       const result = await permissionEngine.check(
         'editor1',
         parentResource,
-        'edit' as Action
+        'edit' as Action,
       );
 
       expect(result.allowed).toBe(false);
@@ -86,7 +86,7 @@ describe('AccessControl', () => {
       const allowed = await ac.checkResourcePermission(
         'owner1',
         parentResource,
-        'delete' as Action
+        'delete' as Action,
       );
 
       expect(allowed).toBe(true);
@@ -96,7 +96,7 @@ describe('AccessControl', () => {
       const allowed = await ac.checkResourcePermission(
         'nonexistent',
         parentResource,
-        'view' as Action
+        'view' as Action,
       );
 
       expect(allowed).toBe(false);
@@ -108,13 +108,13 @@ describe('AccessControl', () => {
       const viewAllowed = await ac.checkResourcePermission(
         'viewer1',
         parentResource,
-        'view' as Action
+        'view' as Action,
       );
 
       const editAllowed = await ac.checkResourcePermission(
         'viewer1',
         parentResource,
-        'edit' as Action
+        'edit' as Action,
       );
 
       expect(viewAllowed).toBe(true);
@@ -254,7 +254,7 @@ describe('AccessControl', () => {
       const parentAllowed = await permissionEngine.check(
         'user1',
         parentResource,
-        'edit' as Action
+        'edit' as Action,
       );
       expect(parentAllowed.allowed).toBe(true);
 
@@ -262,14 +262,14 @@ describe('AccessControl', () => {
       const child1Allowed = await permissionEngine.check(
         'user1',
         childResource,
-        'edit' as Action
+        'edit' as Action,
       );
       expect(child1Allowed.allowed).toBe(true);
 
       const child2Allowed = await permissionEngine.check(
         'user1',
         child2,
-        'edit' as Action
+        'edit' as Action,
       );
       expect(child2Allowed.allowed).toBe(true);
     });
@@ -293,7 +293,7 @@ describe('AccessControl', () => {
       const child1Allowed = await permissionEngine.check(
         'editor1',
         childResource,
-        'delete' as Action
+        'delete' as Action,
       );
       expect(child1Allowed.allowed).toBe(false);
     });
@@ -320,7 +320,7 @@ describe('AccessControl', () => {
       const childAllowed = await ac.checkResourcePermission(
         'user1',
         childResource,
-        'edit' as Action
+        'edit' as Action,
       );
 
       expect(childAllowed).toBe(true);
@@ -338,7 +338,7 @@ describe('AccessControl', () => {
       const allowed = await ac.checkResourcePermission(
         'user1',
         childResource,
-        'edit' as Action
+        'edit' as Action,
       );
 
       expect(allowed).toBe(true);

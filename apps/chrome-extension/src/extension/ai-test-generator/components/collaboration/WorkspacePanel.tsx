@@ -4,8 +4,13 @@
  * Displays workspace information, members, and settings.
  */
 
-import React, { useState, useEffect } from 'react';
-import type { Workspace, WorkspaceMember, MemberRole } from '../../types/collaboration';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import type {
+  MemberRole,
+  Workspace,
+  WorkspaceMember,
+} from '../../types/collaboration';
 
 /**
  * Props for WorkspacePanel
@@ -44,14 +49,19 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
   const [viewMode, setViewMode] = useState<ViewMode>('overview');
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(workspace.name);
-  const [editedDescription, setEditedDescription] = useState(workspace.description);
-  const [editedVisibility, setEditedVisibility] = useState(workspace.visibility);
+  const [editedDescription, setEditedDescription] = useState(
+    workspace.description,
+  );
+  const [editedVisibility, setEditedVisibility] = useState(
+    workspace.visibility,
+  );
 
   /**
    * Check if current user can manage workspace
    */
-  const canManage = workspace.members.find((m) => m.userId === currentUserId)?.role === 'admin' ||
-                     workspace.ownerId === currentUserId;
+  const canManage =
+    workspace.members.find((m) => m.userId === currentUserId)?.role ===
+      'admin' || workspace.ownerId === currentUserId;
 
   /**
    * Handle workspace save
@@ -82,7 +92,10 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
    * Handle member removal
    */
   const handleRemoveMember = (userId: string) => {
-    if (onMemberRemove && confirm('Are you sure you want to remove this member?')) {
+    if (
+      onMemberRemove &&
+      confirm('Are you sure you want to remove this member?')
+    ) {
       onMemberRemove(userId);
     }
   };
@@ -105,7 +118,9 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
           <span className="stat-label">Members</span>
         </div>
         <div className="stat">
-          <span className="stat-value">{workspace.visibility === 'public' ? 'Anyone' : 'Members only'}</span>
+          <span className="stat-value">
+            {workspace.visibility === 'public' ? 'Anyone' : 'Members only'}
+          </span>
           <span className="stat-label">Visibility</span>
         </div>
       </div>
@@ -120,7 +135,12 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
       <div className="members-header">
         <h3>Members ({workspace.members.length})</h3>
         {canManage && (
-          <button className="btn-primary" onClick={() => {/* TODO: Open invite modal */}}>
+          <button
+            className="btn-primary"
+            onClick={() => {
+              /* TODO: Open invite modal */
+            }}
+          >
             Invite Member
           </button>
         )}
@@ -143,7 +163,12 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
               {canManage && member.userId !== workspace.ownerId ? (
                 <select
                   value={member.role}
-                  onChange={(e) => handleRoleChange(member.userId, e.target.value as MemberRole)}
+                  onChange={(e) =>
+                    handleRoleChange(
+                      member.userId,
+                      e.target.value as MemberRole,
+                    )
+                  }
                   className="role-select"
                 >
                   <option value="viewer">Viewer</option>
@@ -201,7 +226,9 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
             <label>Visibility</label>
             <select
               value={editedVisibility}
-              onChange={(e) => setEditedVisibility(e.target.value as Workspace['visibility'])}
+              onChange={(e) =>
+                setEditedVisibility(e.target.value as Workspace['visibility'])
+              }
               className="form-select"
             >
               <option value="private">Private</option>
@@ -213,7 +240,10 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
             <button className="btn-primary" onClick={handleSave}>
               Save Changes
             </button>
-            <button className="btn-secondary" onClick={() => setIsEditing(false)}>
+            <button
+              className="btn-secondary"
+              onClick={() => setIsEditing(false)}
+            >
               Cancel
             </button>
           </div>
@@ -261,7 +291,12 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
       <h3>Pending Invitations</h3>
       <p className="empty-state">No pending invitations</p>
       {canManage && (
-        <button className="btn-primary" onClick={() => {/* TODO: Open invite modal */}}>
+        <button
+          className="btn-primary"
+          onClick={() => {
+            /* TODO: Open invite modal */
+          }}
+        >
           Send Invitation
         </button>
       )}

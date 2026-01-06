@@ -215,7 +215,7 @@ export class GitHubAuthService {
           } catch (error) {
             reject(error);
           }
-        }
+        },
       );
     });
   }
@@ -233,7 +233,7 @@ export class GitHubAuthService {
       const popup = window.open(
         authUrl,
         'github-oauth',
-        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes`
+        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes`,
       );
 
       if (!popup) {
@@ -331,19 +331,22 @@ export class GitHubAuthService {
   }> {
     // For demo/development: Use a token exchange proxy or mock
     // In production: Call your backend service that handles token exchange
-    const response = await fetch('https://github.com/login/oauth/access_token', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      'https://github.com/login/oauth/access_token',
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          client_id: this.config.clientId,
+          code,
+          // Note: client_secret should never be in client-side code in production
+          // This is a placeholder for development/demo purposes
+        }),
       },
-      body: JSON.stringify({
-        client_id: this.config.clientId,
-        code,
-        // Note: client_secret should never be in client-side code in production
-        // This is a placeholder for development/demo purposes
-      }),
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Failed to exchange code for token');

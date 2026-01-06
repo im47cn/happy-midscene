@@ -4,8 +4,12 @@
  * Shows active collaborators in real-time.
  */
 
-import React, { useState, useEffect } from 'react';
-import type { Participant, CollaborationSession } from '../../types/collaboration';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import type {
+  CollaborationSession,
+  Participant,
+} from '../../types/collaboration';
 
 /**
  * Props for ParticipantList
@@ -129,7 +133,9 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({
           >
             {getInitials(p.userId)}
           </div>
-          {p.isCurrentUser && <span className="current-user-indicator">You</span>}
+          {p.isCurrentUser && (
+            <span className="current-user-indicator">You</span>
+          )}
           {!p.isActive && <span className="inactive-indicator">zzz</span>}
         </div>
       ))}

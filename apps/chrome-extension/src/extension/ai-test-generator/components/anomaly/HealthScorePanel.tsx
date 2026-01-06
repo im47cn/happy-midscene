@@ -8,14 +8,27 @@
 import {
   ArrowDownOutlined,
   ArrowUpOutlined,
-  MinusOutlined,
   CheckCircleOutlined,
-  WarningOutlined,
   CloseCircleOutlined,
   InfoCircleOutlined,
+  MinusOutlined,
+  WarningOutlined,
 } from '@ant-design/icons';
-import { Card, Progress, Space, Tag, Tooltip, Typography, Spin, Empty } from 'antd';
-import type { HealthScore, HealthDimension, TrendDirection } from '../../types/anomaly';
+import {
+  Card,
+  Empty,
+  Progress,
+  Space,
+  Spin,
+  Tag,
+  Tooltip,
+  Typography,
+} from 'antd';
+import type {
+  HealthDimension,
+  HealthScore,
+  TrendDirection,
+} from '../../types/anomaly';
 
 const { Text, Title } = Typography;
 
@@ -124,12 +137,16 @@ function DimensionCard({ dimension }: DimensionCardProps) {
   const scoreColor = getScoreColor(dimension.score);
 
   return (
-    <Card
-      size="small"
-      className="dimension-card"
-      style={{ marginBottom: 8 }}
-    >
-      <div className="dimension-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+    <Card size="small" className="dimension-card" style={{ marginBottom: 8 }}>
+      <div
+        className="dimension-header"
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 8,
+        }}
+      >
         <Space>
           {getDimensionIcon(dimension.name)}
           <Text strong>{translateDimensionName(dimension.name)}</Text>
@@ -164,7 +181,11 @@ function DimensionCard({ dimension }: DimensionCardProps) {
               {getImpactIcon(factor.impact)}
               <span>{factor.name}</span>
             </Space>
-            <span>{typeof factor.value === 'number' ? factor.value.toFixed(1) : factor.value}</span>
+            <span>
+              {typeof factor.value === 'number'
+                ? factor.value.toFixed(1)
+                : factor.value}
+            </span>
           </div>
         ))}
       </div>
@@ -180,7 +201,11 @@ function DimensionCard({ dimension }: DimensionCardProps) {
 // Main Component
 // ============================================================================
 
-export function HealthScorePanel({ score, loading = false, onRefresh }: HealthScorePanelProps) {
+export function HealthScorePanel({
+  score,
+  loading = false,
+  onRefresh,
+}: HealthScorePanelProps) {
   if (loading) {
     return (
       <Card className="health-score-panel" title="健康评分">
@@ -219,14 +244,19 @@ export function HealthScorePanel({ score, loading = false, onRefresh }: HealthSc
       }
     >
       {/* Overall Score */}
-      <div className="overall-score" style={{ textAlign: 'center', marginBottom: 24 }}>
+      <div
+        className="overall-score"
+        style={{ textAlign: 'center', marginBottom: 24 }}
+      >
         <Progress
           type="dashboard"
           percent={score.overall}
           strokeColor={scoreColor}
           format={(percent) => (
             <div>
-              <div style={{ fontSize: 32, fontWeight: 700, color: scoreColor }}>{percent}</div>
+              <div style={{ fontSize: 32, fontWeight: 700, color: scoreColor }}>
+                {percent}
+              </div>
               <div style={{ fontSize: 12, color: '#666' }}>总分</div>
             </div>
           )}
@@ -240,7 +270,10 @@ export function HealthScorePanel({ score, loading = false, onRefresh }: HealthSc
         </div>
 
         {/* Comparison */}
-        <div className="comparison" style={{ marginTop: 8, fontSize: 12, color: '#999' }}>
+        <div
+          className="comparison"
+          style={{ marginTop: 8, fontSize: 12, color: '#999' }}
+        >
           <Space split={<span style={{ color: '#d9d9d9' }}>|</span>}>
             <span>
               上周: <Text strong>{score.comparedTo.lastWeek || '-'}</Text>
@@ -254,9 +287,14 @@ export function HealthScorePanel({ score, loading = false, onRefresh }: HealthSc
 
       {/* Dimensions */}
       <div className="dimensions" style={{ marginBottom: 16 }}>
-        <Title level={5} style={{ marginBottom: 12 }}>维度评分</Title>
+        <Title level={5} style={{ marginBottom: 12 }}>
+          维度评分
+        </Title>
         {score.dimensions.map((dimension, index) => (
-          <DimensionCard key={`${dimension.name}-${index}`} dimension={dimension} />
+          <DimensionCard
+            key={`${dimension.name}-${index}`}
+            dimension={dimension}
+          />
         ))}
       </div>
 
@@ -269,7 +307,10 @@ export function HealthScorePanel({ score, loading = false, onRefresh }: HealthSc
           </Title>
           <ul style={{ margin: 0, paddingLeft: 20 }}>
             {score.recommendations.map((rec, index) => (
-              <li key={index} style={{ color: '#666', marginBottom: 4, fontSize: 13 }}>
+              <li
+                key={index}
+                style={{ color: '#666', marginBottom: 4, fontSize: 13 }}
+              >
                 {rec}
               </li>
             ))}
@@ -278,7 +319,14 @@ export function HealthScorePanel({ score, loading = false, onRefresh }: HealthSc
       )}
 
       {/* Timestamp */}
-      <div style={{ marginTop: 16, fontSize: 11, color: '#999', textAlign: 'right' }}>
+      <div
+        style={{
+          marginTop: 16,
+          fontSize: 11,
+          color: '#999',
+          textAlign: 'right',
+        }}
+      >
         计算时间: {new Date(score.calculatedAt).toLocaleString()}
       </div>
     </Card>

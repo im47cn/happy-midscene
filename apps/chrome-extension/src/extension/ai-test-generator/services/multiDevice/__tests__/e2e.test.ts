@@ -12,20 +12,20 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
+  type CollaborativeScript,
+  DataChannel,
+  type DeviceConfig,
+  Orchestrator,
+  ResultAggregator,
+  ScriptParser,
+  SyncManager,
+  type TestStep,
+  createCollaborativeReportGenerator,
   createDataChannel,
   createOrchestrator,
   createResultAggregator,
   createScriptParser,
   createSyncManager,
-  createCollaborativeReportGenerator,
-  DataChannel,
-  Orchestrator,
-  ResultAggregator,
-  ScriptParser,
-  SyncManager,
-  type CollaborativeScript,
-  type DeviceConfig,
-  type TestStep,
 } from '..';
 
 /**
@@ -35,7 +35,8 @@ class MockDeviceSession {
   readonly id: string;
   readonly alias: string;
   readonly type: 'web' | 'android' | 'ios';
-  status: 'connecting' | 'ready' | 'busy' | 'error' | 'disconnected' = 'disconnected';
+  status: 'connecting' | 'ready' | 'busy' | 'error' | 'disconnected' =
+    'disconnected';
 
   private connected = false;
   private shouldFail = false;
@@ -310,7 +311,7 @@ describe('Multi-Device E2E Acceptance Tests', () => {
 
       // Device 0 arrives (start waiting but don't complete)
       syncManager.waitForSync('tracking-sync', 'device-0');
-      let arrived = syncManager.getArrivedDevices('tracking-sync');
+      const arrived = syncManager.getArrivedDevices('tracking-sync');
       expect(arrived).toContain('device-0');
 
       waiting = syncManager.getWaitingDevices('tracking-sync');
@@ -395,9 +396,7 @@ describe('Multi-Device E2E Acceptance Tests', () => {
 
       const duration = Date.now() - startTime;
 
-      expect(result).toBe(
-        'User user-123 placed order order-456 for $99.99',
-      );
+      expect(result).toBe('User user-123 placed order order-456 for $99.99');
       expect(duration).toBeLessThan(500);
     });
   });
@@ -416,7 +415,7 @@ describe('Multi-Device E2E Acceptance Tests', () => {
       await failingDevice.connect();
       devices.push(failingDevice);
 
-      for (let i of [1, 2]) {
+      for (const i of [1, 2]) {
         const device = new MockDeviceSession({
           id: `device-${i}`,
           alias: `Working Device ${i}`,
@@ -494,8 +493,14 @@ describe('Multi-Device E2E Acceptance Tests', () => {
             deviceId: 'device-0',
             deviceAlias: 'Device 0',
             steps: [
-              { instruction: 'Step 1', result: { success: true, duration: 300, error: undefined } },
-              { instruction: 'Step 2', result: { success: true, duration: 700, error: undefined } },
+              {
+                instruction: 'Step 1',
+                result: { success: true, duration: 300, error: undefined },
+              },
+              {
+                instruction: 'Step 2',
+                result: { success: true, duration: 700, error: undefined },
+              },
             ],
             totalDuration: 1000,
           },
@@ -503,8 +508,14 @@ describe('Multi-Device E2E Acceptance Tests', () => {
             deviceId: 'device-1',
             deviceAlias: 'Device 1',
             steps: [
-              { instruction: 'Step 1', result: { success: true, duration: 400, error: undefined } },
-              { instruction: 'Step 2', result: { success: true, duration: 400, error: undefined } },
+              {
+                instruction: 'Step 1',
+                result: { success: true, duration: 400, error: undefined },
+              },
+              {
+                instruction: 'Step 2',
+                result: { success: true, duration: 400, error: undefined },
+              },
             ],
             totalDuration: 800,
           },
@@ -545,8 +556,14 @@ describe('Multi-Device E2E Acceptance Tests', () => {
             deviceId: 'device-0',
             deviceAlias: 'Web Device',
             steps: [
-              { instruction: 'Navigate', result: { success: true, duration: 500, error: undefined } },
-              { instruction: 'Click', result: { success: true, duration: 300, error: undefined } },
+              {
+                instruction: 'Navigate',
+                result: { success: true, duration: 500, error: undefined },
+              },
+              {
+                instruction: 'Click',
+                result: { success: true, duration: 300, error: undefined },
+              },
             ],
             totalDuration: 2000,
           },
@@ -557,9 +574,18 @@ describe('Multi-Device E2E Acceptance Tests', () => {
       };
 
       // Generate all formats
-      const markdown = generator.generate(executionResult as any, { format: 'markdown', title: 'Test Flow' });
-      const html = generator.generate(executionResult as any, { format: 'html', title: 'Test Flow' });
-      const json = generator.generate(executionResult as any, { format: 'json', title: 'Test Flow' });
+      const markdown = generator.generate(executionResult as any, {
+        format: 'markdown',
+        title: 'Test Flow',
+      });
+      const html = generator.generate(executionResult as any, {
+        format: 'html',
+        title: 'Test Flow',
+      });
+      const json = generator.generate(executionResult as any, {
+        format: 'json',
+        title: 'Test Flow',
+      });
 
       expect(markdown.content).toContain('# Test Flow');
       expect(html.content).toContain('<html');
@@ -579,7 +605,10 @@ describe('Multi-Device E2E Acceptance Tests', () => {
             deviceId: 'device-0',
             deviceAlias: 'Device 0',
             steps: [
-              { instruction: 'Test step', result: { success: true, duration: 100, error: undefined } },
+              {
+                instruction: 'Test step',
+                result: { success: true, duration: 100, error: undefined },
+              },
             ],
             totalDuration: 100,
           },
@@ -780,7 +809,10 @@ flow:
           deviceId: d.id,
           deviceAlias: d.alias,
           steps: [
-            { instruction: 'Test step', result: { success: true, duration: 100, error: undefined } },
+            {
+              instruction: 'Test step',
+              result: { success: true, duration: 100, error: undefined },
+            },
           ],
           totalDuration: 100,
         })),

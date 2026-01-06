@@ -8,15 +8,15 @@ import type {
   KnowledgeArticle,
   KnowledgeArticleStatus,
 } from '../../types/collaboration';
-import type {
-  IKnowledgeBase,
-  CreateArticleData,
-  UpdateArticleData,
-  ArticleQueryOptions,
-} from './interfaces';
-import { categoryManager } from './categoryManager';
-import { knowledgeSearch } from './knowledgeSearch';
 import { auditLogger } from './auditLogger';
+import { categoryManager } from './categoryManager';
+import type {
+  ArticleQueryOptions,
+  CreateArticleData,
+  IKnowledgeBase,
+  UpdateArticleData,
+} from './interfaces';
+import { knowledgeSearch } from './knowledgeSearch';
 
 /**
  * In-memory storage for articles
@@ -122,7 +122,7 @@ export class KnowledgeBase implements IKnowledgeBase {
    */
   async updateArticle(
     id: string,
-    data: UpdateArticleData
+    data: UpdateArticleData,
   ): Promise<KnowledgeArticle> {
     const article = this.storage.articles.get(id);
     if (!article) {
@@ -259,7 +259,9 @@ export class KnowledgeBase implements IKnowledgeBase {
   /**
    * List articles with optional filters
    */
-  async listArticles(options?: ArticleQueryOptions): Promise<KnowledgeArticle[]> {
+  async listArticles(
+    options?: ArticleQueryOptions,
+  ): Promise<KnowledgeArticle[]> {
     let articles: KnowledgeArticle[] = [];
 
     // Start with all articles or filter by initial criteria
@@ -395,9 +397,7 @@ export class KnowledgeBase implements IKnowledgeBase {
    */
   async getPopularArticles(limit = 10): Promise<KnowledgeArticle[]> {
     const all = await this.listArticles({ status: 'published' });
-    return all
-      .sort((a, b) => b.viewCount - a.viewCount)
-      .slice(0, limit);
+    return all.sort((a, b) => b.viewCount - a.viewCount).slice(0, limit);
   }
 
   /**
@@ -437,7 +437,10 @@ export class KnowledgeBase implements IKnowledgeBase {
   /**
    * Get article version
    */
-  async getVersion(id: string, version: number): Promise<KnowledgeArticle | null> {
+  async getVersion(
+    id: string,
+    version: number,
+  ): Promise<KnowledgeArticle | null> {
     // In production, this would return specific version
     const article = await this.getArticle(id);
     return article && article.version === version ? article : null;
@@ -482,7 +485,7 @@ export class KnowledgeBase implements IKnowledgeBase {
   private addToIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     if (!index.has(key)) {
       index.set(key, new Set());
@@ -496,7 +499,7 @@ export class KnowledgeBase implements IKnowledgeBase {
   private removeFromIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     const set = index.get(key);
     if (set) {

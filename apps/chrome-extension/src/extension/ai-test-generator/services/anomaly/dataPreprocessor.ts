@@ -86,7 +86,10 @@ export function calculateStats(values: number[]): {
   const max = sorted[n - 1];
 
   // Median
-  const median = n % 2 === 0 ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2 : sorted[Math.floor(n / 2)];
+  const median =
+    n % 2 === 0
+      ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2
+      : sorted[Math.floor(n / 2)];
 
   // Quartiles
   const q1Index = Math.floor(n * 0.25);
@@ -100,7 +103,11 @@ export function calculateStats(values: number[]): {
 /**
  * Calculate Z-score for a value
  */
-export function calculateZScore(value: number, mean: number, stdDev: number): number {
+export function calculateZScore(
+  value: number,
+  mean: number,
+  stdDev: number,
+): number {
   if (stdDev === 0) return 0;
   return (value - mean) / stdDev;
 }
@@ -113,7 +120,10 @@ class DataPreprocessor {
   /**
    * Preprocess data with all configured steps
    */
-  preprocess(data: DataPoint[], config: Partial<PreprocessConfig> = {}): PreprocessResult {
+  preprocess(
+    data: DataPoint[],
+    config: Partial<PreprocessConfig> = {},
+  ): PreprocessResult {
     const fullConfig = { ...DEFAULT_PREPROCESS_CONFIG, ...config };
     let processedData = [...data];
     let removedOutliers = 0;
@@ -131,21 +141,30 @@ class DataPreprocessor {
 
     // Remove outliers
     if (fullConfig.outlierRemoval) {
-      const result = this.removeOutliers(processedData, fullConfig.outlierThreshold);
+      const result = this.removeOutliers(
+        processedData,
+        fullConfig.outlierThreshold,
+      );
       processedData = result.data;
       removedOutliers += result.removed;
     }
 
     // Fill missing values (detect gaps in timeline)
     if (fullConfig.fillMissing && processedData.length >= 2) {
-      const result = this.fillMissingValues(processedData, fullConfig.fillMethod);
+      const result = this.fillMissingValues(
+        processedData,
+        fullConfig.fillMethod,
+      );
       processedData = result.data;
       filledMissing = result.filled;
     }
 
     // Normalize
     if (fullConfig.normalize) {
-      processedData = this.normalizeData(processedData, fullConfig.normalizeMethod);
+      processedData = this.normalizeData(
+        processedData,
+        fullConfig.normalizeMethod,
+      );
     }
 
     // Calculate final stats
@@ -170,7 +189,7 @@ class DataPreprocessor {
    */
   removeOutliers(
     data: DataPoint[],
-    threshold: number = 3
+    threshold = 3,
   ): { data: DataPoint[]; removed: number } {
     if (data.length < 3) {
       return { data, removed: 0 };
@@ -180,7 +199,9 @@ class DataPreprocessor {
     const stats = calculateStats(values);
 
     const filtered = data.filter((d) => {
-      const zScore = Math.abs(calculateZScore(d.value, stats.mean, stats.stdDev));
+      const zScore = Math.abs(
+        calculateZScore(d.value, stats.mean, stats.stdDev),
+      );
       return zScore <= threshold;
     });
 
@@ -195,7 +216,7 @@ class DataPreprocessor {
    */
   removeOutliersIQR(
     data: DataPoint[],
-    multiplier: number = 1.5
+    multiplier = 1.5,
   ): { data: DataPoint[]; removed: number } {
     if (data.length < 4) {
       return { data, removed: 0 };
@@ -207,7 +228,9 @@ class DataPreprocessor {
     const lowerBound = stats.q1 - multiplier * iqr;
     const upperBound = stats.q3 + multiplier * iqr;
 
-    const filtered = data.filter((d) => d.value >= lowerBound && d.value <= upperBound);
+    const filtered = data.filter(
+      (d) => d.value >= lowerBound && d.value <= upperBound,
+    );
 
     return {
       data: filtered,
@@ -220,7 +243,7 @@ class DataPreprocessor {
    */
   fillMissingValues(
     data: DataPoint[],
-    method: 'linear' | 'previous' | 'mean'
+    method: 'linear' | 'previous' | 'mean',
   ): { data: DataPoint[]; filled: number } {
     if (data.length < 2) {
       return { data, filled: 0 };
@@ -235,7 +258,10 @@ class DataPreprocessor {
     const typicalInterval = intervals[Math.floor(intervals.length / 2)]; // Median interval
 
     // If interval is too small or inconsistent, skip
-    if (typicalInterval <= 0 || intervals[intervals.length - 1] / typicalInterval > 100) {
+    if (
+      typicalInterval <= 0 ||
+      intervals[intervals.length - 1] / typicalInterval > 100
+    ) {
       return { data, filled: 0 };
     }
 
@@ -254,12 +280,16 @@ class DataPreprocessor {
         // Fill gaps larger than 1.5x typical interval
         if (expectedPoints > 0 && gap > typicalInterval * 1.5) {
           for (let j = 1; j <= expectedPoints; j++) {
-            const timestamp = data[i].timestamp + (gap * j) / (expectedPoints + 1);
+            const timestamp =
+              data[i].timestamp + (gap * j) / (expectedPoints + 1);
             let value: number;
 
             switch (method) {
               case 'linear':
-                value = data[i].value + ((data[i + 1].value - data[i].value) * j) / (expectedPoints + 1);
+                value =
+                  data[i].value +
+                  ((data[i + 1].value - data[i].value) * j) /
+                    (expectedPoints + 1);
                 break;
               case 'previous':
                 value = data[i].value;
@@ -293,7 +323,8 @@ class DataPreprocessor {
 
       switch (method) {
         case 'zscore':
-          normalizedValue = stats.stdDev === 0 ? 0 : (d.value - stats.mean) / stats.stdDev;
+          normalizedValue =
+            stats.stdDev === 0 ? 0 : (d.value - stats.mean) / stats.stdDev;
           break;
         case 'minmax':
           const range = stats.max - stats.min;
@@ -311,20 +342,23 @@ class DataPreprocessor {
   denormalize(
     normalizedValue: number,
     originalStats: { mean: number; stdDev: number; min: number; max: number },
-    method: 'zscore' | 'minmax'
+    method: 'zscore' | 'minmax',
   ): number {
     switch (method) {
       case 'zscore':
         return normalizedValue * originalStats.stdDev + originalStats.mean;
       case 'minmax':
-        return normalizedValue * (originalStats.max - originalStats.min) + originalStats.min;
+        return (
+          normalizedValue * (originalStats.max - originalStats.min) +
+          originalStats.min
+        );
     }
   }
 
   /**
    * Smooth data using simple moving average
    */
-  smoothData(data: DataPoint[], windowSize: number = 3): DataPoint[] {
+  smoothData(data: DataPoint[], windowSize = 3): DataPoint[] {
     if (data.length < windowSize) return data;
 
     const result: DataPoint[] = [];
@@ -334,7 +368,8 @@ class DataPreprocessor {
       const start = Math.max(0, i - halfWindow);
       const end = Math.min(data.length, i + halfWindow + 1);
       const windowData = data.slice(start, end);
-      const avgValue = windowData.reduce((sum, d) => sum + d.value, 0) / windowData.length;
+      const avgValue =
+        windowData.reduce((sum, d) => sum + d.value, 0) / windowData.length;
 
       result.push({ timestamp: data[i].timestamp, value: avgValue });
     }
@@ -345,7 +380,11 @@ class DataPreprocessor {
   /**
    * Detect if data has significant trend
    */
-  detectTrend(data: DataPoint[]): { hasTrend: boolean; slope: number; direction: 'up' | 'down' | 'flat' } {
+  detectTrend(data: DataPoint[]): {
+    hasTrend: boolean;
+    slope: number;
+    direction: 'up' | 'down' | 'flat';
+  } {
     if (data.length < 3) {
       return { hasTrend: false, slope: 0, direction: 'flat' };
     }
@@ -370,12 +409,16 @@ class DataPreprocessor {
 
     // Calculate R-squared to determine significance
     const predictions = xValues.map((x) => yMean + slope * (x - xMean));
-    const ssRes = yValues.reduce((sum, y, i) => sum + Math.pow(y - predictions[i], 2), 0);
+    const ssRes = yValues.reduce(
+      (sum, y, i) => sum + Math.pow(y - predictions[i], 2),
+      0,
+    );
     const ssTot = yValues.reduce((sum, y) => sum + Math.pow(y - yMean, 2), 0);
     const rSquared = ssTot === 0 ? 0 : 1 - ssRes / ssTot;
 
     const hasTrend = rSquared > 0.3 && Math.abs(slope) > 0.01;
-    const direction = Math.abs(slope) < 0.01 ? 'flat' : slope > 0 ? 'up' : 'down';
+    const direction =
+      Math.abs(slope) < 0.01 ? 'flat' : slope > 0 ? 'up' : 'down';
 
     return { hasTrend, slope, direction };
   }
@@ -402,7 +445,7 @@ class DataPreprocessor {
   aggregate(
     data: DataPoint[],
     intervalMs: number,
-    method: 'mean' | 'sum' | 'max' | 'min' | 'last' = 'mean'
+    method: 'mean' | 'sum' | 'max' | 'min' | 'last' = 'mean',
   ): DataPoint[] {
     if (data.length === 0) return [];
 
@@ -424,7 +467,8 @@ class DataPreprocessor {
 
       switch (method) {
         case 'mean':
-          aggregatedValue = values.reduce((sum, v) => sum + v, 0) / values.length;
+          aggregatedValue =
+            values.reduce((sum, v) => sum + v, 0) / values.length;
           break;
         case 'sum':
           aggregatedValue = values.reduce((sum, v) => sum + v, 0);

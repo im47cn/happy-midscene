@@ -112,7 +112,10 @@ export class AndroidSession extends BaseDeviceSession {
       }
 
       // Enable screen mirroring if configured
-      if (this.androidConfig.enableMirroring && this.agent?.startScreenMirroring) {
+      if (
+        this.androidConfig.enableMirroring &&
+        this.agent?.startScreenMirroring
+      ) {
         this.startScreenMirroring();
       }
 
@@ -120,8 +123,7 @@ export class AndroidSession extends BaseDeviceSession {
       this.setStatus('ready');
       this.lastError = undefined;
     } catch (error) {
-      this.lastError =
-        error instanceof Error ? error.message : String(error);
+      this.lastError = error instanceof Error ? error.message : String(error);
       this.setStatus('error');
       this.emit('error', { error: this.lastError });
       throw error;

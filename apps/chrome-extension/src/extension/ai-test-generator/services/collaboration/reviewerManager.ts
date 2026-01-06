@@ -5,10 +5,10 @@
  */
 
 import type { ReviewerStatus } from '../../types/collaboration';
-import type { IReviewerManager } from './interfaces';
-import { reviewSystem } from './reviewSystem';
-import { memberManager } from './memberManager';
 import { auditLogger } from './auditLogger';
+import type { IReviewerManager } from './interfaces';
+import { memberManager } from './memberManager';
+import { reviewSystem } from './reviewSystem';
 
 /**
  * Tracks file contribution to suggest reviewers
@@ -45,7 +45,7 @@ export class ReviewerManager implements IReviewerManager {
    */
   async getSuggestedReviewers(
     workspaceId: string,
-    fileIds: string[]
+    fileIds: string[],
   ): Promise<string[]> {
     const suggested = new Set<string>();
     const scores = new Map<string, number>();
@@ -56,10 +56,7 @@ export class ReviewerManager implements IReviewerManager {
       if (contributions) {
         for (const contrib of contributions) {
           const currentScore = scores.get(contrib.userId) || 0;
-          scores.set(
-            contrib.userId,
-            currentScore + contrib.contributionScore
-          );
+          scores.set(contrib.userId, currentScore + contrib.contributionScore);
         }
       }
     }
@@ -108,7 +105,7 @@ export class ReviewerManager implements IReviewerManager {
    */
   async getReviewerStatus(
     reviewId: string,
-    userId: string
+    userId: string,
   ): Promise<ReviewerStatus | null> {
     const review = await reviewSystem.getReview(reviewId);
     if (!review) {
@@ -124,7 +121,7 @@ export class ReviewerManager implements IReviewerManager {
    */
   async assignReviewers(
     reviewId: string,
-    reviewerIds: string[]
+    reviewerIds: string[],
   ): Promise<void> {
     const review = await reviewSystem.getReview(reviewId);
     if (!review) {
@@ -203,10 +200,7 @@ export class ReviewerManager implements IReviewerManager {
   /**
    * Auto-assign reviewers to a review
    */
-  async autoAssignReviewers(
-    reviewId: string,
-    count: number = 2
-  ): Promise<string[]> {
+  async autoAssignReviewers(reviewId: string, count = 2): Promise<string[]> {
     const review = await reviewSystem.getReview(reviewId);
     if (!review) {
       throw new Error(`Review not found: ${reviewId}`);
@@ -215,7 +209,7 @@ export class ReviewerManager implements IReviewerManager {
     const fileIds = review.changes.map((c) => c.fileId);
     const suggested = await this.getSuggestedReviewers(
       review.workspaceId,
-      fileIds
+      fileIds,
     );
 
     // Get available reviewers
@@ -239,7 +233,7 @@ export class ReviewerManager implements IReviewerManager {
   async recordContribution(
     fileId: string,
     userId: string,
-    score: number = 1
+    score = 1,
   ): Promise<void> {
     if (!this.contributionStorage.contributions.has(fileId)) {
       this.contributionStorage.contributions.set(fileId, []);

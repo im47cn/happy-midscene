@@ -2,9 +2,13 @@
  * Conflict Resolver Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ConflictResolver } from '../conflictResolver';
-import type { EditorOperation, ConflictType, ConflictResolution } from '../conflictResolver';
+import type {
+  ConflictResolution,
+  ConflictType,
+  EditorOperation,
+} from '../conflictResolver';
 
 describe('ConflictResolver', () => {
   let cr: ConflictResolver;
@@ -21,7 +25,7 @@ describe('ConflictResolver', () => {
     type: EditorOperation['type'],
     position: number,
     userId: string,
-    extra: Partial<EditorOperation> = {}
+    extra: Partial<EditorOperation> = {},
   ): EditorOperation => ({
     type,
     position,
@@ -53,8 +57,14 @@ describe('ConflictResolver', () => {
     });
 
     it('should auto-resolve concurrent inserts', async () => {
-      const op1 = createOp('insert', 5, 'user1', { content: 'A', timestamp: 100 });
-      const op2 = createOp('insert', 5, 'user2', { content: 'B', timestamp: 200 });
+      const op1 = createOp('insert', 5, 'user1', {
+        content: 'A',
+        timestamp: 100,
+      });
+      const op2 = createOp('insert', 5, 'user2', {
+        content: 'B',
+        timestamp: 200,
+      });
 
       const result = await cr.resolve(op1, op2);
 
@@ -172,8 +182,14 @@ describe('ConflictResolver', () => {
     });
 
     it('should merge two inserts', () => {
-      const op1 = createOp('insert', 5, 'user1', { content: 'A', timestamp: 100 });
-      const op2 = createOp('insert', 5, 'user2', { content: 'B', timestamp: 200 });
+      const op1 = createOp('insert', 5, 'user1', {
+        content: 'A',
+        timestamp: 100,
+      });
+      const op2 = createOp('insert', 5, 'user2', {
+        content: 'B',
+        timestamp: 200,
+      });
 
       cr.detectConflicts([op1, op2]);
       const conflict = cr.getUnresolvedConflicts()[0];
@@ -377,8 +393,14 @@ describe('ConflictResolver', () => {
 
     it('should include merged content when merge possible', async () => {
       const baseContent = 'Hello World';
-      const op1 = createOp('insert', 5, 'user1', { content: 'A', timestamp: 100 });
-      const op2 = createOp('insert', 5, 'user2', { content: 'B', timestamp: 200 });
+      const op1 = createOp('insert', 5, 'user1', {
+        content: 'A',
+        timestamp: 100,
+      });
+      const op2 = createOp('insert', 5, 'user2', {
+        content: 'B',
+        timestamp: 200,
+      });
 
       cr.detectConflicts([op1, op2]);
       const conflict = cr.getUnresolvedConflicts()[0];
@@ -469,8 +491,14 @@ describe('ConflictResolver', () => {
     });
 
     it('should order concurrent inserts by timestamp', async () => {
-      const op1 = createOp('insert', 5, 'user1', { content: 'A', timestamp: 100 });
-      const op2 = createOp('insert', 5, 'user2', { content: 'B', timestamp: 200 });
+      const op1 = createOp('insert', 5, 'user1', {
+        content: 'A',
+        timestamp: 100,
+      });
+      const op2 = createOp('insert', 5, 'user2', {
+        content: 'B',
+        timestamp: 200,
+      });
 
       const result = await cr.resolve(op1, op2);
 

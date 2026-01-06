@@ -2,10 +2,10 @@
  * GapIdentifier Tests
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { gapIdentifier } from '../gapIdentifier';
-import { analyticsStorage } from '../../analytics/analyticsStorage';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ExecutionRecord } from '../../../types/analytics';
+import { analyticsStorage } from '../../analytics/analyticsStorage';
+import { gapIdentifier } from '../gapIdentifier';
 
 // Mock analytics storage
 vi.mock('../../analytics/analyticsStorage', () => ({
@@ -31,8 +31,20 @@ describe('GapIdentifier', () => {
     duration: 30000,
     status: 'passed',
     steps: [
-      { index: 0, description: 'Open page', status: 'passed', duration: 1000, retryCount: 0 },
-      { index: 1, description: 'Click button', status: 'passed', duration: 500, retryCount: 0 },
+      {
+        index: 0,
+        description: 'Open page',
+        status: 'passed',
+        duration: 1000,
+        retryCount: 0,
+      },
+      {
+        index: 1,
+        description: 'Click button',
+        status: 'passed',
+        duration: 500,
+        retryCount: 0,
+      },
     ],
     environment: {
       browser: 'Chrome',
@@ -61,12 +73,26 @@ describe('GapIdentifier', () => {
       const executions = [
         createExecution({
           steps: [
-            { index: 0, description: 'Login to the system', status: 'passed', duration: 1000, retryCount: 0 },
-            { index: 1, description: 'Navigate to dashboard', status: 'passed', duration: 500, retryCount: 0 },
+            {
+              index: 0,
+              description: 'Login to the system',
+              status: 'passed',
+              duration: 1000,
+              retryCount: 0,
+            },
+            {
+              index: 1,
+              description: 'Navigate to dashboard',
+              status: 'passed',
+              duration: 500,
+              retryCount: 0,
+            },
           ],
         }),
       ];
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       const gaps = await gapIdentifier.identify();
 
@@ -76,7 +102,9 @@ describe('GapIdentifier', () => {
 
     it('should sort gaps by risk level', async () => {
       const executions = [createExecution()];
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       const gaps = await gapIdentifier.identify();
 
@@ -95,11 +123,19 @@ describe('GapIdentifier', () => {
       const executions = [
         createExecution({
           steps: [
-            { index: 0, description: 'Login successfully', status: 'passed', duration: 1000, retryCount: 0 },
+            {
+              index: 0,
+              description: 'Login successfully',
+              status: 'passed',
+              duration: 1000,
+              retryCount: 0,
+            },
           ],
         }),
       ];
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       const coverage = await gapIdentifier.calculateCoverage('auth-login');
 

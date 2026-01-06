@@ -57,8 +57,16 @@ export {
 } from './storage';
 
 // Baseline building (Phase 2)
-export { baselineBuilder, type BuildBaselineOptions, type UpdateBaselineOptions } from './baselineBuilder';
-export { seasonalityAnalyzer, type SeasonalAnalysisResult, type CycleInfo } from './seasonalityAnalyzer';
+export {
+  baselineBuilder,
+  type BuildBaselineOptions,
+  type UpdateBaselineOptions,
+} from './baselineBuilder';
+export {
+  seasonalityAnalyzer,
+  type SeasonalAnalysisResult,
+  type CycleInfo,
+} from './seasonalityAnalyzer';
 export {
   dataPreprocessor,
   type DataPoint,

@@ -5,7 +5,7 @@
  * 一旦我被更新，务必更新我的开头注释，以及所属的文件夹的CLAUDE.md。
  */
 
-import type { PatternType, LearnedPattern, Anomaly } from '../../types/anomaly';
+import type { Anomaly, LearnedPattern, PatternType } from '../../types/anomaly';
 import { anomalyStorage } from './storage';
 
 // ============================================================================
@@ -102,7 +102,7 @@ class PatternLearner {
    */
   async learnPatterns(
     data: DataPoint[],
-    options: LearnOptions = {}
+    options: LearnOptions = {},
   ): Promise<LearnedPattern[]> {
     await this.initialize();
 
@@ -118,22 +118,32 @@ class PatternLearner {
 
     // Detect different pattern types
     const periodicPattern = this.detectPeriodicPattern(sortedData);
-    if (periodicPattern && periodicPattern.confidence >= (opts.minConfidence ?? 50)) {
+    if (
+      periodicPattern &&
+      periodicPattern.confidence >= (opts.minConfidence ?? 50)
+    ) {
       learnedPatterns.push(periodicPattern);
     }
 
     const suddenPatterns = this.detectSuddenPatterns(sortedData);
     learnedPatterns.push(
-      ...suddenPatterns.filter((p) => p.confidence >= (opts.minConfidence ?? 50))
+      ...suddenPatterns.filter(
+        (p) => p.confidence >= (opts.minConfidence ?? 50),
+      ),
     );
 
     const gradualPatterns = this.detectGradualPatterns(sortedData);
     learnedPatterns.push(
-      ...gradualPatterns.filter((p) => p.confidence >= (opts.minConfidence ?? 50))
+      ...gradualPatterns.filter(
+        (p) => p.confidence >= (opts.minConfidence ?? 50),
+      ),
     );
 
     const seasonalPattern = this.detectSeasonalPattern(sortedData);
-    if (seasonalPattern && seasonalPattern.confidence >= (opts.minConfidence ?? 50)) {
+    if (
+      seasonalPattern &&
+      seasonalPattern.confidence >= (opts.minConfidence ?? 50)
+    ) {
       learnedPatterns.push(seasonalPattern);
     }
 
@@ -173,7 +183,7 @@ class PatternLearner {
    */
   async updatePatterns(
     patternId: string,
-    observation: { matched: boolean; feedback?: 'positive' | 'negative' }
+    observation: { matched: boolean; feedback?: 'positive' | 'negative' },
   ): Promise<void> {
     await this.initialize();
 
@@ -315,7 +325,8 @@ class PatternLearner {
     const bestPeak = peaks[0];
     const avgInterval =
       data.length > 1
-        ? (data[data.length - 1].timestamp - data[0].timestamp) / (data.length - 1)
+        ? (data[data.length - 1].timestamp - data[0].timestamp) /
+          (data.length - 1)
         : 0;
     const period = bestPeak.lag * avgInterval;
 
@@ -342,13 +353,17 @@ class PatternLearner {
     const values = data.map((d) => d.value);
     const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
     const stdDev = Math.sqrt(
-      values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / values.length
+      values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / values.length,
     );
 
     if (stdDev === 0) return patterns;
 
     // Find sudden changes (> 2 std dev from previous value)
-    const suddenChanges: { index: number; magnitude: number; direction: 'up' | 'down' }[] = [];
+    const suddenChanges: {
+      index: number;
+      magnitude: number;
+      direction: 'up' | 'down';
+    }[] = [];
 
     for (let i = 1; i < values.length; i++) {
       const change = values[i] - values[i - 1];
@@ -364,7 +379,8 @@ class PatternLearner {
     // Group consecutive sudden changes
     if (suddenChanges.length >= 2) {
       const avgMagnitude =
-        suddenChanges.reduce((sum, c) => sum + c.magnitude, 0) / suddenChanges.length;
+        suddenChanges.reduce((sum, c) => sum + c.magnitude, 0) /
+        suddenChanges.length;
       const directions = new Set(suddenChanges.map((c) => c.direction));
 
       patterns.push({
@@ -376,7 +392,8 @@ class PatternLearner {
         lastSeen: Date.now(),
         features: {
           avgMagnitude,
-          direction: directions.size === 1 ? suddenChanges[0].direction : 'both',
+          direction:
+            directions.size === 1 ? suddenChanges[0].direction : 'both',
           threshold: 2 * stdDev,
         },
       });
@@ -488,7 +505,8 @@ class PatternLearner {
 
     // Overall variance
     const overallVariance =
-      data.reduce((sum, d) => sum + (d.value - overallMean) ** 2, 0) / data.length;
+      data.reduce((sum, d) => sum + (d.value - overallMean) ** 2, 0) /
+      data.length;
 
     if (overallVariance === 0) return null;
 
@@ -546,10 +564,17 @@ class PatternLearner {
         type: 'periodic',
         confidence: pattern.confidence,
         description: pattern.description,
-        evidence: [`Autocorrelation peak at lag ${(pattern.features as PatternFeatures).lag}`],
+        evidence: [
+          `Autocorrelation peak at lag ${(pattern.features as PatternFeatures).lag}`,
+        ],
       };
     }
-    return { type: 'periodic', confidence: 0, description: 'No periodic pattern', evidence: [] };
+    return {
+      type: 'periodic',
+      confidence: 0,
+      description: 'No periodic pattern',
+      evidence: [],
+    };
   }
 
   private checkSuddenPattern(data: DataPoint[]): RecognitionResult {
@@ -563,7 +588,12 @@ class PatternLearner {
         evidence: [`${best.occurrences} sudden changes detected`],
       };
     }
-    return { type: 'sudden', confidence: 0, description: 'No sudden changes', evidence: [] };
+    return {
+      type: 'sudden',
+      confidence: 0,
+      description: 'No sudden changes',
+      evidence: [],
+    };
   }
 
   private checkGradualPattern(data: DataPoint[]): RecognitionResult {
@@ -574,10 +604,17 @@ class PatternLearner {
         type: 'gradual',
         confidence: best.confidence,
         description: best.description,
-        evidence: [`R² = ${((best.features as PatternFeatures & { r2: number }).r2 ?? 0).toFixed(3)}`],
+        evidence: [
+          `R² = ${((best.features as PatternFeatures & { r2: number }).r2 ?? 0).toFixed(3)}`,
+        ],
       };
     }
-    return { type: 'gradual', confidence: 0, description: 'No gradual trend', evidence: [] };
+    return {
+      type: 'gradual',
+      confidence: 0,
+      description: 'No gradual trend',
+      evidence: [],
+    };
   }
 
   private checkSeasonalPattern(data: DataPoint[]): RecognitionResult {
@@ -593,14 +630,22 @@ class PatternLearner {
         ],
       };
     }
-    return { type: 'seasonal', confidence: 0, description: 'No seasonal pattern', evidence: [] };
+    return {
+      type: 'seasonal',
+      confidence: 0,
+      description: 'No seasonal pattern',
+      evidence: [],
+    };
   }
 
   // ============================================================================
   // Private Methods - Pattern Matching
   // ============================================================================
 
-  private calculatePatternMatch(pattern: LearnedPattern, data: DataPoint[]): PatternMatch {
+  private calculatePatternMatch(
+    pattern: LearnedPattern,
+    data: DataPoint[],
+  ): PatternMatch {
     const features = pattern.features as PatternFeatures;
     const matchedFeatures: string[] = [];
     let similaritySum = 0;
@@ -615,7 +660,8 @@ class PatternLearner {
           if (
             features.period &&
             detectedFeatures.period &&
-            Math.abs(features.period - detectedFeatures.period) < features.period * 0.2
+            Math.abs(features.period - detectedFeatures.period) <
+              features.period * 0.2
           ) {
             matchedFeatures.push('period');
             similaritySum += 0.8;
@@ -636,7 +682,8 @@ class PatternLearner {
           if (
             features.threshold &&
             detectedFeatures.threshold &&
-            Math.abs(features.threshold - detectedFeatures.threshold) < features.threshold * 0.3
+            Math.abs(features.threshold - detectedFeatures.threshold) <
+              features.threshold * 0.3
           ) {
             matchedFeatures.push('threshold');
             similaritySum += 0.4;
@@ -665,7 +712,7 @@ class PatternLearner {
           const detectedFeatures = detected.features as PatternFeatures;
           if (features.hourOfDay && detectedFeatures.hourOfDay) {
             const overlap = features.hourOfDay.filter((h) =>
-              detectedFeatures.hourOfDay?.includes(h)
+              detectedFeatures.hourOfDay?.includes(h),
             ).length;
             if (overlap > 0) {
               matchedFeatures.push('hourOfDay');
@@ -674,7 +721,7 @@ class PatternLearner {
           }
           if (features.dayOfWeek && detectedFeatures.dayOfWeek) {
             const overlap = features.dayOfWeek.filter((d) =>
-              detectedFeatures.dayOfWeek?.includes(d)
+              detectedFeatures.dayOfWeek?.includes(d),
             ).length;
             if (overlap > 0) {
               matchedFeatures.push('dayOfWeek');
@@ -703,7 +750,7 @@ class PatternLearner {
   // ============================================================================
 
   private groupAnomaliesByPattern(
-    anomalies: Anomaly[]
+    anomalies: Anomaly[],
   ): Map<string, Anomaly[]> {
     const groups = new Map<string, Anomaly[]>();
 
@@ -718,7 +765,10 @@ class PatternLearner {
     return groups;
   }
 
-  private createPatternFromAnomalies(key: string, anomalies: Anomaly[]): LearnedPattern {
+  private createPatternFromAnomalies(
+    key: string,
+    anomalies: Anomaly[],
+  ): LearnedPattern {
     const [type, severity] = key.split('_');
 
     // Analyze timing patterns
@@ -746,7 +796,8 @@ class PatternLearner {
 
     return {
       id: `anomaly_${key}_${Date.now()}`,
-      type: commonHours.length > 0 || commonDays.length > 0 ? 'seasonal' : 'sudden',
+      type:
+        commonHours.length > 0 || commonDays.length > 0 ? 'seasonal' : 'sudden',
       description: `${type} anomalies with ${severity} severity`,
       confidence: Math.min(90, 50 + anomalies.length * 10),
       occurrences: anomalies.length,
@@ -756,7 +807,9 @@ class PatternLearner {
         severity,
         hourOfDay: commonHours,
         dayOfWeek: commonDays,
-        relatedCaseIds: [...new Set(anomalies.map((a) => a.caseId).filter(Boolean))],
+        relatedCaseIds: [
+          ...new Set(anomalies.map((a) => a.caseId).filter(Boolean)),
+        ],
       },
     };
   }

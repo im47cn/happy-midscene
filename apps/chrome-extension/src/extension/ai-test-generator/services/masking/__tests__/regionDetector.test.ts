@@ -64,24 +64,38 @@ describe('RegionDetector', () => {
       const selectors = regionDetector.getSelectors();
 
       // Check for some expected built-in selectors
-      expect(selectors.some(s => s.selector === 'input[type="password"]')).toBe(true);
-      expect(selectors.some(s => s.selector === 'input[type="email"]')).toBe(true);
-      expect(selectors.some(s => s.selector === 'input[type="tel"]')).toBe(true);
-      expect(selectors.some(s => s.selector === 'input[autocomplete="cc-number"]')).toBe(true);
+      expect(
+        selectors.some((s) => s.selector === 'input[type="password"]'),
+      ).toBe(true);
+      expect(selectors.some((s) => s.selector === 'input[type="email"]')).toBe(
+        true,
+      );
+      expect(selectors.some((s) => s.selector === 'input[type="tel"]')).toBe(
+        true,
+      );
+      expect(
+        selectors.some((s) => s.selector === 'input[autocomplete="cc-number"]'),
+      ).toBe(true);
     });
 
     it('should have correct category mapping', () => {
       const selectors = regionDetector.getSelectors();
 
-      const passwordSelector = selectors.find(s => s.selector === 'input[type="password"]');
+      const passwordSelector = selectors.find(
+        (s) => s.selector === 'input[type="password"]',
+      );
       expect(passwordSelector?.category).toBe('credential');
       expect(passwordSelector?.type).toBe('password');
 
-      const emailSelector = selectors.find(s => s.selector === 'input[type="email"]');
+      const emailSelector = selectors.find(
+        (s) => s.selector === 'input[type="email"]',
+      );
       expect(emailSelector?.category).toBe('pii');
       expect(emailSelector?.type).toBe('email');
 
-      const ccSelector = selectors.find(s => s.selector === 'input[autocomplete="cc-number"]');
+      const ccSelector = selectors.find(
+        (s) => s.selector === 'input[autocomplete="cc-number"]',
+      );
       expect(ccSelector?.category).toBe('financial');
       expect(ccSelector?.type).toBe('credit-card');
     });
@@ -101,11 +115,19 @@ describe('RegionDetector', () => {
     it('should detect password input when present', () => {
       const mockElement = {
         tagName: 'INPUT',
-        getAttribute: vi.fn((name: string) => name === 'type' ? 'password' : null),
+        getAttribute: vi.fn((name: string) =>
+          name === 'type' ? 'password' : null,
+        ),
         closest: vi.fn(() => null),
         getBoundingClientRect: vi.fn(() => ({
-          x: 10, y: 20, width: 200, height: 30,
-          top: 20, left: 10, right: 210, bottom: 50,
+          x: 10,
+          y: 20,
+          width: 200,
+          height: 30,
+          top: 20,
+          left: 10,
+          right: 210,
+          bottom: 50,
           toJSON: () => ({}),
         })),
         offsetParent: {},
@@ -131,11 +153,19 @@ describe('RegionDetector', () => {
     it('should skip zero-size elements', () => {
       const mockElement = {
         tagName: 'INPUT',
-        getAttribute: vi.fn((name: string) => name === 'type' ? 'password' : null),
+        getAttribute: vi.fn((name: string) =>
+          name === 'type' ? 'password' : null,
+        ),
         closest: vi.fn(() => null),
         getBoundingClientRect: vi.fn(() => ({
-          x: 10, y: 20, width: 0, height: 0, // Zero size
-          top: 20, left: 10, right: 10, bottom: 20,
+          x: 10,
+          y: 20,
+          width: 0,
+          height: 0, // Zero size
+          top: 20,
+          left: 10,
+          right: 10,
+          bottom: 20,
           toJSON: () => ({}),
         })),
         offsetParent: {},
@@ -169,11 +199,19 @@ describe('RegionDetector', () => {
 
       const mockElement = {
         tagName: 'INPUT',
-        getAttribute: vi.fn((name: string) => name === 'type' ? 'password' : null),
+        getAttribute: vi.fn((name: string) =>
+          name === 'type' ? 'password' : null,
+        ),
         closest: vi.fn(() => null),
         getBoundingClientRect: vi.fn(() => ({
-          x: 10, y: 20, width: 200, height: 30,
-          top: 20, left: 10, right: 210, bottom: 50,
+          x: 10,
+          y: 20,
+          width: 200,
+          height: 30,
+          top: 20,
+          left: 10,
+          right: 210,
+          bottom: 50,
           toJSON: () => ({}),
         })),
         offsetParent: null, // Hidden elements have null offsetParent
@@ -199,7 +237,16 @@ describe('RegionDetector', () => {
     it('should convert elements to mask regions with padding', () => {
       const elementInfo = {
         element: {} as Element,
-        rect: { x: 10, y: 20, width: 200, height: 30, top: 20, left: 10, right: 210, bottom: 50 } as DOMRect,
+        rect: {
+          x: 10,
+          y: 20,
+          width: 200,
+          height: 30,
+          top: 20,
+          left: 10,
+          right: 210,
+          bottom: 50,
+        } as DOMRect,
         type: 'password' as const,
         category: 'credential' as const,
       };
@@ -218,12 +265,24 @@ describe('RegionDetector', () => {
     it('should apply scroll offset', () => {
       const elementInfo = {
         element: {} as Element,
-        rect: { x: 10, y: 20, width: 200, height: 30, top: 20, left: 10, right: 210, bottom: 50 } as DOMRect,
+        rect: {
+          x: 10,
+          y: 20,
+          width: 200,
+          height: 30,
+          top: 20,
+          left: 10,
+          right: 210,
+          bottom: 50,
+        } as DOMRect,
         type: 'password' as const,
         category: 'credential' as const,
       };
 
-      const regions = regionDetector.elementsToMaskRegions([elementInfo], { x: 100, y: 50 });
+      const regions = regionDetector.elementsToMaskRegions([elementInfo], {
+        x: 100,
+        y: 50,
+      });
 
       expect(regions[0].x).toBe(106); // 10 + 100 - 4
       expect(regions[0].y).toBe(66); // 20 + 50 - 4
@@ -232,7 +291,16 @@ describe('RegionDetector', () => {
     it('should clamp negative coordinates to zero', () => {
       const elementInfo = {
         element: {} as Element,
-        rect: { x: 2, y: 2, width: 200, height: 30, top: 2, left: 2, right: 202, bottom: 32 } as DOMRect,
+        rect: {
+          x: 2,
+          y: 2,
+          width: 200,
+          height: 30,
+          top: 2,
+          left: 2,
+          right: 202,
+          bottom: 32,
+        } as DOMRect,
         type: 'password' as const,
         category: 'credential' as const,
       };
@@ -266,7 +334,9 @@ describe('RegionDetector', () => {
       });
 
       const beforeCount = regionDetector.getSelectors().length;
-      const result = regionDetector.removeSelector('input[data-sensitive="true"]');
+      const result = regionDetector.removeSelector(
+        'input[data-sensitive="true"]',
+      );
 
       expect(result).toBe(true);
       expect(regionDetector.getSelectors().length).toBe(beforeCount - 1);
@@ -300,7 +370,9 @@ describe('RegionDetector', () => {
 });
 
 describe('detectScreenshotMaskRegions utility', () => {
-  let detectScreenshotMaskRegions: typeof import('../regionDetector').detectScreenshotMaskRegions;
+  let detectScreenshotMaskRegions: typeof import(
+    '../regionDetector',
+  ).detectScreenshotMaskRegions;
 
   beforeEach(async () => {
     vi.resetModules();
@@ -318,11 +390,19 @@ describe('detectScreenshotMaskRegions utility', () => {
     // Mock document with a password input
     const mockElement = {
       tagName: 'INPUT',
-      getAttribute: vi.fn((name: string) => name === 'type' ? 'password' : null),
+      getAttribute: vi.fn((name: string) =>
+        name === 'type' ? 'password' : null,
+      ),
       closest: vi.fn(() => null),
       getBoundingClientRect: vi.fn(() => ({
-        x: 10, y: 20, width: 200, height: 30,
-        top: 20, left: 10, right: 210, bottom: 50,
+        x: 10,
+        y: 20,
+        width: 200,
+        height: 30,
+        top: 20,
+        left: 10,
+        right: 210,
+        bottom: 50,
         toJSON: () => ({}),
       })),
       offsetParent: {},

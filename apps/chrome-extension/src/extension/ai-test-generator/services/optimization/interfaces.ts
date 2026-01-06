@@ -68,7 +68,9 @@ export interface IRecommendEngine {
   /**
    * Prioritize recommendations by impact and effort
    */
-  prioritizeRecommendations(recommendations: Recommendation[]): Recommendation[];
+  prioritizeRecommendations(
+    recommendations: Recommendation[],
+  ): Recommendation[];
 
   /**
    * Estimate impact of a recommendation
@@ -117,7 +119,9 @@ export interface IEfficiencyAnalyzer {
   /**
    * Identify slowest test cases
    */
-  identifySlowCases(limit?: number): Promise<EfficiencyAnalysis['slowestCases']>;
+  identifySlowCases(
+    limit?: number,
+  ): Promise<EfficiencyAnalysis['slowestCases']>;
 
   /**
    * Find execution bottlenecks
@@ -127,7 +131,9 @@ export interface IEfficiencyAnalyzer {
   /**
    * Suggest parallelization opportunities
    */
-  suggestParallelization(): Promise<EfficiencyAnalysis['parallelizationOpportunity']>;
+  suggestParallelization(): Promise<
+    EfficiencyAnalysis['parallelizationOpportunity']
+  >;
 }
 
 /**
@@ -154,7 +160,9 @@ export interface IRedundancyDetector {
   /**
    * Suggest merge strategy for redundant cases
    */
-  suggestMerge(caseIds: string[]): Promise<RedundancyReport['redundantGroups'][0]['mergeRecommendation']>;
+  suggestMerge(
+    caseIds: string[],
+  ): Promise<RedundancyReport['redundantGroups'][0]['mergeRecommendation']>;
 }
 
 /**
@@ -224,7 +232,9 @@ export interface IMaintainabilityAnalyzer {
   /**
    * Check best practice violations
    */
-  checkBestPractices(): Promise<MaintainabilityAnalysis['bestPracticeViolations']>;
+  checkBestPractices(): Promise<
+    MaintainabilityAnalysis['bestPracticeViolations']
+  >;
 }
 
 /**

@@ -5,7 +5,10 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { CaseStats, ExecutionRecord } from '../../../types/analytics';
-import type { RecommendContext, ChangeInfo } from '../../../types/recommendation';
+import type {
+  ChangeInfo,
+  RecommendContext,
+} from '../../../types/recommendation';
 import { DEFAULT_PRIORITY_CONFIG } from '../../../types/recommendation';
 import { ScoreCalculator } from '../scoreCalculator';
 
@@ -38,7 +41,13 @@ describe('ScoreCalculator', () => {
     it('should return high risk for unstable tests', () => {
       // stabilityRisk = (100 - 30) / 100 = 0.7, weighted by 0.4 = 0.28
       // With no recent failures and not flaky: 0.28 + 0 + 0 = 0.28
-      context.caseStats = [createCaseStats({ stabilityScore: 30, isFlaky: false, recentResults: ['passed', 'passed', 'passed', 'passed', 'passed'] })];
+      context.caseStats = [
+        createCaseStats({
+          stabilityScore: 30,
+          isFlaky: false,
+          recentResults: ['passed', 'passed', 'passed', 'passed', 'passed'],
+        }),
+      ];
       const calculator = new ScoreCalculator(context);
       const risk = calculator.calculateRiskScore('case-1');
 
@@ -50,7 +59,13 @@ describe('ScoreCalculator', () => {
     it('should return high risk for flaky tests', () => {
       // stabilityRisk = 0.3, flakyRisk = 0.5
       // risk = 0.3 * 0.4 + 0 * 0.4 + 0.5 * 0.2 = 0.12 + 0 + 0.1 = 0.22
-      context.caseStats = [createCaseStats({ stabilityScore: 70, isFlaky: true, recentResults: ['passed', 'passed', 'passed', 'passed', 'passed'] })];
+      context.caseStats = [
+        createCaseStats({
+          stabilityScore: 70,
+          isFlaky: true,
+          recentResults: ['passed', 'passed', 'passed', 'passed', 'passed'],
+        }),
+      ];
       const calculator = new ScoreCalculator(context);
       const risk = calculator.calculateRiskScore('case-1');
 
@@ -76,7 +91,13 @@ describe('ScoreCalculator', () => {
     it('should return low risk for stable tests', () => {
       // stabilityRisk = 0.05, no failures, not flaky
       // risk = 0.05 * 0.4 + 0 * 0.4 + 0 * 0.2 = 0.02
-      context.caseStats = [createCaseStats({ stabilityScore: 95, isFlaky: false, recentResults: ['passed', 'passed', 'passed', 'passed', 'passed'] })];
+      context.caseStats = [
+        createCaseStats({
+          stabilityScore: 95,
+          isFlaky: false,
+          recentResults: ['passed', 'passed', 'passed', 'passed', 'passed'],
+        }),
+      ];
       const calculator = new ScoreCalculator(context);
       const risk = calculator.calculateRiskScore('case-1');
 
@@ -117,8 +138,16 @@ describe('ScoreCalculator', () => {
 
   describe('calculateChangeImpactScore', () => {
     it('should return high impact when changes match case name', () => {
-      context.caseStats = [createCaseStats({ caseName: 'Login Authentication Test' })];
-      context.changes = [{ type: 'file', target: 'authentication', description: 'Auth module changed' }];
+      context.caseStats = [
+        createCaseStats({ caseName: 'Login Authentication Test' }),
+      ];
+      context.changes = [
+        {
+          type: 'file',
+          target: 'authentication',
+          description: 'Auth module changed',
+        },
+      ];
       const calculator = new ScoreCalculator(context);
       const impact = calculator.calculateChangeImpactScore('case-1');
 
@@ -135,7 +164,13 @@ describe('ScoreCalculator', () => {
 
     it('should return zero impact when changes do not match', () => {
       context.caseStats = [createCaseStats({ caseName: 'Login Test' })];
-      context.changes = [{ type: 'file', target: 'payment', description: 'Payment module changed' }];
+      context.changes = [
+        {
+          type: 'file',
+          target: 'payment',
+          description: 'Payment module changed',
+        },
+      ];
       const calculator = new ScoreCalculator(context);
       const impact = calculator.calculateChangeImpactScore('case-1');
 
@@ -163,7 +198,9 @@ describe('ScoreCalculator', () => {
 
   describe('calculateBusinessValueScore', () => {
     it('should return high score for login tests', () => {
-      context.caseStats = [createCaseStats({ caseName: 'User Login Authentication Test' })];
+      context.caseStats = [
+        createCaseStats({ caseName: 'User Login Authentication Test' }),
+      ];
       const calculator = new ScoreCalculator(context);
       const value = calculator.calculateBusinessValueScore('case-1');
 
@@ -171,7 +208,9 @@ describe('ScoreCalculator', () => {
     });
 
     it('should return high score for payment tests', () => {
-      context.caseStats = [createCaseStats({ caseName: 'Checkout Payment Process Test' })];
+      context.caseStats = [
+        createCaseStats({ caseName: 'Checkout Payment Process Test' }),
+      ];
       const calculator = new ScoreCalculator(context);
       const value = calculator.calculateBusinessValueScore('case-1');
 
@@ -179,7 +218,9 @@ describe('ScoreCalculator', () => {
     });
 
     it('should return moderate score for frequently run tests', () => {
-      context.caseStats = [createCaseStats({ caseName: 'Generic Test', totalRuns: 100 })];
+      context.caseStats = [
+        createCaseStats({ caseName: 'Generic Test', totalRuns: 100 }),
+      ];
       const calculator = new ScoreCalculator(context);
       const value = calculator.calculateBusinessValueScore('case-1');
 
@@ -187,7 +228,9 @@ describe('ScoreCalculator', () => {
     });
 
     it('should return base score for unknown tests', () => {
-      context.caseStats = [createCaseStats({ caseName: 'Some Random Test', totalRuns: 5 })];
+      context.caseStats = [
+        createCaseStats({ caseName: 'Some Random Test', totalRuns: 5 }),
+      ];
       const calculator = new ScoreCalculator(context);
       const value = calculator.calculateBusinessValueScore('case-1');
 
@@ -206,7 +249,9 @@ describe('ScoreCalculator', () => {
     });
 
     it('should return reasons explaining the score', () => {
-      context.caseStats = [createCaseStats({ stabilityScore: 30, isFlaky: false })];
+      context.caseStats = [
+        createCaseStats({ stabilityScore: 30, isFlaky: false }),
+      ];
       const calculator = new ScoreCalculator(context);
       const { reasons } = calculator.calculateRecommendScore('case-1');
 
@@ -260,7 +305,9 @@ describe('ScoreCalculator', () => {
     });
 
     it('calculateRecencyScore should work standalone', () => {
-      const caseStat = createCaseStats({ lastRun: Date.now() - 100 * 24 * 60 * 60 * 1000 });
+      const caseStat = createCaseStats({
+        lastRun: Date.now() - 100 * 24 * 60 * 60 * 1000,
+      });
       const recency = ScoreCalculator.calculateRecencyScore(caseStat);
 
       expect(recency).toBe(1);

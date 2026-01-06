@@ -2,10 +2,13 @@
  * Collaboration Hub Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type {
+  CursorPosition,
+  EditorOperation,
+} from '../../types/collaboration';
 import { CollaborationHub } from '../collaborationHub';
 import { syncEngine } from '../syncEngine';
-import type { EditorOperation, CursorPosition } from '../../types/collaboration';
 
 // Mock sync engine
 vi.mock('../syncEngine', () => ({
@@ -223,7 +226,9 @@ describe('CollaborationHub', () => {
         version: 1,
       };
 
-      await expect(hub.sendOperation('non-existent', operation)).rejects.toThrow('Session not found');
+      await expect(
+        hub.sendOperation('non-existent', operation),
+      ).rejects.toThrow('Session not found');
     });
 
     it('should update session last activity', async () => {
@@ -242,7 +247,9 @@ describe('CollaborationHub', () => {
       await hub.sendOperation(session.id, operation);
 
       const updatedSession = await hub.getSessionByFile('file1');
-      expect(updatedSession?.lastActivity).toBeGreaterThan(session.lastActivity);
+      expect(updatedSession?.lastActivity).toBeGreaterThan(
+        session.lastActivity,
+      );
     });
   });
 
@@ -321,7 +328,8 @@ describe('CollaborationHub', () => {
       const session = await hub.joinSession('file1', 'user1');
 
       // Manually set participant as inactive (older than 1 minute)
-      const internalParticipants = (await hub.getSessionByFile('file1'))?.participants;
+      const internalParticipants = (await hub.getSessionByFile('file1'))
+        ?.participants;
       if (internalParticipants) {
         internalParticipants[0].lastSeen = Date.now() - 70000;
       }

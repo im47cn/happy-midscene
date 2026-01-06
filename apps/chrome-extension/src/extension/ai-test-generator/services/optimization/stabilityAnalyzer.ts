@@ -11,8 +11,8 @@ import type {
   RootCause,
   StabilityAnalysis,
 } from '../../types/optimization';
-import type { IStabilityAnalyzer } from './interfaces';
 import { analyticsStorage } from '../analytics/analyticsStorage';
+import type { IStabilityAnalyzer } from './interfaces';
 
 // Thresholds for stability analysis
 const FLAKY_THRESHOLD = 0.1; // 10% flaky rate
@@ -70,7 +70,8 @@ class StabilityAnalyzer implements IStabilityAnalyzer {
           flakyRate,
           totalRuns: stats.totalRuns,
           passCount: Math.round(stats.totalRuns * stats.passRate),
-          failCount: stats.totalRuns - Math.round(stats.totalRuns * stats.passRate),
+          failCount:
+            stats.totalRuns - Math.round(stats.totalRuns * stats.passRate),
           rootCauses,
           recommendations,
         });
@@ -175,9 +176,7 @@ class StabilityAnalyzer implements IStabilityAnalyzer {
   /**
    * Calculate flaky rate from recent results
    */
-  private calculateFlakyRate(
-    results: ('passed' | 'failed')[],
-  ): number {
+  private calculateFlakyRate(results: ('passed' | 'failed')[]): number {
     if (results.length < 2) return 0;
 
     let flips = 0;
@@ -373,14 +372,20 @@ class StabilityAnalyzer implements IStabilityAnalyzer {
     for (const cause of causes) {
       switch (cause.type) {
         case 'timing':
-          recommendations.push('Add explicit waits for elements to be visible/clickable');
-          recommendations.push('Use smart wait strategies instead of fixed delays');
+          recommendations.push(
+            'Add explicit waits for elements to be visible/clickable',
+          );
+          recommendations.push(
+            'Use smart wait strategies instead of fixed delays',
+          );
           recommendations.push('Increase timeout values for slow operations');
           break;
         case 'network':
           recommendations.push('Add retry logic for network requests');
           recommendations.push('Mock external API calls in tests');
-          recommendations.push('Add network stability checks before critical operations');
+          recommendations.push(
+            'Add network stability checks before critical operations',
+          );
           break;
         case 'data_dependency':
           recommendations.push('Use dedicated test data fixtures');
@@ -389,7 +394,9 @@ class StabilityAnalyzer implements IStabilityAnalyzer {
           break;
         case 'race_condition':
           recommendations.push('Add proper synchronization between actions');
-          recommendations.push('Wait for specific conditions before proceeding');
+          recommendations.push(
+            'Wait for specific conditions before proceeding',
+          );
           recommendations.push('Avoid parallel operations that may conflict');
           break;
         case 'environment':
@@ -539,16 +546,15 @@ class StabilityAnalyzer implements IStabilityAnalyzer {
 
     // Average stability from case stats
     const avgStability =
-      caseStats.reduce((sum, c) => sum + c.stabilityScore, 0) / caseStats.length;
+      caseStats.reduce((sum, c) => sum + c.stabilityScore, 0) /
+      caseStats.length;
 
     // Penalty for flaky tests
-    const flakyPenalty =
-      (flakyTests.length / caseStats.length) * 30; // Up to 30 point penalty
+    const flakyPenalty = (flakyTests.length / caseStats.length) * 30; // Up to 30 point penalty
 
     // Penalty for high flaky rates
-    const highFlakyPenalty = flakyTests
-      .filter((f) => f.flakyRate >= HIGH_FLAKY_THRESHOLD)
-      .length * 5;
+    const highFlakyPenalty =
+      flakyTests.filter((f) => f.flakyRate >= HIGH_FLAKY_THRESHOLD).length * 5;
 
     const score = Math.max(0, avgStability - flakyPenalty - highFlakyPenalty);
     return Math.round(score);

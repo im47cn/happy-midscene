@@ -12,13 +12,13 @@ import type {
   SeasonalityConfig,
 } from '../../types/anomaly';
 import { DEFAULT_BASELINE_CONFIG } from '../../types/anomaly';
-import { anomalyStorage } from './storage';
 import {
   type DataPoint,
-  dataPreprocessor,
   calculateStats,
+  dataPreprocessor,
 } from './dataPreprocessor';
 import { seasonalityAnalyzer } from './seasonalityAnalyzer';
+import { anomalyStorage } from './storage';
 
 // ============================================================================
 // Types
@@ -43,7 +43,10 @@ class BaselineBuilder {
   /**
    * Build a baseline from data
    */
-  async buildBaseline(metricName: string, options: BuildBaselineOptions): Promise<BaselineInfo> {
+  async buildBaseline(
+    metricName: string,
+    options: BuildBaselineOptions,
+  ): Promise<BaselineInfo> {
     const config: BaselineConfig = {
       ...DEFAULT_BASELINE_CONFIG,
       metricName,
@@ -76,13 +79,21 @@ class BaselineBuilder {
     if (config.seasonality.enabled) {
       processedData = data.map((d) => ({
         timestamp: d.timestamp,
-        value: seasonalityAnalyzer.deseasonalize(d.value, d.timestamp, config.seasonality),
+        value: seasonalityAnalyzer.deseasonalize(
+          d.value,
+          d.timestamp,
+          config.seasonality,
+        ),
       }));
     }
 
     // Calculate baseline based on method
     const values = processedData.map((d) => d.value);
-    const baseline = this.calculateBaseline(values, config.calculationMethod, config.windowSize);
+    const baseline = this.calculateBaseline(
+      values,
+      config.calculationMethod,
+      config.windowSize,
+    );
 
     // Add metadata
     const baselineInfo: BaselineInfo = {
@@ -101,7 +112,10 @@ class BaselineBuilder {
   /**
    * Update an existing baseline with new data
    */
-  async updateBaseline(metricName: string, options: UpdateBaselineOptions): Promise<BaselineInfo> {
+  async updateBaseline(
+    metricName: string,
+    options: UpdateBaselineOptions,
+  ): Promise<BaselineInfo> {
     const existing = await anomalyStorage.getBaseline(metricName);
     if (!existing) {
       throw new Error(`Baseline not found: ${metricName}`);
@@ -131,7 +145,9 @@ class BaselineBuilder {
   /**
    * Get baseline with config
    */
-  async getBaselineWithConfig(metricName: string): Promise<{ baseline: BaselineInfo; config: BaselineConfig } | null> {
+  async getBaselineWithConfig(
+    metricName: string,
+  ): Promise<{ baseline: BaselineInfo; config: BaselineConfig } | null> {
     const record = await anomalyStorage.getBaseline(metricName);
     if (!record) return null;
     return { baseline: record.baseline, config: record.config };
@@ -143,7 +159,7 @@ class BaselineBuilder {
   private calculateBaseline(
     values: number[],
     method: BaselineMethod,
-    windowSize: number
+    windowSize: number,
   ): Omit<BaselineInfo, 'period' | 'sampleCount' | 'lastUpdated'> {
     switch (method) {
       case 'moving_average':
@@ -164,7 +180,7 @@ class BaselineBuilder {
    */
   private calculateMovingAverageBaseline(
     values: number[],
-    windowSize: number
+    windowSize: number,
   ): Omit<BaselineInfo, 'period' | 'sampleCount' | 'lastUpdated'> {
     // Use last N days of data for baseline
     const effectiveWindow = Math.min(values.length, windowSize);
@@ -186,7 +202,7 @@ class BaselineBuilder {
    */
   private calculateExponentialSmoothingBaseline(
     values: number[],
-    alpha: number = 0.3
+    alpha = 0.3,
   ): Omit<BaselineInfo, 'period' | 'sampleCount' | 'lastUpdated'> {
     if (values.length === 0) {
       return { mean: 0, stdDev: 0, min: 0, max: 0 };
@@ -221,13 +237,16 @@ class BaselineBuilder {
    * More robust to outliers
    */
   private calculatePercentileBaseline(
-    values: number[]
+    values: number[],
   ): Omit<BaselineInfo, 'period' | 'sampleCount' | 'lastUpdated'> {
     const sorted = [...values].sort((a, b) => a - b);
     const n = sorted.length;
 
     // Use median as mean (more robust)
-    const median = n % 2 === 0 ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2 : sorted[Math.floor(n / 2)];
+    const median =
+      n % 2 === 0
+        ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2
+        : sorted[Math.floor(n / 2)];
 
     // Use IQR-based standard deviation estimate
     const q1Index = Math.floor(n * 0.25);
@@ -253,16 +272,21 @@ class BaselineBuilder {
    * Most robust to outliers
    */
   private calculateMedianBaseline(
-    values: number[]
+    values: number[],
   ): Omit<BaselineInfo, 'period' | 'sampleCount' | 'lastUpdated'> {
     const sorted = [...values].sort((a, b) => a - b);
     const n = sorted.length;
 
     // Median
-    const median = n % 2 === 0 ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2 : sorted[Math.floor(n / 2)];
+    const median =
+      n % 2 === 0
+        ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2
+        : sorted[Math.floor(n / 2)];
 
     // Median Absolute Deviation
-    const absoluteDeviations = values.map((v) => Math.abs(v - median)).sort((a, b) => a - b);
+    const absoluteDeviations = values
+      .map((v) => Math.abs(v - median))
+      .sort((a, b) => a - b);
     const mad =
       n % 2 === 0
         ? (absoluteDeviations[n / 2 - 1] + absoluteDeviations[n / 2]) / 2
@@ -291,7 +315,10 @@ class BaselineBuilder {
   /**
    * Check if baseline needs update
    */
-  async needsUpdate(metricName: string, maxAge: number = 24 * 60 * 60 * 1000): Promise<boolean> {
+  async needsUpdate(
+    metricName: string,
+    maxAge: number = 24 * 60 * 60 * 1000,
+  ): Promise<boolean> {
     const baseline = await this.getBaseline(metricName);
     if (!baseline) return true;
 
@@ -304,7 +331,7 @@ class BaselineBuilder {
    */
   async buildMultipleBaselines(
     metrics: { name: string; data: DataPoint[] }[],
-    config?: Partial<BaselineConfig>
+    config?: Partial<BaselineConfig>,
   ): Promise<Map<string, BaselineInfo>> {
     const results = new Map<string, BaselineInfo>();
 
@@ -327,7 +354,10 @@ class BaselineBuilder {
   /**
    * Calculate expected value for a timestamp
    */
-  async getExpectedValue(metricName: string, timestamp: number): Promise<number | null> {
+  async getExpectedValue(
+    metricName: string,
+    timestamp: number,
+  ): Promise<number | null> {
     const record = await anomalyStorage.getBaseline(metricName);
     if (!record) return null;
 
@@ -338,7 +368,7 @@ class BaselineBuilder {
       expectedValue = seasonalityAnalyzer.reseasonalize(
         expectedValue,
         timestamp,
-        record.config.seasonality
+        record.config.seasonality,
       );
     }
 
@@ -351,7 +381,7 @@ class BaselineBuilder {
   async getExpectedRange(
     metricName: string,
     timestamp: number,
-    sigmas: number = 2
+    sigmas = 2,
   ): Promise<{ lower: number; upper: number } | null> {
     const record = await anomalyStorage.getBaseline(metricName);
     if (!record) return null;
@@ -362,7 +392,10 @@ class BaselineBuilder {
 
     // Apply seasonality adjustment
     if (record.config.seasonality.enabled) {
-      const adjustment = seasonalityAnalyzer.getAdjustment(timestamp, record.config.seasonality);
+      const adjustment = seasonalityAnalyzer.getAdjustment(
+        timestamp,
+        record.config.seasonality,
+      );
       mean *= adjustment;
       stdDev *= adjustment;
     }
@@ -376,9 +409,14 @@ class BaselineBuilder {
   /**
    * Get all baselines
    */
-  async getAllBaselines(): Promise<{ metricName: string; baseline: BaselineInfo }[]> {
+  async getAllBaselines(): Promise<
+    { metricName: string; baseline: BaselineInfo }[]
+  > {
     const records = await anomalyStorage.getAllBaselines();
-    return records.map((r) => ({ metricName: r.metricName, baseline: r.baseline }));
+    return records.map((r) => ({
+      metricName: r.metricName,
+      baseline: r.baseline,
+    }));
   }
 
   /**

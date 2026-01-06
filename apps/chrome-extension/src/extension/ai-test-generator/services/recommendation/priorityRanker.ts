@@ -3,16 +3,19 @@
  * Ranks test cases by priority based on multiple factors
  */
 
+import type { CaseStats } from '../../types/analytics';
 import type {
-  RankedCase,
   Priority,
   PriorityConfig,
   PriorityWeights,
+  RankedCase,
 } from '../../types/recommendation';
-import type { CaseStats } from '../../types/analytics';
+import {
+  DEFAULT_PRIORITY_CONFIG,
+  scoreToPriority,
+} from '../../types/recommendation';
 import { analyticsStorage } from '../analytics/analyticsStorage';
 import { ScoreCalculator } from './scoreCalculator';
-import { DEFAULT_PRIORITY_CONFIG, scoreToPriority } from '../../types/recommendation';
 
 /**
  * Priority Ranker class
@@ -30,7 +33,10 @@ export class PriorityRanker {
   /**
    * Rank cases by priority
    */
-  async rankCases(caseIds?: string[], config?: Partial<PriorityConfig>): Promise<RankedCase[]> {
+  async rankCases(
+    caseIds?: string[],
+    config?: Partial<PriorityConfig>,
+  ): Promise<RankedCase[]> {
     const effectiveConfig = config
       ? { ...this.config, ...config }
       : this.config;
@@ -51,7 +57,10 @@ export class PriorityRanker {
 
     const ranked: RankedCase[] = casesToRank.map((caseStat) => {
       const factors = this.calculateFactors(caseStat, calculator);
-      const score = this.calculateWeightedScore(factors, effectiveConfig.weights);
+      const score = this.calculateWeightedScore(
+        factors,
+        effectiveConfig.weights,
+      );
       const priority = scoreToPriority(score, effectiveConfig.thresholds);
 
       return {
@@ -66,7 +75,8 @@ export class PriorityRanker {
     // Sort by priority first, then by score
     ranked.sort((a, b) => {
       const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
-      const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+      const priorityDiff =
+        priorityOrder[a.priority] - priorityOrder[b.priority];
       if (priorityDiff !== 0) return priorityDiff;
       return b.score - a.score;
     });
@@ -90,7 +100,10 @@ export class PriorityRanker {
       this.config.weights = { ...this.config.weights, ...config.weights };
     }
     if (config.thresholds) {
-      this.config.thresholds = { ...this.config.thresholds, ...config.thresholds };
+      this.config.thresholds = {
+        ...this.config.thresholds,
+        ...config.thresholds,
+      };
     }
   }
 
@@ -104,7 +117,10 @@ export class PriorityRanker {
   /**
    * Calculate individual factors for a case
    */
-  private calculateFactors(caseStat: CaseStats, calculator: ScoreCalculator): Record<string, number> {
+  private calculateFactors(
+    caseStat: CaseStats,
+    calculator: ScoreCalculator,
+  ): Record<string, number> {
     return {
       risk: calculator.calculateRiskScore(caseStat.caseId),
       recency: ScoreCalculator.calculateRecencyScore(caseStat),
@@ -118,7 +134,10 @@ export class PriorityRanker {
   /**
    * Calculate weighted score from factors
    */
-  private calculateWeightedScore(factors: Record<string, number>, weights: PriorityWeights): number {
+  private calculateWeightedScore(
+    factors: Record<string, number>,
+    weights: PriorityWeights,
+  ): number {
     return Math.round(
       (factors.risk * weights.riskFactor +
         factors.businessValue * weights.businessValue +
@@ -164,7 +183,9 @@ export class PriorityRanker {
   /**
    * Get priority distribution statistics
    */
-  async getPriorityDistribution(caseIds?: string[]): Promise<Record<Priority, number>> {
+  async getPriorityDistribution(
+    caseIds?: string[],
+  ): Promise<Record<Priority, number>> {
     const ranked = await this.rankCases(caseIds);
 
     return {

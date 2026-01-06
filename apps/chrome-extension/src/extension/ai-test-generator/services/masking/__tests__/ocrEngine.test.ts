@@ -10,7 +10,11 @@ class MockImageData {
   width: number;
   height: number;
 
-  constructor(widthOrData: number | Uint8ClampedArray, width: number, height?: number) {
+  constructor(
+    widthOrData: number | Uint8ClampedArray,
+    width: number,
+    height?: number,
+  ) {
     if (typeof widthOrData === 'number') {
       this.width = widthOrData;
       this.height = width;
@@ -77,7 +81,8 @@ describe('OCREngine', () => {
     });
 
     it('should return empty result for base64 string when OCR is not available', async () => {
-      const base64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      const base64 =
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
       const result = await ocrEngine.recognizeText(base64);
 
@@ -131,7 +136,11 @@ describe('OCREngine with mocked Tesseract', () => {
     width: number;
     height: number;
 
-    constructor(widthOrData: number | Uint8ClampedArray, width: number, height?: number) {
+    constructor(
+      widthOrData: number | Uint8ClampedArray,
+      width: number,
+      height?: number,
+    ) {
       if (typeof widthOrData === 'number') {
         this.width = widthOrData;
         this.height = width;
@@ -159,7 +168,11 @@ describe('OCREngine with mocked Tesseract', () => {
                 text: 'password=secret123',
                 confidence: 95,
                 words: [
-                  { text: 'password=secret123', confidence: 95, bbox: { x0: 10, y0: 10, x1: 100, y1: 30 } },
+                  {
+                    text: 'password=secret123',
+                    confidence: 95,
+                    bbox: { x0: 10, y0: 10, x1: 100, y1: 30 },
+                  },
                 ],
                 bbox: { x0: 10, y0: 10, x1: 100, y1: 30 },
               },
@@ -167,8 +180,16 @@ describe('OCREngine with mocked Tesseract', () => {
                 text: 'phone: 13812345678',
                 confidence: 92,
                 words: [
-                  { text: 'phone:', confidence: 90, bbox: { x0: 10, y0: 40, x1: 50, y1: 60 } },
-                  { text: '13812345678', confidence: 94, bbox: { x0: 55, y0: 40, x1: 150, y1: 60 } },
+                  {
+                    text: 'phone:',
+                    confidence: 90,
+                    bbox: { x0: 10, y0: 40, x1: 50, y1: 60 },
+                  },
+                  {
+                    text: '13812345678',
+                    confidence: 94,
+                    bbox: { x0: 55, y0: 40, x1: 150, y1: 60 },
+                  },
                 ],
                 bbox: { x0: 10, y0: 40, x1: 150, y1: 60 },
               },
@@ -216,7 +237,9 @@ describe('OCREngine with mocked Tesseract', () => {
     });
 
     const mockImageData = new MockImageData(100, 100);
-    const result = await engine.recognizeText(mockImageData as unknown as ImageData);
+    const result = await engine.recognizeText(
+      mockImageData as unknown as ImageData,
+    );
 
     expect(result.text).toContain('password');
     expect(result.lines).toHaveLength(2);

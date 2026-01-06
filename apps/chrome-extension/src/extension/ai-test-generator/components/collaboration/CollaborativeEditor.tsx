@@ -4,12 +4,13 @@
  * Real-time collaborative editing with multi-user cursors.
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import type React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type {
   CollaborationSession,
-  Participant,
   EditorOperation,
   EditorState,
+  Participant,
 } from '../../types/collaboration';
 
 /**
@@ -67,29 +68,32 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
   /**
    * Handle content change with OT
    */
-  const handleContentChange = useCallback((newContent: string) => {
-    if (newContent === content) return;
+  const handleContentChange = useCallback(
+    (newContent: string) => {
+      if (newContent === content) return;
 
-    // Generate operation
-    const operation: EditorOperation = {
-      type: 'insert',
-      position: 0, // Simplified - real implementation would calculate diff
-      content: newContent.slice(content.length),
-      userId: currentUserId,
-      timestamp: Date.now(),
-      version: version + 1,
-    };
+      // Generate operation
+      const operation: EditorOperation = {
+        type: 'insert',
+        position: 0, // Simplified - real implementation would calculate diff
+        content: newContent.slice(content.length),
+        userId: currentUserId,
+        timestamp: Date.now(),
+        version: version + 1,
+      };
 
-    setContent(newContent);
-    setVersion(version + 1);
+      setContent(newContent);
+      setVersion(version + 1);
 
-    if (onContentChange) {
-      onContentChange(newContent);
-    }
-    if (onOperationSend) {
-      onOperationSend(operation);
-    }
-  }, [content, version, currentUserId, onContentChange, onOperationSend]);
+      if (onContentChange) {
+        onContentChange(newContent);
+      }
+      if (onOperationSend) {
+        onOperationSend(operation);
+      }
+    },
+    [content, version, currentUserId, onContentChange, onOperationSend],
+  );
 
   /**
    * Handle cursor position change
@@ -111,38 +115,41 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
   /**
    * Apply remote operation
    */
-  const applyRemoteOperation = useCallback((operation: EditorOperation) => {
-    // Skip operations from current user
-    if (operation.userId === currentUserId) return;
+  const applyRemoteOperation = useCallback(
+    (operation: EditorOperation) => {
+      // Skip operations from current user
+      if (operation.userId === currentUserId) return;
 
-    setTextarea((prevContent) => {
-      let newContent = prevContent;
+      setTextarea((prevContent) => {
+        let newContent = prevContent;
 
-      switch (operation.type) {
-        case 'insert':
-          if (operation.content) {
+        switch (operation.type) {
+          case 'insert':
+            if (operation.content) {
+              newContent =
+                prevContent.slice(0, operation.position) +
+                operation.content +
+                prevContent.slice(operation.position);
+            }
+            break;
+
+          case 'delete':
+            const length = operation.length || 0;
             newContent =
               prevContent.slice(0, operation.position) +
-              operation.content +
-              prevContent.slice(operation.position);
-          }
-          break;
+              prevContent.slice(operation.position + length);
+            break;
 
-        case 'delete':
-          const length = operation.length || 0;
-          newContent =
-            prevContent.slice(0, operation.position) +
-            prevContent.slice(operation.position + length);
-          break;
+          case 'retain':
+            // No change
+            break;
+        }
 
-        case 'retain':
-          // No change
-          break;
-      }
-
-      return newContent;
-    });
-  }, [currentUserId]);
+        return newContent;
+      });
+    },
+    [currentUserId],
+  );
 
   /**
    * Update textarea content programmatically
@@ -180,7 +187,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
     if (!textareaRef.current) return null;
 
     const textarea = textareaRef.current;
-    const fontSize = parseFloat(getComputedStyle(textarea).fontSize);
+    const fontSize = Number.parseFloat(getComputedStyle(textarea).fontSize);
     const lineHeight = fontSize * 1.5;
 
     return remoteCursors.map((cursor) => {
@@ -198,7 +205,10 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
             borderColor: cursor.color,
           }}
         >
-          <div className="cursor-flag" style={{ backgroundColor: cursor.color }}>
+          <div
+            className="cursor-flag"
+            style={{ backgroundColor: cursor.color }}
+          >
             {cursor.label}
           </div>
         </div>
@@ -223,7 +233,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
             {participant.userId.charAt(0).toUpperCase()}
           </div>
         ))}
-      </div>
+    </div>
   );
 
   /**
@@ -233,7 +243,9 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
     if (isConnected) {
       return <span className="status-indicator connected">● Connected</span>;
     }
-    return <span className="status-indicator disconnected">● Reconnecting...</span>;
+    return (
+      <span className="status-indicator disconnected">● Reconnecting...</span>
+    );
   };
 
   return (
@@ -248,9 +260,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
           {getConnectionStatus()}
           <span className="version-info">v{version}</span>
         </div>
-        <div className="toolbar-right">
-          {renderParticipantAvatars()}
-        </div>
+        <div className="toolbar-right">{renderParticipantAvatars()}</div>
       </div>
 
       {/* Editor container */}
@@ -283,8 +293,19 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
 
       {/* Status bar */}
       <div className="editor-statusbar">
-        <span>Ln {textareaRef.current ? textareaRef.current.value.substring(0, textareaRef.current.selectionStart).split('\n').length : 1}, Col {textareaRef.current ? textareaRef.current.selectionStart : 0}</span>
-        <span>{participants.length} {participants.length === 1 ? 'participant' : 'participants'}</span>
+        <span>
+          Ln{' '}
+          {textareaRef.current
+            ? textareaRef.current.value
+                .substring(0, textareaRef.current.selectionStart)
+                .split('\n').length
+            : 1}
+          , Col {textareaRef.current ? textareaRef.current.selectionStart : 0}
+        </span>
+        <span>
+          {participants.length}{' '}
+          {participants.length === 1 ? 'participant' : 'participants'}
+        </span>
       </div>
     </div>
   );

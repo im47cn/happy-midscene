@@ -30,8 +30,17 @@ import {
   message,
 } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
-import type { Anomaly, AnomalyAlert, AnomalyWithAnalysis, HealthScore } from '../../types/anomaly';
-import { alertTrigger, anomalyStorage, healthScorer } from '../../services/anomaly';
+import {
+  alertTrigger,
+  anomalyStorage,
+  healthScorer,
+} from '../../services/anomaly';
+import type {
+  Anomaly,
+  AnomalyAlert,
+  AnomalyWithAnalysis,
+  HealthScore,
+} from '../../types/anomaly';
 import { AnomalyDetail } from './AnomalyDetail';
 import { AnomalyList } from './AnomalyList';
 import { HealthScorePanel } from './HealthScorePanel';
@@ -60,7 +69,10 @@ interface DashboardStats {
 // Sub Components
 // ============================================================================
 
-function StatsOverview({ stats, loading }: { stats: DashboardStats; loading: boolean }) {
+function StatsOverview({
+  stats,
+  loading,
+}: { stats: DashboardStats; loading: boolean }) {
   if (loading) {
     return (
       <Card>
@@ -78,7 +90,9 @@ function StatsOverview({ stats, loading }: { stats: DashboardStats; loading: boo
           <Statistic
             title="活跃异常"
             value={stats.activeAnomalies}
-            valueStyle={{ color: stats.activeAnomalies > 0 ? '#cf1322' : '#3f8600' }}
+            valueStyle={{
+              color: stats.activeAnomalies > 0 ? '#cf1322' : '#3f8600',
+            }}
             prefix={<AlertOutlined />}
           />
         </Card>
@@ -88,7 +102,9 @@ function StatsOverview({ stats, loading }: { stats: DashboardStats; loading: boo
           <Statistic
             title="严重/紧急"
             value={stats.criticalCount}
-            valueStyle={{ color: stats.criticalCount > 0 ? '#fa541c' : '#1890ff' }}
+            valueStyle={{
+              color: stats.criticalCount > 0 ? '#fa541c' : '#1890ff',
+            }}
             prefix={<AlertOutlined />}
           />
         </Card>
@@ -98,7 +114,9 @@ function StatsOverview({ stats, loading }: { stats: DashboardStats; loading: boo
           <Statistic
             title="待处理告警"
             value={stats.pendingAlerts}
-            valueStyle={{ color: stats.pendingAlerts > 0 ? '#faad14' : '#1890ff' }}
+            valueStyle={{
+              color: stats.pendingAlerts > 0 ? '#faad14' : '#1890ff',
+            }}
             prefix={<BellOutlined />}
           />
         </Card>
@@ -120,7 +138,14 @@ function StatsOverview({ stats, loading }: { stats: DashboardStats; loading: boo
 function TrendMiniChart({ data, title }: { data: number[]; title: string }) {
   if (data.length === 0) {
     return (
-      <div style={{ height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div
+        style={{
+          height: 60,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <Text type="secondary">暂无数据</Text>
       </div>
     );
@@ -133,31 +158,42 @@ function TrendMiniChart({ data, title }: { data: number[]; title: string }) {
   const height = 60;
   const padding = 4;
 
-  const points = data.map((value, index) => {
-    const x = padding + (index / (data.length - 1 || 1)) * (width - 2 * padding);
-    const y = height - padding - ((value - min) / range) * (height - 2 * padding);
-    return `${x},${y}`;
-  }).join(' ');
+  const points = data
+    .map((value, index) => {
+      const x =
+        padding + (index / (data.length - 1 || 1)) * (width - 2 * padding);
+      const y =
+        height - padding - ((value - min) / range) * (height - 2 * padding);
+      return `${x},${y}`;
+    })
+    .join(' ');
 
   // Determine trend color
   const trendUp = data.length > 1 && data[data.length - 1] > data[0];
-  const color = title.includes('健康') ? (trendUp ? '#52c41a' : '#cf1322') : (trendUp ? '#cf1322' : '#52c41a');
+  const color = title.includes('健康')
+    ? trendUp
+      ? '#52c41a'
+      : '#cf1322'
+    : trendUp
+      ? '#cf1322'
+      : '#52c41a';
 
   return (
     <div>
-      <Text type="secondary" style={{ fontSize: 12 }}>{title}</Text>
+      <Text type="secondary" style={{ fontSize: 12 }}>
+        {title}
+      </Text>
       <svg width={width} height={height} style={{ display: 'block' }}>
-        <polyline
-          fill="none"
-          stroke={color}
-          strokeWidth="2"
-          points={points}
-        />
+        <polyline fill="none" stroke={color} strokeWidth="2" points={points} />
         {/* Latest point marker */}
         {data.length > 0 && (
           <circle
             cx={width - padding}
-            cy={height - padding - ((data[data.length - 1] - min) / range) * (height - 2 * padding)}
+            cy={
+              height -
+              padding -
+              ((data[data.length - 1] - min) / range) * (height - 2 * padding)
+            }
             r="3"
             fill={color}
           />
@@ -179,7 +215,10 @@ function AlertPanel({
   if (alerts.length === 0) {
     return (
       <Card title="待处理告警" size="small">
-        <Empty description="暂无待处理告警" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+        <Empty
+          description="暂无待处理告警"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
       </Card>
     );
   }
@@ -216,13 +255,20 @@ function AlertPanel({
               <Space>
                 <Badge
                   status={
-                    alert.level === 'emergency' ? 'error' :
-                    alert.level === 'critical' ? 'error' :
-                    alert.level === 'warning' ? 'warning' :
-                    alert.level === 'info' ? 'processing' : 'default'
+                    alert.level === 'emergency'
+                      ? 'error'
+                      : alert.level === 'critical'
+                        ? 'error'
+                        : alert.level === 'warning'
+                          ? 'warning'
+                          : alert.level === 'info'
+                            ? 'processing'
+                            : 'default'
                   }
                 />
-                <Text ellipsis style={{ maxWidth: 200 }}>{alert.message}</Text>
+                <Text ellipsis style={{ maxWidth: 200 }}>
+                  {alert.message}
+                </Text>
               </Space>
               <div>
                 <Text type="secondary" style={{ fontSize: 12 }}>
@@ -268,7 +314,8 @@ export function AnomalyDashboard({
     pendingAlerts: 0,
     resolvedToday: 0,
   });
-  const [selectedAnomaly, setSelectedAnomaly] = useState<AnomalyWithAnalysis | null>(null);
+  const [selectedAnomaly, setSelectedAnomaly] =
+    useState<AnomalyWithAnalysis | null>(null);
   const [healthHistory, setHealthHistory] = useState<number[]>([]);
   const [anomalyTrend, setAnomalyTrend] = useState<number[]>([]);
 
@@ -298,12 +345,15 @@ export function AnomalyDashboard({
       today.setHours(0, 0, 0, 0);
       const todayStart = today.getTime();
 
-      const activeAnomalies = allAnomalies.filter((a: Anomaly) => a.status === 'new');
+      const activeAnomalies = allAnomalies.filter(
+        (a: Anomaly) => a.status === 'new',
+      );
       const criticalCount = activeAnomalies.filter(
-        (a: Anomaly) => a.severity === 'critical' || a.severity === 'high'
+        (a: Anomaly) => a.severity === 'critical' || a.severity === 'high',
       ).length;
       const resolvedToday = allAnomalies.filter(
-        (a: Anomaly) => a.status === 'resolved' && a.resolvedAt && a.resolvedAt >= todayStart
+        (a: Anomaly) =>
+          a.status === 'resolved' && a.resolvedAt && a.resolvedAt >= todayStart,
       ).length;
 
       setStats({
@@ -320,7 +370,7 @@ export function AnomalyDashboard({
         const dayStart = todayStart - i * 24 * 60 * 60 * 1000;
         const dayEnd = dayStart + 24 * 60 * 60 * 1000;
         const count = allAnomalies.filter(
-          (a: Anomaly) => a.detectedAt >= dayStart && a.detectedAt < dayEnd
+          (a: Anomaly) => a.detectedAt >= dayStart && a.detectedAt < dayEnd,
         ).length;
         trend.push(count);
       }
@@ -425,10 +475,18 @@ export function AnomalyDashboard({
   return (
     <div className="anomaly-dashboard" style={{ padding: 16 }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginBottom: 16,
+        }}
+      >
         <Space>
           <DashboardOutlined style={{ fontSize: 24 }} />
-          <Title level={4} style={{ margin: 0 }}>异常监控仪表板</Title>
+          <Title level={4} style={{ margin: 0 }}>
+            异常监控仪表板
+          </Title>
         </Space>
         <Space>
           <Button
@@ -465,7 +523,10 @@ export function AnomalyDashboard({
             <Card title="趋势概览" size="small">
               <Space direction="vertical" style={{ width: '100%' }}>
                 <TrendMiniChart data={healthHistory} title="健康度趋势 (7天)" />
-                <TrendMiniChart data={anomalyTrend} title="异常数量趋势 (7天)" />
+                <TrendMiniChart
+                  data={anomalyTrend}
+                  title="异常数量趋势 (7天)"
+                />
               </Space>
             </Card>
 
@@ -483,7 +544,9 @@ export function AnomalyDashboard({
           <AnomalyList
             anomalies={anomalies}
             loading={loading}
-            onSelect={(anomaly) => setSelectedAnomaly(anomaly as AnomalyWithAnalysis)}
+            onSelect={(anomaly) =>
+              setSelectedAnomaly(anomaly as AnomalyWithAnalysis)
+            }
             onAcknowledge={handleAcknowledge}
             onResolve={(id) => {
               const anomaly = anomalies.find((a) => a.id === id);

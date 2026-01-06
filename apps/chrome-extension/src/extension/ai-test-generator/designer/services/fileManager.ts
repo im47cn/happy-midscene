@@ -4,8 +4,8 @@
  */
 
 import type { TestFlow } from '../../types/designer';
-import { exportYaml, importYaml } from './yamlConverter';
 import { generateId } from './nodeRegistry';
+import { exportYaml, importYaml } from './yamlConverter';
 
 /**
  * 文件格式
@@ -147,7 +147,11 @@ function flowFromJson(jsonContent: string): TestFlow | null {
 /**
  * 生成文件元数据
  */
-function generateMetadata(flow: TestFlow, format: FileFormat, filename?: string): FileMetadata {
+function generateMetadata(
+  flow: TestFlow,
+  format: FileFormat,
+  filename?: string,
+): FileMetadata {
   return {
     name: filename || `${flow.name}.${format}`,
     flowId: flow.id,
@@ -164,7 +168,10 @@ function generateMetadata(flow: TestFlow, format: FileFormat, filename?: string)
 /**
  * 保存流程到浏览器存储
  */
-export function saveToStorage(flow: TestFlow, options: SaveOptions = {}): FileManagerResult {
+export function saveToStorage(
+  flow: TestFlow,
+  options: SaveOptions = {},
+): FileManagerResult {
   try {
     if (!flow || !flow.id) {
       return { success: false, error: 'Invalid flow data' };
@@ -196,7 +203,10 @@ export function saveToStorage(flow: TestFlow, options: SaveOptions = {}): FileMa
 /**
  * 从浏览器存储加载流程
  */
-export function loadFromStorage(flowId: string, options: LoadOptions = {}): TestFlow | null {
+export function loadFromStorage(
+  flowId: string,
+  options: LoadOptions = {},
+): TestFlow | null {
   try {
     const key = `${STORAGE_PREFIX}${flowId}`;
     const content = localStorage.getItem(key);
@@ -270,7 +280,11 @@ export function listStoredFlows(): FileListResult {
 /**
  * 导出流程为文件
  */
-export function exportFlow(flow: TestFlow, format: FileFormat = 'json', options: SaveOptions = {}): FileManagerResult {
+export function exportFlow(
+  flow: TestFlow,
+  format: FileFormat = 'json',
+  options: SaveOptions = {},
+): FileManagerResult {
   try {
     if (!flow || !flow.id) {
       return { success: false, error: 'Invalid flow data' };
@@ -332,7 +346,10 @@ export function exportFlow(flow: TestFlow, format: FileFormat = 'json', options:
 /**
  * 从文件导入流程
  */
-export function importFlow(file: File, options: LoadOptions = {}): Promise<TestFlow | null> {
+export function importFlow(
+  file: File,
+  options: LoadOptions = {},
+): Promise<TestFlow | null> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -388,7 +405,10 @@ export function importFlow(file: File, options: LoadOptions = {}): Promise<TestF
 /**
  * 从 URL 导入流程
  */
-export async function importFromUrl(url: string, options: LoadOptions = {}): Promise<TestFlow | null> {
+export async function importFromUrl(
+  url: string,
+  options: LoadOptions = {},
+): Promise<TestFlow | null> {
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -434,14 +454,16 @@ export function cloneFlow(flow: TestFlow, newName?: string): TestFlow {
     ...flow,
     id: generateId('flow'),
     name: newName || `${flow.name} (副本)`,
-    nodes: flow.nodes?.map((node) => ({
-      ...node,
-      id: generateId(node.type),
-    })) || [],
-    edges: flow.edges?.map((edge) => ({
-      ...edge,
-      id: generateId('edge'),
-    })) || [],
+    nodes:
+      flow.nodes?.map((node) => ({
+        ...node,
+        id: generateId(node.type),
+      })) || [],
+    edges:
+      flow.edges?.map((edge) => ({
+        ...edge,
+        id: generateId('edge'),
+      })) || [],
     metadata: {
       ...flow.metadata,
       createdAt: Date.now(),
@@ -456,7 +478,10 @@ export function cloneFlow(flow: TestFlow, newName?: string): TestFlow {
 /**
  * 合并两个流程
  */
-export function mergeFlows(targetFlow: TestFlow, sourceFlow: TestFlow): TestFlow {
+export function mergeFlows(
+  targetFlow: TestFlow,
+  sourceFlow: TestFlow,
+): TestFlow {
   // 创建节点ID映射
   const nodeIdMap = new Map<string, string>();
   const sourceNodes = sourceFlow.nodes || [];
@@ -482,7 +507,10 @@ export function mergeFlows(targetFlow: TestFlow, sourceFlow: TestFlow): TestFlow
     ...targetFlow,
     nodes: [...(targetFlow.nodes || []), ...mergedNodes],
     edges: [...(targetFlow.edges || []), ...mergedEdges],
-    variables: [...(targetFlow.variables || []), ...(sourceFlow.variables || [])],
+    variables: [
+      ...(targetFlow.variables || []),
+      ...(sourceFlow.variables || []),
+    ],
     metadata: {
       ...targetFlow.metadata,
       updatedAt: Date.now(),
@@ -583,11 +611,15 @@ export function clearAllStorage(): void {
 /**
  * 获取存储使用情况
  */
-export function getStorageUsage(): { used: number; total: number; percentage: number } {
+export function getStorageUsage(): {
+  used: number;
+  total: number;
+  percentage: number;
+} {
   let used = 0;
   const total = 5 * 1024 * 1024; // 5MB (localStorage 典型限制)
 
-  for (let key in localStorage) {
+  for (const key in localStorage) {
     if (localStorage.hasOwnProperty(key)) {
       used += localStorage[key].length + key.length;
     }

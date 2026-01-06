@@ -5,8 +5,8 @@
 
 import {
   EditOutlined,
-  EyeInvisibleOutlined,
   ExperimentOutlined,
+  EyeInvisibleOutlined,
   OrderedListOutlined,
   PlusOutlined,
   ReloadOutlined,
@@ -118,16 +118,19 @@ export const MaskingSettings: React.FC<MaskingSettingsProps> = ({
   }, []);
 
   // Save rule (create or update)
-  const handleSaveRule = useCallback((rule: DetectionRule) => {
-    if (editingRule) {
-      // Update existing rule
-      detectorEngine.removeRule(rule.id);
-    }
-    detectorEngine.addRule(rule);
-    setRules([...detectorEngine.getRules()]);
-    setShowRuleEditor(false);
-    setEditingRule(null);
-  }, [editingRule]);
+  const handleSaveRule = useCallback(
+    (rule: DetectionRule) => {
+      if (editingRule) {
+        // Update existing rule
+        detectorEngine.removeRule(rule.id);
+      }
+      detectorEngine.addRule(rule);
+      setRules([...detectorEngine.getRules()]);
+      setShowRuleEditor(false);
+      setEditingRule(null);
+    },
+    [editingRule],
+  );
 
   // Delete rule
   const handleDeleteRule = useCallback((ruleId: string) => {

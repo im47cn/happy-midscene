@@ -13,8 +13,8 @@ import type {
   RedundancyReport,
   StabilityAnalysis,
 } from '../../types/optimization';
-import type { IRecommendEngine } from './interfaces';
 import { impactEstimator } from './impactEstimator';
+import type { IRecommendEngine } from './interfaces';
 
 // Storage key for adoption tracking
 const ADOPTION_STORAGE_KEY = 'optimization-adoptions';
@@ -65,7 +65,9 @@ class RecommendEngine implements IRecommendEngine {
     // Generate maintainability recommendations
     if (analysis.maintainability) {
       recommendations.push(
-        ...this.generateMaintainabilityRecommendations(analysis.maintainability),
+        ...this.generateMaintainabilityRecommendations(
+          analysis.maintainability,
+        ),
       );
     }
 
@@ -76,11 +78,14 @@ class RecommendEngine implements IRecommendEngine {
   /**
    * Prioritize recommendations by impact and effort
    */
-  prioritizeRecommendations(recommendations: Recommendation[]): Recommendation[] {
+  prioritizeRecommendations(
+    recommendations: Recommendation[],
+  ): Recommendation[] {
     return recommendations.sort((a, b) => {
       // First by priority
       const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
-      const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+      const priorityDiff =
+        priorityOrder[a.priority] - priorityOrder[b.priority];
       if (priorityDiff !== 0) return priorityDiff;
 
       // Then by ROI
@@ -142,7 +147,10 @@ class RecommendEngine implements IRecommendEngine {
               order: 1,
               action: '分析慢速步骤',
               details: slowCase.slowSteps
-                .map((s) => `步骤 ${s.order}: ${s.description} (${Math.round(s.duration / 1000)}s)`)
+                .map(
+                  (s) =>
+                    `步骤 ${s.order}: ${s.description} (${Math.round(s.duration / 1000)}s)`,
+                )
                 .join('\n'),
             },
             {
@@ -415,7 +423,10 @@ class RecommendEngine implements IRecommendEngine {
     }
 
     // Best practice violations
-    for (const violation of maintainability.bestPracticeViolations.slice(0, 3)) {
+    for (const violation of maintainability.bestPracticeViolations.slice(
+      0,
+      3,
+    )) {
       recommendations.push(
         this.createRecommendation({
           type: 'maintainability',

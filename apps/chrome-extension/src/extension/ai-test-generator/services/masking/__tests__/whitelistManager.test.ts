@@ -124,7 +124,11 @@ describe('WhitelistManager', () => {
 
   describe('getEntry', () => {
     it('should return entry by ID', () => {
-      const added = manager.addEntry({ type: 'exact', value: 'test', enabled: true });
+      const added = manager.addEntry({
+        type: 'exact',
+        value: 'test',
+        enabled: true,
+      });
 
       const found = manager.getEntry(added.id);
       expect(found).toBeDefined();
@@ -139,7 +143,11 @@ describe('WhitelistManager', () => {
 
   describe('updateEntry', () => {
     it('should update entry value', () => {
-      const entry = manager.addEntry({ type: 'exact', value: 'old', enabled: true });
+      const entry = manager.addEntry({
+        type: 'exact',
+        value: 'old',
+        enabled: true,
+      });
 
       const result = manager.updateEntry(entry.id, { value: 'new' });
       expect(result).toBe(true);
@@ -149,7 +157,11 @@ describe('WhitelistManager', () => {
     });
 
     it('should update enabled state', () => {
-      const entry = manager.addEntry({ type: 'exact', value: 'test', enabled: true });
+      const entry = manager.addEntry({
+        type: 'exact',
+        value: 'test',
+        enabled: true,
+      });
 
       manager.updateEntry(entry.id, { enabled: false });
 
@@ -158,7 +170,11 @@ describe('WhitelistManager', () => {
     });
 
     it('should update timestamp on update', async () => {
-      const entry = manager.addEntry({ type: 'exact', value: 'test', enabled: true });
+      const entry = manager.addEntry({
+        type: 'exact',
+        value: 'test',
+        enabled: true,
+      });
       const originalUpdatedAt = entry.updatedAt;
 
       // Wait a bit to ensure different timestamp
@@ -178,7 +194,11 @@ describe('WhitelistManager', () => {
 
   describe('removeEntry', () => {
     it('should remove entry by ID', () => {
-      const entry = manager.addEntry({ type: 'exact', value: 'test', enabled: true });
+      const entry = manager.addEntry({
+        type: 'exact',
+        value: 'test',
+        enabled: true,
+      });
 
       const result = manager.removeEntry(entry.id);
       expect(result).toBe(true);
@@ -200,7 +220,11 @@ describe('WhitelistManager', () => {
     });
 
     it('should match pattern values', () => {
-      manager.addEntry({ type: 'pattern', value: 'test-\\d+-pattern', enabled: true });
+      manager.addEntry({
+        type: 'pattern',
+        value: 'test-\\d+-pattern',
+        enabled: true,
+      });
 
       expect(manager.isWhitelisted('test-123-pattern')).toBe(true);
       expect(manager.isWhitelisted('test-abc-pattern')).toBe(false);
@@ -209,16 +233,28 @@ describe('WhitelistManager', () => {
     it('should match domain values', () => {
       manager.addEntry({ type: 'domain', value: 'example.com', enabled: true });
 
-      expect(manager.isWhitelisted('anything', { url: 'https://example.com/path' })).toBe(true);
-      expect(manager.isWhitelisted('anything', { url: 'https://sub.example.com/path' })).toBe(true);
-      expect(manager.isWhitelisted('anything', { url: 'https://other.com/path' })).toBe(false);
+      expect(
+        manager.isWhitelisted('anything', { url: 'https://example.com/path' }),
+      ).toBe(true);
+      expect(
+        manager.isWhitelisted('anything', {
+          url: 'https://sub.example.com/path',
+        }),
+      ).toBe(true);
+      expect(
+        manager.isWhitelisted('anything', { url: 'https://other.com/path' }),
+      ).toBe(false);
     });
 
     it('should match path prefix values', () => {
       manager.addEntry({ type: 'path', value: '/api/v1', enabled: true });
 
-      expect(manager.isWhitelisted('anything', { path: '/api/v1/users' })).toBe(true);
-      expect(manager.isWhitelisted('anything', { path: '/api/v2/users' })).toBe(false);
+      expect(manager.isWhitelisted('anything', { path: '/api/v1/users' })).toBe(
+        true,
+      );
+      expect(manager.isWhitelisted('anything', { path: '/api/v2/users' })).toBe(
+        false,
+      );
     });
 
     it('should not match disabled entries', () => {
@@ -252,7 +288,11 @@ describe('WhitelistManager', () => {
 
   describe('enableEntry/disableEntry', () => {
     it('should enable specific entry', () => {
-      const entry = manager.addEntry({ type: 'exact', value: 'test', enabled: false });
+      const entry = manager.addEntry({
+        type: 'exact',
+        value: 'test',
+        enabled: false,
+      });
 
       manager.enableEntry(entry.id);
 
@@ -261,7 +301,11 @@ describe('WhitelistManager', () => {
     });
 
     it('should disable specific entry', () => {
-      const entry = manager.addEntry({ type: 'exact', value: 'test', enabled: true });
+      const entry = manager.addEntry({
+        type: 'exact',
+        value: 'test',
+        enabled: true,
+      });
 
       manager.disableEntry(entry.id);
 

@@ -4,15 +4,8 @@
  * Logs and queries audit entries for security and compliance.
  */
 
-import type {
-  AuditEntry,
-  Resource,
-} from '../../types/collaboration';
-import type {
-  IAuditLogger,
-  AuditQuery,
-  AuditQueryOptions,
-} from './interfaces';
+import type { AuditEntry, Resource } from '../../types/collaboration';
+import type { AuditQuery, AuditQueryOptions, IAuditLogger } from './interfaces';
 
 /**
  * In-memory storage for audit entries
@@ -137,7 +130,7 @@ export class AuditLogger implements IAuditLogger {
    */
   async getByResource(
     resourceType: Resource['type'],
-    resourceId: string
+    resourceId: string,
   ): Promise<AuditEntry[]> {
     const resourceKey = `${resourceType}:${resourceId}`;
     const entryIds = this.storage.byResource.get(resourceKey);
@@ -162,7 +155,7 @@ export class AuditLogger implements IAuditLogger {
    */
   async getByUser(
     userId: string,
-    options?: AuditQueryOptions
+    options?: AuditQueryOptions,
   ): Promise<AuditEntry[]> {
     const entryIds = this.storage.byUser.get(userId);
 
@@ -272,7 +265,7 @@ export class AuditLogger implements IAuditLogger {
    */
   async getRecentActivity(
     workspaceId: string,
-    limit = 50
+    limit = 50,
   ): Promise<AuditEntry[]> {
     return this.query({ workspaceId, limit });
   }
@@ -292,7 +285,8 @@ export class AuditLogger implements IAuditLogger {
         e.action.toLowerCase().includes(lowerQuery) ||
         e.resourceId.toLowerCase().includes(lowerQuery) ||
         (e.error && e.error.toLowerCase().includes(lowerQuery)) ||
-        (e.metadata && JSON.stringify(e.metadata).toLowerCase().includes(lowerQuery))
+        (e.metadata &&
+          JSON.stringify(e.metadata).toLowerCase().includes(lowerQuery)),
     );
   }
 
@@ -325,7 +319,7 @@ export class AuditLogger implements IAuditLogger {
     this.removeFromIndex(
       this.storage.byResource,
       `${entry.resourceType}:${entry.resourceId}`,
-      id
+      id,
     );
   }
 
@@ -356,7 +350,7 @@ export class AuditLogger implements IAuditLogger {
   private addToIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     if (!index.has(key)) {
       index.set(key, new Set());
@@ -370,7 +364,7 @@ export class AuditLogger implements IAuditLogger {
   private removeFromIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     const set = index.get(key);
     if (set) {

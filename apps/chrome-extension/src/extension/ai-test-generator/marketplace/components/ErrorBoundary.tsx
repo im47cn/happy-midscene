@@ -80,9 +80,7 @@ export class MarketplaceErrorBoundary extends Component<
           }}
         >
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-            <WarningOutlined
-              style={{ fontSize: 48, color: '#faad14' }}
-            />
+            <WarningOutlined style={{ fontSize: 48, color: '#faad14' }} />
             <Text strong style={{ fontSize: 16 }}>
               Something went wrong
             </Text>
@@ -101,7 +99,9 @@ export class MarketplaceErrorBoundary extends Component<
                     </Text>
                     {errorInfo?.componentStack && (
                       <details>
-                        <summary style={{ cursor: 'pointer', color: '#8c8c8c' }}>
+                        <summary
+                          style={{ cursor: 'pointer', color: '#8c8c8c' }}
+                        >
                           Component Stack
                         </summary>
                         <pre
@@ -145,7 +145,7 @@ export class MarketplaceErrorBoundary extends Component<
  */
 export function withErrorBoundary<P extends object>(
   WrappedComponent: React.ComponentType<P>,
-  errorBoundaryProps?: Omit<ErrorBoundaryProps, 'children'>
+  errorBoundaryProps?: Omit<ErrorBoundaryProps, 'children'>,
 ): React.FC<P> {
   const WithErrorBoundary: React.FC<P> = (props) => (
     <MarketplaceErrorBoundary {...errorBoundaryProps}>

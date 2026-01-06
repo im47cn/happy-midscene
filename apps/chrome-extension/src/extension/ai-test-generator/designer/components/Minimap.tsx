@@ -3,10 +3,11 @@
  * 小地图组件 - 显示流程的整体缩略图
  */
 
-import React, { useMemo } from 'react';
 import { MiniMap as ReactFlowMinimap } from '@xyflow/react';
 import type { MiniMapProps as ReactFlowMiniMapProps } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
+import type React from 'react';
+import { useMemo } from 'react';
 import type { DesignerNode } from '../../types/designer';
 
 /**
@@ -39,7 +40,11 @@ const getNodeStrokeColor = (node: Node): string => {
   const designerNode = node as DesignerNode;
 
   // 错误状态
-  if (designerNode.data.errors && Array.isArray(designerNode.data.errors) && designerNode.data.errors.length > 0) {
+  if (
+    designerNode.data.errors &&
+    Array.isArray(designerNode.data.errors) &&
+    designerNode.data.errors.length > 0
+  ) {
     return '#ef4444'; // red
   }
 
@@ -51,7 +56,8 @@ const getNodeStrokeColor = (node: Node): string => {
   return '#ffffff'; // white
 };
 
-export interface MinimapProps extends Omit<ReactFlowMiniMapProps, 'nodeColor' | 'nodeStrokeColor'> {
+export interface MinimapProps
+  extends Omit<ReactFlowMiniMapProps, 'nodeColor' | 'nodeStrokeColor'> {
   /** 节点背景色是否透明 */
   maskColor?: string;
 }
@@ -71,7 +77,7 @@ export const Minimap: React.FC<MinimapProps> = ({
       borderRadius: '8px',
       boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
     }),
-    []
+    [],
   );
 
   return (
@@ -102,7 +108,11 @@ export interface MinimapButtonProps {
   className?: string;
 }
 
-export const MinimapButton: React.FC<MinimapButtonProps> = ({ show, onToggle, className = '' }) => {
+export const MinimapButton: React.FC<MinimapButtonProps> = ({
+  show,
+  onToggle,
+  className = '',
+}) => {
   return (
     <button
       className={`minimap-toggle ${className}`}

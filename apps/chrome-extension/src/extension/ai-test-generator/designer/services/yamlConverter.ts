@@ -5,23 +5,23 @@
 
 import yaml from 'js-yaml';
 import type {
+  Action,
+  AdaptiveStep,
+  AdaptiveTestCase,
+  AdaptiveTestConfig,
+  ConditionExpression,
+  LoopConfig,
+  VariableOperation,
+} from '../../types/adaptive';
+import { DEFAULT_ADAPTIVE_CONFIG } from '../../types/adaptive';
+import type {
   DesignerEdge,
   DesignerNode,
   NodeConfig,
-  TestFlow,
   NodeType,
+  TestFlow,
 } from '../../types/designer';
-import type {
-  AdaptiveTestCase,
-  AdaptiveStep,
-  AdaptiveTestConfig,
-  Action,
-  LoopConfig,
-  VariableOperation,
-  ConditionExpression,
-} from '../../types/adaptive';
-import { DEFAULT_ADAPTIVE_CONFIG } from '../../types/adaptive';
-import { generateId, nodeRegistry, createNode } from './nodeRegistry';
+import { createNode, generateId, nodeRegistry } from './nodeRegistry';
 
 /**
  * 转换选项
@@ -62,7 +62,10 @@ export interface ParseResult {
 /**
  * 拓扑排序 - 按照节点连接关系排序
  */
-function topologicalSort(nodes: DesignerNode[], edges: DesignerEdge[]): DesignerNode[] {
+function topologicalSort(
+  nodes: DesignerNode[],
+  edges: DesignerEdge[],
+): DesignerNode[] {
   const inDegree = new Map<string, number>();
   const adjacency = new Map<string, string[]>();
   const nodeMap = new Map<string, DesignerNode>();
@@ -170,12 +173,14 @@ function nodeToStep(
   node: DesignerNode,
   nextNodesByHandle: Map<string, DesignerNode[]>,
   visited: Set<string>,
-  options: ConversionOptions
+  options: ConversionOptions,
 ): AdaptiveStep {
   const step: AdaptiveStep = {
     id: node.id,
     type: (node.data.stepType as any) || 'action',
-    description: String(node.data.label || nodeRegistry.get(node.type as NodeType)?.label || ''),
+    description: String(
+      node.data.label || nodeRegistry.get(node.type as NodeType)?.label || '',
+    ),
   };
 
   const config = (node.data.config as any) || {};
@@ -202,7 +207,8 @@ function nodeToStep(
       const action = configToAction(node.type, config);
       if (action) {
         step.action = action;
-        step.description = step.description || `${action.type} ${action.target}`;
+        step.description =
+          step.description || `${action.type} ${action.target}`;
       }
       break;
 
@@ -250,13 +256,24 @@ function nodeToStep(
       step.condition = {
         expression: config.condition || 'true',
         thenSteps: thenNodes.map((n) =>
-          nodeToStep(n, nextNodesByHandle, new Set([...visited, n.id]), options)
+          nodeToStep(
+            n,
+            nextNodesByHandle,
+            new Set([...visited, n.id]),
+            options,
+          ),
         ),
-        elseSteps: elseNodes.length > 0
-          ? elseNodes.map((n) =>
-              nodeToStep(n, nextNodesByHandle, new Set([...visited, n.id]), options)
-            )
-          : undefined,
+        elseSteps:
+          elseNodes.length > 0
+            ? elseNodes.map((n) =>
+                nodeToStep(
+                  n,
+                  nextNodesByHandle,
+                  new Set([...visited, n.id]),
+                  options,
+                ),
+              )
+            : undefined,
       };
       break;
 
@@ -271,7 +288,12 @@ function nodeToStep(
         collection: config.collection,
         itemVar: config.itemVar,
         body: loopBodyNodes.map((n) =>
-          nodeToStep(n, nextNodesByHandle, new Set([...visited, n.id]), options)
+          nodeToStep(
+            n,
+            nextNodesByHandle,
+            new Set([...visited, n.id]),
+            options,
+          ),
         ),
         maxIterations: config.maxIterations || 50,
       } as LoopConfig;
@@ -325,7 +347,9 @@ function nodeToStep(
 /**
  * 构建节点连接映射
  */
-function buildConnectionMap(edges: DesignerEdge[]): Map<string, DesignerEdge[]> {
+function buildConnectionMap(
+  edges: DesignerEdge[],
+): Map<string, DesignerEdge[]> {
   const map = new Map<string, DesignerEdge[]>();
 
   edges.forEach((edge) => {
@@ -344,7 +368,7 @@ function buildConnectionMap(edges: DesignerEdge[]): Map<string, DesignerEdge[]> 
  */
 function buildNextNodesMap(
   nodes: DesignerNode[],
-  edges: DesignerEdge[]
+  edges: DesignerEdge[],
 ): Map<string, DesignerNode[]> {
   const map = new Map<string, DesignerNode[]>();
   const nodeMap = new Map(nodes.map((n) => [n.id, n]));
@@ -367,13 +391,12 @@ function buildNextNodesMap(
 /**
  * 将流程转换为 YAML
  */
-export function flowToYaml(flow: TestFlow, options: ConversionOptions = {}): ConversionResult {
+export function flowToYaml(
+  flow: TestFlow,
+  options: ConversionOptions = {},
+): ConversionResult {
   const warnings: string[] = [];
-  const {
-    includeMetadata = true,
-    indent = 2,
-    sortNodes = false,
-  } = options;
+  const { includeMetadata = true, indent = 2, sortNodes = false } = options;
 
   // 验证流程
   if (!flow || !flow.nodes || flow.nodes.length === 0) {
@@ -385,7 +408,9 @@ export function flowToYaml(flow: TestFlow, options: ConversionOptions = {}): Con
   }
 
   // 排序节点
-  const sortedNodes = sortNodes ? topologicalSort([...flow.nodes], flow.edges) : [...flow.nodes];
+  const sortedNodes = sortNodes
+    ? topologicalSort([...flow.nodes], flow.edges)
+    : [...flow.nodes];
 
   // 构建连接映射
   const nextNodesMap = buildNextNodesMap(sortedNodes, flow.edges);
@@ -458,10 +483,14 @@ export function flowToYaml(flow: TestFlow, options: ConversionOptions = {}): Con
     name: flow.name,
     description: flow.description,
     steps,
-    variables: flow.variables?.reduce((acc, v) => {
-      acc[v.name] = v.defaultValue;
-      return acc;
-    }, {} as Record<string, any>) || {},
+    variables:
+      flow.variables?.reduce(
+        (acc, v) => {
+          acc[v.name] = v.defaultValue;
+          return acc;
+        },
+        {} as Record<string, any>,
+      ) || {},
     config: DEFAULT_ADAPTIVE_CONFIG,
     ...(includeMetadata && {
       createdAt: flow.metadata?.createdAt,
@@ -487,7 +516,10 @@ export function flowToYaml(flow: TestFlow, options: ConversionOptions = {}): Con
 /**
  * 将 YAML 解析为流程
  */
-export function yamlToFlow(yamlContent: string, flowName?: string): ParseResult {
+export function yamlToFlow(
+  yamlContent: string,
+  flowName?: string,
+): ParseResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -529,7 +561,11 @@ export function yamlToFlow(yamlContent: string, flowName?: string): ParseResult 
 
     // 处理步骤
     let yOffset = 200;
-    const processStep = (step: AdaptiveStep, parentId?: string, handle?: string): string => {
+    const processStep = (
+      step: AdaptiveStep,
+      parentId?: string,
+      handle?: string,
+    ): string => {
       let nodeType: NodeType = 'click';
       const config: any = {};
       let label = step.description;
@@ -562,7 +598,7 @@ export function yamlToFlow(yamlContent: string, flowName?: string): ParseResult 
             break;
           case 'wait':
             nodeType = 'wait';
-            config.duration = parseInt(step.action.value || '1000', 10);
+            config.duration = Number.parseInt(step.action.value || '1000', 10);
             label = `等待 ${config.duration}ms`;
             break;
           case 'navigate':
@@ -692,15 +728,22 @@ export function yamlToFlow(yamlContent: string, flowName?: string): ParseResult 
     }
 
     // 转换变量
-    const variables = Object.entries(parsed.variables || {}).map(([name, value]) => ({
-      name,
-      type: typeof value === 'boolean' ? 'boolean' as const
-        : typeof value === 'number' ? 'number' as const
-        : Array.isArray(value) ? 'array' as const
-        : typeof value === 'object' ? 'object' as const
-        : 'string' as const,
-      defaultValue: value,
-    }));
+    const variables = Object.entries(parsed.variables || {}).map(
+      ([name, value]) => ({
+        name,
+        type:
+          typeof value === 'boolean'
+            ? ('boolean' as const)
+            : typeof value === 'number'
+              ? ('number' as const)
+              : Array.isArray(value)
+                ? ('array' as const)
+                : typeof value === 'object'
+                  ? ('object' as const)
+                  : ('string' as const),
+        defaultValue: value,
+      }),
+    );
 
     // 创建流程
     const flow: TestFlow = {
@@ -737,7 +780,9 @@ export function yamlToFlow(yamlContent: string, flowName?: string): ParseResult 
           updatedAt: Date.now(),
         },
       },
-      errors: [`YAML 解析错误: ${error instanceof Error ? error.message : String(error)}`],
+      errors: [
+        `YAML 解析错误: ${error instanceof Error ? error.message : String(error)}`,
+      ],
       warnings,
     };
   }
@@ -746,7 +791,10 @@ export function yamlToFlow(yamlContent: string, flowName?: string): ParseResult 
 /**
  * 将流程导出为 YAML 文件内容（带格式化）
  */
-export function exportYaml(flow: TestFlow, options: ConversionOptions = {}): string {
+export function exportYaml(
+  flow: TestFlow,
+  options: ConversionOptions = {},
+): string {
   const result = flowToYaml(flow, options);
 
   // 添加文件头注释
@@ -761,7 +809,10 @@ export function exportYaml(flow: TestFlow, options: ConversionOptions = {}): str
 /**
  * 从 YAML 文件内容导入流程
  */
-export function importYaml(yamlContent: string, flowName?: string): TestFlow | null {
+export function importYaml(
+  yamlContent: string,
+  flowName?: string,
+): TestFlow | null {
   const result = yamlToFlow(yamlContent, flowName);
 
   if (result.errors.length > 0) {
@@ -775,10 +826,13 @@ export function importYaml(yamlContent: string, flowName?: string): TestFlow | n
 /**
  * 获取流程的 YAML 预览（前 N 行）
  */
-export function getYamlPreview(flow: TestFlow, lineCount: number = 20): string {
+export function getYamlPreview(flow: TestFlow, lineCount = 20): string {
   const result = flowToYaml(flow);
   const lines = result.content.split('\n');
-  return lines.slice(0, lineCount).join('\n') + (lines.length > lineCount ? '\n...' : '');
+  return (
+    lines.slice(0, lineCount).join('\n') +
+    (lines.length > lineCount ? '\n...' : '')
+  );
 }
 
 export default {

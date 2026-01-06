@@ -4,7 +4,7 @@
  * Manages change collection, diff generation, and application.
  */
 
-import type { Review, Change } from '../../types/collaboration';
+import type { Change, Review } from '../../types/collaboration';
 import type { IChangeManager } from './interfaces';
 
 /**
@@ -38,7 +38,7 @@ export class ChangeManager implements IChangeManager {
   async collectChanges(
     fileId: string,
     fromVersion: string,
-    toVersion: string
+    toVersion: string,
   ): Promise<Change[]> {
     // In production, this would fetch actual file versions from storage
     // For now, return an empty array
@@ -99,7 +99,11 @@ export class ChangeManager implements IChangeManager {
 
     while (i < linesA.length || j < linesB.length) {
       // Find the start of a difference
-      while (i < linesA.length && j < linesB.length && linesA[i] === linesB[j]) {
+      while (
+        i < linesA.length &&
+        j < linesB.length &&
+        linesA[i] === linesB[j]
+      ) {
         i++;
         j++;
       }
@@ -116,16 +120,18 @@ export class ChangeManager implements IChangeManager {
       let contextCount = 0;
       const maxContext = 3;
 
-      while (
-        i < linesA.length ||
-        j < linesB.length
-      ) {
+      while (i < linesA.length || j < linesB.length) {
         const lineA = i < linesA.length ? linesA[i] : null;
         const lineB = j < linesB.length ? linesB[j] : null;
 
         if (lineA === lineB) {
           if (lines.length > 0 && contextCount < maxContext) {
-            lines.push({ type: 'same', content: lineA!, lineNumberA: i + 1, lineNumberB: j + 1 });
+            lines.push({
+              type: 'same',
+              content: lineA!,
+              lineNumberA: i + 1,
+              lineNumberB: j + 1,
+            });
             contextCount++;
             i++;
             j++;
@@ -150,8 +156,20 @@ export class ChangeManager implements IChangeManager {
       }
 
       // Add trailing context
-      for (let k = 0; k < maxContext && i < linesA.length && j < linesB.length && linesA[i] === linesB[j]; k++) {
-        lines.push({ type: 'same', content: linesA[i], lineNumberA: i + 1, lineNumberB: j + 1 });
+      for (
+        let k = 0;
+        k < maxContext &&
+        i < linesA.length &&
+        j < linesB.length &&
+        linesA[i] === linesB[j];
+        k++
+      ) {
+        lines.push({
+          type: 'same',
+          content: linesA[i],
+          lineNumberA: i + 1,
+          lineNumberB: j + 1,
+        });
         i++;
         j++;
       }
@@ -173,7 +191,11 @@ export class ChangeManager implements IChangeManager {
   /**
    * Format hunks as unified diff
    */
-  private formatUnifiedDiff(hunks: Hunk[], contentA: string, contentB: string): string {
+  private formatUnifiedDiff(
+    hunks: Hunk[],
+    contentA: string,
+    contentB: string,
+  ): string {
     const lines: string[] = [];
 
     // Add header
@@ -183,7 +205,7 @@ export class ChangeManager implements IChangeManager {
     for (const hunk of hunks) {
       // Hunk header
       lines.push(
-        `@@ -${hunk.oldStart},${hunk.oldLines} +${hunk.newStart},${hunk.newLines} @@`
+        `@@ -${hunk.oldStart},${hunk.oldLines} +${hunk.newStart},${hunk.newLines} @@`,
       );
 
       // Hunk content
@@ -221,10 +243,10 @@ export class ChangeManager implements IChangeManager {
           hunks.push(currentHunk);
         }
         currentHunk = {
-          oldStart: parseInt(hunkHeader[1], 10),
-          oldLines: parseInt(hunkHeader[2], 10),
-          newStart: parseInt(hunkHeader[3], 10),
-          newLines: parseInt(hunkHeader[4], 10),
+          oldStart: Number.parseInt(hunkHeader[1], 10),
+          oldLines: Number.parseInt(hunkHeader[2], 10),
+          newStart: Number.parseInt(hunkHeader[3], 10),
+          newLines: Number.parseInt(hunkHeader[4], 10),
           lines: [],
         };
         continue;
@@ -297,7 +319,7 @@ export class ChangeManager implements IChangeManager {
     fileId: string,
     fileName: string,
     oldContent: string,
-    newContent: string
+    newContent: string,
   ): Change {
     const diff = this.generateDiff(oldContent, newContent);
     const stats = this.calculateStats(diff);
@@ -326,7 +348,7 @@ export class ChangeManager implements IChangeManager {
     fileId: string,
     fileName: string,
     contentA: string,
-    contentB: string
+    contentB: string,
   ): Change {
     return this.createChange(fileId, fileName, contentA, contentB);
   }
@@ -342,8 +364,10 @@ export class ChangeManager implements IChangeManager {
    * Check if a file has changes
    */
   hasChanges(diff: string): boolean {
-    return this.calculateStats(diff).additions > 0 ||
-           this.calculateStats(diff).deletions > 0;
+    return (
+      this.calculateStats(diff).additions > 0 ||
+      this.calculateStats(diff).deletions > 0
+    );
   }
 
   /**

@@ -28,6 +28,7 @@ import {
   message,
 } from 'antd';
 import { useEffect, useState } from 'react';
+import { useI18n } from '../../../i18n';
 import {
   type GitLabBranch,
   type GitLabProject,
@@ -35,7 +36,6 @@ import {
 } from '../services/gitlabClient';
 import { useGeneratorStore } from '../store';
 import { GitLabConfigModal } from './GitLabConfig';
-import { useI18n } from '../../../i18n';
 
 const { Text, Title, Paragraph, Link } = Typography;
 const { TextArea } = Input;
@@ -363,7 +363,9 @@ export function CommitView() {
                       <Space>
                         <BranchesOutlined />
                         {b.name}
-                        {b.default && <Text type="secondary">({t('default')})</Text>}
+                        {b.default && (
+                          <Text type="secondary">({t('default')})</Text>
+                        )}
                       </Space>
                     ),
                   }))}

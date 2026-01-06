@@ -74,9 +74,7 @@ function formatValue(value: any): { display: string; type: string } {
   if (value === null) return { display: 'null', type: 'null' };
   if (value === undefined) return { display: 'undefined', type: 'undefined' };
 
-  const type = Array.isArray(value)
-    ? 'array'
-    : typeof value;
+  const type = Array.isArray(value) ? 'array' : typeof value;
 
   let display: string;
   if (typeof value === 'object') {
@@ -142,14 +140,10 @@ export function SharedDataPanel({
   // Convert data to entries
   const entries = useMemo((): SharedDataEntry[] => {
     return Object.entries(data)
-      .filter(([key]) =>
-        key.toLowerCase().includes(searchText.toLowerCase()),
-      )
+      .filter(([key]) => key.toLowerCase().includes(searchText.toLowerCase()))
       .map(([key, value]) => {
         const formatted = formatValue(value);
-        const historyEntry = [...history]
-          .reverse()
-          .find((h) => h.key === key);
+        const historyEntry = [...history].reverse().find((h) => h.key === key);
 
         return {
           key,
@@ -371,7 +365,10 @@ export function SharedDataPanel({
         <Space>
           <SyncOutlined />
           <span>共享数据</span>
-          <Badge count={entries.length} style={{ backgroundColor: '#52c41a' }} />
+          <Badge
+            count={entries.length}
+            style={{ backgroundColor: '#52c41a' }}
+          />
         </Space>
       }
       size="small"
@@ -432,9 +429,7 @@ export function SharedDataPanel({
         >
           {entries.length === 0 ? (
             <Empty
-              description={
-                searchText ? '未找到匹配项' : '暂无共享数据'
-              }
+              description={searchText ? '未找到匹配项' : '暂无共享数据'}
               image={Empty.PRESENTED_IMAGE_SIMPLE}
             />
           ) : (

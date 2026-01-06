@@ -19,7 +19,9 @@ import { analyticsStorage } from '../../analytics/analyticsStorage';
 describe('CorrelationFinder', () => {
   let finder: CorrelationFinder;
 
-  const createExecutionRecord = (overrides?: Partial<ExecutionRecord>): ExecutionRecord => ({
+  const createExecutionRecord = (
+    overrides?: Partial<ExecutionRecord>,
+  ): ExecutionRecord => ({
     id: `exec-${Math.random().toString(36).substr(2, 9)}`,
     caseId: `case-${Math.random().toString(36).substr(2, 9)}`,
     caseName: 'Test Case',
@@ -72,16 +74,34 @@ describe('CorrelationFinder', () => {
           caseId: 'case-1',
           startTime: baseTime,
           status: 'failed',
-          steps: [{ index: 0, description: 'Login', status: 'failed', duration: 1000, retryCount: 0 }],
+          steps: [
+            {
+              index: 0,
+              description: 'Login',
+              status: 'failed',
+              duration: 1000,
+              retryCount: 0,
+            },
+          ],
         }),
         createExecutionRecord({
           caseId: 'case-2',
           startTime: baseTime + 1000, // Within time window
           status: 'failed',
-          steps: [{ index: 0, description: 'Login', status: 'failed', duration: 1000, retryCount: 0 }],
+          steps: [
+            {
+              index: 0,
+              description: 'Login',
+              status: 'failed',
+              duration: 1000,
+              retryCount: 0,
+            },
+          ],
         }),
       ];
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       await finder.refreshCorrelations();
       const correlations = await finder.findCorrelations('case-1');
@@ -95,7 +115,9 @@ describe('CorrelationFinder', () => {
         createExecutionRecord({ caseId: 'login-test', status: 'failed' }),
         createExecutionRecord({ caseId: 'auth-test', status: 'failed' }),
       ];
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       await finder.refreshCorrelations();
       const correlations = await finder.findCorrelations('login-test');
@@ -117,7 +139,9 @@ describe('CorrelationFinder', () => {
         createExecutionRecord({ caseId: 'case-b', status: 'failed' }),
         createExecutionRecord({ caseId: 'case-c', status: 'passed' }),
       ];
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       await finder.refreshCorrelations();
       const related = await finder.getRelatedCases('case-a', 1);
@@ -130,7 +154,9 @@ describe('CorrelationFinder', () => {
         createExecutionRecord({ caseId: 'case-a' }),
         createExecutionRecord({ caseId: 'case-b' }),
       ];
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       await finder.refreshCorrelations();
       const related = await finder.getRelatedCases('case-a', 1);
@@ -153,7 +179,9 @@ describe('CorrelationFinder', () => {
         createExecutionRecord({ caseId: 'case-1' }),
         createExecutionRecord({ caseId: 'case-2' }),
       ];
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       await finder.refreshCorrelations();
       const graph = await finder.getCorrelationGraph();
@@ -170,7 +198,9 @@ describe('CorrelationFinder', () => {
       const executions = [
         createExecutionRecord({ caseId: 'node-test', caseName: 'Test Node' }),
       ];
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       await finder.refreshCorrelations();
       const graph = await finder.getCorrelationGraph();
@@ -188,7 +218,9 @@ describe('CorrelationFinder', () => {
         createExecutionRecord({ caseId: 'source-case', status: 'failed' }),
         createExecutionRecord({ caseId: 'target-case', status: 'failed' }),
       ];
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       await finder.refreshCorrelations();
       const graph = await finder.getCorrelationGraph();
@@ -204,10 +236,10 @@ describe('CorrelationFinder', () => {
 
   describe('refreshCorrelations', () => {
     it('should refresh correlation data', async () => {
-      const executions = [
-        createExecutionRecord({ caseId: 'refresh-test' }),
-      ];
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      const executions = [createExecutionRecord({ caseId: 'refresh-test' })];
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       await finder.refreshCorrelations();
 
@@ -218,10 +250,10 @@ describe('CorrelationFinder', () => {
 
   describe('clearCache', () => {
     it('should clear cached correlations', async () => {
-      const executions = [
-        createExecutionRecord({ caseId: 'cached-case' }),
-      ];
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      const executions = [createExecutionRecord({ caseId: 'cached-case' })];
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       await finder.refreshCorrelations();
       finder.clearCache();
@@ -236,16 +268,26 @@ describe('CorrelationFinder', () => {
   describe('correlation strength', () => {
     it('should detect same feature correlation', async () => {
       const executions = [
-        createExecutionRecord({ caseId: 'user-login-test', caseName: 'User Login Test' }),
-        createExecutionRecord({ caseId: 'admin-login-test', caseName: 'Admin Login Test' }),
+        createExecutionRecord({
+          caseId: 'user-login-test',
+          caseName: 'User Login Test',
+        }),
+        createExecutionRecord({
+          caseId: 'admin-login-test',
+          caseName: 'Admin Login Test',
+        }),
       ];
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       await finder.refreshCorrelations();
       const correlations = await finder.findCorrelations('user-login-test');
 
       // Should find correlation due to shared keyword "login"
-      const hasSameFeature = correlations.some((c) => c.correlationType === 'same_feature');
+      const hasSameFeature = correlations.some(
+        (c) => c.correlationType === 'same_feature',
+      );
       expect(hasSameFeature).toBe(true);
     });
   });
@@ -258,27 +300,53 @@ describe('CorrelationFinder', () => {
           caseId: 'case-a',
           startTime: baseTime,
           steps: [
-            { index: 0, description: 'Open login page', status: 'passed', duration: 1000, retryCount: 0 },
-            { index: 1, description: 'Enter credentials', status: 'passed', duration: 500, retryCount: 0 },
+            {
+              index: 0,
+              description: 'Open login page',
+              status: 'passed',
+              duration: 1000,
+              retryCount: 0,
+            },
+            {
+              index: 1,
+              description: 'Enter credentials',
+              status: 'passed',
+              duration: 500,
+              retryCount: 0,
+            },
           ],
         }),
         createExecutionRecord({
           caseId: 'case-b',
           startTime: baseTime + 2000,
           steps: [
-            { index: 0, description: 'Open login page', status: 'passed', duration: 1000, retryCount: 0 },
-            { index: 1, description: 'Click submit', status: 'passed', duration: 500, retryCount: 0 },
+            {
+              index: 0,
+              description: 'Open login page',
+              status: 'passed',
+              duration: 1000,
+              retryCount: 0,
+            },
+            {
+              index: 1,
+              description: 'Click submit',
+              status: 'passed',
+              duration: 500,
+              retryCount: 0,
+            },
           ],
         }),
       ];
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       await finder.refreshCorrelations();
       const correlations = await finder.findCorrelations('case-a');
 
       // Should detect shared precondition
       const hasSharedPrecondition = correlations.some((c) =>
-        c.evidence.some((e) => e.type === 'shared_precondition')
+        c.evidence.some((e) => e.type === 'shared_precondition'),
       );
       expect(hasSharedPrecondition).toBe(true);
     });
@@ -297,13 +365,17 @@ describe('CorrelationFinder', () => {
           startTime: baseTime + 30000, // 30 seconds later, within sequence window
         }),
       ];
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       await finder.refreshCorrelations();
       const correlations = await finder.findCorrelations('first-test');
 
       // May detect execution sequence
-      const hasSequence = correlations.some((c) => c.correlationType === 'execution_sequence');
+      const hasSequence = correlations.some(
+        (c) => c.correlationType === 'execution_sequence',
+      );
       expect(Array.isArray(correlations)).toBe(true);
     });
   });
@@ -324,16 +396,20 @@ describe('CorrelationFinder', () => {
             caseId: `case-${i + 10}`,
             startTime: baseTime + 1000,
             status: 'failed',
-          })
+          }),
         );
       }
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       await finder.refreshCorrelations();
       const graph = await finder.getCorrelationGraph();
 
       // Check that risk levels are assigned
-      const hasHighRisk = graph.nodes.some((n) => n.riskLevel === 'high' || n.riskLevel === 'medium');
+      const hasHighRisk = graph.nodes.some(
+        (n) => n.riskLevel === 'high' || n.riskLevel === 'medium',
+      );
       expect(hasHighRisk).toBe(true);
     });
   });
@@ -343,13 +419,31 @@ describe('CorrelationFinder', () => {
       const baseTime = Date.now();
       // Create cases that fail together (should form a cluster)
       const executions = [
-        createExecutionRecord({ caseId: 'cluster-1-a', startTime: baseTime, status: 'failed' }),
-        createExecutionRecord({ caseId: 'cluster-1-b', startTime: baseTime + 1000, status: 'failed' }),
-        createExecutionRecord({ caseId: 'cluster-1-c', startTime: baseTime + 2000, status: 'failed' }),
+        createExecutionRecord({
+          caseId: 'cluster-1-a',
+          startTime: baseTime,
+          status: 'failed',
+        }),
+        createExecutionRecord({
+          caseId: 'cluster-1-b',
+          startTime: baseTime + 1000,
+          status: 'failed',
+        }),
+        createExecutionRecord({
+          caseId: 'cluster-1-c',
+          startTime: baseTime + 2000,
+          status: 'failed',
+        }),
         // Isolated case
-        createExecutionRecord({ caseId: 'isolated', startTime: baseTime + 10000, status: 'passed' }),
+        createExecutionRecord({
+          caseId: 'isolated',
+          startTime: baseTime + 10000,
+          status: 'passed',
+        }),
       ];
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       await finder.refreshCorrelations();
       const graph = await finder.getCorrelationGraph();
@@ -364,7 +458,9 @@ describe('CorrelationFinder', () => {
         createExecutionRecord({ caseId: 'c1' }),
         createExecutionRecord({ caseId: 'c2' }),
       ];
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       await finder.refreshCorrelations();
       const graph = await finder.getCorrelationGraph();
@@ -383,27 +479,45 @@ describe('CorrelationFinder', () => {
       // Create multiple executions for the same case to establish correlations
       const baseTime = Date.now();
       const executions = [
-        createExecutionRecord({ caseId: 'cached-test', startTime: baseTime, caseName: 'Login Test' }),
-        createExecutionRecord({ caseId: 'related-test', startTime: baseTime + 1000, caseName: 'Login Auth Test' }),
-        createExecutionRecord({ caseId: 'cached-test', startTime: baseTime + 2000, caseName: 'Login Test' }),
+        createExecutionRecord({
+          caseId: 'cached-test',
+          startTime: baseTime,
+          caseName: 'Login Test',
+        }),
+        createExecutionRecord({
+          caseId: 'related-test',
+          startTime: baseTime + 1000,
+          caseName: 'Login Auth Test',
+        }),
+        createExecutionRecord({
+          caseId: 'cached-test',
+          startTime: baseTime + 2000,
+          caseName: 'Login Test',
+        }),
       ];
-      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(executions);
+      vi.mocked(analyticsStorage.getRecentExecutions).mockResolvedValue(
+        executions,
+      );
 
       // First call should fetch and populate cache
       await finder.refreshCorrelations();
-      const callCount = vi.mocked(analyticsStorage.getRecentExecutions).mock.calls.length;
+      const callCount = vi.mocked(analyticsStorage.getRecentExecutions).mock
+        .calls.length;
 
       // Find correlations to populate the cache map
       await finder.findCorrelations('cached-test');
 
       // Verify cache is populated
-      const callCountAfterFind = vi.mocked(analyticsStorage.getRecentExecutions).mock.calls.length;
+      const callCountAfterFind = vi.mocked(analyticsStorage.getRecentExecutions)
+        .mock.calls.length;
 
       // Within cache duration, subsequent calls should use cache
       await finder.findCorrelations('cached-test');
 
       // Should not have called getRecentExecutions again after initial population
-      expect(vi.mocked(analyticsStorage.getRecentExecutions).mock.calls.length).toBe(callCountAfterFind);
+      expect(
+        vi.mocked(analyticsStorage.getRecentExecutions).mock.calls.length,
+      ).toBe(callCountAfterFind);
     });
   });
 });

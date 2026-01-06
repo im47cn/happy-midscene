@@ -5,10 +5,10 @@
  */
 
 import type {
+  Action,
   MemberRole,
   PermissionCheck,
   Resource,
-  Action,
 } from '../../types/collaboration';
 import type { IPermissionEngine } from './interfaces';
 import { memberManager } from './memberManager';
@@ -70,7 +70,7 @@ export class PermissionEngine implements IPermissionEngine {
   async check(
     userId: string,
     resource: Resource,
-    action: Action
+    action: Action,
   ): Promise<PermissionCheck> {
     // Check cache first
     const cacheKey = this.getCacheKey(userId, resource, action);
@@ -82,7 +82,7 @@ export class PermissionEngine implements IPermissionEngine {
     // Get user's role in workspace
     const role = await memberManager.getMemberRole(
       resource.workspaceId,
-      userId
+      userId,
     );
 
     if (!role) {
@@ -98,7 +98,7 @@ export class PermissionEngine implements IPermissionEngine {
     const resourceOverride = this.checkResourceOverride(
       resource.id,
       userId,
-      action
+      action,
     );
     if (resourceOverride !== null) {
       const result: PermissionCheck = {
@@ -132,7 +132,7 @@ export class PermissionEngine implements IPermissionEngine {
    */
   async checkBatch(
     userId: string,
-    checks: Array<{ resource: Resource; action: Action }>
+    checks: Array<{ resource: Resource; action: Action }>,
   ): Promise<Map<string, PermissionCheck>> {
     const results = new Map<string, PermissionCheck>();
 
@@ -165,7 +165,7 @@ export class PermissionEngine implements IPermissionEngine {
    */
   async getUserRole(
     userId: string,
-    workspaceId: string
+    workspaceId: string,
   ): Promise<MemberRole | null> {
     return memberManager.getMemberRole(workspaceId, userId);
   }
@@ -176,7 +176,7 @@ export class PermissionEngine implements IPermissionEngine {
   grantResourcePermission(
     resourceId: string,
     userId: string,
-    action: Action
+    action: Action,
   ): void {
     const key = `resource:${resourceId}`;
     if (!this.resourcePermissions.has(key)) {
@@ -191,7 +191,9 @@ export class PermissionEngine implements IPermissionEngine {
         existing.allowedActions.push(action);
       }
       // Remove from denied if present
-      existing.deniedActions = existing.deniedActions.filter((a) => a !== action);
+      existing.deniedActions = existing.deniedActions.filter(
+        (a) => a !== action,
+      );
     } else {
       permissions.push({
         resourceId,
@@ -211,7 +213,7 @@ export class PermissionEngine implements IPermissionEngine {
   revokeResourcePermission(
     resourceId: string,
     userId: string,
-    action: Action
+    action: Action,
   ): void {
     const key = `resource:${resourceId}`;
     if (!this.resourcePermissions.has(key)) {
@@ -232,7 +234,9 @@ export class PermissionEngine implements IPermissionEngine {
       permissions.push(existing);
     } else {
       // Remove from allowed if present
-      existing.allowedActions = existing.allowedActions.filter((a) => a !== action);
+      existing.allowedActions = existing.allowedActions.filter(
+        (a) => a !== action,
+      );
       // Add to denied if not already there
       if (!existing.deniedActions.includes(action)) {
         existing.deniedActions.push(action);
@@ -301,7 +305,7 @@ export class PermissionEngine implements IPermissionEngine {
   private checkResourceOverride(
     resourceId: string,
     userId: string,
-    action: Action
+    action: Action,
   ): boolean | null {
     const key = `resource:${resourceId}`;
     const permissions = this.resourcePermissions.get(key);
@@ -328,7 +332,7 @@ export class PermissionEngine implements IPermissionEngine {
   private getCacheKey(
     userId: string,
     resource: Resource,
-    action: Action
+    action: Action,
   ): string {
     return `${userId}:${resource.workspaceId}:${resource.type}:${resource.id}:${action}`;
   }

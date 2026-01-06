@@ -253,7 +253,12 @@ export const DEFAULT_ORCHESTRATOR_CONFIG: OrchestratorConfig = {
 /**
  * Data transformation functions
  */
-export type DataTransformer = 'trim' | 'number' | 'format' | 'uppercase' | 'lowercase';
+export type DataTransformer =
+  | 'trim'
+  | 'number'
+  | 'format'
+  | 'uppercase'
+  | 'lowercase';
 
 /**
  * Variable reference with optional transformation
@@ -269,8 +274,16 @@ export interface VariableRef {
  */
 export interface OrchestratorCallbacks {
   onDeviceStatusChange?: (deviceId: string, status: DeviceStatus) => void;
-  onStepStart?: (deviceId: string, stepIndex: number, instruction: string) => void;
-  onStepComplete?: (deviceId: string, stepIndex: number, result: StepResult) => void;
+  onStepStart?: (
+    deviceId: string,
+    stepIndex: number,
+    instruction: string,
+  ) => void;
+  onStepComplete?: (
+    deviceId: string,
+    stepIndex: number,
+    result: StepResult,
+  ) => void;
   onSyncWait?: (syncPointId: string, waitingDevices: string[]) => void;
   onSyncRelease?: (syncPointId: string) => void;
   onDataExport?: (key: string, value: any, deviceId: string) => void;

@@ -34,7 +34,9 @@ export const UserProfile: React.FC<UserProfileProps> = ({
   compact = false,
 }) => {
   const { t } = useI18n();
-  const [authState, setAuthState] = useState<AuthState>(githubAuth.getAuthState());
+  const [authState, setAuthState] = useState<AuthState>(
+    githubAuth.getAuthState(),
+  );
 
   useEffect(() => {
     const unsubscribe = githubAuth.subscribe((state) => {
@@ -111,7 +113,14 @@ export const UserProfile: React.FC<UserProfileProps> = ({
     });
 
     return items;
-  }, [t, handleViewProfile, handleLogout, onMyTemplates, onPublish, onSettings]);
+  }, [
+    t,
+    handleViewProfile,
+    handleLogout,
+    onMyTemplates,
+    onPublish,
+    onSettings,
+  ]);
 
   if (!authState.isAuthenticated || !authState.user) {
     return null;
@@ -122,7 +131,11 @@ export const UserProfile: React.FC<UserProfileProps> = ({
 
   if (compact) {
     return (
-      <Dropdown menu={{ items: menuItems }} trigger={['click']} placement="bottomRight">
+      <Dropdown
+        menu={{ items: menuItems }}
+        trigger={['click']}
+        placement="bottomRight"
+      >
         <Avatar
           src={user.avatar_url}
           size="small"
@@ -134,13 +147,13 @@ export const UserProfile: React.FC<UserProfileProps> = ({
   }
 
   return (
-    <Dropdown menu={{ items: menuItems }} trigger={['click']} placement="bottomRight">
+    <Dropdown
+      menu={{ items: menuItems }}
+      trigger={['click']}
+      placement="bottomRight"
+    >
       <Space style={{ cursor: 'pointer' }}>
-        <Avatar
-          src={user.avatar_url}
-          size="small"
-          icon={<UserOutlined />}
-        />
+        <Avatar src={user.avatar_url} size="small" icon={<UserOutlined />} />
         <Text style={{ fontSize: 12 }}>{displayName}</Text>
       </Space>
     </Dropdown>

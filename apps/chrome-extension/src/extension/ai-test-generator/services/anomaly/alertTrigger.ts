@@ -52,6 +52,7 @@ export interface AlertStats {
   acknowledged: number;
   pending: number;
   recentConverged: number;
+  deduplicated: number;
 }
 
 export interface ConvergenceGroup {
@@ -76,17 +77,17 @@ const DEFAULT_ALERT_CONFIG: AlertConfig = {
 };
 
 const SEVERITY_TO_LEVEL: Record<Severity, AlertLevel> = {
-  info: 'info',
-  warning: 'warning',
-  critical: 'critical',
-  emergency: 'emergency',
+  low: 'info',
+  medium: 'warning',
+  high: 'critical',
+  critical: 'emergency',
 };
 
 const SEVERITY_PRIORITY: Record<Severity, number> = {
-  info: 0,
-  warning: 1,
-  critical: 2,
-  emergency: 3,
+  low: 0,
+  medium: 1,
+  high: 2,
+  critical: 3,
 };
 
 // ============================================================================
@@ -94,15 +95,28 @@ const SEVERITY_PRIORITY: Record<Severity, number> = {
 // ============================================================================
 
 const ALERT_TEMPLATES: Record<AnomalyType, AlertTemplate> = {
-  pass_rate_drop: {
-    type: 'pass_rate_drop',
-    titleTemplate: 'Pass Rate Drop Detected',
-    messageTemplate: 'Pass rate dropped to {value}% (baseline: {baseline}%). {deviation}% below normal.',
+  success_rate_drop: {
+    type: 'success_rate_drop',
+    titleTemplate: 'Success Rate Drop Detected',
+    messageTemplate: 'Success rate dropped to {value}% (baseline: {baseline}%). {deviation}% below normal.',
     levelMapping: {
-      info: 'info',
-      warning: 'warning',
-      critical: 'critical',
-      emergency: 'emergency',
+      low: 'info',
+      medium: 'warning',
+      high: 'critical',
+      critical: 'emergency',
+    },
+    includeRootCause: true,
+    includeSuggestions: true,
+  },
+  pass_rate_drop: {
+    type: 'pass_rate_drop' as AnomalyType,
+    titleTemplate: '通过率下降检测',
+    messageTemplate: '通过率降至 {value}% (基线: {baseline}%)。较正常值低 {deviation}%。',
+    levelMapping: {
+      low: 'info',
+      medium: 'warning',
+      high: 'critical',
+      critical: 'emergency',
     },
     includeRootCause: true,
     includeSuggestions: true,
@@ -112,10 +126,10 @@ const ALERT_TEMPLATES: Record<AnomalyType, AlertTemplate> = {
     titleTemplate: 'Duration Spike Detected',
     messageTemplate: 'Execution time spiked to {value}ms (baseline: {baseline}ms). {deviation}% above normal.',
     levelMapping: {
-      info: 'info',
-      warning: 'warning',
-      critical: 'critical',
-      emergency: 'emergency',
+      low: 'info',
+      medium: 'warning',
+      high: 'critical',
+      critical: 'emergency',
     },
     includeRootCause: true,
     includeSuggestions: true,
@@ -125,25 +139,51 @@ const ALERT_TEMPLATES: Record<AnomalyType, AlertTemplate> = {
     titleTemplate: 'Consecutive Failures Alert',
     messageTemplate: '{value} consecutive test failures detected. Immediate attention required.',
     levelMapping: {
-      info: 'info',
-      warning: 'warning',
-      critical: 'critical',
-      emergency: 'emergency',
+      low: 'info',
+      medium: 'warning',
+      high: 'critical',
+      critical: 'emergency',
     },
     includeRootCause: true,
     includeSuggestions: true,
   },
-  flaky_detected: {
-    type: 'flaky_detected',
-    titleTemplate: 'Flaky Test Detected',
+  failure_spike: {
+    type: 'failure_spike',
+    titleTemplate: 'Failure Spike Detected',
+    messageTemplate: 'Failure rate spiked to {value}% (baseline: {baseline}%). {deviation}% above normal.',
+    levelMapping: {
+      low: 'info',
+      medium: 'warning',
+      high: 'critical',
+      critical: 'emergency',
+    },
+    includeRootCause: true,
+    includeSuggestions: true,
+  },
+  flaky_pattern: {
+    type: 'flaky_pattern',
+    titleTemplate: 'Flaky Pattern Detected',
     messageTemplate: 'Test "{caseName}" shows flaky behavior. Pass rate: {value}%.',
     levelMapping: {
-      info: 'info',
-      warning: 'warning',
-      critical: 'warning',
-      emergency: 'critical',
+      low: 'info',
+      medium: 'warning',
+      high: 'warning',
+      critical: 'critical',
     },
     includeRootCause: false,
+    includeSuggestions: true,
+  },
+  performance_degradation: {
+    type: 'performance_degradation',
+    titleTemplate: 'Performance Degradation Detected',
+    messageTemplate: 'Performance degraded by {deviation}%. Current: {value}, baseline: {baseline}.',
+    levelMapping: {
+      low: 'info',
+      medium: 'warning',
+      high: 'critical',
+      critical: 'emergency',
+    },
+    includeRootCause: true,
     includeSuggestions: true,
   },
   resource_anomaly: {
@@ -151,25 +191,51 @@ const ALERT_TEMPLATES: Record<AnomalyType, AlertTemplate> = {
     titleTemplate: 'Resource Anomaly Detected',
     messageTemplate: 'Unusual resource consumption: {metricName} at {value} ({deviation}% deviation).',
     levelMapping: {
-      info: 'info',
-      warning: 'warning',
-      critical: 'critical',
-      emergency: 'emergency',
+      low: 'info',
+      medium: 'warning',
+      high: 'critical',
+      critical: 'emergency',
     },
     includeRootCause: true,
     includeSuggestions: true,
   },
-  pattern_break: {
-    type: 'pattern_break',
-    titleTemplate: 'Pattern Break Detected',
-    messageTemplate: 'Established pattern broken for {metricName}. Current: {value}, Expected: {baseline}.',
+  trend_change: {
+    type: 'trend_change',
+    titleTemplate: 'Trend Change Detected',
+    messageTemplate: 'Trend changed for {metricName}. Current: {value}, Expected: {baseline}.',
     levelMapping: {
-      info: 'info',
-      warning: 'warning',
-      critical: 'critical',
-      emergency: 'emergency',
+      low: 'info',
+      medium: 'warning',
+      high: 'critical',
+      critical: 'emergency',
     },
     includeRootCause: true,
+    includeSuggestions: true,
+  },
+  seasonal_deviation: {
+    type: 'seasonal_deviation',
+    titleTemplate: 'Seasonal Deviation Detected',
+    messageTemplate: 'Deviation from seasonal pattern for {metricName}. Current: {value}, Expected: {baseline}.',
+    levelMapping: {
+      low: 'info',
+      medium: 'warning',
+      high: 'critical',
+      critical: 'emergency',
+    },
+    includeRootCause: true,
+    includeSuggestions: true,
+  },
+  flaky_detected: {
+    type: 'flaky_detected' as AnomalyType,
+    titleTemplate: 'Flaky Test Detected',
+    messageTemplate: 'Test "{caseName}" shows flaky behavior. Pass rate: {value}%.',
+    levelMapping: {
+      low: 'info',
+      medium: 'warning',
+      high: 'warning',
+      critical: 'critical',
+    },
+    includeRootCause: false,
     includeSuggestions: true,
   },
 };
@@ -184,6 +250,7 @@ class AlertTrigger {
   private convergenceGroups: Map<string, ConvergenceGroup> = new Map();
   private cooldownUntil: Map<string, number> = new Map();
   private idCounter = 0;
+  private deduplicatedCount = 0;
 
   constructor(config: Partial<AlertConfig> = {}) {
     this.config = { ...DEFAULT_ALERT_CONFIG, ...config };
@@ -215,6 +282,7 @@ class AlertTrigger {
     // Check deduplication
     const dedupResult = this.checkDeduplication(alert);
     if (dedupResult.isDuplicate) {
+      this.deduplicatedCount++;
       return {
         alert,
         shouldNotify: false,
@@ -343,6 +411,7 @@ class AlertTrigger {
       acknowledged: 0,
       pending: 0,
       recentConverged: 0,
+      deduplicated: this.deduplicatedCount,
     };
 
     for (const alerts of this.recentAlerts.values()) {
@@ -430,23 +499,35 @@ class AlertTrigger {
 
   private createAlert(anomaly: Anomaly): AnomalyAlert {
     const template = ALERT_TEMPLATES[anomaly.type];
-    const level = template.levelMapping[anomaly.severity];
+    if (!template) {
+      // Fallback for unknown anomaly types
+      const fallbackTemplate = {
+        titleTemplate: 'Anomaly Detected',
+        messageTemplate: 'Anomaly detected: {metricName} value is {value}',
+        levelMapping: {
+          low: 'info' as AlertLevel,
+          medium: 'warning' as AlertLevel,
+          high: 'critical' as AlertLevel,
+          critical: 'emergency' as AlertLevel,
+        },
+      };
+      const level = fallbackTemplate.levelMapping[anomaly.severity] || 'warning';
+      return {
+        id: this.generateId(),
+        anomalyId: anomaly.id,
+        level,
+        title: fallbackTemplate.titleTemplate,
+        message: this.formatMessage(fallbackTemplate.messageTemplate, anomaly),
+        createdAt: Date.now(),
+        acknowledged: false,
+      };
+    }
 
+    const level = template.levelMapping[anomaly.severity];
     let message = this.formatMessage(template.messageTemplate, anomaly);
 
-    // Add root cause summary if available
-    if (template.includeRootCause && anomaly.rootCauses.length > 0) {
-      const rootCauseSummary = this.formatRootCauses(anomaly.rootCauses);
-      message += `\n\nRoot Causes:\n${rootCauseSummary}`;
-    }
-
-    // Add suggestions
-    if (template.includeSuggestions && anomaly.rootCauses.length > 0) {
-      const suggestions = this.formatSuggestions(anomaly.rootCauses);
-      if (suggestions) {
-        message += `\n\nSuggested Actions:\n${suggestions}`;
-      }
-    }
+    // Note: rootCauses would need to be passed separately if needed
+    // Since Anomaly interface doesn't have rootCauses field
 
     return {
       id: this.generateId(),
@@ -460,12 +541,16 @@ class AlertTrigger {
   }
 
   private formatMessage(template: string, anomaly: Anomaly): string {
+    const deviationPercent = anomaly.expectedValue !== 0
+      ? ((anomaly.currentValue - anomaly.expectedValue) / anomaly.expectedValue * 100)
+      : 0;
+
     return template
-      .replace('{value}', anomaly.metric.currentValue.toFixed(2))
-      .replace('{baseline}', anomaly.baseline.mean.toFixed(2))
-      .replace('{deviation}', anomaly.deviation.percentageDeviation.toFixed(1))
-      .replace('{metricName}', anomaly.metric.name)
-      .replace('{caseName}', anomaly.impact.affectedCases[0] || 'Unknown');
+      .replace('{value}', anomaly.currentValue.toFixed(2))
+      .replace('{baseline}', anomaly.expectedValue.toFixed(2))
+      .replace('{deviation}', Math.abs(deviationPercent).toFixed(1))
+      .replace('{metricName}', anomaly.metric)
+      .replace('{caseName}', anomaly.caseName || anomaly.caseId || 'Unknown');
   }
 
   private formatRootCauses(rootCauses: RootCause[]): string {

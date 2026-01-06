@@ -5,12 +5,12 @@
  */
 
 import type { KnowledgeCategory } from '../../types/collaboration';
+import { auditLogger } from './auditLogger';
 import type {
-  ICategoryManager,
   CreateCategoryData,
+  ICategoryManager,
   UpdateCategoryData,
 } from './interfaces';
-import { auditLogger } from './auditLogger';
 
 /**
  * In-memory storage for categories
@@ -95,7 +95,7 @@ export class CategoryManager implements ICategoryManager {
    */
   async updateCategory(
     id: string,
-    data: UpdateCategoryData
+    data: UpdateCategoryData,
   ): Promise<KnowledgeCategory> {
     const category = this.storage.categories.get(id);
     if (!category) {
@@ -170,7 +170,9 @@ export class CategoryManager implements ICategoryManager {
     // Check if category has children
     const children = this.storage.byParent.get(id);
     if (children && children.size > 0) {
-      throw new Error('Cannot delete category with child categories. Move or delete children first.');
+      throw new Error(
+        'Cannot delete category with child categories. Move or delete children first.',
+      );
     }
 
     // Remove from all indexes
@@ -317,7 +319,11 @@ export class CategoryManager implements ICategoryManager {
 
     // Remove from current parent
     if (category.parentId) {
-      this.removeFromIndex(this.storage.byParent, category.parentId, categoryId);
+      this.removeFromIndex(
+        this.storage.byParent,
+        category.parentId,
+        categoryId,
+      );
     } else {
       this.storage.rootCategories.delete(categoryId);
     }
@@ -350,7 +356,9 @@ export class CategoryManager implements ICategoryManager {
   /**
    * Get category with children
    */
-  async getCategoryWithChildren(id: string): Promise<KnowledgeCategory & { children: KnowledgeCategory[] } | null> {
+  async getCategoryWithChildren(
+    id: string,
+  ): Promise<(KnowledgeCategory & { children: KnowledgeCategory[] }) | null> {
     const category = await this.getCategory(id);
     if (!category) {
       return null;
@@ -415,7 +423,7 @@ export class CategoryManager implements ICategoryManager {
   private addToIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     if (!index.has(key)) {
       index.set(key, new Set());
@@ -429,7 +437,7 @@ export class CategoryManager implements ICategoryManager {
   private removeFromIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     const set = index.get(key);
     if (set) {

@@ -107,7 +107,7 @@ export class CommentNotifier {
    */
   async notifyCommentReply(
     parentComment: Comment,
-    reply: Comment
+    reply: Comment,
   ): Promise<void> {
     if (parentComment.author === reply.author) {
       return; // Don't notify for self-replies
@@ -130,7 +130,7 @@ export class CommentNotifier {
    */
   async notifyCommentResolved(
     comment: Comment,
-    resolvedBy: string
+    resolvedBy: string,
   ): Promise<void> {
     if (comment.author === resolvedBy) {
       return; // Don't notify for self-resolution
@@ -152,7 +152,7 @@ export class CommentNotifier {
    * Create a notification
    */
   async createNotification(
-    data: Omit<Notification, 'id' | 'createdAt' | 'read'>
+    data: Omit<Notification, 'id' | 'createdAt' | 'read'>,
   ): Promise<Notification> {
     const id = this.generateId();
     const now = Date.now();
@@ -171,7 +171,10 @@ export class CommentNotifier {
     const prefs = this.getPreferences(data.userId);
     if (prefs.inApp) {
       // In production, would send via WebSocket or push notification
-      console.log(`[CommentNotifier] In-app notification for ${data.userId}:`, data.title);
+      console.log(
+        `[CommentNotifier] In-app notification for ${data.userId}:`,
+        data.title,
+      );
     }
 
     // Send email notification
@@ -185,7 +188,10 @@ export class CommentNotifier {
   /**
    * Get notifications for a user
    */
-  async getNotifications(userId: string, unreadOnly = false): Promise<Notification[]> {
+  async getNotifications(
+    userId: string,
+    unreadOnly = false,
+  ): Promise<Notification[]> {
     const notificationIds = this.storage.byUser.get(userId);
     if (!notificationIds) {
       return [];
@@ -242,7 +248,11 @@ export class CommentNotifier {
     const notification = this.storage.notifications.get(notificationId);
     if (notification) {
       this.storage.notifications.delete(notificationId);
-      this.removeFromIndex(this.storage.byUser, notification.userId, notificationId);
+      this.removeFromIndex(
+        this.storage.byUser,
+        notification.userId,
+        notificationId,
+      );
     }
   }
 
@@ -259,7 +269,10 @@ export class CommentNotifier {
   /**
    * Update user notification preferences
    */
-  updatePreferences(userId: string, preferences: Partial<NotificationPreferences>): void {
+  updatePreferences(
+    userId: string,
+    preferences: Partial<NotificationPreferences>,
+  ): void {
     const current = this.getPreferences(userId);
     this.storage.preferences.set(userId, {
       ...current,
@@ -271,7 +284,9 @@ export class CommentNotifier {
    * Send email notification
    * In production, this would integrate with an email service
    */
-  private async sendEmailNotification(notification: Notification): Promise<void> {
+  private async sendEmailNotification(
+    notification: Notification,
+  ): Promise<void> {
     console.log(`[CommentNotifier] Email notification:`, {
       to: notification.userId,
       subject: notification.title,
@@ -335,7 +350,7 @@ export class CommentNotifier {
   private addToIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     if (!index.has(key)) {
       index.set(key, new Set());
@@ -349,7 +364,7 @@ export class CommentNotifier {
   private removeFromIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     const set = index.get(key);
     if (set) {

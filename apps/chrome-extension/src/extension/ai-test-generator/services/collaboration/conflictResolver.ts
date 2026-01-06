@@ -61,7 +61,10 @@ export class ConflictResolver {
   /**
    * Automatically resolve a conflict
    */
-  async resolve(op1: EditorOperation, op2: EditorOperation): Promise<ResolutionResult> {
+  async resolve(
+    op1: EditorOperation,
+    op2: EditorOperation,
+  ): Promise<ResolutionResult> {
     const conflicts = this.detectConflicts([op1, op2]);
 
     if (conflicts.length === 0) {
@@ -115,7 +118,7 @@ export class ConflictResolver {
   manualResolve(
     conflictId: string,
     resolution: ConflictResolution,
-    customContent?: string
+    customContent?: string,
   ): EditorOperation | null {
     const conflict = this.conflicts.get(conflictId);
     if (!conflict) {
@@ -135,7 +138,10 @@ export class ConflictResolver {
 
       case 'merge':
         // Attempt merge
-        const merged = this.mergeOperations(conflict.operations[0], conflict.operations[1]);
+        const merged = this.mergeOperations(
+          conflict.operations[0],
+          conflict.operations[1],
+        );
         if (merged) {
           conflict.resolved = true;
           conflict.resolution = resolution;
@@ -186,7 +192,7 @@ export class ConflictResolver {
    */
   private checkConflict(
     op1: EditorOperation,
-    op2: EditorOperation
+    op2: EditorOperation,
   ): Conflict | null {
     // Operations by the same user don't conflict
     if (op1.userId === op2.userId) {
@@ -212,7 +218,12 @@ export class ConflictResolver {
     if (
       op1.type === 'delete' &&
       op2.type === 'delete' &&
-      this.rangesOverlap(op1.position, op1.length || 0, op2.position, op2.length || 0)
+      this.rangesOverlap(
+        op1.position,
+        op1.length || 0,
+        op2.position,
+        op2.length || 0,
+      )
     ) {
       return this.createConflict('concurrent_edit', op1.position, [op1, op2]);
     }
@@ -243,7 +254,7 @@ export class ConflictResolver {
   private createConflict(
     type: ConflictType,
     position: number,
-    operations: EditorOperation[]
+    operations: EditorOperation[],
   ): Conflict {
     const id = this.generateId();
     const conflict: Conflict = {
@@ -272,7 +283,7 @@ export class ConflictResolver {
           conflict.operations[1].type === 'insert'
         ) {
           const ops = [...conflict.operations].sort(
-            (a, b) => a.timestamp - b.timestamp
+            (a, b) => a.timestamp - b.timestamp,
           );
           conflict.resolved = true;
           conflict.resolution = 'merge';
@@ -296,12 +307,13 @@ export class ConflictResolver {
    */
   private mergeOperations(
     op1: EditorOperation,
-    op2: EditorOperation
+    op2: EditorOperation,
   ): EditorOperation | null {
     // If both are inserts, concatenate
     if (op1.type === 'insert' && op2.type === 'insert') {
       // Order by timestamp
-      const [first, second] = op1.timestamp < op2.timestamp ? [op1, op2] : [op2, op1];
+      const [first, second] =
+        op1.timestamp < op2.timestamp ? [op1, op2] : [op2, op1];
 
       return {
         type: 'insert',
@@ -323,7 +335,7 @@ export class ConflictResolver {
     start1: number,
     len1: number,
     start2: number,
-    len2: number
+    len2: number,
   ): boolean {
     const end1 = start1 + len1;
     const end2 = start2 + len2;
@@ -357,7 +369,7 @@ export class ConflictResolver {
    */
   async getExtendedConflict(
     conflictId: string,
-    baseContent: string
+    baseContent: string,
   ): Promise<ExtendedConflict | null> {
     const conflict = this.conflicts.get(conflictId);
     if (!conflict) {
@@ -377,7 +389,9 @@ export class ConflictResolver {
       baseContent,
       theirsContent,
       yoursContent,
-      mergedContent: mergedContent ? this.applyOp(baseContent, mergedContent) : undefined,
+      mergedContent: mergedContent
+        ? this.applyOp(baseContent, mergedContent)
+        : undefined,
     };
   }
 

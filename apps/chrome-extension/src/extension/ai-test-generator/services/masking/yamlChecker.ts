@@ -240,9 +240,7 @@ class YamlChecker {
     const lines = yamlContent.split('\n');
 
     // Apply suggestions from bottom to top to preserve line numbers
-    const sortedSuggestions = [...suggestions].sort(
-      (a, b) => b.line - a.line,
-    );
+    const sortedSuggestions = [...suggestions].sort((a, b) => b.line - a.line);
 
     for (const suggestion of sortedSuggestions) {
       if (suggestion.line <= lines.length) {

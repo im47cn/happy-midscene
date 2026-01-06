@@ -2,9 +2,9 @@
  * Change Manager Tests
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { ChangeManager } from '../changeManager';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { Change, Review } from '../../types/collaboration';
+import { ChangeManager } from '../changeManager';
 
 describe('ChangeManager', () => {
   let cm: ChangeManager;
@@ -181,7 +181,12 @@ describe('ChangeManager', () => {
 
   describe('createChange', () => {
     it('should create modified change', () => {
-      const change = cm.createChange('file1', 'test.ts', 'old content', 'new content');
+      const change = cm.createChange(
+        'file1',
+        'test.ts',
+        'old content',
+        'new content',
+      );
 
       expect(change.fileId).toBe('file1');
       expect(change.fileName).toBe('test.ts');
@@ -223,8 +228,18 @@ describe('ChangeManager', () => {
         createdAt: Date.now(),
         status: 'pending',
         changes: [
-          { fileId: 'file1', fileName: 'test1.ts', changeType: 'modified', diff: '' },
-          { fileId: 'file2', fileName: 'test2.ts', changeType: 'added', diff: '' },
+          {
+            fileId: 'file1',
+            fileName: 'test1.ts',
+            changeType: 'modified',
+            diff: '',
+          },
+          {
+            fileId: 'file2',
+            fileName: 'test2.ts',
+            changeType: 'added',
+            diff: '',
+          },
         ],
         reviewers: [],
       };
@@ -335,7 +350,8 @@ describe('ChangeManager', () => {
 
     it('should handle complex multi-hunk changes', () => {
       const original = 'header\nsection1\nsection2\nsection3\nfooter';
-      const modified = 'header\nsection1-modified\nsection2\nsection3-modified\nfooter\nnew-section';
+      const modified =
+        'header\nsection1-modified\nsection2\nsection3-modified\nfooter\nnew-section';
 
       const diff = cm.generateDiff(original, modified);
       const result = cm.applyDiff(original, diff);

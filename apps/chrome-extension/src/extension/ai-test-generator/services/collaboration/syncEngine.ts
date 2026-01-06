@@ -64,7 +64,9 @@ export class SyncEngine implements ISyncEngine {
       // Process queued offline operations
       await this.processOfflineQueue();
 
-      console.log(`[SyncEngine] Connected to session ${sessionId} as user ${userId}`);
+      console.log(
+        `[SyncEngine] Connected to session ${sessionId} as user ${userId}`,
+      );
     } catch (error) {
       this.connection = 'disconnected';
       this.scheduleReconnect();
@@ -220,7 +222,9 @@ export class SyncEngine implements ISyncEngine {
       return;
     }
 
-    console.log(`[SyncEngine] Scheduling reconnect in ${this.reconnectDelay}ms`);
+    console.log(
+      `[SyncEngine] Scheduling reconnect in ${this.reconnectDelay}ms`,
+    );
 
     this.reconnectTimer = setTimeout(async () => {
       this.reconnectTimer = null;
@@ -232,7 +236,7 @@ export class SyncEngine implements ISyncEngine {
           // Exponential backoff
           this.reconnectDelay = Math.min(
             this.reconnectDelay * 2,
-            this.maxReconnectDelay
+            this.maxReconnectDelay,
           );
           this.scheduleReconnect();
         }
@@ -281,7 +285,10 @@ export class SyncEngine implements ISyncEngine {
    * Set reconnect delay
    */
   setReconnectDelay(delay: number): void {
-    this.reconnectDelay = Math.min(Math.max(delay, 1000), this.maxReconnectDelay);
+    this.reconnectDelay = Math.min(
+      Math.max(delay, 1000),
+      this.maxReconnectDelay,
+    );
   }
 
   /**

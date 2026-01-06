@@ -4,20 +4,24 @@
  */
 
 import { uuid } from '@midscene/shared/utils';
-import type {
-  Recommendation,
-  RecommendOptions,
-  RecommendContext,
-  PriorityConfig,
-  RegressionType,
-  ChangeInfo,
-  ChangeImpact,
-  Feedback,
-} from '../../types/recommendation';
 import type { CaseStats, ExecutionRecord } from '../../types/analytics';
+import type {
+  ChangeImpact,
+  ChangeInfo,
+  Feedback,
+  PriorityConfig,
+  RecommendContext,
+  RecommendOptions,
+  Recommendation,
+  RegressionType,
+} from '../../types/recommendation';
+import {
+  DEFAULT_PRIORITY_CONFIG,
+  scoreToCategory,
+  scoreToPriority,
+} from '../../types/recommendation';
 import { analyticsStorage } from '../analytics/analyticsStorage';
 import { ScoreCalculator } from './scoreCalculator';
-import { DEFAULT_PRIORITY_CONFIG, scoreToCategory, scoreToPriority } from '../../types/recommendation';
 
 /**
  * Recommend Engine class
@@ -35,7 +39,9 @@ export class RecommendEngine {
   /**
    * Get recommendations based on current context
    */
-  async getRecommendations(options?: RecommendOptions): Promise<Recommendation[]> {
+  async getRecommendations(
+    options?: RecommendOptions,
+  ): Promise<Recommendation[]> {
     const context = await this.buildContext();
     const calculator = new ScoreCalculator(context);
 
@@ -43,7 +49,9 @@ export class RecommendEngine {
     const recommendations: Recommendation[] = [];
 
     for (const caseStat of context.caseStats) {
-      const { score, reasons } = calculator.calculateRecommendScore(caseStat.caseId);
+      const { score, reasons } = calculator.calculateRecommendScore(
+        caseStat.caseId,
+      );
 
       // Apply filters
       if (options?.minScore !== undefined && score < options.minScore) {
@@ -90,7 +98,9 @@ export class RecommendEngine {
   /**
    * Get recommendations for specific changes
    */
-  async getRecommendationsForChange(changes: ChangeInfo[]): Promise<Recommendation[]> {
+  async getRecommendationsForChange(
+    changes: ChangeInfo[],
+  ): Promise<Recommendation[]> {
     const context = await this.buildContext();
     context.changes = changes;
 
@@ -98,7 +108,9 @@ export class RecommendEngine {
     const recommendations: Recommendation[] = [];
 
     for (const caseStat of context.caseStats) {
-      const { score, reasons } = calculator.calculateRecommendScore(caseStat.caseId);
+      const { score, reasons } = calculator.calculateRecommendScore(
+        caseStat.caseId,
+      );
 
       // Only include cases with meaningful impact
       const impactReason = reasons.find((r) => r.type === 'change_impact');
@@ -135,7 +147,9 @@ export class RecommendEngine {
     const allRecommendations: Recommendation[] = [];
 
     for (const caseStat of context.caseStats) {
-      const { score, reasons } = calculator.calculateRecommendScore(caseStat.caseId);
+      const { score, reasons } = calculator.calculateRecommendScore(
+        caseStat.caseId,
+      );
       const priority = scoreToPriority(score, this.config.thresholds);
       const category = scoreToCategory(score);
 
@@ -158,7 +172,11 @@ export class RecommendEngine {
       case 'minimal':
         // Critical priority + recently failed
         return allRecommendations
-          .filter((r) => r.priority === 'critical' || r.reasons.some((r) => r.type === 'recent_failure'))
+          .filter(
+            (r) =>
+              r.priority === 'critical' ||
+              r.reasons.some((r) => r.type === 'recent_failure'),
+          )
           .sort((a, b) => b.score - a.score);
 
       case 'standard':
@@ -171,7 +189,10 @@ export class RecommendEngine {
         // All cases, sorted by priority
         return allRecommendations.sort((a, b) => {
           const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
-          return priorityOrder[a.priority] - priorityOrder[b.priority] || b.score - a.score;
+          return (
+            priorityOrder[a.priority] - priorityOrder[b.priority] ||
+            b.score - a.score
+          );
         });
 
       default:
@@ -205,7 +226,9 @@ export class RecommendEngine {
 
     return changes.map((change) => {
       const affectedCases = recommendations
-        .filter((r) => r.reasons.some((reason) => reason.type === 'change_impact'))
+        .filter((r) =>
+          r.reasons.some((reason) => reason.type === 'change_impact'),
+        )
         .filter((r) => {
           const caseName = r.caseName.toLowerCase();
           const target = change.target.toLowerCase();
@@ -213,7 +236,10 @@ export class RecommendEngine {
         })
         .map((r) => r.caseId);
 
-      const impactLevel = this.determineImpactLevel(affectedCases.length, recommendations.length);
+      const impactLevel = this.determineImpactLevel(
+        affectedCases.length,
+        recommendations.length,
+      );
 
       return {
         change,
@@ -235,7 +261,10 @@ export class RecommendEngine {
       this.config.weights = { ...this.config.weights, ...config.weights };
     }
     if (config.thresholds) {
-      this.config.thresholds = { ...this.config.thresholds, ...config.thresholds };
+      this.config.thresholds = {
+        ...this.config.thresholds,
+        ...config.thresholds,
+      };
     }
   }
 
@@ -263,7 +292,10 @@ export class RecommendEngine {
   /**
    * Apply time budget constraint to recommendations
    */
-  private applyTimeBudget(recommendations: Recommendation[], timeLimitMinutes: number): Recommendation[] {
+  private applyTimeBudget(
+    recommendations: Recommendation[],
+    timeLimitMinutes: number,
+  ): Recommendation[] {
     const timeLimitMs = timeLimitMinutes * 60 * 1000;
     const result: Recommendation[] = [];
     let totalTime = 0;
@@ -288,7 +320,10 @@ export class RecommendEngine {
   /**
    * Determine impact level based on affected cases
    */
-  private determineImpactLevel(affectedCount: number, totalCount: number): ChangeImpact['impactLevel'] {
+  private determineImpactLevel(
+    affectedCount: number,
+    totalCount: number,
+  ): ChangeImpact['impactLevel'] {
     const ratio = affectedCount / Math.max(totalCount, 1);
 
     if (ratio > 0.3 || affectedCount > 10) return 'high';

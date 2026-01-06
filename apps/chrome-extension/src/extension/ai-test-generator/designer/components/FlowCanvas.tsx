@@ -3,49 +3,54 @@
  * 流程画布组件 - React Flow 集成
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   Background,
-  Controls,
-  ReactFlow,
   type Connection,
+  Controls,
   type Edge,
   type NodeTypes,
-  type OnNodesChange,
-  type OnEdgesChange,
   type OnConnect,
+  type OnEdgesChange,
+  type OnNodesChange,
+  ReactFlow,
   addEdge,
   useReactFlow,
 } from '@xyflow/react';
+import type React from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import '@xyflow/react/dist/style.css';
-import { useDesignerStore } from '../store';
+import type {
+  DesignerEdge,
+  DesignerNode,
+  NodeType,
+} from '../../types/designer';
 import { createNode, nodeRegistry } from '../services/nodeRegistry';
-import type { DesignerEdge, DesignerNode, NodeType } from '../../types/designer';
+import { useDesignerStore } from '../store';
 
 // Import node types
 import {
-  StartNode,
-  EndNode,
-  CommentNode,
-  SubflowNode,
-  ClickNode,
-  InputNode,
-  ScrollNode,
-  WaitNode,
-  NavigateNode,
-  HoverNode,
-  DragNode,
-  AssertExistsNode,
-  AssertTextNode,
-  AssertStateNode,
   AiAssertNode,
-  IfElseNode,
-  LoopNode,
-  ParallelNode,
-  GroupNode,
-  SetVariableNode,
-  ExtractDataNode,
+  AssertExistsNode,
+  AssertStateNode,
+  AssertTextNode,
+  ClickNode,
+  CommentNode,
+  DragNode,
+  EndNode,
   ExternalDataNode,
+  ExtractDataNode,
+  GroupNode,
+  HoverNode,
+  IfElseNode,
+  InputNode,
+  LoopNode,
+  NavigateNode,
+  ParallelNode,
+  ScrollNode,
+  SetVariableNode,
+  StartNode,
+  SubflowNode,
+  WaitNode,
 } from '../nodes';
 
 /**
@@ -126,18 +131,22 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
   // 转换 nodes 和 edges 为 React Flow 格式
   const nodes = useMemo(() => {
-    return flow?.nodes.map((node) => ({
-      ...node,
-      deletable: node.data.deletable !== false,
-    })) || [];
+    return (
+      flow?.nodes.map((node) => ({
+        ...node,
+        deletable: node.data.deletable !== false,
+      })) || []
+    );
   }, [flow?.nodes]);
 
   const edges = useMemo(() => {
-    return flow?.edges.map((edge) => ({
-      ...edge,
-      animated: edge.type === 'conditional' || edge.type === 'loop',
-      style: edge.type === 'conditional' ? { stroke: '#6366f1' } : undefined,
-    })) || [];
+    return (
+      flow?.edges.map((edge) => ({
+        ...edge,
+        animated: edge.type === 'conditional' || edge.type === 'loop',
+        style: edge.type === 'conditional' ? { stroke: '#6366f1' } : undefined,
+      })) || []
+    );
   }, [flow?.edges]);
 
   /**
@@ -157,7 +166,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         }
       }
     },
-    [readOnly, updateNode, deleteNode]
+    [readOnly, updateNode, deleteNode],
   );
 
   /**
@@ -174,7 +183,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         }
       }
     },
-    [readOnly]
+    [readOnly],
   );
 
   /**
@@ -194,7 +203,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       };
 
       // 判断是否是条件连线 (基于 sourceHandle)
-      if (connection.sourceHandle === 'true' || connection.sourceHandle === 'false') {
+      if (
+        connection.sourceHandle === 'true' ||
+        connection.sourceHandle === 'false'
+      ) {
         newEdge.type = 'conditional';
         newEdge.data = {
           condition: connection.sourceHandle === 'true' ? 'true' : 'false',
@@ -211,7 +223,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       // 验证流程
       setTimeout(() => validateFlow(), 100);
     },
-    [readOnly, addEdge, onConnectCallback, validateFlow]
+    [readOnly, addEdge, onConnectCallback, validateFlow],
   );
 
   /**
@@ -255,7 +267,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       // 验证流程
       setTimeout(() => validateFlow(), 100);
     },
-    [readOnly, flowInstance, addNode, onNodeDrop, validateFlow]
+    [readOnly, flowInstance, addNode, onNodeDrop, validateFlow],
   );
 
   /**
@@ -276,7 +288,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         clearSelection();
       }
     },
-    [selectNode, selectNodes, clearSelection, onNodeSelect]
+    [selectNode, selectNodes, clearSelection, onNodeSelect],
   );
 
   /**
@@ -308,11 +320,17 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       if ((event.ctrlKey || event.metaKey) && event.key === 'c') {
         const { flow, selectedNodes } = useDesignerStore.getState();
         if (flow && selectedNodes.length > 0) {
-          const nodesToCopy = flow.nodes.filter((n) => selectedNodes.includes(n.id));
-          const edgesToCopy = flow.edges.filter((e) =>
-            selectedNodes.includes(e.source) && selectedNodes.includes(e.target)
+          const nodesToCopy = flow.nodes.filter((n) =>
+            selectedNodes.includes(n.id),
           );
-          useDesignerStore.setState({ clipboard: { nodes: nodesToCopy, edges: edgesToCopy } });
+          const edgesToCopy = flow.edges.filter(
+            (e) =>
+              selectedNodes.includes(e.source) &&
+              selectedNodes.includes(e.target),
+          );
+          useDesignerStore.setState({
+            clipboard: { nodes: nodesToCopy, edges: edgesToCopy },
+          });
         }
       }
 
@@ -334,14 +352,20 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       }
 
       // Ctrl/Cmd + Z 撤销
-      if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey) {
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.key === 'z' &&
+        !event.shiftKey
+      ) {
         event.preventDefault();
         useDesignerStore.getState().undo();
       }
 
       // Ctrl/Cmd + Shift + Z 或 Ctrl/Cmd + Y 重做
       if (
-        ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'z') ||
+        ((event.ctrlKey || event.metaKey) &&
+          event.shiftKey &&
+          event.key === 'z') ||
         ((event.ctrlKey || event.metaKey) && event.key === 'y')
       ) {
         event.preventDefault();
@@ -419,7 +443,9 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 /**
  * FlowCanvasWrapper - 包装组件提供 ReactFlowProvider
  */
-export const FlowCanvasWrapper: React.FC<Omit<FlowCanvasProps, 'onConnect'>> = (props) => {
+export const FlowCanvasWrapper: React.FC<Omit<FlowCanvasProps, 'onConnect'>> = (
+  props,
+) => {
   return (
     // ReactFlowProvider 应该在组件树的上层提供
     // 这里我们假设使用者已经在外层提供了 Provider

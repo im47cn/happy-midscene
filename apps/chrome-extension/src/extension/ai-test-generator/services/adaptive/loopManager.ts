@@ -4,19 +4,22 @@
  */
 
 import type {
+  ExecutionContext as AdaptiveExecutionContext,
   LoopConfig,
   LoopContext,
   LoopType,
-  ExecutionContext as AdaptiveExecutionContext,
 } from '../../types/adaptive';
-import { ConditionEngine, getConditionEngine } from './conditionEngine';
+import { type ConditionEngine, getConditionEngine } from './conditionEngine';
 
 /**
  * AI Agent 接口 (Midscene)
  */
 interface AIAgent {
   aiLocate?(prompt: string, options?: { deepThink?: boolean }): Promise<any>;
-  describeElementAtPoint?(center: { x: number; y: number }, options?: any): Promise<any>;
+  describeElementAtPoint?(
+    center: { x: number; y: number },
+    options?: any,
+  ): Promise<any>;
   dump?: { executions?: any[] };
 }
 
@@ -67,7 +70,7 @@ export class LoopManager {
   async execute(
     loop: LoopConfig,
     context: AdaptiveExecutionContext,
-    bodyFn: (iteration: number, item?: any) => Promise<void>
+    bodyFn: (iteration: number, item?: any) => Promise<void>,
   ): Promise<LoopExecutionResult> {
     const startTime = performance.now();
 
@@ -94,7 +97,9 @@ export class LoopManager {
     } catch (error) {
       return {
         completed: false,
-        iterations: context.loopStack[context.loopStack.length - 1]?.currentIteration || 0,
+        iterations:
+          context.loopStack[context.loopStack.length - 1]?.currentIteration ||
+          0,
         duration: performance.now() - startTime,
         reason: 'error',
         error: error instanceof Error ? error : new Error(String(error)),
@@ -108,7 +113,7 @@ export class LoopManager {
   private async executeCountLoop(
     loop: LoopConfig,
     context: AdaptiveExecutionContext,
-    bodyFn: (iteration: number) => Promise<void>
+    bodyFn: (iteration: number) => Promise<void>,
   ): Promise<LoopExecutionResult> {
     const count = loop.count || 1;
     const maxIterations = Math.min(count, loop.maxIterations);
@@ -139,7 +144,9 @@ export class LoopManager {
       loopContext.currentIteration = i + 1;
 
       if (this.debug) {
-        console.log(`[LoopManager] Count loop iteration ${i + 1}/${maxIterations}`);
+        console.log(
+          `[LoopManager] Count loop iteration ${i + 1}/${maxIterations}`,
+        );
       }
 
       await bodyFn(i + 1);
@@ -161,7 +168,7 @@ export class LoopManager {
   private async executeWhileLoop(
     loop: LoopConfig,
     context: AdaptiveExecutionContext,
-    bodyFn: (iteration: number) => Promise<void>
+    bodyFn: (iteration: number) => Promise<void>,
   ): Promise<LoopExecutionResult> {
     const condition = loop.condition;
     if (!condition) {
@@ -213,7 +220,9 @@ export class LoopManager {
       loopContext.currentIteration = iteration + 1;
 
       if (this.debug) {
-        console.log(`[LoopManager] While loop iteration ${iteration + 1} (condition: true)`);
+        console.log(
+          `[LoopManager] While loop iteration ${iteration + 1} (condition: true)`,
+        );
       }
 
       await bodyFn(iteration + 1);
@@ -236,7 +245,7 @@ export class LoopManager {
   private async executeForEachLoop(
     loop: LoopConfig,
     context: AdaptiveExecutionContext,
-    bodyFn: (iteration: number, item: any) => Promise<void>
+    bodyFn: (iteration: number, item: any) => Promise<void>,
   ): Promise<LoopExecutionResult> {
     const collectionVar = loop.collection;
     const itemVar = loop.itemVar || 'item';
@@ -291,7 +300,10 @@ export class LoopManager {
       context.variables.set(itemVar, item);
 
       if (this.debug) {
-        console.log(`[LoopManager] ForEach loop iteration ${i + 1}/${maxIterations}, item:`, item);
+        console.log(
+          `[LoopManager] ForEach loop iteration ${i + 1}/${maxIterations}, item:`,
+          item,
+        );
       }
 
       await bodyFn(i + 1, item);
@@ -349,7 +361,9 @@ export class LoopManager {
   breakLoop(context: AdaptiveExecutionContext): void {
     const currentLoop = context.loopStack.pop();
     if (currentLoop && this.debug) {
-      console.log(`[LoopManager] Breaking loop ${currentLoop.loopId} at iteration ${currentLoop.currentIteration}`);
+      console.log(
+        `[LoopManager] Breaking loop ${currentLoop.loopId} at iteration ${currentLoop.currentIteration}`,
+      );
     }
   }
 
@@ -359,7 +373,9 @@ export class LoopManager {
   continueLoop(context: AdaptiveExecutionContext): void {
     const currentLoop = context.loopStack[context.loopStack.length - 1];
     if (currentLoop && this.debug) {
-      console.log(`[LoopManager] Continuing loop ${currentLoop.loopId} (skipping iteration ${currentLoop.currentIteration})`);
+      console.log(
+        `[LoopManager] Continuing loop ${currentLoop.loopId} (skipping iteration ${currentLoop.currentIteration})`,
+      );
     }
   }
 }
@@ -389,7 +405,7 @@ export async function executeLoop(
   loop: LoopConfig,
   context: AdaptiveExecutionContext,
   bodyFn: (iteration: number, item?: any) => Promise<void>,
-  agent?: AIAgent
+  agent?: AIAgent,
 ): Promise<LoopExecutionResult> {
   const manager = getLoopManager(agent);
   return manager.execute(loop, context, bodyFn);

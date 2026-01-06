@@ -5,9 +5,9 @@
  */
 
 import type { Version, VersionDiff } from '../../types/collaboration';
-import type { IVersionControl } from './interfaces';
-import { diffEngine } from './diffEngine';
 import { auditLogger } from './auditLogger';
+import { diffEngine } from './diffEngine';
+import type { IVersionControl } from './interfaces';
 
 /**
  * Version storage structure
@@ -46,7 +46,7 @@ export class VersionControl implements IVersionControl {
     fileId: string,
     content: string,
     message: string,
-    author: string
+    author: string,
   ): Promise<Version> {
     const id = this.generateId();
     const now = Date.now();
@@ -186,7 +186,7 @@ export class VersionControl implements IVersionControl {
       fileId,
       version.content,
       `Revert to ${version.version}`,
-      version.author // In production, use actual user
+      version.author, // In production, use actual user
     );
 
     fileVersions.currentVersion = newVersion.id;
@@ -225,7 +225,7 @@ export class VersionControl implements IVersionControl {
    */
   async compareWithCurrent(
     fileId: string,
-    versionId: string
+    versionId: string,
   ): Promise<VersionDiff | null> {
     const current = await this.getLatest(fileId);
     const previous = await this.getVersion(versionId);
@@ -242,14 +242,16 @@ export class VersionControl implements IVersionControl {
    */
   async getByVersionString(
     fileId: string,
-    versionString: string
+    versionString: string,
   ): Promise<Version | null> {
     const fileVersions = this.storage.versions.get(fileId);
     if (!fileVersions) {
       return null;
     }
 
-    const version = fileVersions.versions.find((v) => v.version === versionString);
+    const version = fileVersions.versions.find(
+      (v) => v.version === versionString,
+    );
     return version ? { ...version } : null;
   }
 

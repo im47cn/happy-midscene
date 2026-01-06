@@ -3,30 +3,31 @@
  * 工具栏组件 - 提供文件操作、编辑、视图控制等功能
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
 import {
-  SaveOutlined,
-  ExportOutlined,
-  ImportOutlined,
-  UndoOutlined,
-  RedoOutlined,
-  DeleteOutlined,
-  CopyOutlined,
-  ZoomInOutlined,
-  ZoomOutOutlined,
-  FullscreenOutlined,
+  AppstoreOutlined,
   CheckOutlined,
   CloseOutlined,
-  EyeOutlined,
-  EyeInvisibleOutlined,
-  QuestionCircleOutlined,
+  CopyOutlined,
+  DeleteOutlined,
   DownOutlined,
-  AppstoreOutlined,
+  ExportOutlined,
+  EyeInvisibleOutlined,
+  EyeOutlined,
+  FullscreenOutlined,
+  ImportOutlined,
+  QuestionCircleOutlined,
+  RedoOutlined,
+  SaveOutlined,
+  UndoOutlined,
+  ZoomInOutlined,
+  ZoomOutOutlined,
 } from '@ant-design/icons';
+import { useReactFlow } from '@xyflow/react';
 import { Button, Divider, Dropdown, Space, Tooltip, message } from 'antd';
 import type { MenuProps } from 'antd';
+import type React from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDesignerStore } from '../store';
-import { useReactFlow } from '@xyflow/react';
 
 export interface ToolbarProps {
   /** 是否只读模式 */
@@ -72,7 +73,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setZoom,
   } = useDesignerStore();
 
-  const [validationStatus, setValidationStatus] = useState<'idle' | 'valid' | 'invalid'>('idle');
+  const [validationStatus, setValidationStatus] = useState<
+    'idle' | 'valid' | 'invalid'
+  >('idle');
 
   /**
    * 处理保存
@@ -95,7 +98,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         onExport(key as 'yaml' | 'json');
       }
     },
-    [onExport]
+    [onExport],
   );
 
   /**
@@ -217,7 +220,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       onHelp();
     } else {
       // 默认显示帮助信息
-      message.info('快捷键: Delete=删除, Ctrl+C=复制, Ctrl+V=粘贴, Ctrl+Z=撤销, Ctrl+Y=重做');
+      message.info(
+        '快捷键: Delete=删除, Ctrl+C=复制, Ctrl+V=粘贴, Ctrl+Z=撤销, Ctrl+Y=重做',
+      );
     }
   }, [onHelp]);
 
@@ -304,14 +309,26 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           />
         </Tooltip>
 
-        <Dropdown menu={{ onClick: handleExportMenuClick, items: exportMenuItems }} disabled={!flow || readOnly}>
-          <Button type="text" icon={<ExportOutlined />} disabled={!flow || readOnly}>
+        <Dropdown
+          menu={{ onClick: handleExportMenuClick, items: exportMenuItems }}
+          disabled={!flow || readOnly}
+        >
+          <Button
+            type="text"
+            icon={<ExportOutlined />}
+            disabled={!flow || readOnly}
+          >
             <DownOutlined />
           </Button>
         </Dropdown>
 
         <Tooltip title="导入">
-          <Button type="text" icon={<ImportOutlined />} onClick={handleImport} disabled={readOnly} />
+          <Button
+            type="text"
+            icon={<ImportOutlined />}
+            onClick={handleImport}
+            disabled={readOnly}
+          />
         </Tooltip>
       </Space>
 
@@ -320,11 +337,21 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       {/* 编辑操作组 */}
       <Space size="small">
         <Tooltip title="撤销 (Ctrl+Z)">
-          <Button type="text" icon={<UndoOutlined />} onClick={handleUndo} disabled={!canUndo || readOnly} />
+          <Button
+            type="text"
+            icon={<UndoOutlined />}
+            onClick={handleUndo}
+            disabled={!canUndo || readOnly}
+          />
         </Tooltip>
 
         <Tooltip title="重做 (Ctrl+Y)">
-          <Button type="text" icon={<RedoOutlined />} onClick={handleRedo} disabled={!canRedo || readOnly} />
+          <Button
+            type="text"
+            icon={<RedoOutlined />}
+            onClick={handleRedo}
+            disabled={!canRedo || readOnly}
+          />
         </Tooltip>
 
         <Tooltip title="复制选中节点 (Ctrl+C)">
@@ -352,11 +379,19 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       {/* 视图操作组 */}
       <Space size="small">
         <Tooltip title="放大">
-          <Button type="text" icon={<ZoomInOutlined />} onClick={handleZoomIn} />
+          <Button
+            type="text"
+            icon={<ZoomInOutlined />}
+            onClick={handleZoomIn}
+          />
         </Tooltip>
 
         <Tooltip title="缩小">
-          <Button type="text" icon={<ZoomOutOutlined />} onClick={handleZoomOut} />
+          <Button
+            type="text"
+            icon={<ZoomOutOutlined />}
+            onClick={handleZoomOut}
+          />
         </Tooltip>
 
         <Dropdown menu={{ items: viewMenuItems }}>
@@ -395,7 +430,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       {/* 帮助按钮 */}
       <Tooltip title="帮助">
-        <Button type="text" icon={<QuestionCircleOutlined />} onClick={handleHelp} />
+        <Button
+          type="text"
+          icon={<QuestionCircleOutlined />}
+          onClick={handleHelp}
+        />
       </Tooltip>
     </div>
   );

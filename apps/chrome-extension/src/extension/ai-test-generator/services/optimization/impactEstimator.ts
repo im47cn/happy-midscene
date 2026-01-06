@@ -45,11 +45,12 @@ class ImpactEstimator implements IImpactEstimator {
    * Estimate time savings from a recommendation
    */
   estimateTimeSaving(recommendation: Recommendation): number {
-    const coefficient =
-      IMPACT_COEFFICIENTS[recommendation.type]?.time || 0.1;
+    const coefficient = IMPACT_COEFFICIENTS[recommendation.type]?.time || 0.1;
 
     // Base saving depends on priority and affected cases
-    const priorityMultiplier = this.getPriorityMultiplier(recommendation.priority);
+    const priorityMultiplier = this.getPriorityMultiplier(
+      recommendation.priority,
+    );
     const caseCount = recommendation.relatedCases.length || 1;
 
     // Calculate saving per test execution
@@ -66,7 +67,9 @@ class ImpactEstimator implements IImpactEstimator {
     const coefficient =
       IMPACT_COEFFICIENTS[recommendation.type]?.quality || 0.1;
 
-    const priorityMultiplier = this.getPriorityMultiplier(recommendation.priority);
+    const priorityMultiplier = this.getPriorityMultiplier(
+      recommendation.priority,
+    );
 
     // Quality improvement as a percentage
     const improvement = coefficient * priorityMultiplier * 100;

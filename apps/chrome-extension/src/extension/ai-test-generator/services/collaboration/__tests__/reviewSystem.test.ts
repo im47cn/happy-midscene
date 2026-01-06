@@ -2,9 +2,9 @@
  * Review System Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { ReviewSystem } from '../reviewSystem';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { CreateReviewData } from '../interfaces';
+import { ReviewSystem } from '../reviewSystem';
 
 describe('ReviewSystem', () => {
   let system: ReviewSystem;
@@ -240,7 +240,9 @@ describe('ReviewSystem', () => {
 
       await system.submitReview(r1.id);
 
-      const pending = await system.listReviews('workspace1', { status: 'pending' });
+      const pending = await system.listReviews('workspace1', {
+        status: 'pending',
+      });
       expect(pending).toHaveLength(1);
 
       const draft = await system.listReviews('workspace1', { status: 'draft' });
@@ -284,7 +286,9 @@ describe('ReviewSystem', () => {
 
       const updated = await system.getReview(review.id);
       expect(updated?.reviewers).toHaveLength(2);
-      expect(updated?.reviewers.find((r) => r.userId === 'user3')?.status).toBe('pending');
+      expect(updated?.reviewers.find((r) => r.userId === 'user3')?.status).toBe(
+        'pending',
+      );
     });
   });
 
@@ -302,7 +306,9 @@ describe('ReviewSystem', () => {
 
       const updated = await system.getReview(review.id);
       expect(updated?.reviewers).toHaveLength(1);
-      expect(updated?.reviewers.find((r) => r.userId === 'user2')).toBeUndefined();
+      expect(
+        updated?.reviewers.find((r) => r.userId === 'user2'),
+      ).toBeUndefined();
     });
   });
 

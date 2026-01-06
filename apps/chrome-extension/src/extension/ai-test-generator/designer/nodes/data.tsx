@@ -3,8 +3,8 @@
  * 数据节点 - SetVariable, ExtractData, ExternalData
  */
 
-import React, { memo } from 'react';
 import type { NodeProps } from '@xyflow/react';
+import React, { memo } from 'react';
 import { BaseNode } from './BaseNode';
 
 /**
@@ -35,7 +35,9 @@ SetVariableNode.displayName = 'SetVariableNode';
  */
 export const ExtractDataNode = memo<NodeProps>((props) => {
   const { data } = props;
-  const config = data.config as { target?: string; extractType?: string; variable?: string } | undefined;
+  const config = data.config as
+    | { target?: string; extractType?: string; variable?: string }
+    | undefined;
   const target = config?.target || '';
   const extractType = config?.extractType || 'text';
   const variable = config?.variable || '';
@@ -59,7 +61,9 @@ ExtractDataNode.displayName = 'ExtractDataNode';
  */
 export const ExternalDataNode = memo<NodeProps>((props) => {
   const { data } = props;
-  const config = data.config as { source?: string; format?: string; variable?: string } | undefined;
+  const config = data.config as
+    | { source?: string; format?: string; variable?: string }
+    | undefined;
   const source = config?.source || '';
   const format = config?.format || 'json';
   const variable = config?.variable || '';

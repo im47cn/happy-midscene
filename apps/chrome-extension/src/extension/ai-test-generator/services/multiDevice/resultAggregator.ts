@@ -127,7 +127,9 @@ export class ResultAggregator {
   /**
    * Calculate aggregated statistics
    */
-  private calculateStats(result: CollaborativeExecutionResult): AggregatedStats {
+  private calculateStats(
+    result: CollaborativeExecutionResult,
+  ): AggregatedStats {
     let totalSteps = 0;
     let successfulSteps = 0;
     let failedSteps = 0;
@@ -290,7 +292,10 @@ export class ResultAggregator {
     // Remove variable parts like numbers, timestamps, IDs
     return error
       .replace(/\d{4}-\d{2}-\d{2}T[\d:.]+Z/g, '<timestamp>')
-      .replace(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/gi, '<uuid>')
+      .replace(
+        /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/gi,
+        '<uuid>',
+      )
       .replace(/\b\d+\b/g, '<number>')
       .replace(/['"][^'"]+['"]/g, '<string>')
       .trim()
@@ -300,19 +305,28 @@ export class ResultAggregator {
   /**
    * Infer potential cause from error pattern
    */
-  private inferCause(pattern: string, affectedCount: number): string | undefined {
+  private inferCause(
+    pattern: string,
+    affectedCount: number,
+  ): string | undefined {
     const lowerPattern = pattern.toLowerCase();
 
     if (lowerPattern.includes('timeout')) {
       return 'Network or element timeout';
     }
-    if (lowerPattern.includes('not found') || lowerPattern.includes('no such element')) {
+    if (
+      lowerPattern.includes('not found') ||
+      lowerPattern.includes('no such element')
+    ) {
       return 'Element not found on page';
     }
     if (lowerPattern.includes('network') || lowerPattern.includes('fetch')) {
       return 'Network connectivity issue';
     }
-    if (lowerPattern.includes('permission') || lowerPattern.includes('denied')) {
+    if (
+      lowerPattern.includes('permission') ||
+      lowerPattern.includes('denied')
+    ) {
       return 'Permission or access denied';
     }
     if (affectedCount > 1) {

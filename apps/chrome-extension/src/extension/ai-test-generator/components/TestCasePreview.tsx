@@ -29,9 +29,9 @@ import {
   Typography,
 } from 'antd';
 import { useMemo, useState } from 'react';
+import { useI18n } from '../../../i18n';
 import { useGeneratorStore } from '../store';
 import type { TaskStep, TestCase } from '../types';
-import { useI18n } from '../../../i18n';
 
 const { Text, Title } = Typography;
 const { Panel } = Collapse;

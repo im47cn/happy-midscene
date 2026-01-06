@@ -3,14 +3,17 @@
  * 状态检测器 - 检测页面状态 (logged_in, loading, error, empty, custom)
  */
 
-import type { PageState, EvaluateOptions } from '../../types/adaptive';
+import type { EvaluateOptions, PageState } from '../../types/adaptive';
 
 /**
  * AI Agent 接口 (Midscene)
  */
 interface AIAgent {
   aiLocate?(prompt: string, options?: { deepThink?: boolean }): Promise<any>;
-  describeElementAtPoint?(center: { x: number; y: number }, options?: any): Promise<any>;
+  describeElementAtPoint?(
+    center: { x: number; y: number },
+    options?: any,
+  ): Promise<any>;
   dump?: { executions?: any[] };
 }
 
@@ -59,7 +62,7 @@ export class StateDetector {
    */
   async detect(
     state: PageState,
-    options: EvaluateOptions = {}
+    options: EvaluateOptions = {},
   ): Promise<boolean> {
     const result = await detectWithDetails(state, this.agent, {
       timeout: options.timeout ?? this.timeout,
@@ -73,7 +76,7 @@ export class StateDetector {
    */
   async detectWithDetails(
     state: PageState,
-    options: EvaluateOptions = {}
+    options: EvaluateOptions = {},
   ): Promise<StateDetectionResult> {
     return detectWithDetails(state, this.agent, {
       timeout: options.timeout ?? this.timeout,
@@ -86,15 +89,15 @@ export class StateDetector {
    */
   async detectAll(
     states: PageState[],
-    options: EvaluateOptions = {}
+    options: EvaluateOptions = {},
   ): Promise<Map<PageState, StateDetectionResult>> {
     const results = new Map<PageState, StateDetectionResult>();
 
     await Promise.all(
-      states.map(async state => {
+      states.map(async (state) => {
         const result = await this.detectWithDetails(state, options);
         results.set(state, result);
-      })
+      }),
     );
 
     return results;
@@ -165,9 +168,7 @@ const STATE_DETECTION_RULES: Record<
       '.skeleton',
       '[role="progressbar"]',
     ],
-    textPatterns: [
-      /loading|加载中|请稍候|wait/i,
-    ],
+    textPatterns: [/loading|加载中|请稍候|wait/i],
     aiPrompts: [
       'Is there a loading spinner, progress bar, or skeleton loader visible?',
       'Is the page currently loading content?',
@@ -215,9 +216,7 @@ const STATE_DETECTION_RULES: Record<
   custom: {
     selectors: [],
     textPatterns: [],
-    aiPrompts: [
-      'Describe the current state of the page',
-    ],
+    aiPrompts: ['Describe the current state of the page'],
   },
 };
 
@@ -227,7 +226,7 @@ const STATE_DETECTION_RULES: Record<
 async function detectWithDetails(
   state: PageState,
   agent: AIAgent | null,
-  options: { timeout: number; debug?: boolean }
+  options: { timeout: number; debug?: boolean },
 ): Promise<StateDetectionResult> {
   const startTime = performance.now();
   const rules = STATE_DETECTION_RULES[state];
@@ -272,7 +271,7 @@ async function detectWithDetails(
 async function detectViaDOM(
   state: PageState,
   agent: AIAgent | null,
-  options: { timeout: number }
+  options: { timeout: number },
 ): Promise<StateDetectionResult> {
   const rules = STATE_DETECTION_RULES[state];
 
@@ -283,7 +282,7 @@ async function detectViaDOM(
         const result = await Promise.race([
           agent.aiLocate!(selector, { deepThink: false }),
           new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout')), options.timeout / 2)
+            setTimeout(() => reject(new Error('Timeout')), options.timeout / 2),
           ),
         ]);
 
@@ -314,7 +313,7 @@ async function detectViaDOM(
 async function detectViaText(
   state: PageState,
   agent: AIAgent | null,
-  options: { timeout: number }
+  options: { timeout: number },
 ): Promise<StateDetectionResult> {
   const rules = STATE_DETECTION_RULES[state];
 
@@ -327,7 +326,7 @@ async function detectViaText(
         const result = await Promise.race([
           agent.aiLocate!(prompt, { deepThink: false }),
           new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout')), options.timeout / 2)
+            setTimeout(() => reject(new Error('Timeout')), options.timeout / 2),
           ),
         ]);
 
@@ -358,7 +357,7 @@ async function detectViaText(
 async function detectViaAI(
   state: PageState,
   agent: AIAgent,
-  options: { timeout: number }
+  options: { timeout: number },
 ): Promise<StateDetectionResult> {
   const rules = STATE_DETECTION_RULES[state];
 
@@ -367,7 +366,7 @@ async function detectViaAI(
       const result = await Promise.race([
         agent.aiLocate!(prompt, { deepThink: true }),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Timeout')), options.timeout)
+          setTimeout(() => reject(new Error('Timeout')), options.timeout),
         ),
       ]);
 
@@ -414,7 +413,7 @@ export function getStateDetector(agent?: AIAgent): StateDetector {
  */
 export async function detectPageState(
   state: PageState,
-  agent?: AIAgent
+  agent?: AIAgent,
 ): Promise<boolean> {
   const detector = getStateDetector(agent);
   return detector.detect(state);
@@ -424,7 +423,7 @@ export async function detectPageState(
  * 获取当前页面状态快捷函数
  */
 export async function getCurrentPageState(
-  agent?: AIAgent
+  agent?: AIAgent,
 ): Promise<PageState | null> {
   const detector = getStateDetector(agent);
   const result = await detector.getCurrentPageState();

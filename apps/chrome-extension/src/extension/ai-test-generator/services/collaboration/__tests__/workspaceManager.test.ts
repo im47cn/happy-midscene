@@ -2,9 +2,12 @@
  * Workspace Manager Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type {
+  CreateWorkspaceData,
+  Workspace,
+} from '../../../types/collaboration';
 import { WorkspaceManager } from '../workspaceManager';
-import type { Workspace, CreateWorkspaceData } from '../../../types/collaboration';
 
 describe('WorkspaceManager', () => {
   let manager: WorkspaceManager;
@@ -144,8 +147,9 @@ describe('WorkspaceManager', () => {
     });
 
     it('should throw error for non-existent workspace', async () => {
-      await expect(manager.update('non-existent', { name: 'New Name' }))
-        .rejects.toThrow('Workspace not found');
+      await expect(
+        manager.update('non-existent', { name: 'New Name' }),
+      ).rejects.toThrow('Workspace not found');
     });
   });
 
@@ -163,8 +167,9 @@ describe('WorkspaceManager', () => {
     });
 
     it('should throw error for non-existent workspace', async () => {
-      await expect(manager.delete('non-existent'))
-        .rejects.toThrow('Workspace not found');
+      await expect(manager.delete('non-existent')).rejects.toThrow(
+        'Workspace not found',
+      );
     });
   });
 
@@ -198,12 +203,14 @@ describe('WorkspaceManager', () => {
 
       const updated = await manager.get(workspace.id);
       expect(updated?.members).toHaveLength(2);
-      expect(updated?.members.find((m) => m.userId === 'user2')?.role).toBe('editor');
+      expect(updated?.members.find((m) => m.userId === 'user2')?.role).toBe(
+        'editor',
+      );
     });
 
     it('should throw error for non-existent workspace', async () => {
       await expect(
-        manager.addMember('non-existent', 'user2', 'editor')
+        manager.addMember('non-existent', 'user2', 'editor'),
       ).rejects.toThrow('Workspace not found');
     });
 
@@ -214,7 +221,7 @@ describe('WorkspaceManager', () => {
       });
 
       await expect(
-        manager.addMember(workspace.id, 'user1', 'editor')
+        manager.addMember(workspace.id, 'user1', 'editor'),
       ).rejects.toThrow('User is already a member');
     });
   });
@@ -231,7 +238,9 @@ describe('WorkspaceManager', () => {
 
       const updated = await manager.get(workspace.id);
       expect(updated?.members).toHaveLength(1);
-      expect(updated?.members.find((m) => m.userId === 'user2')).toBeUndefined();
+      expect(
+        updated?.members.find((m) => m.userId === 'user2'),
+      ).toBeUndefined();
     });
 
     it('should not allow removing owner', async () => {
@@ -240,9 +249,9 @@ describe('WorkspaceManager', () => {
         ownerId: 'user1',
       });
 
-      await expect(
-        manager.removeMember(workspace.id, 'user1')
-      ).rejects.toThrow('Cannot remove workspace owner');
+      await expect(manager.removeMember(workspace.id, 'user1')).rejects.toThrow(
+        'Cannot remove workspace owner',
+      );
     });
   });
 
@@ -257,7 +266,9 @@ describe('WorkspaceManager', () => {
       await manager.updateMemberRole(workspace.id, 'user2', 'admin');
 
       const updated = await manager.get(workspace.id);
-      expect(updated?.members.find((m) => m.userId === 'user2')?.role).toBe('admin');
+      expect(updated?.members.find((m) => m.userId === 'user2')?.role).toBe(
+        'admin',
+      );
     });
 
     it('should not allow changing owner role', async () => {
@@ -267,7 +278,7 @@ describe('WorkspaceManager', () => {
       });
 
       await expect(
-        manager.updateMemberRole(workspace.id, 'user1', 'admin')
+        manager.updateMemberRole(workspace.id, 'user1', 'admin'),
       ).rejects.toThrow('Cannot change owner role');
     });
   });

@@ -42,7 +42,10 @@ const { Text } = Typography;
 /**
  * Category display configuration
  */
-const CATEGORY_CONFIG: Record<SensitiveCategory, { color: string; label: string }> = {
+const CATEGORY_CONFIG: Record<
+  SensitiveCategory,
+  { color: string; label: string }
+> = {
   credential: { color: 'red', label: '凭证' },
   pii: { color: 'orange', label: '个人信息' },
   financial: { color: 'gold', label: '金融' },
@@ -98,8 +101,12 @@ interface RuleTesterProps {
  */
 export const RuleTester: React.FC<RuleTesterProps> = ({ onClose }) => {
   const [testInput, setTestInput] = useState('');
-  const [detectionResults, setDetectionResults] = useState<DetectionResult[]>([]);
-  const [maskingResult, setMaskingResult] = useState<TextMaskingResult | null>(null);
+  const [detectionResults, setDetectionResults] = useState<DetectionResult[]>(
+    [],
+  );
+  const [maskingResult, setMaskingResult] = useState<TextMaskingResult | null>(
+    null,
+  );
   const [selectedRules, setSelectedRules] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -280,7 +287,13 @@ export const RuleTester: React.FC<RuleTesterProps> = ({ onClose }) => {
       >
         {/* Input Section */}
         <div style={{ marginBottom: 16 }}>
-          <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
+          <div
+            style={{
+              marginBottom: 8,
+              display: 'flex',
+              justifyContent: 'space-between',
+            }}
+          >
             <span>测试文本</span>
             <Space>
               <Select
@@ -288,7 +301,10 @@ export const RuleTester: React.FC<RuleTesterProps> = ({ onClose }) => {
                 placeholder="加载示例"
                 style={{ width: 150 }}
                 onChange={handleLoadSample}
-                options={SAMPLE_DATA.map((s) => ({ value: s.value, label: s.label }))}
+                options={SAMPLE_DATA.map((s) => ({
+                  value: s.value,
+                  label: s.label,
+                }))}
               />
               <Button size="small" onClick={handleClear}>
                 清空
@@ -329,16 +345,30 @@ export const RuleTester: React.FC<RuleTesterProps> = ({ onClose }) => {
               <Statistic
                 title="检测命中"
                 value={detectionResults.length}
-                prefix={detectionResults.length > 0 ? <WarningOutlined style={{ color: '#faad14' }} /> : null}
-                valueStyle={{ fontSize: 20, color: detectionResults.length > 0 ? '#faad14' : undefined }}
+                prefix={
+                  detectionResults.length > 0 ? (
+                    <WarningOutlined style={{ color: '#faad14' }} />
+                  ) : null
+                }
+                valueStyle={{
+                  fontSize: 20,
+                  color: detectionResults.length > 0 ? '#faad14' : undefined,
+                }}
               />
             </Col>
             <Col span={6}>
               <Statistic
                 title="脱敏处理"
                 value={maskingResult?.matches.length || 0}
-                prefix={maskingResult?.matches.length ? <CheckCircleOutlined style={{ color: '#52c41a' }} /> : null}
-                valueStyle={{ fontSize: 20, color: maskingResult?.matches.length ? '#52c41a' : undefined }}
+                prefix={
+                  maskingResult?.matches.length ? (
+                    <CheckCircleOutlined style={{ color: '#52c41a' }} />
+                  ) : null
+                }
+                valueStyle={{
+                  fontSize: 20,
+                  color: maskingResult?.matches.length ? '#52c41a' : undefined,
+                }}
               />
             </Col>
             <Col span={6}>
@@ -379,16 +409,29 @@ export const RuleTester: React.FC<RuleTesterProps> = ({ onClose }) => {
               <>
                 <Table
                   size="small"
-                  dataSource={maskingResult.matches.map((m, i) => ({ ...m, key: i }))}
+                  dataSource={maskingResult.matches.map((m, i) => ({
+                    ...m,
+                    key: i,
+                  }))}
                   columns={maskingColumns}
                   pagination={false}
                   scroll={{ y: 200 }}
                   style={{ marginBottom: 16 }}
                 />
 
-                <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
+                <div
+                  style={{
+                    marginBottom: 8,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                  }}
+                >
                   <span>脱敏后文本</span>
-                  <Button size="small" icon={<CopyOutlined />} onClick={handleCopyResult}>
+                  <Button
+                    size="small"
+                    icon={<CopyOutlined />}
+                    onClick={handleCopyResult}
+                  >
                     复制
                   </Button>
                 </div>

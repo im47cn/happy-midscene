@@ -4,17 +4,20 @@
  */
 
 import type {
-  AdaptiveTestCase,
-  AdaptiveStep,
-  LoopConfig,
   Action,
-  VariableOperation,
-  ValidationResult,
+  AdaptiveStep,
+  AdaptiveTestCase,
+  LoopConfig,
   ParseOptions,
   SyntaxNode,
+  ValidationResult,
+  VariableOperation,
 } from '../../types/adaptive';
 import { DEFAULT_ADAPTIVE_CONFIG } from '../../types/adaptive';
-import { parseConditionExpression, parseNaturalLanguageCondition } from './expressionParser';
+import {
+  parseConditionExpression,
+  parseNaturalLanguageCondition,
+} from './expressionParser';
 
 /**
  * 解析上下文
@@ -46,9 +49,13 @@ function generateId(): string {
 /**
  * 解析 YAML frontmatter
  */
-function parseFrontmatter(lines: string[]): { variables: Record<string, any>; config: any; endIndex: number } {
+function parseFrontmatter(lines: string[]): {
+  variables: Record<string, any>;
+  config: any;
+  endIndex: number;
+} {
   const variables: Record<string, any> = {};
-  let config: any = {};
+  const config: any = {};
   let endIndex = 0;
 
   // Check for YAML frontmatter
@@ -65,26 +72,30 @@ function parseFrontmatter(lines: string[]): { variables: Record<string, any>; co
       endIndex = yamlLine + 1;
 
       // Simple YAML parsing
-      const varMatch = yamlContent.match(/variables:\s*\n((?:  .+\n*)+)/);
+      const varMatch = yamlContent.match(/variables:\s*\n((?: {2}.+\n*)+)/);
       if (varMatch) {
         const varLines = varMatch[1].trim().split('\n');
         for (const line of varLines) {
           const match = line.match(/^\s*(\w+):\s*(.+)$/);
           if (match) {
             const value = match[2].trim();
-            variables[match[1]] = isNaN(Number(value)) ? value.replace(/"/g, '') : Number(value);
+            variables[match[1]] = isNaN(Number(value))
+              ? value.replace(/"/g, '')
+              : Number(value);
           }
         }
       }
 
-      const configMatch = yamlContent.match(/config:\s*\n((?:  .+\n*)+)/);
+      const configMatch = yamlContent.match(/config:\s*\n((?: {2}.+\n*)+)/);
       if (configMatch) {
         const configLines = configMatch[1].trim().split('\n');
         for (const line of configLines) {
           const match = line.match(/^\s*(\w+):\s*(.+)$/);
           if (match) {
             const value = match[2].trim();
-            config[match[1]] = isNaN(Number(value)) ? value === 'true' : Number(value);
+            config[match[1]] = isNaN(Number(value))
+              ? value === 'true'
+              : Number(value);
           }
         }
       }
@@ -97,7 +108,9 @@ function parseFrontmatter(lines: string[]): { variables: Record<string, any>; co
 /**
  * 解析行类型
  */
-function parseLineType(line: string): { type: IndentStep['type']; content: string } | null {
+function parseLineType(
+  line: string,
+): { type: IndentStep['type']; content: string } | null {
   const trimmed = line.trim();
 
   if (!trimmed || trimmed.startsWith('#')) {
@@ -116,12 +129,20 @@ function parseLineType(line: string): { type: IndentStep['type']; content: strin
   }
 
   // Loop keywords
-  if (trimmed.match(/^repeat\s+\d+\s+times/i) || trimmed.match(/^while\s+/i) || trimmed.match(/^forEach\s+/i)) {
+  if (
+    trimmed.match(/^repeat\s+\d+\s+times/i) ||
+    trimmed.match(/^while\s+/i) ||
+    trimmed.match(/^forEach\s+/i)
+  ) {
     return { type: 'loop', content: trimmed };
   }
 
   // Variable operations
-  if (trimmed.match(/^set\s+\w+\s*=/) || trimmed.match(/^extract\s+\w+\s+from/) || trimmed.match(/^increment\s+\w+/)) {
+  if (
+    trimmed.match(/^set\s+\w+\s*=/) ||
+    trimmed.match(/^extract\s+\w+\s+from/) ||
+    trimmed.match(/^increment\s+\w+/)
+  ) {
     return { type: 'variable', content: trimmed };
   }
 
@@ -143,7 +164,9 @@ function getIndentLevel(line: string): number {
 function parseAction(content: string): Action {
   // Click action
   if (content.match(/^点击\s+/) || content.match(/^click\s+/i)) {
-    const targetMatch = content.match(/(?:点击|click)\s+"([^"]+)"/) || content.match(/(?:点击|click)\s+(.+)$/);
+    const targetMatch =
+      content.match(/(?:点击|click)\s+"([^"]+)"/) ||
+      content.match(/(?:点击|click)\s+(.+)$/);
     return {
       type: 'click',
       target: targetMatch ? targetMatch[1].trim() : content,
@@ -153,7 +176,8 @@ function parseAction(content: string): Action {
   // Input action
   if (content.match(/^输入\s+/) || content.match(/^input\s+/i)) {
     const valueMatch = content.match(/"(?:[^"]+)"/);
-    const targetMatch = content.match(/into\s+"([^"]+)"/) || content.match(/into\s+(.+)$/);
+    const targetMatch =
+      content.match(/into\s+"([^"]+)"/) || content.match(/into\s+(.+)$/);
     return {
       type: 'input',
       target: targetMatch ? targetMatch[1].trim() : '',
@@ -163,7 +187,9 @@ function parseAction(content: string): Action {
 
   // Assert action
   if (content.match(/^断言\s+/) || content.match(/^assert\s+/i)) {
-    const targetMatch = content.match(/(?:断言|assert)\s+"([^"]+)"/) || content.match(/(?:断言|assert)\s+(.+)$/);
+    const targetMatch =
+      content.match(/(?:断言|assert)\s+"([^"]+)"/) ||
+      content.match(/(?:断言|assert)\s+(.+)$/);
     return {
       type: 'assert',
       target: targetMatch ? targetMatch[1].trim() : content,
@@ -172,7 +198,9 @@ function parseAction(content: string): Action {
 
   // Wait action
   if (content.match(/^等待\s+/) || content.match(/^wait\s+/i)) {
-    const targetMatch = content.match(/(?:等待|wait)\s+(\d+)\s*(s|sec|second|秒)/i);
+    const targetMatch = content.match(
+      /(?:等待|wait)\s+(\d+)\s*(s|sec|second|秒)/i,
+    );
     return {
       type: 'wait',
       target: targetMatch ? `${targetMatch[1]}s` : '1s',
@@ -182,7 +210,9 @@ function parseAction(content: string): Action {
 
   // Navigate action
   if (content.match(/^导航\s+/) || content.match(/^navigate\s+/i)) {
-    const targetMatch = content.match(/(?:导航|navigate)\s+(?:to\s+)?["']?([^"'\s]+)["']?/);
+    const targetMatch = content.match(
+      /(?:导航|navigate)\s+(?:to\s+)?["']?([^"'\s]+)["']?/,
+    );
     return {
       type: 'navigate',
       target: targetMatch ? targetMatch[1] : content,
@@ -200,7 +230,9 @@ function parseAction(content: string): Action {
 
   // Hover action
   if (content.match(/^悬停\s+/) || content.match(/^hover\s+/i)) {
-    const targetMatch = content.match(/(?:悬停|hover)\s+"([^"]+)"/) || content.match(/(?:悬停|hover)\s+(.+)$/);
+    const targetMatch =
+      content.match(/(?:悬停|hover)\s+"([^"]+)"/) ||
+      content.match(/(?:悬停|hover)\s+(.+)$/);
     return {
       type: 'hover',
       target: targetMatch ? targetMatch[1].trim() : content,
@@ -235,9 +267,9 @@ function parseLoopConfig(content: string): LoopConfig {
   if (countMatch) {
     return {
       type: 'count',
-      count: parseInt(countMatch[1], 10),
+      count: Number.parseInt(countMatch[1], 10),
       body: [],
-      maxIterations: parseInt(countMatch[1], 10) + 10,
+      maxIterations: Number.parseInt(countMatch[1], 10) + 10,
     };
   }
 
@@ -254,8 +286,9 @@ function parseLoopConfig(content: string): LoopConfig {
   }
 
   // ForEach loop: forEach TARGET as VAR
-  const forEachMatch = content.match(/forEach\s+"([^"]+)"\s+as\s+(\w+)/i) ||
-                      content.match(/forEach\s+(\S+)\s+as\s+(\w+)/i);
+  const forEachMatch =
+    content.match(/forEach\s+"([^"]+)"\s+as\s+(\w+)/i) ||
+    content.match(/forEach\s+(\S+)\s+as\s+(\w+)/i);
   if (forEachMatch) {
     return {
       type: 'forEach',
@@ -297,8 +330,9 @@ function parseVariableOperation(content: string): VariableOperation {
   }
 
   // Extract from page
-  const extractMatch = content.match(/^extract\s+(\w+)\s+from\s+"(.+)"$/) ||
-                        content.match(/^extract\s+(\w+)\s+from\s+(\S+)$/);
+  const extractMatch =
+    content.match(/^extract\s+(\w+)\s+from\s+"(.+)"$/) ||
+    content.match(/^extract\s+(\w+)\s+from\s+(\S+)$/);
   if (extractMatch) {
     return {
       operation: 'extract',
@@ -333,12 +367,20 @@ function buildSyntaxTree(steps: IndentStep[]): SyntaxNode[] {
 
   for (const step of steps) {
     const node: SyntaxNode = {
-      type: step.type === 'action' ? 'action' :
-            step.type === 'condition' ? 'condition' :
-            step.type === 'loop' ? 'loop' :
-            step.type === 'variable' ? 'variable' :
-            step.type === 'then' ? 'condition' :
-            step.type === 'else' ? 'else' : 'end',
+      type:
+        step.type === 'action'
+          ? 'action'
+          : step.type === 'condition'
+            ? 'condition'
+            : step.type === 'loop'
+              ? 'loop'
+              : step.type === 'variable'
+                ? 'variable'
+                : step.type === 'then'
+                  ? 'condition'
+                  : step.type === 'else'
+                    ? 'else'
+                    : 'end',
       content: step.content,
       indent: step.indent,
       lineNumber: step.lineNumber,
@@ -371,7 +413,10 @@ function buildSyntaxTree(steps: IndentStep[]): SyntaxNode[] {
 /**
  * 解析步骤为 AdaptiveStep
  */
-function parseStep(step: IndentStep, context: ParseContext): AdaptiveStep | null {
+function parseStep(
+  step: IndentStep,
+  context: ParseContext,
+): AdaptiveStep | null {
   const id = generateId();
 
   switch (step.type) {
@@ -435,7 +480,7 @@ function parseStep(step: IndentStep, context: ParseContext): AdaptiveStep | null
  */
 function organizeSteps(
   flatSteps: IndentStep[],
-  context: ParseContext
+  context: ParseContext,
 ): AdaptiveStep[] {
   const result: AdaptiveStep[] = [];
   const stack: { step: AdaptiveStep; indent: number }[] = [];
@@ -450,7 +495,10 @@ function organizeSteps(
     if (!step) continue;
 
     // Pop stack until we find parent
-    while (stack.length > 0 && stack[stack.length - 1].indent >= indentStep.indent) {
+    while (
+      stack.length > 0 &&
+      stack[stack.length - 1].indent >= indentStep.indent
+    ) {
       stack.pop();
     }
 
@@ -461,9 +509,11 @@ function organizeSteps(
       if (parent.type === 'condition' && parent.condition) {
         // Check if this is after an 'else' marker
         const elseIndex = flatSteps.findIndex(
-          s => s.lineNumber > indentStep.lineNumber && s.type === 'else'
+          (s) => s.lineNumber > indentStep.lineNumber && s.type === 'else',
         );
-        const beforeElse = elseIndex === -1 || flatSteps[elseIndex].lineNumber > indentStep.lineNumber;
+        const beforeElse =
+          elseIndex === -1 ||
+          flatSteps[elseIndex].lineNumber > indentStep.lineNumber;
 
         if (beforeElse) {
           parent.condition.thenSteps.push(step);
@@ -492,7 +542,7 @@ function organizeSteps(
  */
 export function parseAdaptiveTest(
   markdown: string,
-  options: ParseOptions = {}
+  options: ParseOptions = {},
 ): AdaptiveTestCase {
   const lines = markdown.split('\n');
 
@@ -509,7 +559,11 @@ export function parseAdaptiveTest(
       name = headingMatch[1].trim();
       // Get description from following lines
       for (let j = i + 1; j < lines.length; j++) {
-        if (lines[j]?.trim().startsWith('#') || lines[j]?.trim().startsWith('-')) break;
+        if (
+          lines[j]?.trim().startsWith('#') ||
+          lines[j]?.trim().startsWith('-')
+        )
+          break;
         if (lines[j]?.trim()) {
           description += (description ? ' ' : '') + lines[j]!.trim();
         }
@@ -587,7 +641,7 @@ export function parseAdaptiveTest(
  */
 export function validateAdaptiveTest(
   testCase: AdaptiveTestCase,
-  options: ParseOptions = {}
+  options: ParseOptions = {},
 ): ValidationResult {
   const errors: any[] = [];
   const warnings: any[] = [];
@@ -644,7 +698,7 @@ function validateStep(
   errors: any[],
   warnings: any[],
   depth: number,
-  maxDepth: number
+  maxDepth: number,
 ): void {
   // Check nesting depth
   if (depth > maxDepth) {
@@ -658,7 +712,9 @@ function validateStep(
 
   // Validate condition
   if (step.type === 'condition' && step.condition) {
-    const parseResult = parseNaturalLanguageCondition(step.condition.expression);
+    const parseResult = parseNaturalLanguageCondition(
+      step.condition.expression,
+    );
     if (!parseResult.success) {
       errors.push({
         type: 'syntax',
@@ -714,7 +770,10 @@ function validateStep(
       });
     }
 
-    if (step.variable.operation === 'set' && step.variable.value === undefined) {
+    if (
+      step.variable.operation === 'set' &&
+      step.variable.value === undefined
+    ) {
       warnings.push({
         type: 'maintainability',
         message: 'Variable set without a value',
@@ -734,9 +793,14 @@ export function buildParseTree(testCase: AdaptiveTestCase): SyntaxNode[] {
   function flattenSteps(inputSteps: AdaptiveStep[], indent = 0): void {
     for (const step of inputSteps) {
       steps.push({
-        type: step.type === 'action' ? 'action' :
-              step.type === 'condition' ? 'condition' :
-              step.type === 'loop' ? 'loop' : 'variable',
+        type:
+          step.type === 'action'
+            ? 'action'
+            : step.type === 'condition'
+              ? 'condition'
+              : step.type === 'loop'
+                ? 'loop'
+                : 'variable',
         content: step.description,
         indent: step.indent || indent,
         lineNumber: step.lineNumber || 0,
@@ -759,7 +823,9 @@ export function buildParseTree(testCase: AdaptiveTestCase): SyntaxNode[] {
 /**
  * 格式化测试用例为 Markdown
  */
-export function formatAdaptiveTestToMarkdown(testCase: AdaptiveTestCase): string {
+export function formatAdaptiveTestToMarkdown(
+  testCase: AdaptiveTestCase,
+): string {
   let md = `---\n`;
   md += `name: ${testCase.name}\n`;
   if (testCase.description) {

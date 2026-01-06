@@ -6,31 +6,31 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import type { BaselineInfo } from '../../../types/anomaly';
 import {
-  // Z-Score
-  calculateZScore,
-  detectZScoreAnomaly,
-  detectZScoreAnomalies,
-  calculateModifiedZScore,
-  calculateMAD,
+  calculateBollingerBands,
+  calculateEMA,
   // IQR
   calculateIQRStats,
-  detectIQRAnomaly,
-  detectIQRAnomalies,
-  getAnomalyPercentage,
+  calculateMAD,
+  calculateModifiedZScore,
+  calculateMovingStdDev,
   // Moving Average
   calculateSMA,
-  calculateEMA,
-  calculateMovingStdDev,
-  detectMovingAverageAnomaly,
-  calculateBollingerBands,
+  // Z-Score
+  calculateZScore,
   // Consecutive
   detectConsecutiveFailures,
   detectFlakyPattern,
+  detectIQRAnomalies,
+  detectIQRAnomaly,
+  detectMovingAverageAnomaly,
   detectPassRateChange,
+  detectZScoreAnomalies,
+  detectZScoreAnomaly,
+  getAnomalyPercentage,
   getFailureTrend,
 } from '../algorithms';
-import type { BaselineInfo } from '../../../types/anomaly';
 
 // ============================================================================
 // Helper Functions
@@ -49,7 +49,8 @@ function createBaselineFromData(data: number[]): BaselineInfo {
     };
   }
   const mean = data.reduce((sum, v) => sum + v, 0) / data.length;
-  const variance = data.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / data.length;
+  const variance =
+    data.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / data.length;
   const stdDev = Math.sqrt(variance);
   return {
     mean,
@@ -118,7 +119,9 @@ describe('Z-Score Detection', () => {
       const data = [10, 11, 10, 11, 10, 11];
       const baseline = createBaselineFromData(data);
       const testData = [10, 11, 50, 10, 11, 10, 60, 11];
-      const anomalies = detectZScoreAnomalies(testData, baseline, { threshold: 2 });
+      const anomalies = detectZScoreAnomalies(testData, baseline, {
+        threshold: 2,
+      });
       expect(anomalies.length).toBeGreaterThan(0);
     });
   });
@@ -291,7 +294,9 @@ describe('Consecutive Pattern Detection', () => {
         { passed: false, timestamp: 4 },
         { passed: false, timestamp: 5 },
       ];
-      const detection = detectConsecutiveFailures(results, { failureThreshold: 3 });
+      const detection = detectConsecutiveFailures(results, {
+        failureThreshold: 3,
+      });
       expect(detection.isAnomaly).toBe(true);
       expect(detection.consecutiveFailures).toBeGreaterThanOrEqual(3);
     });
@@ -303,7 +308,9 @@ describe('Consecutive Pattern Detection', () => {
         { passed: false, timestamp: 3 },
         { passed: true, timestamp: 4 },
       ];
-      const detection = detectConsecutiveFailures(results, { failureThreshold: 3 });
+      const detection = detectConsecutiveFailures(results, {
+        failureThreshold: 3,
+      });
       expect(detection.isAnomaly).toBe(false);
     });
   });
@@ -348,7 +355,11 @@ describe('Consecutive Pattern Detection', () => {
         timestamp: i + 11,
       }));
 
-      const detection = detectPassRateChange([...previousResults, ...currentResults], 10, 0.2);
+      const detection = detectPassRateChange(
+        [...previousResults, ...currentResults],
+        10,
+        0.2,
+      );
       expect(detection.hasChange).toBe(true);
       expect(detection.change).toBeLessThan(0); // Decline
     });

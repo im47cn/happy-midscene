@@ -4,16 +4,16 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  createMessageBatcher,
-  createMemoryPool,
-  createPerformanceMonitor,
-  createScreenshotCompressor,
+  type CompressionConfig,
   DEFAULT_COMPRESSION_CONFIG,
-  MessageBatcher,
   MemoryPool,
+  MessageBatcher,
   PerformanceMonitor,
   ScreenshotCompressor,
-  type CompressionConfig,
+  createMemoryPool,
+  createMessageBatcher,
+  createPerformanceMonitor,
+  createScreenshotCompressor,
 } from '../performance';
 
 describe('ScreenshotCompressor', () => {
@@ -25,7 +25,8 @@ describe('ScreenshotCompressor', () => {
 
   describe('compression', () => {
     it('should calculate base64 size correctly', () => {
-      const base64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      const base64 =
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
       const size = compressor['base64Size'](base64);
       expect(size).toBeGreaterThan(0);
     });
@@ -44,7 +45,8 @@ describe('ScreenshotCompressor', () => {
     });
 
     it('should handle PNG data URLs', async () => {
-      const pngBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      const pngBase64 =
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
       const result = await compressor.compress(pngBase64);
       expect(result.originalSize).toBeGreaterThan(0);
     });
@@ -52,7 +54,8 @@ describe('ScreenshotCompressor', () => {
 
   describe('caching', () => {
     it('should cache compression results', async () => {
-      const base64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      const base64 =
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
       const result1 = await compressor.compress(base64);
       const result2 = await compressor.compress(base64);
 

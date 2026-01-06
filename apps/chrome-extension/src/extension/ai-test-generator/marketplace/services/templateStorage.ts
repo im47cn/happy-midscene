@@ -47,7 +47,10 @@ export class TemplateStorage implements ITemplateStorage {
     } catch (error) {
       console.error(`Failed to save storage data for ${key}:`, error);
       // Handle quota exceeded error
-      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+      if (
+        error instanceof DOMException &&
+        error.name === 'QuotaExceededError'
+      ) {
         this.handleQuotaExceeded();
       }
     }
@@ -58,7 +61,10 @@ export class TemplateStorage implements ITemplateStorage {
    */
   private handleQuotaExceeded(): void {
     // Remove oldest history entries
-    const history = this.getStorageData<TemplateUsageHistory[]>(STORAGE_KEYS.HISTORY, []);
+    const history = this.getStorageData<TemplateUsageHistory[]>(
+      STORAGE_KEYS.HISTORY,
+      [],
+    );
     if (history.length > 10) {
       const trimmedHistory = history.slice(-10);
       this.setStorageData(STORAGE_KEYS.HISTORY, trimmedHistory);
@@ -69,7 +75,10 @@ export class TemplateStorage implements ITemplateStorage {
    * Get all templates from storage
    */
   private getTemplatesMap(): Map<string, LocalTemplate> {
-    const data = this.getStorageData<Record<string, LocalTemplate>>(STORAGE_KEYS.TEMPLATES, {});
+    const data = this.getStorageData<Record<string, LocalTemplate>>(
+      STORAGE_KEYS.TEMPLATES,
+      {},
+    );
     return new Map(Object.entries(data));
   }
 
@@ -115,7 +124,9 @@ export class TemplateStorage implements ITemplateStorage {
    */
   async getDownloadedTemplates(): Promise<LocalTemplate[]> {
     const map = this.getTemplatesMap();
-    return Array.from(map.values()).sort((a, b) => b.downloadedAt - a.downloadedAt);
+    return Array.from(map.values()).sort(
+      (a, b) => b.downloadedAt - a.downloadedAt,
+    );
   }
 
   /**
@@ -147,7 +158,7 @@ export class TemplateStorage implements ITemplateStorage {
   async recordUsage(
     id: string,
     parameters: Record<string, unknown>,
-    generatedYaml: string
+    generatedYaml: string,
   ): Promise<void> {
     // Update template usage stats
     const map = this.getTemplatesMap();
@@ -161,7 +172,10 @@ export class TemplateStorage implements ITemplateStorage {
     }
 
     // Add to history
-    const history = this.getStorageData<TemplateUsageHistory[]>(STORAGE_KEYS.HISTORY, []);
+    const history = this.getStorageData<TemplateUsageHistory[]>(
+      STORAGE_KEYS.HISTORY,
+      [],
+    );
     const historyEntry: TemplateUsageHistory = {
       id: `${id}-${Date.now()}`,
       templateId: id,
@@ -172,7 +186,10 @@ export class TemplateStorage implements ITemplateStorage {
     };
 
     // Keep only recent entries
-    const updatedHistory = [historyEntry, ...history].slice(0, MAX_HISTORY_ENTRIES);
+    const updatedHistory = [historyEntry, ...history].slice(
+      0,
+      MAX_HISTORY_ENTRIES,
+    );
     this.setStorageData(STORAGE_KEYS.HISTORY, updatedHistory);
   }
 
@@ -180,7 +197,10 @@ export class TemplateStorage implements ITemplateStorage {
    * Get usage history
    */
   async getUsageHistory(limit = 20): Promise<TemplateUsageHistory[]> {
-    const history = this.getStorageData<TemplateUsageHistory[]>(STORAGE_KEYS.HISTORY, []);
+    const history = this.getStorageData<TemplateUsageHistory[]>(
+      STORAGE_KEYS.HISTORY,
+      [],
+    );
     return history.slice(0, limit);
   }
 
@@ -212,8 +232,13 @@ export class TemplateStorage implements ITemplateStorage {
     estimatedSize: number;
   } {
     const templates = this.getTemplatesMap();
-    const history = this.getStorageData<TemplateUsageHistory[]>(STORAGE_KEYS.HISTORY, []);
-    const favorites = Array.from(templates.values()).filter((t) => t.isFavorite);
+    const history = this.getStorageData<TemplateUsageHistory[]>(
+      STORAGE_KEYS.HISTORY,
+      [],
+    );
+    const favorites = Array.from(templates.values()).filter(
+      (t) => t.isFavorite,
+    );
 
     let estimatedSize = 0;
     for (const key of Object.values(STORAGE_KEYS)) {
@@ -240,7 +265,10 @@ export class TemplateStorage implements ITemplateStorage {
     exportedAt: number;
   } {
     const templates = Array.from(this.getTemplatesMap().values());
-    const history = this.getStorageData<TemplateUsageHistory[]>(STORAGE_KEYS.HISTORY, []);
+    const history = this.getStorageData<TemplateUsageHistory[]>(
+      STORAGE_KEYS.HISTORY,
+      [],
+    );
 
     return {
       templates,
@@ -267,7 +295,10 @@ export class TemplateStorage implements ITemplateStorage {
     this.saveTemplatesMap(map);
 
     // Merge history
-    const existingHistory = this.getStorageData<TemplateUsageHistory[]>(STORAGE_KEYS.HISTORY, []);
+    const existingHistory = this.getStorageData<TemplateUsageHistory[]>(
+      STORAGE_KEYS.HISTORY,
+      [],
+    );
     const existingIds = new Set(existingHistory.map((h) => h.id));
     const newHistory = data.history.filter((h) => !existingIds.has(h.id));
     const mergedHistory = [...newHistory, ...existingHistory]

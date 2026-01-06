@@ -4,11 +4,11 @@
  */
 
 import type {
-  ConditionExpression,
   ExecutionContext as AdaptiveExecutionContext,
+  ConditionExpression,
   ElementCheck,
-  PageState,
   EvaluateOptions,
+  PageState,
 } from '../../types/adaptive';
 
 /**
@@ -26,7 +26,10 @@ export interface EvaluationResult {
  */
 interface AIAgent {
   aiLocate?(prompt: string, options?: { deepThink?: boolean }): Promise<any>;
-  describeElementAtPoint?(center: { x: number; y: number }, options?: any): Promise<any>;
+  describeElementAtPoint?(
+    center: { x: number; y: number },
+    options?: any,
+  ): Promise<any>;
   dump?: { executions?: any[] };
 }
 
@@ -69,7 +72,7 @@ export class ConditionEngine {
   async evaluate(
     expression: ConditionExpression | string,
     context: AdaptiveExecutionContext,
-    options: EvaluateOptions = {}
+    options: EvaluateOptions = {},
   ): Promise<EvaluationResult> {
     const startTime = performance.now();
 
@@ -77,7 +80,9 @@ export class ConditionEngine {
       // If expression is string, parse it first
       let parsedExpression: ConditionExpression;
       if (typeof expression === 'string') {
-        const { parseNaturalLanguageCondition } = await import('./expressionParser');
+        const { parseNaturalLanguageCondition } = await import(
+          './expressionParser'
+        );
         const parseResult = parseNaturalLanguageCondition(expression);
         if (!parseResult.success || !parseResult.result) {
           return {
@@ -93,7 +98,11 @@ export class ConditionEngine {
       }
 
       // Evaluate based on type
-      const value = await this.evaluateExpression(parsedExpression, context, options);
+      const value = await this.evaluateExpression(
+        parsedExpression,
+        context,
+        options,
+      );
 
       if (this.debug) {
         console.log('[ConditionEngine] Evaluation result:', {
@@ -109,7 +118,8 @@ export class ConditionEngine {
         duration: performance.now() - startTime,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       return {
         success: false,
         value: options.fallback ?? this.fallback,
@@ -125,7 +135,7 @@ export class ConditionEngine {
   private async evaluateExpression(
     expression: ConditionExpression,
     context: AdaptiveExecutionContext,
-    options: EvaluateOptions
+    options: EvaluateOptions,
   ): Promise<boolean> {
     switch (expression.type) {
       case 'element':
@@ -154,7 +164,7 @@ export class ConditionEngine {
   private async evaluateElementCondition(
     expression: ConditionExpression,
     context: AdaptiveExecutionContext,
-    options: EvaluateOptions
+    options: EvaluateOptions,
   ): Promise<boolean> {
     const element = expression.element;
     if (!element) {
@@ -171,7 +181,7 @@ export class ConditionEngine {
       const result = await Promise.race([
         this.agent.aiLocate(element.target, { deepThink: false }),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Evaluation timeout')), timeout)
+          setTimeout(() => reject(new Error('Evaluation timeout')), timeout),
         ),
       ]);
 
@@ -186,7 +196,9 @@ export class ConditionEngine {
 
         case 'visible':
           // Element is visible if it was found and has valid bounds
-          return result.element?.rect?.width > 0 && result.element?.rect?.height > 0;
+          return (
+            result.element?.rect?.width > 0 && result.element?.rect?.height > 0
+          );
 
         case 'enabled':
           // Assume found elements are enabled unless explicitly disabled
@@ -194,8 +206,10 @@ export class ConditionEngine {
 
         case 'selected':
           // Check if element has selected attribute
-          return result.element?.attributes?.selected === true ||
-                 result.element?.attributes?.checked === true;
+          return (
+            result.element?.attributes?.selected === true ||
+            result.element?.attributes?.checked === true
+          );
 
         default:
           return true;
@@ -214,7 +228,7 @@ export class ConditionEngine {
   private async evaluateTextCondition(
     expression: ConditionExpression,
     context: AdaptiveExecutionContext,
-    options: EvaluateOptions
+    options: EvaluateOptions,
   ): Promise<boolean> {
     const text = expression.text;
     if (!text) {
@@ -222,7 +236,9 @@ export class ConditionEngine {
     }
 
     // Get text from context (if available) or use agent
-    let actualText = context.variables.get('__text_' + text.target) as string | undefined;
+    let actualText = context.variables.get('__text_' + text.target) as
+      | string
+      | undefined;
 
     if (!actualText && this.agent?.aiLocate) {
       try {
@@ -230,7 +246,7 @@ export class ConditionEngine {
         const result = await Promise.race([
           this.agent.aiLocate(text.target, { deepThink: false }),
           new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Evaluation timeout')), timeout)
+            setTimeout(() => reject(new Error('Evaluation timeout')), timeout),
           ),
         ]);
 
@@ -276,7 +292,7 @@ export class ConditionEngine {
   private async evaluateStateCondition(
     expression: ConditionExpression,
     context: AdaptiveExecutionContext,
-    options: EvaluateOptions
+    options: EvaluateOptions,
   ): Promise<boolean> {
     const state = expression.state;
     if (!state) {
@@ -296,7 +312,7 @@ export class ConditionEngine {
   private async evaluateVariableCondition(
     expression: ConditionExpression,
     context: AdaptiveExecutionContext,
-    options: EvaluateOptions
+    options: EvaluateOptions,
   ): Promise<boolean> {
     const variable = expression.variable;
     if (!variable) {
@@ -337,7 +353,7 @@ export class ConditionEngine {
   private async evaluateCompoundCondition(
     expression: ConditionExpression,
     context: AdaptiveExecutionContext,
-    options: EvaluateOptions
+    options: EvaluateOptions,
   ): Promise<boolean> {
     const compound = expression.compound;
     if (!compound || !compound.operands || compound.operands.length === 0) {
@@ -347,23 +363,31 @@ export class ConditionEngine {
     switch (compound.operator) {
       case 'and': {
         const results = await Promise.all(
-          compound.operands.map(op => this.evaluateExpression(op, context, options))
+          compound.operands.map((op) =>
+            this.evaluateExpression(op, context, options),
+          ),
         );
-        return results.every(r => r === true);
+        return results.every((r) => r === true);
       }
 
       case 'or': {
         const results = await Promise.all(
-          compound.operands.map(op => this.evaluateExpression(op, context, options))
+          compound.operands.map((op) =>
+            this.evaluateExpression(op, context, options),
+          ),
         );
-        return results.some(r => r === true);
+        return results.some((r) => r === true);
       }
 
       case 'not': {
         if (compound.operands.length !== 1) {
           return false;
         }
-        const result = await this.evaluateExpression(compound.operands[0], context, options);
+        const result = await this.evaluateExpression(
+          compound.operands[0],
+          context,
+          options,
+        );
         return !result;
       }
 
@@ -378,17 +402,19 @@ export class ConditionEngine {
   async evaluateBatch(
     expressions: Array<ConditionExpression | string>,
     context: AdaptiveExecutionContext,
-    options: EvaluateOptions = {}
+    options: EvaluateOptions = {},
   ): Promise<EvaluationResult[]> {
     return Promise.all(
-      expressions.map(expr => this.evaluate(expr, context, options))
+      expressions.map((expr) => this.evaluate(expr, context, options)),
     );
   }
 
   /**
    * 创建评估上下文
    */
-  createContext(initialVariables: Record<string, any> = {}): AdaptiveExecutionContext {
+  createContext(
+    initialVariables: Record<string, any> = {},
+  ): AdaptiveExecutionContext {
     return {
       variables: new Map(Object.entries(initialVariables)),
       loopStack: [],
@@ -423,7 +449,7 @@ export function getConditionEngine(agent?: AIAgent): ConditionEngine {
 export async function evaluateCondition(
   expression: ConditionExpression | string,
   context: AdaptiveExecutionContext,
-  agent?: AIAgent
+  agent?: AIAgent,
 ): Promise<EvaluationResult> {
   const engine = getConditionEngine(agent);
   return engine.evaluate(expression, context);

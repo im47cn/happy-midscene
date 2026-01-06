@@ -2,9 +2,9 @@
  * ImpactEstimator Tests
  */
 
-import { describe, it, expect } from 'vitest';
-import { impactEstimator } from '../impactEstimator';
+import { describe, expect, it } from 'vitest';
 import type { Recommendation } from '../../../types/optimization';
+import { impactEstimator } from '../impactEstimator';
 
 describe('ImpactEstimator', () => {
   const createRecommendation = (

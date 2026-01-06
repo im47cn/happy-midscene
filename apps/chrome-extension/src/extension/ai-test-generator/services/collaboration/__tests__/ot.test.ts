@@ -2,9 +2,9 @@
  * Operational Transform Tests
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { OperationalTransform } from '../ot';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { EditorOperation } from '../../../types/collaboration';
+import { OperationalTransform } from '../ot';
 
 describe('OperationalTransform', () => {
   let ot: OperationalTransform;

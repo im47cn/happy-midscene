@@ -9,22 +9,22 @@ import type { CaseStats, ExecutionRecord } from './analytics';
  * Recommendation reason types
  */
 export type ReasonType =
-  | 'recent_failure'      // 最近失败
-  | 'high_risk'           // 高风险
-  | 'long_not_run'        // 长时间未执行
-  | 'change_impact'       // 变更影响
-  | 'correlation'         // 关联用例
-  | 'coverage_gap'        // 覆盖率缺口
-  | 'user_preference';    // 用户偏好
+  | 'recent_failure' // 最近失败
+  | 'high_risk' // 高风险
+  | 'long_not_run' // 长时间未执行
+  | 'change_impact' // 变更影响
+  | 'correlation' // 关联用例
+  | 'coverage_gap' // 覆盖率缺口
+  | 'user_preference'; // 用户偏好
 
 /**
  * Recommendation categories
  */
 export type RecommendCategory =
-  | 'must_run'            // 必须执行
-  | 'should_run'          // 建议执行
-  | 'could_run'           // 可选执行
-  | 'low_priority';       // 低优先级
+  | 'must_run' // 必须执行
+  | 'should_run' // 建议执行
+  | 'could_run' // 可选执行
+  | 'low_priority'; // 低优先级
 
 /**
  * Priority levels
@@ -37,7 +37,7 @@ export type Priority = 'critical' | 'high' | 'medium' | 'low';
 export interface RecommendReason {
   type: ReasonType;
   description: string;
-  weight: number;           // 0-1, contribution to final score
+  weight: number; // 0-1, contribution to final score
   data?: Record<string, unknown>;
 }
 
@@ -48,11 +48,11 @@ export interface Recommendation {
   id: string;
   caseId: string;
   caseName: string;
-  score: number;                    // 0-100
+  score: number; // 0-100
   reasons: RecommendReason[];
   priority: Priority;
   category: RecommendCategory;
-  estimatedDuration: number;        // milliseconds
+  estimatedDuration: number; // milliseconds
   lastExecuted?: number;
   lastResult?: 'passed' | 'failed';
 }
@@ -61,20 +61,20 @@ export interface Recommendation {
  * Priority configuration weights
  */
 export interface PriorityWeights {
-  riskFactor: number;          // 风险系数权重
-  businessValue: number;       // 业务价值权重
-  executionCost: number;       // 执行成本权重
-  changeImpact: number;        // 变更影响权重
-  recency: number;             // 时效性权重
+  riskFactor: number; // 风险系数权重
+  businessValue: number; // 业务价值权重
+  executionCost: number; // 执行成本权重
+  changeImpact: number; // 变更影响权重
+  recency: number; // 时效性权重
 }
 
 /**
  * Priority thresholds
  */
 export interface PriorityThresholds {
-  critical: number;            // 关键优先级阈值
-  high: number;                // 高优先级阈值
-  medium: number;              // 中优先级阈值
+  critical: number; // 关键优先级阈值
+  high: number; // 高优先级阈值
+  medium: number; // 中优先级阈值
 }
 
 /**
@@ -107,11 +107,11 @@ export const DEFAULT_PRIORITY_CONFIG: PriorityConfig = {
  * Correlation types between test cases
  */
 export type CorrelationType =
-  | 'co_failure'                 // 共同失败
-  | 'shared_precondition'        // 共享前置条件
-  | 'execution_sequence'         // 执行顺序依赖
-  | 'same_feature'               // 同一功能
-  | 'similar_pattern';           // 相似模式
+  | 'co_failure' // 共同失败
+  | 'shared_precondition' // 共享前置条件
+  | 'execution_sequence' // 执行顺序依赖
+  | 'same_feature' // 同一功能
+  | 'similar_pattern'; // 相似模式
 
 /**
  * Correlation evidence
@@ -130,7 +130,7 @@ export interface CaseCorrelation {
   caseId1: string;
   caseId2: string;
   correlationType: CorrelationType;
-  strength: number;              // 0-1
+  strength: number; // 0-1
   evidence: CorrelationEvidence[];
 }
 
@@ -215,7 +215,7 @@ export interface Feedback {
   accepted: boolean;
   executed?: boolean;
   result?: 'passed' | 'failed';
-  rating?: number;              // 1-5
+  rating?: number; // 1-5
   comment?: string;
   timestamp: number;
 }
@@ -227,7 +227,7 @@ export interface RecommendOptions {
   limit?: number;
   categories?: RecommendCategory[];
   minScore?: number;
-  timeLimit?: number;            // time budget in minutes
+  timeLimit?: number; // time budget in minutes
   includeReasons?: boolean;
 }
 
@@ -300,7 +300,10 @@ export interface CorrelationCluster {
 /**
  * Category thresholds
  */
-export const CATEGORY_THRESHOLDS: Record<RecommendCategory, { minScore: number; maxScore?: number }> = {
+export const CATEGORY_THRESHOLDS: Record<
+  RecommendCategory,
+  { minScore: number; maxScore?: number }
+> = {
   must_run: { minScore: 80 },
   should_run: { minScore: 60, maxScore: 79 },
   could_run: { minScore: 40, maxScore: 59 },
@@ -320,7 +323,10 @@ export function scoreToCategory(score: number): RecommendCategory {
 /**
  * Convert score to priority
  */
-export function scoreToPriority(score: number, thresholds: PriorityThresholds): Priority {
+export function scoreToPriority(
+  score: number,
+  thresholds: PriorityThresholds,
+): Priority {
   if (score >= thresholds.critical) return 'critical';
   if (score >= thresholds.high) return 'high';
   if (score >= thresholds.medium) return 'medium';

@@ -8,14 +8,7 @@ import {
   EyeOutlined,
   InfoCircleOutlined,
 } from '@ant-design/icons';
-import {
-  Form,
-  Input,
-  InputNumber,
-  Select,
-  Switch,
-  Tooltip,
-} from 'antd';
+import { Form, Input, InputNumber, Select, Switch, Tooltip } from 'antd';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import type { ParameterDef } from '../types';
@@ -38,7 +31,9 @@ export const ParameterForm: React.FC<ParameterFormProps> = ({
   disabled = false,
 }) => {
   const [form] = Form.useForm();
-  const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
+  const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>(
+    {},
+  );
 
   // Sync form values with props
   useEffect(() => {
@@ -49,7 +44,7 @@ export const ParameterForm: React.FC<ParameterFormProps> = ({
     (_: unknown, allValues: Record<string, unknown>) => {
       onChange(allValues);
     },
-    [onChange]
+    [onChange],
   );
 
   const togglePasswordVisibility = (name: string) => {
@@ -99,13 +94,7 @@ export const ParameterForm: React.FC<ParameterFormProps> = ({
         );
 
       case 'url':
-        return (
-          <Input
-            {...commonProps}
-            type="url"
-            addonBefore="https://"
-          />
-        );
+        return <Input {...commonProps} type="url" addonBefore="https://" />;
 
       case 'string':
       default:
@@ -136,7 +125,9 @@ export const ParameterForm: React.FC<ParameterFormProps> = ({
               {param.required && <span style={{ color: '#ff4d4f' }}> *</span>}
               {param.description && (
                 <Tooltip title={param.description}>
-                  <InfoCircleOutlined style={{ marginLeft: 4, color: '#8c8c8c' }} />
+                  <InfoCircleOutlined
+                    style={{ marginLeft: 4, color: '#8c8c8c' }}
+                  />
                 </Tooltip>
               )}
             </span>

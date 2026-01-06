@@ -246,10 +246,7 @@ export class OfflineManager {
   /**
    * Update the cache manifest
    */
-  private updateManifest(
-    templateId: string,
-    action: 'add' | 'remove'
-  ): void {
+  private updateManifest(templateId: string, action: 'add' | 'remove'): void {
     try {
       const stored = localStorage.getItem(STORAGE_KEYS.CACHE_MANIFEST);
       const manifest: CacheManifest = stored
@@ -261,11 +258,16 @@ export class OfflineManager {
           manifest.templates.push(templateId);
         }
       } else {
-        manifest.templates = manifest.templates.filter((id) => id !== templateId);
+        manifest.templates = manifest.templates.filter(
+          (id) => id !== templateId,
+        );
       }
 
       manifest.lastSync = Date.now();
-      localStorage.setItem(STORAGE_KEYS.CACHE_MANIFEST, JSON.stringify(manifest));
+      localStorage.setItem(
+        STORAGE_KEYS.CACHE_MANIFEST,
+        JSON.stringify(manifest),
+      );
     } catch (error) {
       console.warn('Failed to update cache manifest:', error);
     }
@@ -398,7 +400,7 @@ export class OfflineManager {
    */
   async prefetchTemplates(
     fetchTemplate: (id: string) => Promise<Template>,
-    templateIds: string[]
+    templateIds: string[],
   ): Promise<{ success: string[]; failed: string[] }> {
     const success: string[] = [];
     const failed: string[] = [];

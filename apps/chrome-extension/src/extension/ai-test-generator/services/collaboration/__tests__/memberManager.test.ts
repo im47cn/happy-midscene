@@ -2,10 +2,10 @@
  * Member Manager Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { MemberRole, WorkspaceMember } from '../../../types/collaboration';
 import { MemberManager } from '../memberManager';
 import { workspaceManager } from '../workspaceManager';
-import type { WorkspaceMember, MemberRole } from '../../../types/collaboration';
 
 describe('MemberManager', () => {
   let mm: MemberManager;
@@ -37,7 +37,9 @@ describe('MemberManager', () => {
     });
 
     it('should throw for non-existent workspace', async () => {
-      await expect(mm.getMembers('non-existent')).rejects.toThrow('Workspace not found');
+      await expect(mm.getMembers('non-existent')).rejects.toThrow(
+        'Workspace not found',
+      );
     });
   });
 
@@ -98,7 +100,10 @@ describe('MemberManager', () => {
     });
 
     it('should return empty array for non-existent role', async () => {
-      const members = await mm.getMembersByRole(testWorkspaceId, 'admin' as MemberRole);
+      const members = await mm.getMembersByRole(
+        testWorkspaceId,
+        'admin' as MemberRole,
+      );
       expect(Array.isArray(members)).toBe(true);
     });
   });
@@ -173,9 +178,21 @@ describe('MemberManager', () => {
 
   describe('searchMembers', () => {
     it('should find members matching query', async () => {
-      await workspaceManager.addMember(testWorkspaceId, 'alice@example.com', 'editor');
-      await workspaceManager.addMember(testWorkspaceId, 'bob@example.com', 'viewer');
-      await workspaceManager.addMember(testWorkspaceId, 'charlie@example.com', 'viewer');
+      await workspaceManager.addMember(
+        testWorkspaceId,
+        'alice@example.com',
+        'editor',
+      );
+      await workspaceManager.addMember(
+        testWorkspaceId,
+        'bob@example.com',
+        'viewer',
+      );
+      await workspaceManager.addMember(
+        testWorkspaceId,
+        'charlie@example.com',
+        'viewer',
+      );
 
       const results = await mm.searchMembers(testWorkspaceId, 'alice');
       expect(results).toHaveLength(1);
@@ -183,7 +200,11 @@ describe('MemberManager', () => {
     });
 
     it('should be case insensitive', async () => {
-      await workspaceManager.addMember(testWorkspaceId, 'alice@example.com', 'editor');
+      await workspaceManager.addMember(
+        testWorkspaceId,
+        'alice@example.com',
+        'editor',
+      );
 
       const results = await mm.searchMembers(testWorkspaceId, 'ALICE');
       expect(results).toHaveLength(1);
@@ -195,8 +216,16 @@ describe('MemberManager', () => {
     });
 
     it('should find partial matches', async () => {
-      await workspaceManager.addMember(testWorkspaceId, 'alice@example.com', 'editor');
-      await workspaceManager.addMember(testWorkspaceId, 'bob@example.com', 'viewer');
+      await workspaceManager.addMember(
+        testWorkspaceId,
+        'alice@example.com',
+        'editor',
+      );
+      await workspaceManager.addMember(
+        testWorkspaceId,
+        'bob@example.com',
+        'viewer',
+      );
 
       const results = await mm.searchMembers(testWorkspaceId, 'example');
       expect(results.length).toBeGreaterThan(0);

@@ -34,7 +34,7 @@ export interface ConsecutivePatternResult {
  */
 export function detectConsecutiveFailures(
   results: ExecutionResult[],
-  options: ConsecutiveDetectionOptions = {}
+  options: ConsecutiveDetectionOptions = {},
 ): ConsecutivePatternResult {
   const { failureThreshold = 3, successThreshold = 2 } = options;
 
@@ -75,16 +75,26 @@ export function detectConsecutiveFailures(
   }
 
   // Determine pattern
-  let pattern: 'consecutive_failures' | 'intermittent' | 'stable' | 'recovering';
+  let pattern:
+    | 'consecutive_failures'
+    | 'intermittent'
+    | 'stable'
+    | 'recovering';
   if (consecutiveFailures >= failureThreshold) {
     pattern = 'consecutive_failures';
-  } else if (consecutiveSuccesses >= successThreshold && consecutiveFailures === 0) {
+  } else if (
+    consecutiveSuccesses >= successThreshold &&
+    consecutiveFailures === 0
+  ) {
     pattern = 'stable';
   } else if (consecutiveSuccesses > 0 && failureStreak.length > 0) {
     pattern = 'recovering';
   } else {
     // Check for intermittent failures
-    const recentResults = sortedResults.slice(0, Math.min(10, sortedResults.length));
+    const recentResults = sortedResults.slice(
+      0,
+      Math.min(10, sortedResults.length),
+    );
     const failCount = recentResults.filter((r) => !r.passed).length;
     const failRate = failCount / recentResults.length;
     pattern = failRate > 0.3 && failRate < 0.7 ? 'intermittent' : 'stable';
@@ -104,8 +114,8 @@ export function detectConsecutiveFailures(
  */
 export function detectFlakyPattern(
   results: ExecutionResult[],
-  minExecutions: number = 5,
-  flakyThreshold: number = 0.3
+  minExecutions = 5,
+  flakyThreshold = 0.3,
 ): { isFlaky: boolean; flakyScore: number; alternations: number } {
   if (results.length < minExecutions) {
     return { isFlaky: false, flakyScore: 0, alternations: 0 };
@@ -143,9 +153,14 @@ export function detectFlakyPattern(
  */
 export function detectPassRateChange(
   results: ExecutionResult[],
-  windowSize: number = 10,
-  changeThreshold: number = 0.3
-): { hasChange: boolean; previousRate: number; currentRate: number; change: number } {
+  windowSize = 10,
+  changeThreshold = 0.3,
+): {
+  hasChange: boolean;
+  previousRate: number;
+  currentRate: number;
+  change: number;
+} {
   if (results.length < windowSize * 2) {
     return { hasChange: false, previousRate: 0, currentRate: 0, change: 0 };
   }
@@ -157,8 +172,10 @@ export function detectPassRateChange(
   const previousWindow = sorted.slice(midPoint - windowSize, midPoint);
   const currentWindow = sorted.slice(midPoint);
 
-  const previousRate = previousWindow.filter((r) => r.passed).length / previousWindow.length;
-  const currentRate = currentWindow.filter((r) => r.passed).length / currentWindow.length;
+  const previousRate =
+    previousWindow.filter((r) => r.passed).length / previousWindow.length;
+  const currentRate =
+    currentWindow.filter((r) => r.passed).length / currentWindow.length;
   const change = currentRate - previousRate;
 
   return {
@@ -174,7 +191,7 @@ export function detectPassRateChange(
  */
 export function getFailureTrend(
   results: ExecutionResult[],
-  windowSize: number = 5
+  windowSize = 5,
 ): { trend: 'increasing' | 'decreasing' | 'stable'; slope: number } {
   if (results.length < windowSize * 2) {
     return { trend: 'stable', slope: 0 };

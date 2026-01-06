@@ -3,10 +3,7 @@
  * Manages template reviews and ratings (local storage mode)
  */
 
-import type {
-  IRatingSystem,
-  TemplateReview,
-} from '../types';
+import type { IRatingSystem, TemplateReview } from '../types';
 
 const STORAGE_KEY = 'marketplace:reviews';
 
@@ -54,22 +51,29 @@ export class RatingSystem implements IRatingSystem {
    * Submit a new review
    */
   async submitReview(
-    review: Omit<TemplateReview, 'id' | 'createdAt' | 'helpful' | 'notHelpful'>
+    review: Omit<TemplateReview, 'id' | 'createdAt' | 'helpful' | 'notHelpful'>,
   ): Promise<TemplateReview> {
     const map = this.getReviewsMap();
     const templateReviews = map.get(review.templateId) || [];
 
     // Check if user already reviewed
     const existingIndex = templateReviews.findIndex(
-      (r) => r.userId === review.userId
+      (r) => r.userId === review.userId,
     );
 
     const newReview: TemplateReview = {
       ...review,
-      id: existingIndex >= 0 ? templateReviews[existingIndex].id : this.generateId(),
+      id:
+        existingIndex >= 0
+          ? templateReviews[existingIndex].id
+          : this.generateId(),
       helpful: existingIndex >= 0 ? templateReviews[existingIndex].helpful : 0,
-      notHelpful: existingIndex >= 0 ? templateReviews[existingIndex].notHelpful : 0,
-      createdAt: existingIndex >= 0 ? templateReviews[existingIndex].createdAt : Date.now(),
+      notHelpful:
+        existingIndex >= 0 ? templateReviews[existingIndex].notHelpful : 0,
+      createdAt:
+        existingIndex >= 0
+          ? templateReviews[existingIndex].createdAt
+          : Date.now(),
       updatedAt: existingIndex >= 0 ? Date.now() : undefined,
     };
 
@@ -109,7 +113,10 @@ export class RatingSystem implements IRatingSystem {
   /**
    * Get a user's review for a template
    */
-  async getUserReview(templateId: string, userId: string): Promise<TemplateReview | null> {
+  async getUserReview(
+    templateId: string,
+    userId: string,
+  ): Promise<TemplateReview | null> {
     const map = this.getReviewsMap();
     const reviews = map.get(templateId) || [];
     return reviews.find((r) => r.userId === userId) || null;
@@ -134,7 +141,13 @@ export class RatingSystem implements IRatingSystem {
       };
     }
 
-    const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    const distribution: Record<number, number> = {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+    };
     let sum = 0;
 
     for (const review of reviews) {
@@ -154,7 +167,7 @@ export class RatingSystem implements IRatingSystem {
    */
   async getTemplateReviews(
     templateId: string,
-    sortBy: 'recent' | 'helpful' | 'rating' = 'recent'
+    sortBy: 'recent' | 'helpful' | 'rating' = 'recent',
   ): Promise<TemplateReview[]> {
     const map = this.getReviewsMap();
     const reviews = [...(map.get(templateId) || [])];
@@ -182,7 +195,7 @@ export class RatingSystem implements IRatingSystem {
 
     for (const [templateId, reviews] of map) {
       const reviewIndex = reviews.findIndex(
-        (r) => r.id === reviewId && r.userId === userId
+        (r) => r.id === reviewId && r.userId === userId,
       );
       if (reviewIndex >= 0) {
         reviews.splice(reviewIndex, 1);

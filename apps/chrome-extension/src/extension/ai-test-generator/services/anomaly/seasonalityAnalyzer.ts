@@ -35,7 +35,15 @@ const MS_PER_WEEK = 7 * MS_PER_DAY;
 const MS_PER_MONTH = 30 * MS_PER_DAY; // Approximate
 
 // Day names for weekly patterns
-const DAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+const DAY_NAMES = [
+  'sunday',
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+];
 
 // Hour buckets for daily patterns
 const HOUR_BUCKETS = ['night', 'morning', 'afternoon', 'evening']; // 0-5, 6-11, 12-17, 18-23
@@ -48,7 +56,7 @@ class SeasonalityAnalyzer {
   /**
    * Analyze time series data for seasonal patterns
    */
-  analyze(data: DataPoint[], minDataPoints: number = 14): SeasonalAnalysisResult {
+  analyze(data: DataPoint[], minDataPoints = 14): SeasonalAnalysisResult {
     if (data.length < minDataPoints) {
       return {
         hasSeasonality: false,
@@ -120,7 +128,10 @@ class SeasonalityAnalyzer {
   /**
    * Detect daily pattern (by hour buckets)
    */
-  detectDailyPattern(data: DataPoint[]): { adjustments: Record<string, number>; strength: number } {
+  detectDailyPattern(data: DataPoint[]): {
+    adjustments: Record<string, number>;
+    strength: number;
+  } {
     const bucketValues: Record<string, number[]> = {
       night: [],
       morning: [],
@@ -144,7 +155,8 @@ class SeasonalityAnalyzer {
 
     // Calculate overall mean
     const allValues = data.map((d) => d.value);
-    const overallMean = allValues.reduce((sum, v) => sum + v, 0) / allValues.length;
+    const overallMean =
+      allValues.reduce((sum, v) => sum + v, 0) / allValues.length;
 
     // Calculate adjustments and strength
     const adjustments: Record<string, number> = {};
@@ -153,7 +165,9 @@ class SeasonalityAnalyzer {
 
     for (const bucket of HOUR_BUCKETS) {
       if (bucketValues[bucket].length > 0) {
-        const bucketMean = bucketValues[bucket].reduce((sum, v) => sum + v, 0) / bucketValues[bucket].length;
+        const bucketMean =
+          bucketValues[bucket].reduce((sum, v) => sum + v, 0) /
+          bucketValues[bucket].length;
         adjustments[bucket] = overallMean !== 0 ? bucketMean / overallMean : 1;
         variance += Math.pow(adjustments[bucket] - 1, 2);
         count++;
@@ -163,7 +177,8 @@ class SeasonalityAnalyzer {
     }
 
     // Strength based on variance in adjustments
-    const strength = count > 1 ? Math.min(1, Math.sqrt(variance / count) * 2) : 0;
+    const strength =
+      count > 1 ? Math.min(1, Math.sqrt(variance / count) * 2) : 0;
 
     return { adjustments, strength };
   }
@@ -171,7 +186,10 @@ class SeasonalityAnalyzer {
   /**
    * Detect weekly pattern (by day of week)
    */
-  detectWeeklyPattern(data: DataPoint[]): { adjustments: Record<string, number>; strength: number } {
+  detectWeeklyPattern(data: DataPoint[]): {
+    adjustments: Record<string, number>;
+    strength: number;
+  } {
     const dayValues: Record<string, number[]> = {};
     for (const day of DAY_NAMES) {
       dayValues[day] = [];
@@ -186,7 +204,8 @@ class SeasonalityAnalyzer {
 
     // Calculate overall mean
     const allValues = data.map((d) => d.value);
-    const overallMean = allValues.reduce((sum, v) => sum + v, 0) / allValues.length;
+    const overallMean =
+      allValues.reduce((sum, v) => sum + v, 0) / allValues.length;
 
     // Calculate adjustments and strength
     const adjustments: Record<string, number> = {};
@@ -195,7 +214,8 @@ class SeasonalityAnalyzer {
 
     for (const day of DAY_NAMES) {
       if (dayValues[day].length > 0) {
-        const dayMean = dayValues[day].reduce((sum, v) => sum + v, 0) / dayValues[day].length;
+        const dayMean =
+          dayValues[day].reduce((sum, v) => sum + v, 0) / dayValues[day].length;
         adjustments[day] = overallMean !== 0 ? dayMean / overallMean : 1;
         variance += Math.pow(adjustments[day] - 1, 2);
         count++;
@@ -205,7 +225,8 @@ class SeasonalityAnalyzer {
     }
 
     // Strength based on variance in adjustments
-    const strength = count > 1 ? Math.min(1, Math.sqrt(variance / count) * 2) : 0;
+    const strength =
+      count > 1 ? Math.min(1, Math.sqrt(variance / count) * 2) : 0;
 
     return { adjustments, strength };
   }
@@ -213,7 +234,10 @@ class SeasonalityAnalyzer {
   /**
    * Detect monthly pattern (by week of month)
    */
-  detectMonthlyPattern(data: DataPoint[]): { adjustments: Record<string, number>; strength: number } {
+  detectMonthlyPattern(data: DataPoint[]): {
+    adjustments: Record<string, number>;
+    strength: number;
+  } {
     const weekValues: Record<string, number[]> = {
       week1: [],
       week2: [],
@@ -239,7 +263,8 @@ class SeasonalityAnalyzer {
 
     // Calculate overall mean
     const allValues = data.map((d) => d.value);
-    const overallMean = allValues.reduce((sum, v) => sum + v, 0) / allValues.length;
+    const overallMean =
+      allValues.reduce((sum, v) => sum + v, 0) / allValues.length;
 
     // Calculate adjustments and strength
     const adjustments: Record<string, number> = {};
@@ -248,7 +273,9 @@ class SeasonalityAnalyzer {
 
     for (const week of ['week1', 'week2', 'week3', 'week4', 'week5']) {
       if (weekValues[week].length > 0) {
-        const weekMean = weekValues[week].reduce((sum, v) => sum + v, 0) / weekValues[week].length;
+        const weekMean =
+          weekValues[week].reduce((sum, v) => sum + v, 0) /
+          weekValues[week].length;
         adjustments[week] = overallMean !== 0 ? weekMean / overallMean : 1;
         variance += Math.pow(adjustments[week] - 1, 2);
         count++;
@@ -258,7 +285,8 @@ class SeasonalityAnalyzer {
     }
 
     // Strength based on variance in adjustments
-    const strength = count > 1 ? Math.min(1, Math.sqrt(variance / count) * 2) : 0;
+    const strength =
+      count > 1 ? Math.min(1, Math.sqrt(variance / count) * 2) : 0;
 
     return { adjustments, strength };
   }
@@ -285,7 +313,10 @@ class SeasonalityAnalyzer {
   /**
    * Get the pattern key for a timestamp
    */
-  private getPatternKey(timestamp: number, type: 'daily' | 'weekly' | 'monthly'): string {
+  private getPatternKey(
+    timestamp: number,
+    type: 'daily' | 'weekly' | 'monthly',
+  ): string {
     const date = new Date(timestamp);
 
     switch (type) {
@@ -313,7 +344,11 @@ class SeasonalityAnalyzer {
   /**
    * Adjust a value for seasonality (deseasonalize)
    */
-  deseasonalize(value: number, timestamp: number, config: SeasonalityConfig): number {
+  deseasonalize(
+    value: number,
+    timestamp: number,
+    config: SeasonalityConfig,
+  ): number {
     const adjustment = this.getAdjustment(timestamp, config);
     return adjustment !== 0 ? value / adjustment : value;
   }
@@ -321,7 +356,11 @@ class SeasonalityAnalyzer {
   /**
    * Restore seasonality to a value (reseasonalize)
    */
-  reseasonalize(value: number, timestamp: number, config: SeasonalityConfig): number {
+  reseasonalize(
+    value: number,
+    timestamp: number,
+    config: SeasonalityConfig,
+  ): number {
     const adjustment = this.getAdjustment(timestamp, config);
     return value * adjustment;
   }
@@ -329,7 +368,10 @@ class SeasonalityAnalyzer {
   /**
    * Detect autocorrelation at different lags
    */
-  detectAutocorrelation(data: DataPoint[], maxLag: number = 30): { lag: number; correlation: number }[] {
+  detectAutocorrelation(
+    data: DataPoint[],
+    maxLag = 30,
+  ): { lag: number; correlation: number }[] {
     if (data.length < maxLag + 10) {
       return [];
     }
@@ -347,7 +389,8 @@ class SeasonalityAnalyzer {
         count++;
       }
 
-      const correlation = stats.stdDev !== 0 ? sum / (count * stats.stdDev * stats.stdDev) : 0;
+      const correlation =
+        stats.stdDev !== 0 ? sum / (count * stats.stdDev * stats.stdDev) : 0;
       results.push({ lag, correlation });
     }
 
@@ -376,7 +419,10 @@ class SeasonalityAnalyzer {
     if (peaks.length === 0) return null;
 
     // Get the strongest peak
-    const strongestPeak = peaks.reduce((max, p) => (p.correlation > max.correlation ? p : max), peaks[0]);
+    const strongestPeak = peaks.reduce(
+      (max, p) => (p.correlation > max.correlation ? p : max),
+      peaks[0],
+    );
 
     // Determine cycle type based on lag
     let type: 'daily' | 'weekly' | 'monthly';
@@ -390,7 +436,10 @@ class SeasonalityAnalyzer {
 
     // Estimate period in milliseconds
     const avgInterval =
-      data.length > 1 ? (data[data.length - 1].timestamp - data[0].timestamp) / (data.length - 1) : MS_PER_DAY;
+      data.length > 1
+        ? (data[data.length - 1].timestamp - data[0].timestamp) /
+          (data.length - 1)
+        : MS_PER_DAY;
     const period = strongestPeak.lag * avgInterval;
 
     return {
@@ -432,7 +481,7 @@ class SeasonalityAnalyzer {
   /**
    * Get holiday adjustment factor
    */
-  getHolidayAdjustment(timestamp: number, normalHolidayFactor: number = 0.5): number {
+  getHolidayAdjustment(timestamp: number, normalHolidayFactor = 0.5): number {
     return this.isHoliday(timestamp) ? normalHolidayFactor : 1;
   }
 }

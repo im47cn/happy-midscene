@@ -5,21 +5,21 @@
  */
 
 import type {
-  Review,
-  Reviewer,
-  ReviewStatus,
-  Comment,
   ChangeType,
+  Comment,
+  Review,
+  ReviewStatus,
+  Reviewer,
 } from '../../types/collaboration';
+import { auditLogger } from './auditLogger';
 import type {
-  IReviewSystem,
-  CreateReviewData,
-  ReviewResult,
-  ReviewFilters,
   CreateCommentData,
+  CreateReviewData,
+  IReviewSystem,
+  ReviewFilters,
+  ReviewResult,
 } from './interfaces';
 import { permissionEngine } from './permissionEngine';
-import { auditLogger } from './auditLogger';
 
 /**
  * Review state transition rules
@@ -102,7 +102,11 @@ export class ReviewSystem implements IReviewSystem {
       success: true,
     });
 
-    return { ...review, reviewers: [...reviewers], changes: [...review.changes] };
+    return {
+      ...review,
+      reviewers: [...reviewers],
+      changes: [...review.changes],
+    };
   }
 
   /**
@@ -191,7 +195,7 @@ export class ReviewSystem implements IReviewSystem {
    */
   async submitReviewResult(
     reviewId: string,
-    result: ReviewResult
+    result: ReviewResult,
   ): Promise<void> {
     const review = this.storage.reviews.get(reviewId);
     if (!review) {
@@ -212,10 +216,10 @@ export class ReviewSystem implements IReviewSystem {
     if (allResponded) {
       // Update review status based on reviewer responses
       const anyChangesRequested = review.reviewers.some(
-        (r) => r.status === 'changes_requested'
+        (r) => r.status === 'changes_requested',
       );
       const allApproved = review.reviewers.every(
-        (r) => r.status === 'approved'
+        (r) => r.status === 'approved',
       );
 
       if (allApproved) {
@@ -294,7 +298,7 @@ export class ReviewSystem implements IReviewSystem {
    */
   async listReviews(
     workspaceId: string,
-    filters?: ReviewFilters
+    filters?: ReviewFilters,
   ): Promise<Review[]> {
     const reviewIds = this.storage.byWorkspace.get(workspaceId);
     if (!reviewIds) {
@@ -323,7 +327,7 @@ export class ReviewSystem implements IReviewSystem {
     }
     if (filters?.reviewer) {
       reviews = reviews.filter((r) =>
-        r.reviewers.some((rev) => rev.userId === filters.reviewer)
+        r.reviewers.some((rev) => rev.userId === filters.reviewer),
       );
     }
     if (filters?.startTime) {
@@ -341,7 +345,7 @@ export class ReviewSystem implements IReviewSystem {
    */
   async addComment(
     reviewId: string,
-    data: CreateCommentData
+    data: CreateCommentData,
   ): Promise<Comment> {
     const review = this.storage.reviews.get(reviewId);
     if (!review) {
@@ -445,7 +449,7 @@ export class ReviewSystem implements IReviewSystem {
     const allowedTransitions = STATUS_TRANSITIONS[review.status];
     if (!allowedTransitions.includes(newStatus)) {
       throw new Error(
-        `Cannot transition from ${review.status} to ${newStatus}`
+        `Cannot transition from ${review.status} to ${newStatus}`,
       );
     }
 
@@ -457,7 +461,7 @@ export class ReviewSystem implements IReviewSystem {
    * Get review count by status
    */
   async getReviewCountByStatus(
-    workspaceId: string
+    workspaceId: string,
   ): Promise<Record<ReviewStatus, number>> {
     const reviews = await this.listReviews(workspaceId);
     const counts: Record<string, number> = {
@@ -490,7 +494,11 @@ export class ReviewSystem implements IReviewSystem {
     }
 
     this.storage.reviews.delete(reviewId);
-    this.removeFromIndex(this.storage.byWorkspace, review.workspaceId, reviewId);
+    this.removeFromIndex(
+      this.storage.byWorkspace,
+      review.workspaceId,
+      reviewId,
+    );
     this.removeFromIndex(this.storage.byAuthor, review.author, reviewId);
   }
 
@@ -507,7 +515,7 @@ export class ReviewSystem implements IReviewSystem {
   private addToIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     if (!index.has(key)) {
       index.set(key, new Set());
@@ -521,7 +529,7 @@ export class ReviewSystem implements IReviewSystem {
   private removeFromIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     const set = index.get(key);
     if (set) {

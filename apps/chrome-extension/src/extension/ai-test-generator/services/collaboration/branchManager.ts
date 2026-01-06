@@ -5,9 +5,13 @@
  */
 
 import type { Branch } from '../../types/collaboration';
-import type { IBranchManager, CreateBranchData, ConflictResolution } from './interfaces';
-import { versionControl } from './versionControl';
 import { diffEngine } from './diffEngine';
+import type {
+  ConflictResolution,
+  CreateBranchData,
+  IBranchManager,
+} from './interfaces';
+import { versionControl } from './versionControl';
 
 /**
  * In-memory storage for branches
@@ -40,7 +44,9 @@ export class BranchManager implements IBranchManager {
 
     // Get current file content as base version
     const currentVersion = await versionControl.getLatest(data.fileId);
-    const baseVersion = currentVersion ? currentVersion.id : `base_${Date.now()}`;
+    const baseVersion = currentVersion
+      ? currentVersion.id
+      : `base_${Date.now()}`;
 
     const branch: Branch = {
       id,
@@ -118,12 +124,14 @@ export class BranchManager implements IBranchManager {
     const result = await diffEngine.threeWayMerge(
       targetVersion.content, // Use target as base for simplicity
       sourceVersion.content,
-      targetVersion.content
+      targetVersion.content,
     );
 
     if (result === null) {
       source.status = 'abandoned';
-      throw new Error('Merge conflict detected. Please resolve conflicts manually.');
+      throw new Error(
+        'Merge conflict detected. Please resolve conflicts manually.',
+      );
     }
 
     // Create new version with merged content
@@ -131,7 +139,7 @@ export class BranchManager implements IBranchManager {
       source.fileId,
       result,
       `Merge branch ${source.name} into ${target.name}`,
-      source.createdBy
+      source.createdBy,
     );
 
     // Update target branch
@@ -158,7 +166,7 @@ export class BranchManager implements IBranchManager {
    */
   async resolveConflicts(
     branchId: string,
-    resolutions: ConflictResolution[]
+    resolutions: ConflictResolution[],
   ): Promise<void> {
     const branch = this.storage.branches.get(branchId);
     if (!branch) {
@@ -195,7 +203,7 @@ export class BranchManager implements IBranchManager {
       branch.fileId,
       content,
       `Resolved merge conflicts for ${branch.name}`,
-      branch.createdBy
+      branch.createdBy,
     );
 
     // Update branch version
@@ -215,7 +223,7 @@ export class BranchManager implements IBranchManager {
    */
   async compareBranches(
     branchIdA: string,
-    branchIdB: string
+    branchIdB: string,
   ): Promise<{
     ahead: number;
     behind: number;
@@ -270,7 +278,7 @@ export class BranchManager implements IBranchManager {
         const mergeResult = await diffEngine.threeWayMerge(
           mainVersion.content,
           branchVersion.content,
-          mainVersion.content
+          mainVersion.content,
         );
         hasConflicts = mergeResult === null;
       }
@@ -359,7 +367,7 @@ export class BranchManager implements IBranchManager {
   private addToIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     if (!index.has(key)) {
       index.set(key, new Set());
@@ -373,7 +381,7 @@ export class BranchManager implements IBranchManager {
   private removeFromIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     const set = index.get(key);
     if (set) {

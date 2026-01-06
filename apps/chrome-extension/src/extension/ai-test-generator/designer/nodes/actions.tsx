@@ -3,8 +3,8 @@
  * 动作节点 - Click, Input, Scroll, Wait, Navigate, Hover, Drag
  */
 
-import React, { memo } from 'react';
 import type { NodeProps } from '@xyflow/react';
+import React, { memo } from 'react';
 import { BaseNode } from './BaseNode';
 
 /**
@@ -57,7 +57,9 @@ InputNode.displayName = 'InputNode';
  */
 export const ScrollNode = memo<NodeProps>((props) => {
   const { data } = props;
-  const config = data.config as { target?: string; direction?: string } | undefined;
+  const config = data.config as
+    | { target?: string; direction?: string }
+    | undefined;
   const direction = config?.direction || 'down';
 
   return (
@@ -145,7 +147,9 @@ HoverNode.displayName = 'HoverNode';
  */
 export const DragNode = memo<NodeProps>((props) => {
   const { data } = props;
-  const config = data.config as { from?: string; to?: string; toTarget?: string } | undefined;
+  const config = data.config as
+    | { from?: string; to?: string; toTarget?: string }
+    | undefined;
   const from = config?.from || '';
   const to = config?.to || config?.toTarget || '';
 

@@ -64,7 +64,8 @@ export const translations = {
     exampleLoaded: '示例已加载',
     fileLoaded: '已加载文件',
     parseAndPreview: '解析并预览',
-    inputPlaceholder: '在此输入或粘贴 Markdown 格式的测试需求...\n\n支持的格式:\n1. 标题作为测试用例名称\n2. 列表项作为测试步骤\n3. 可以包含多个测试用例',
+    inputPlaceholder:
+      '在此输入或粘贴 Markdown 格式的测试需求...\n\n支持的格式:\n1. 标题作为测试用例名称\n2. 列表项作为测试步骤\n3. 可以包含多个测试用例',
 
     // AI 测试生成器 - 预览界面
     testCasePreview: '测试用例预览',
@@ -171,7 +172,8 @@ export const translations = {
     clearConfig: '清除配置',
     testConnection: '测试连接',
     securityTip: '安全提示',
-    gitlabTokenSecurityDesc: '您的 GitLab Token 将加密存储在本地浏览器中，不会上传至任何服务器。',
+    gitlabTokenSecurityDesc:
+      '您的 GitLab Token 将加密存储在本地浏览器中，不会上传至任何服务器。',
     gitlabServerUrl: 'GitLab 服务器地址',
     pleaseEnterGitlabUrl: '请输入 GitLab 地址',
     pleaseEnterValidUrl: '请输入有效的 URL',
@@ -190,7 +192,8 @@ export const translations = {
     rejectFix: '拒绝修复',
     acceptFix: '采用修复',
     possibleElementMatch: '发现可能的元素匹配',
-    aiFoundMatchingElement: 'AI 在页面上找到了一个与原始描述匹配的元素，请确认是否采用此修复。',
+    aiFoundMatchingElement:
+      'AI 在页面上找到了一个与原始描述匹配的元素，请确认是否采用此修复。',
     originalStep: '原始步骤',
     healingStrategy: '修复策略',
     attempts: '尝试次数',
@@ -443,7 +446,8 @@ export const translations = {
     exampleLoaded: 'Example loaded',
     fileLoaded: 'File loaded',
     parseAndPreview: 'Parse & Preview',
-    inputPlaceholder: 'Enter or paste Markdown test requirements here...\n\nSupported format:\n1. Headings as test case names\n2. List items as test steps\n3. Multiple test cases supported',
+    inputPlaceholder:
+      'Enter or paste Markdown test requirements here...\n\nSupported format:\n1. Headings as test case names\n2. List items as test steps\n3. Multiple test cases supported',
 
     // AI 测试生成器 - 预览界面
     testCasePreview: 'Test Case Preview',
@@ -499,7 +503,8 @@ export const translations = {
     modifyAndRetry: 'Modify and Retry',
     modifyInstruction: 'Modify Instruction',
     modifyInstructionPlaceholder: 'Modify instruction description...',
-    retryHint: 'Hint: Try using more specific descriptions, such as element color, position, or text content',
+    retryHint:
+      'Hint: Try using more specific descriptions, such as element color, position, or text content',
 
     // AI 测试生成器 - 提交界面
     commitView: 'Commit View',
@@ -528,13 +533,15 @@ export const translations = {
     pleaseSelectOrCreateBranch: 'Please select or create a branch',
     filePathMustEndWithYaml: 'File path must end with .yaml or .yml',
     scriptCommitSuccess: 'Script Commit Success',
-    scriptCommitSuccessDesc: 'Test script has been successfully committed to GitLab repository',
+    scriptCommitSuccessDesc:
+      'Test script has been successfully committed to GitLab repository',
     viewFile: 'View File',
     createNewTest: 'Create New Test',
     scriptGenerationComplete: 'Script Generation Complete',
     generatedYamlScript: 'Generated YAML Script',
     scriptManuallyModified: 'Script manually modified',
-    gitlabNotConfiguredDesc: 'Please configure GitLab connection information before committing',
+    gitlabNotConfiguredDesc:
+      'Please configure GitLab connection information before committing',
     configureNow: 'Configure Now',
     targetProject: 'Target Project',
     searchAndSelectProject: 'Search and select project',
@@ -550,7 +557,8 @@ export const translations = {
     clearConfig: 'Clear Config',
     testConnection: 'Test Connection',
     securityTip: 'Security Tip',
-    gitlabTokenSecurityDesc: 'Your GitLab Token will be encrypted and stored locally in your browser, and will not be uploaded to any server.',
+    gitlabTokenSecurityDesc:
+      'Your GitLab Token will be encrypted and stored locally in your browser, and will not be uploaded to any server.',
     gitlabServerUrl: 'GitLab Server URL',
     pleaseEnterGitlabUrl: 'Please enter GitLab URL',
     pleaseEnterValidUrl: 'Please enter a valid URL',
@@ -569,7 +577,8 @@ export const translations = {
     rejectFix: 'Reject Fix',
     acceptFix: 'Accept Fix',
     possibleElementMatch: 'Possible Element Match Found',
-    aiFoundMatchingElement: 'AI found an element on the page that matches the original description. Please confirm whether to accept this fix.',
+    aiFoundMatchingElement:
+      'AI found an element on the page that matches the original description. Please confirm whether to accept this fix.',
     originalStep: 'Original Step',
     healingStrategy: 'Healing Strategy',
     attempts: 'Attempts',
@@ -646,20 +655,23 @@ export const translations = {
     stars: 'Stars',
     all: 'All',
     networkError: 'Network Error',
-    networkErrorMessage: 'Unable to connect. Please check your internet connection.',
+    networkErrorMessage:
+      'Unable to connect. Please check your internet connection.',
     notFound: 'Not Found',
     notFoundMessage: 'The requested resource could not be found.',
     accessDenied: 'Access Denied',
     accessDeniedMessage: 'You do not have permission to access this resource.',
     serverError: 'Server Error',
-    serverErrorMessage: 'Something went wrong on our end. Please try again later.',
+    serverErrorMessage:
+      'Something went wrong on our end. Please try again later.',
     somethingWentWrong: 'Something Went Wrong',
     unexpectedError: 'An unexpected error occurred. Please try again.',
     tryAgain: 'Try Again',
     noResultsFound: 'No Results Found',
     tryAdjustingFilters: 'Try adjusting your search or filters.',
     noFavoritesYet: 'No Favorites Yet',
-    addTemplatesToFavorites: 'Add templates to your favorites to see them here.',
+    addTemplatesToFavorites:
+      'Add templates to your favorites to see them here.',
     noHistory: 'No History',
     templatesWillAppearHere: 'Templates you use will appear here.',
     noTemplates: 'No Templates',
@@ -783,7 +795,11 @@ export function getPreferredLanguage(): Language {
   // 3. 检查时区（中国时区默认中文）
   try {
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    if (timeZone === 'Asia/Shanghai' || timeZone === 'Asia/Chongqing' || timeZone === 'Asia/Hong_Kong') {
+    if (
+      timeZone === 'Asia/Shanghai' ||
+      timeZone === 'Asia/Chongqing' ||
+      timeZone === 'Asia/Hong_Kong'
+    ) {
       return 'zh';
     }
   } catch (e) {
@@ -821,7 +837,10 @@ export function useI18n() {
   useEffect(() => {
     // 监听语言变化
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'midscene-language' && (e.newValue === 'zh' || e.newValue === 'en')) {
+      if (
+        e.key === 'midscene-language' &&
+        (e.newValue === 'zh' || e.newValue === 'en')
+      ) {
         setLang(e.newValue);
       }
     };

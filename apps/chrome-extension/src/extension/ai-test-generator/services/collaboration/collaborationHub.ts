@@ -6,22 +6,30 @@
 
 import type {
   CollaborationSession,
-  Participant,
   CursorPosition,
   EditorOperation,
   EditorState,
+  Participant,
 } from '../../types/collaboration';
 import type { ICollaborationHub } from './interfaces';
-import { syncEngine } from './syncEngine';
 import { ot } from './ot';
+import { syncEngine } from './syncEngine';
 
 /**
  * Generate a color for a participant
  */
 function generateParticipantColor(userId: string): string {
   const colors = [
-    '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
-    '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B788',
+    '#FF6B6B',
+    '#4ECDC4',
+    '#45B7D1',
+    '#FFA07A',
+    '#98D8C8',
+    '#F7DC6F',
+    '#BB8FCE',
+    '#85C1E2',
+    '#F8B739',
+    '#52B788',
   ];
   let hash = 0;
   for (let i = 0; i < userId.length; i++) {
@@ -68,7 +76,7 @@ export class CollaborationHub implements ICollaborationHub {
    */
   async joinSession(
     fileId: string,
-    userId: string
+    userId: string,
   ): Promise<CollaborationSession> {
     // Find or create session for this file
     let sessionData = this.findSessionByFile(fileId);
@@ -99,7 +107,7 @@ export class CollaborationHub implements ICollaborationHub {
 
     // Add participant if not already present
     const existingParticipant = sessionData.session.participants.find(
-      (p) => p.userId === userId
+      (p) => p.userId === userId,
     );
 
     if (!existingParticipant) {
@@ -115,7 +123,11 @@ export class CollaborationHub implements ICollaborationHub {
       };
 
       sessionData.session.participants.push(participant);
-      this.addToIndex(this.storage.sessionsByUser, userId, sessionData.session.id);
+      this.addToIndex(
+        this.storage.sessionsByUser,
+        userId,
+        sessionData.session.id,
+      );
 
       // Connect to sync engine
       await syncEngine.connect(sessionData.session.id, userId);
@@ -124,12 +136,16 @@ export class CollaborationHub implements ICollaborationHub {
     sessionData.session.lastActivity = Date.now();
 
     // Broadcast participant join
-    await this.broadcast(sessionData.session.id, {
-      type: 'participant_join',
-      sessionId: sessionData.session.id,
+    await this.broadcast(
+      sessionData.session.id,
+      {
+        type: 'participant_join',
+        sessionId: sessionData.session.id,
+        userId,
+        timestamp: Date.now(),
+      },
       userId,
-      timestamp: Date.now(),
-    }, userId);
+    );
 
     return {
       ...sessionData.session,
@@ -148,7 +164,7 @@ export class CollaborationHub implements ICollaborationHub {
 
     // Remove participant
     const index = sessionData.session.participants.findIndex(
-      (p) => p.userId === userId
+      (p) => p.userId === userId,
     );
 
     if (index !== -1) {
@@ -162,7 +178,11 @@ export class CollaborationHub implements ICollaborationHub {
     // Clean up empty sessions
     if (sessionData.session.participants.length === 0) {
       this.storage.sessions.delete(sessionId);
-      this.removeFromIndex(this.storage.byFile, sessionData.session.fileId, sessionId);
+      this.removeFromIndex(
+        this.storage.byFile,
+        sessionData.session.fileId,
+        sessionId,
+      );
     } else {
       // Broadcast participant leave
       await this.broadcast(sessionId, {
@@ -179,7 +199,7 @@ export class CollaborationHub implements ICollaborationHub {
    */
   async sendOperation(
     sessionId: string,
-    operation: EditorOperation
+    operation: EditorOperation,
   ): Promise<void> {
     const sessionData = this.storage.sessions.get(sessionId);
     if (!sessionData) {
@@ -202,12 +222,16 @@ export class CollaborationHub implements ICollaborationHub {
     sessionData.session.lastActivity = Date.now();
 
     // Broadcast to other participants
-    await this.broadcast(sessionId, {
-      type: 'operation',
+    await this.broadcast(
       sessionId,
-      userId: operation.userId,
-      timestamp: Date.now(),
-    } as unknown, operation.userId);
+      {
+        type: 'operation',
+        sessionId,
+        userId: operation.userId,
+        timestamp: Date.now(),
+      } as unknown,
+      operation.userId,
+    );
   }
 
   /**
@@ -217,7 +241,7 @@ export class CollaborationHub implements ICollaborationHub {
     sessionId: string,
     userId: string,
     cursor: CursorPosition,
-    selection?: CursorPosition
+    selection?: CursorPosition,
   ): Promise<void> {
     const sessionData = this.storage.sessions.get(sessionId);
     if (!sessionData) {
@@ -225,7 +249,7 @@ export class CollaborationHub implements ICollaborationHub {
     }
 
     const participant = sessionData.session.participants.find(
-      (p) => p.userId === userId
+      (p) => p.userId === userId,
     );
 
     if (participant) {
@@ -241,12 +265,16 @@ export class CollaborationHub implements ICollaborationHub {
     }
 
     // Broadcast cursor update
-    await this.broadcast(sessionId, {
-      type: 'cursor',
+    await this.broadcast(
       sessionId,
+      {
+        type: 'cursor',
+        sessionId,
+        userId,
+        timestamp: Date.now(),
+      } as unknown,
       userId,
-      timestamp: Date.now(),
-    } as unknown, userId);
+    );
   }
 
   /**
@@ -261,7 +289,7 @@ export class CollaborationHub implements ICollaborationHub {
     // Filter out inactive participants
     const now = Date.now();
     const active = sessionData.session.participants.filter(
-      (p) => now - p.lastSeen < 60000 // 1 minute timeout
+      (p) => now - p.lastSeen < 60000, // 1 minute timeout
     );
 
     return active.map((p) => ({ ...p }));
@@ -290,7 +318,7 @@ export class CollaborationHub implements ICollaborationHub {
   async broadcast(
     sessionId: string,
     message: unknown,
-    excludeUserId?: string
+    excludeUserId?: string,
   ): Promise<void> {
     const sessionData = this.storage.sessions.get(sessionId);
     if (!sessionData) {
@@ -357,7 +385,7 @@ export class CollaborationHub implements ICollaborationHub {
 
     for (const sessionData of this.storage.sessions.values()) {
       const active = sessionData.session.participants.filter(
-        (p) => now - p.lastSeen < timeout
+        (p) => now - p.lastSeen < timeout,
       );
 
       removed += sessionData.session.participants.length - active.length;
@@ -399,7 +427,7 @@ export class CollaborationHub implements ICollaborationHub {
   private addToIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     if (!index.has(key)) {
       index.set(key, new Set());
@@ -413,7 +441,7 @@ export class CollaborationHub implements ICollaborationHub {
   private removeFromIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     const set = index.get(key);
     if (set) {

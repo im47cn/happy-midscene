@@ -99,7 +99,10 @@ export class WhitelistManager {
         try {
           this.compiledPatterns.set(entry.id, new RegExp(entry.value, 'gi'));
         } catch (error) {
-          console.warn(`Invalid pattern in whitelist entry ${entry.id}:`, error);
+          console.warn(
+            `Invalid pattern in whitelist entry ${entry.id}:`,
+            error,
+          );
         }
       }
     }
@@ -108,7 +111,10 @@ export class WhitelistManager {
   /**
    * Check if a value is whitelisted
    */
-  isWhitelisted(value: string, context?: { url?: string; path?: string }): boolean {
+  isWhitelisted(
+    value: string,
+    context?: { url?: string; path?: string },
+  ): boolean {
     if (!this.config.enabled) {
       return false;
     }
@@ -135,7 +141,10 @@ export class WhitelistManager {
           if (context?.url) {
             try {
               const url = new URL(context.url);
-              if (url.hostname === entry.value || url.hostname.endsWith(`.${entry.value}`)) {
+              if (
+                url.hostname === entry.value ||
+                url.hostname.endsWith(`.${entry.value}`)
+              ) {
                 return true;
               }
             } catch {
@@ -160,7 +169,9 @@ export class WhitelistManager {
   /**
    * Add a whitelist entry
    */
-  addEntry(entry: Omit<WhitelistEntry, 'id' | 'createdAt' | 'updatedAt'>): WhitelistEntry {
+  addEntry(
+    entry: Omit<WhitelistEntry, 'id' | 'createdAt' | 'updatedAt'>,
+  ): WhitelistEntry {
     const now = Date.now();
     const newEntry: WhitelistEntry = {
       ...entry,
@@ -179,7 +190,10 @@ export class WhitelistManager {
   /**
    * Update a whitelist entry
    */
-  updateEntry(id: string, updates: Partial<Omit<WhitelistEntry, 'id' | 'createdAt'>>): boolean {
+  updateEntry(
+    id: string,
+    updates: Partial<Omit<WhitelistEntry, 'id' | 'createdAt'>>,
+  ): boolean {
     const index = this.config.entries.findIndex((e) => e.id === id);
     if (index === -1) {
       return false;
@@ -274,12 +288,20 @@ export class WhitelistManager {
   /**
    * Import whitelist from JSON
    */
-  importFromJSON(json: string): { success: boolean; count: number; error?: string } {
+  importFromJSON(json: string): {
+    success: boolean;
+    count: number;
+    error?: string;
+  } {
     try {
       const parsed = JSON.parse(json);
 
       if (!parsed.entries || !Array.isArray(parsed.entries)) {
-        return { success: false, count: 0, error: 'Invalid format: missing entries array' };
+        return {
+          success: false,
+          count: 0,
+          error: 'Invalid format: missing entries array',
+        };
       }
 
       // Validate entries
@@ -291,7 +313,9 @@ export class WhitelistManager {
           ['exact', 'pattern', 'domain', 'path'].includes(entry.type)
         ) {
           validEntries.push({
-            id: entry.id || `wl_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
+            id:
+              entry.id ||
+              `wl_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
             type: entry.type,
             value: entry.value,
             description: entry.description || '',
@@ -303,8 +327,12 @@ export class WhitelistManager {
       }
 
       // Merge with existing entries (avoid duplicates by value)
-      const existingValues = new Set(this.config.entries.map((e) => `${e.type}:${e.value}`));
-      const newEntries = validEntries.filter((e) => !existingValues.has(`${e.type}:${e.value}`));
+      const existingValues = new Set(
+        this.config.entries.map((e) => `${e.type}:${e.value}`),
+      );
+      const newEntries = validEntries.filter(
+        (e) => !existingValues.has(`${e.type}:${e.value}`),
+      );
 
       this.config.entries.push(...newEntries);
       this.compilePatterns();

@@ -54,7 +54,10 @@ export class GitHubMarketplaceAPI implements IMarketplaceAPI {
   /**
    * Get cached data or fetch fresh
    */
-  private async getCached<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
+  private async getCached<T>(
+    key: string,
+    fetcher: () => Promise<T>,
+  ): Promise<T> {
     if (!this.config.cacheEnabled) {
       return fetcher();
     }
@@ -97,7 +100,10 @@ export class GitHubMarketplaceAPI implements IMarketplaceAPI {
    * Get template index
    */
   private async getIndex(): Promise<TemplateIndex> {
-    if (this.indexCache && Date.now() - this.indexCacheTime < this.config.cacheTTL) {
+    if (
+      this.indexCache &&
+      Date.now() - this.indexCacheTime < this.config.cacheTTL
+    ) {
       return this.indexCache;
     }
 
@@ -137,12 +143,17 @@ export class GitHubMarketplaceAPI implements IMarketplaceAPI {
         id: 'login-basic',
         name: 'Basic Login',
         slug: 'login-basic',
-        shortDescription: 'Universal login template supporting username/password authentication',
+        shortDescription:
+          'Universal login template supporting username/password authentication',
         category: 'authentication',
         platforms: ['web'],
         thumbnail: undefined,
         version: '1.0.0',
-        publisher: { id: 'official', name: 'Midscene Official', verified: true },
+        publisher: {
+          id: 'official',
+          name: 'Midscene Official',
+          verified: true,
+        },
         stats: { downloads: 1234, favorites: 89, rating: 4.8, ratingCount: 45 },
         featured: true,
         publishedAt: Date.now() - 30 * 24 * 60 * 60 * 1000,
@@ -156,7 +167,11 @@ export class GitHubMarketplaceAPI implements IMarketplaceAPI {
         platforms: ['web', 'android'],
         thumbnail: undefined,
         version: '2.1.0',
-        publisher: { id: 'official', name: 'Midscene Official', verified: true },
+        publisher: {
+          id: 'official',
+          name: 'Midscene Official',
+          verified: true,
+        },
         stats: { downloads: 890, favorites: 56, rating: 4.6, ratingCount: 32 },
         featured: true,
         publishedAt: Date.now() - 15 * 24 * 60 * 60 * 1000,
@@ -170,8 +185,17 @@ export class GitHubMarketplaceAPI implements IMarketplaceAPI {
         platforms: ['web', 'android', 'ios'],
         thumbnail: undefined,
         version: '1.5.0',
-        publisher: { id: 'official', name: 'Midscene Official', verified: true },
-        stats: { downloads: 2100, favorites: 120, rating: 4.9, ratingCount: 78 },
+        publisher: {
+          id: 'official',
+          name: 'Midscene Official',
+          verified: true,
+        },
+        stats: {
+          downloads: 2100,
+          favorites: 120,
+          rating: 4.9,
+          ratingCount: 78,
+        },
         featured: true,
         publishedAt: Date.now() - 7 * 24 * 60 * 60 * 1000,
       },
@@ -198,7 +222,11 @@ export class GitHubMarketplaceAPI implements IMarketplaceAPI {
         platforms: ['web'],
         thumbnail: undefined,
         version: '1.0.0',
-        publisher: { id: 'official', name: 'Midscene Official', verified: true },
+        publisher: {
+          id: 'official',
+          name: 'Midscene Official',
+          verified: true,
+        },
         stats: { downloads: 456, favorites: 28, rating: 4.7, ratingCount: 15 },
         featured: false,
         publishedAt: Date.now() - 10 * 24 * 60 * 60 * 1000,
@@ -220,11 +248,41 @@ export class GitHubMarketplaceAPI implements IMarketplaceAPI {
     ];
 
     const categories: CategoryInfo[] = [
-      { id: 'authentication', name: 'Authentication', description: 'Login/Logout flows', icon: 'lock', count: 2 },
-      { id: 'form', name: 'Form', description: 'Form submissions', icon: 'form', count: 1 },
-      { id: 'search', name: 'Search', description: 'Search functionality', icon: 'search', count: 1 },
-      { id: 'shopping', name: 'Shopping', description: 'E-commerce flows', icon: 'shopping-cart', count: 1 },
-      { id: 'payment', name: 'Payment', description: 'Payment processing', icon: 'credit-card', count: 1 },
+      {
+        id: 'authentication',
+        name: 'Authentication',
+        description: 'Login/Logout flows',
+        icon: 'lock',
+        count: 2,
+      },
+      {
+        id: 'form',
+        name: 'Form',
+        description: 'Form submissions',
+        icon: 'form',
+        count: 1,
+      },
+      {
+        id: 'search',
+        name: 'Search',
+        description: 'Search functionality',
+        icon: 'search',
+        count: 1,
+      },
+      {
+        id: 'shopping',
+        name: 'Shopping',
+        description: 'E-commerce flows',
+        icon: 'shopping-cart',
+        count: 1,
+      },
+      {
+        id: 'payment',
+        name: 'Payment',
+        description: 'Payment processing',
+        icon: 'credit-card',
+        count: 1,
+      },
     ];
 
     this.initFuse(mockTemplates);
@@ -250,7 +308,7 @@ export class GitHubMarketplaceAPI implements IMarketplaceAPI {
     }
     if (options?.platforms?.length) {
       templates = templates.filter((t) =>
-        options.platforms!.some((p) => t.platforms.includes(p))
+        options.platforms!.some((p) => t.platforms.includes(p)),
       );
     }
     if (options?.rating) {
@@ -316,7 +374,7 @@ export class GitHubMarketplaceAPI implements IMarketplaceAPI {
     }
     if (query.platforms?.length) {
       templates = templates.filter((t) =>
-        query.platforms!.some((p) => t.platforms.includes(p))
+        query.platforms!.some((p) => t.platforms.includes(p)),
       );
     }
     if (query.rating) {
@@ -344,7 +402,9 @@ export class GitHubMarketplaceAPI implements IMarketplaceAPI {
   async getTemplate(id: string): Promise<Template> {
     return this.getCached(`template:${id}`, async () => {
       try {
-        const metadata = await this.fetchJson<Omit<Template, 'content'>>(`templates/${id}/metadata.json`);
+        const metadata = await this.fetchJson<Omit<Template, 'content'>>(
+          `templates/${id}/metadata.json`,
+        );
         const yaml = await this.fetchText(`templates/${id}/template.yaml`);
 
         let readme: string | undefined;
@@ -387,8 +447,10 @@ flow:
       id,
       name: 'Basic Login',
       slug: id,
-      description: '# Basic Login Template\n\nA universal login template that works with most web applications.\n\n## Features\n\n- Username/password authentication\n- Remember me option\n- Error handling\n\n## Usage\n\nConfigure the login URL and credentials, then run the test.',
-      shortDescription: 'Universal login template supporting username/password authentication',
+      description:
+        '# Basic Login Template\n\nA universal login template that works with most web applications.\n\n## Features\n\n- Username/password authentication\n- Remember me option\n- Error handling\n\n## Usage\n\nConfigure the login URL and credentials, then run the test.',
+      shortDescription:
+        'Universal login template supporting username/password authentication',
       category: 'authentication',
       tags: ['login', 'authentication', 'basic'],
       platforms: ['web'],
@@ -421,7 +483,8 @@ flow:
             description: 'Password for login',
           },
         ],
-        readme: '# Basic Login Template\n\nThis template provides a reusable login flow.',
+        readme:
+          '# Basic Login Template\n\nThis template provides a reusable login flow.',
       },
       media: {},
       version: '1.0.0',
@@ -453,7 +516,9 @@ flow:
   async getTemplateVersions(id: string): Promise<TemplateVersion[]> {
     return this.getCached(`versions:${id}`, async () => {
       try {
-        return await this.fetchJson<TemplateVersion[]>(`templates/${id}/versions.json`);
+        return await this.fetchJson<TemplateVersion[]>(
+          `templates/${id}/versions.json`,
+        );
       } catch {
         // Return mock versions
         return [
@@ -474,10 +539,16 @@ flow:
   /**
    * Get template reviews
    */
-  async getTemplateReviews(id: string, page = 0, limit = 10): Promise<TemplateReview[]> {
+  async getTemplateReviews(
+    id: string,
+    page = 0,
+    limit = 10,
+  ): Promise<TemplateReview[]> {
     return this.getCached(`reviews:${id}:${page}:${limit}`, async () => {
       try {
-        const allReviews = await this.fetchJson<TemplateReview[]>(`templates/${id}/reviews.json`);
+        const allReviews = await this.fetchJson<TemplateReview[]>(
+          `templates/${id}/reviews.json`,
+        );
         return allReviews.slice(page * limit, (page + 1) * limit);
       } catch {
         // Return mock reviews
@@ -519,9 +590,13 @@ flow:
       } catch {
         return {
           id,
-          name: id === 'official' ? 'Midscene Official' : 'Community Contributor',
+          name:
+            id === 'official' ? 'Midscene Official' : 'Community Contributor',
           verified: id === 'official',
-          bio: id === 'official' ? 'Official templates from the Midscene team' : 'Community contributor',
+          bio:
+            id === 'official'
+              ? 'Official templates from the Midscene team'
+              : 'Community contributor',
           templateCount: 5,
         };
       }
@@ -547,7 +622,10 @@ flow:
   /**
    * Get popular templates
    */
-  async getPopular(category?: TemplateCategory, limit = 20): Promise<TemplateSummary[]> {
+  async getPopular(
+    category?: TemplateCategory,
+    limit = 20,
+  ): Promise<TemplateSummary[]> {
     const result = await this.getTemplates({
       category,
       sortBy: 'downloads',

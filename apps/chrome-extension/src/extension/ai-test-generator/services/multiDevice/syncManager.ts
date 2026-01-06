@@ -20,10 +20,7 @@ export interface SyncPointState {
 /**
  * Sync event types
  */
-export type SyncEventType =
-  | 'device_arrived'
-  | 'sync_released'
-  | 'sync_timeout';
+export type SyncEventType = 'device_arrived' | 'sync_released' | 'sync_timeout';
 
 /**
  * Sync event

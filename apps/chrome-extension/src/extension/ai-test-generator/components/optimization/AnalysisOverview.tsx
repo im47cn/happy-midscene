@@ -10,10 +10,23 @@ import {
   SafetyOutlined,
   ToolOutlined,
 } from '@ant-design/icons';
-import { Card, Col, Empty, List, Progress, Row, Space, Tag, Tooltip } from 'antd';
+import {
+  Card,
+  Col,
+  Empty,
+  List,
+  Progress,
+  Row,
+  Space,
+  Tag,
+  Tooltip,
+} from 'antd';
 
 import type { OptimizationReport, Priority } from '../../types/optimization';
-import { PRIORITY_LABELS, RECOMMENDATION_TYPE_LABELS } from '../../types/optimization';
+import {
+  PRIORITY_LABELS,
+  RECOMMENDATION_TYPE_LABELS,
+} from '../../types/optimization';
 
 const priorityColors: Record<Priority, string> = {
   critical: '#ff4d4f',
@@ -34,36 +47,38 @@ export function AnalysisOverview({ report }: AnalysisOverviewProps) {
         <Col span={12}>
           <Card title="优先级分布" size="small">
             <Row gutter={[8, 8]}>
-              {(['critical', 'high', 'medium', 'low'] as Priority[]).map((p) => {
-                const count = report.summary.byPriority[p] || 0;
-                const total = report.summary.totalRecommendations || 1;
-                const percent = Math.round((count / total) * 100);
-                return (
-                  <Col span={12} key={p}>
-                    <div style={{ marginBottom: 8 }}>
-                      <Space>
-                        <span
-                          style={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: '50%',
-                            background: priorityColors[p],
-                            display: 'inline-block',
-                          }}
+              {(['critical', 'high', 'medium', 'low'] as Priority[]).map(
+                (p) => {
+                  const count = report.summary.byPriority[p] || 0;
+                  const total = report.summary.totalRecommendations || 1;
+                  const percent = Math.round((count / total) * 100);
+                  return (
+                    <Col span={12} key={p}>
+                      <div style={{ marginBottom: 8 }}>
+                        <Space>
+                          <span
+                            style={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: '50%',
+                              background: priorityColors[p],
+                              display: 'inline-block',
+                            }}
+                          />
+                          <span>{PRIORITY_LABELS[p]}</span>
+                          <Tag>{count}</Tag>
+                        </Space>
+                        <Progress
+                          percent={percent}
+                          size="small"
+                          showInfo={false}
+                          strokeColor={priorityColors[p]}
                         />
-                        <span>{PRIORITY_LABELS[p]}</span>
-                        <Tag>{count}</Tag>
-                      </Space>
-                      <Progress
-                        percent={percent}
-                        size="small"
-                        showInfo={false}
-                        strokeColor={priorityColors[p]}
-                      />
-                    </div>
-                  </Col>
-                );
-              })}
+                      </div>
+                    </Col>
+                  );
+                },
+              )}
             </Row>
           </Card>
         </Col>
@@ -76,7 +91,12 @@ export function AnalysisOverview({ report }: AnalysisOverviewProps) {
                 if (count === 0) return null;
                 return (
                   <Tag key={type} color="blue">
-                    {RECOMMENDATION_TYPE_LABELS[type as keyof typeof RECOMMENDATION_TYPE_LABELS]} ({count})
+                    {
+                      RECOMMENDATION_TYPE_LABELS[
+                        type as keyof typeof RECOMMENDATION_TYPE_LABELS
+                      ]
+                    }{' '}
+                    ({count})
                   </Tag>
                 );
               })}
@@ -178,16 +198,23 @@ export function AnalysisOverview({ report }: AnalysisOverviewProps) {
             size="small"
           >
             {report.coverageGaps.length === 0 ? (
-              <Empty description="没有覆盖率缺口" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+              <Empty
+                description="没有覆盖率缺口"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
             ) : (
               <List
                 size="small"
                 dataSource={report.coverageGaps.slice(0, 4)}
                 renderItem={(gap) => (
                   <List.Item>
-                    <Tooltip title={`当前 ${gap.currentCoverage}%, 建议 ${gap.recommendedCoverage}%`}>
+                    <Tooltip
+                      title={`当前 ${gap.currentCoverage}%, 建议 ${gap.recommendedCoverage}%`}
+                    >
                       <Space>
-                        <Tag color={priorityColors[gap.riskLevel]}>{gap.riskLevel}</Tag>
+                        <Tag color={priorityColors[gap.riskLevel]}>
+                          {gap.riskLevel}
+                        </Tag>
                         <span>{gap.feature}</span>
                       </Space>
                     </Tooltip>
@@ -210,7 +237,10 @@ export function AnalysisOverview({ report }: AnalysisOverviewProps) {
             size="small"
           >
             {report.stabilityAnalysis.flakyTests.length === 0 ? (
-              <Empty description="没有不稳定测试" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+              <Empty
+                description="没有不稳定测试"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
             ) : (
               <List
                 size="small"
@@ -248,7 +278,10 @@ export function AnalysisOverview({ report }: AnalysisOverviewProps) {
             size="small"
           >
             {report.maintainabilityAnalysis.issues.length === 0 ? (
-              <Empty description="没有维护性问题" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+              <Empty
+                description="没有维护性问题"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
             ) : (
               <List
                 size="small"
@@ -299,11 +332,14 @@ export function AnalysisOverview({ report }: AnalysisOverviewProps) {
                   <List.Item>
                     <Card size="small">
                       <div style={{ fontWeight: 500 }}>{opt.type}</div>
-                      <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
+                      <div
+                        style={{ fontSize: 12, color: '#666', marginTop: 4 }}
+                      >
                         {opt.suggestion}
                       </div>
                       <Tag color="green" style={{ marginTop: 8 }}>
-                        节省 {opt.estimatedSaving.value} {opt.estimatedSaving.unit}
+                        节省 {opt.estimatedSaving.value}{' '}
+                        {opt.estimatedSaving.unit}
                       </Tag>
                     </Card>
                   </List.Item>

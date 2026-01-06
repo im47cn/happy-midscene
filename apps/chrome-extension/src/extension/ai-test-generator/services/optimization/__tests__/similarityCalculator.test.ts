@@ -2,22 +2,24 @@
  * SimilarityCalculator Tests
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { similarityCalculator } from '../similarityCalculator';
 
 describe('SimilarityCalculator', () => {
   describe('calculateStepSimilarity', () => {
     it('should return 1 for identical steps', () => {
       const steps = ['Click login button', 'Enter username', 'Submit form'];
-      expect(similarityCalculator.calculateStepSimilarity(steps, steps)).toBe(1);
+      expect(similarityCalculator.calculateStepSimilarity(steps, steps)).toBe(
+        1,
+      );
     });
 
     it('should return 0 for completely different steps', () => {
       const steps1 = ['Click login button', 'Enter username'];
       const steps2 = ['Navigate to settings', 'Change password'];
-      expect(
-        similarityCalculator.calculateStepSimilarity(steps1, steps2),
-      ).toBe(0);
+      expect(similarityCalculator.calculateStepSimilarity(steps1, steps2)).toBe(
+        0,
+      );
     });
 
     it('should return value between 0 and 1 for partial overlap', () => {
@@ -33,8 +35,12 @@ describe('SimilarityCalculator', () => {
 
     it('should handle empty arrays', () => {
       expect(similarityCalculator.calculateStepSimilarity([], [])).toBe(1);
-      expect(similarityCalculator.calculateStepSimilarity(['step'], [])).toBe(0);
-      expect(similarityCalculator.calculateStepSimilarity([], ['step'])).toBe(0);
+      expect(similarityCalculator.calculateStepSimilarity(['step'], [])).toBe(
+        0,
+      );
+      expect(similarityCalculator.calculateStepSimilarity([], ['step'])).toBe(
+        0,
+      );
     });
   });
 
@@ -46,7 +52,9 @@ describe('SimilarityCalculator', () => {
     });
 
     it('should remove quoted strings', () => {
-      const result = similarityCalculator.normalizeStep('type "username" in input');
+      const result = similarityCalculator.normalizeStep(
+        'type "username" in input',
+      );
       expect(result).toBe('type "" in input');
     });
 
@@ -56,7 +64,9 @@ describe('SimilarityCalculator', () => {
     });
 
     it('should normalize whitespace', () => {
-      const result = similarityCalculator.normalizeStep('click   the    button');
+      const result = similarityCalculator.normalizeStep(
+        'click   the    button',
+      );
       expect(result).toBe('click the button');
     });
   });
@@ -75,9 +85,9 @@ describe('SimilarityCalculator', () => {
     });
 
     it('should extract verify action', () => {
-      expect(similarityCalculator.extractActionType('Verify text appears')).toBe(
-        'verify',
-      );
+      expect(
+        similarityCalculator.extractActionType('Verify text appears'),
+      ).toBe('verify');
     });
 
     it('should return other for unknown actions', () => {
@@ -93,9 +103,9 @@ describe('SimilarityCalculator', () => {
     });
 
     it('should return correct distance for different strings', () => {
-      expect(similarityCalculator.levenshteinDistance('kitten', 'sitting')).toBe(
-        3,
-      );
+      expect(
+        similarityCalculator.levenshteinDistance('kitten', 'sitting'),
+      ).toBe(3);
     });
 
     it('should handle empty strings', () => {

@@ -5,9 +5,9 @@
 
 import { describe, expect, it } from 'vitest';
 import {
-  testCaseToFlowNodes,
   type FlowNode,
   type FlowNodeStatus,
+  testCaseToFlowNodes,
 } from '../AdaptiveFlowVisualization';
 
 describe('testCaseToFlowNodes', () => {
@@ -73,9 +73,7 @@ describe('testCaseToFlowNodes', () => {
             type: 'count',
             count: 3,
             maxIterations: 3,
-            body: [
-              { id: 'step-2', description: 'Loop body action' },
-            ],
+            body: [{ id: 'step-2', description: 'Loop body action' }],
           },
         },
       ],
@@ -171,9 +169,7 @@ describe('testCaseToFlowNodes', () => {
     const testCase = {
       id: 'test-1',
       name: 'Type Test',
-      steps: [
-        { id: 'step-1', description: 'Loop', type: 'loop' },
-      ],
+      steps: [{ id: 'step-1', description: 'Loop', type: 'loop' }],
       variables: {},
     };
 
@@ -195,9 +191,7 @@ describe('testCaseToFlowNodes', () => {
             { id: 'step-2', description: 'Then action 1' },
             { id: 'step-3', description: 'Then action 2' },
           ],
-          elseSteps: [
-            { id: 'step-4', description: 'Else action' },
-          ],
+          elseSteps: [{ id: 'step-4', description: 'Else action' }],
         },
       ],
       variables: {},
@@ -218,9 +212,7 @@ describe('testCaseToFlowNodes', () => {
           id: 'step-1',
           description: 'Condition',
           condition: { expression: '${x}' },
-          thenSteps: [
-            { id: 'step-2', description: 'Then action' },
-          ],
+          thenSteps: [{ id: 'step-2', description: 'Then action' }],
         },
       ],
       variables: {},
@@ -236,9 +228,7 @@ describe('testCaseToFlowNodes', () => {
     const testCase = {
       id: 'test-1',
       name: 'Label Test',
-      steps: [
-        { id: 'step-1', description: 'My custom label' },
-      ],
+      steps: [{ id: 'step-1', description: 'My custom label' }],
       variables: {},
     };
 
@@ -250,9 +240,7 @@ describe('testCaseToFlowNodes', () => {
     const testCase = {
       id: 'test-1',
       name: 'Label Fallback Test',
-      steps: [
-        { id: 'step-1' } as any,
-      ],
+      steps: [{ id: 'step-1' } as any],
       variables: {},
     };
 
@@ -284,8 +272,22 @@ describe('FlowNode structure', () => {
       status: 'pending',
       label: 'Is logged in?',
       children: [
-        { id: 'node-2', type: 'action', status: 'pending', label: 'Then', branch: 'then', depth: 1 },
-        { id: 'node-3', type: 'action', status: 'skipped', label: 'Else', branch: 'else', depth: 1 },
+        {
+          id: 'node-2',
+          type: 'action',
+          status: 'pending',
+          label: 'Then',
+          branch: 'then',
+          depth: 1,
+        },
+        {
+          id: 'node-3',
+          type: 'action',
+          status: 'skipped',
+          label: 'Else',
+          branch: 'else',
+          depth: 1,
+        },
       ],
     };
 
@@ -296,7 +298,13 @@ describe('FlowNode structure', () => {
   });
 
   it('should handle all possible status types', () => {
-    const statuses: FlowNodeStatus[] = ['pending', 'running', 'success', 'failed', 'skipped'];
+    const statuses: FlowNodeStatus[] = [
+      'pending',
+      'running',
+      'success',
+      'failed',
+      'skipped',
+    ];
 
     statuses.forEach((status) => {
       const node: FlowNode = {

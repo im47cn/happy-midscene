@@ -35,7 +35,7 @@ class LazyImageLoader {
       {
         rootMargin: '50px',
         threshold: 0.01,
-      }
+      },
     );
   }
 
@@ -74,7 +74,7 @@ class LazyImageLoader {
  */
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
-  wait: number
+  wait: number,
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout | null = null;
 
@@ -92,7 +92,7 @@ export function debounce<T extends (...args: any[]) => any>(
  */
 export function throttle<T extends (...args: any[]) => any>(
   func: T,
-  limit: number
+  limit: number,
 ): (...args: Parameters<T>) => void {
   let inThrottle = false;
 
@@ -111,7 +111,7 @@ export function throttle<T extends (...args: any[]) => any>(
  * Request animation frame based throttle
  */
 export function rafThrottle<T extends (...args: any[]) => any>(
-  func: T
+  func: T,
 ): (...args: Parameters<T>) => void {
   let rafId: number | null = null;
 
@@ -152,7 +152,10 @@ export class VirtualListManager<T> {
     const { itemHeight, containerHeight, bufferSize } = this.config;
     const start = Math.max(0, Math.floor(scrollTop / itemHeight) - bufferSize);
     const visibleCount = Math.ceil(containerHeight / itemHeight);
-    const end = Math.min(this.items.length, start + visibleCount + bufferSize * 2);
+    const end = Math.min(
+      this.items.length,
+      start + visibleCount + bufferSize * 2,
+    );
 
     this.visibleRange = { start, end };
   }
@@ -255,14 +258,18 @@ export class LRUCache<K, V> {
  * Batch processor for API requests
  */
 export class BatchProcessor<T, R> {
-  private queue: Array<{ item: T; resolve: (result: R) => void; reject: (error: any) => void }> = [];
+  private queue: Array<{
+    item: T;
+    resolve: (result: R) => void;
+    reject: (error: any) => void;
+  }> = [];
   private timer: NodeJS.Timeout | null = null;
   private processing = false;
 
   constructor(
     private batchSize: number,
     private batchDelay: number,
-    private processBatch: (items: T[]) => Promise<R[]>
+    private processBatch: (items: T[]) => Promise<R[]>,
   ) {}
 
   async add(item: T): Promise<R> {
@@ -292,14 +299,14 @@ export class BatchProcessor<T, R> {
     const batch = this.queue.splice(0, this.batchSize);
 
     try {
-      const items = batch.map(b => b.item);
+      const items = batch.map((b) => b.item);
       const results = await this.processBatch(items);
 
       batch.forEach((b, i) => {
         b.resolve(results[i]);
       });
     } catch (error) {
-      batch.forEach(b => {
+      batch.forEach((b) => {
         b.reject(error);
       });
     } finally {
@@ -322,7 +329,9 @@ export class WorkerManager {
   constructor(private workerScript: string) {}
 
   async init(): Promise<void> {
-    const blob = new Blob([this.workerScript], { type: 'application/javascript' });
+    const blob = new Blob([this.workerScript], {
+      type: 'application/javascript',
+    });
     const workerUrl = URL.createObjectURL(blob);
     this.worker = new Worker(workerUrl);
 
@@ -342,7 +351,7 @@ export class WorkerManager {
 
     this.worker.onerror = (error) => {
       console.error('Worker error:', error);
-      this.tasks.forEach(task => task.reject(error));
+      this.tasks.forEach((task) => task.reject(error));
       this.tasks.clear();
     };
   }
@@ -381,7 +390,10 @@ export class SearchIndex<T> {
   }
 
   private defaultTokenizer(text: string): string[] {
-    return text.toLowerCase().split(/\s+/).filter(token => token.length > 2);
+    return text
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((token) => token.length > 2);
   }
 
   addDocument(doc: T, fields: Record<string, string>): void {
@@ -403,12 +415,14 @@ export class SearchIndex<T> {
     const results = new Map<T, number>();
 
     for (const token of tokens) {
-      const keys = field ? [`${field}:${token}`] : Array.from(this.index.keys()).filter(k => k.endsWith(`:${token}`));
+      const keys = field
+        ? [`${field}:${token}`]
+        : Array.from(this.index.keys()).filter((k) => k.endsWith(`:${token}`));
 
       for (const key of keys) {
         const docs = this.index.get(key);
         if (docs) {
-          docs.forEach(doc => {
+          docs.forEach((doc) => {
             results.set(doc, (results.get(doc) || 0) + 1);
           });
         }
@@ -445,7 +459,9 @@ export class PerformanceMonitor {
       performance.measure(measureName, startMark);
     }
 
-    const measure = performance.getEntriesByName(measureName)[0] as PerformanceMeasure;
+    const measure = performance.getEntriesByName(
+      measureName,
+    )[0] as PerformanceMeasure;
     const duration = measure.duration;
 
     if (!this.metrics.has(name)) {
@@ -461,7 +477,9 @@ export class PerformanceMonitor {
     return duration;
   }
 
-  getStats(name: string): { avg: number; min: number; max: number; count: number } | null {
+  getStats(
+    name: string,
+  ): { avg: number; min: number; max: number; count: number } | null {
     const values = this.metrics.get(name);
     if (!values || values.length === 0) return null;
 

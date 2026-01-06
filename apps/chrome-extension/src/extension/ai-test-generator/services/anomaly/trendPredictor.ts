@@ -6,22 +6,22 @@
  */
 
 import type {
-  TrendDirection,
   PredictionPoint,
+  TrendDirection,
   TrendFactor,
   TrendPrediction,
 } from '../../types/anomaly';
-import { anomalyStorage } from './storage';
 import {
-  linearRegressionPredict,
-  calculateLinearConfidence,
-  detectTrendFromSlope,
-  exponentialSmoothingPredict,
-  calculateSmoothingConfidence,
-  detectTrendFromHolt,
   arimaPredict,
   calculateArimaConfidence,
+  calculateLinearConfidence,
+  calculateSmoothingConfidence,
+  detectTrendFromHolt,
+  detectTrendFromSlope,
+  exponentialSmoothingPredict,
+  linearRegressionPredict,
 } from './models';
+import { anomalyStorage } from './storage';
 
 // ============================================================================
 // Types
@@ -87,9 +87,13 @@ class TrendPredictor {
   async predict(
     metricName: string,
     data: DataPoint[],
-    options: PredictOptions = {}
+    options: PredictOptions = {},
   ): Promise<TrendPrediction> {
-    const { horizon = DEFAULT_HORIZON_MS, steps = DEFAULT_STEPS, method = 'ensemble' } = options;
+    const {
+      horizon = DEFAULT_HORIZON_MS,
+      steps = DEFAULT_STEPS,
+      method = 'ensemble',
+    } = options;
 
     if (data.length < MIN_DATA_POINTS) {
       return this.createInsufficientDataPrediction(metricName, data);
@@ -111,7 +115,12 @@ class TrendPredictor {
       confidence = result.confidence;
       factors = result.factors;
     } else {
-      const result = this.singleModelPredict(sortedData, horizon, steps, method);
+      const result = this.singleModelPredict(
+        sortedData,
+        horizon,
+        steps,
+        method,
+      );
       predictions = result.predictions;
       trend = result.trend;
       confidence = result.confidence;
@@ -133,7 +142,7 @@ class TrendPredictor {
    */
   async predictForCase(
     caseId: string,
-    options: PredictOptions = {}
+    options: PredictOptions = {},
   ): Promise<CasePrediction | null> {
     // Get historical data for the case
     const baseline = await anomalyStorage.getBaseline(caseId, 'pass_rate');
@@ -143,26 +152,39 @@ class TrendPredictor {
 
     // Create data points from baseline history
     const passRateData = baseline.history.map((h, i) => ({
-      timestamp: baseline.updatedAt - (baseline.history.length - i) * 24 * 60 * 60 * 1000,
+      timestamp:
+        baseline.updatedAt -
+        (baseline.history.length - i) * 24 * 60 * 60 * 1000,
       value: h,
     }));
 
     // Get duration baseline if available
-    const durationBaseline = await anomalyStorage.getBaseline(caseId, 'duration');
+    const durationBaseline = await anomalyStorage.getBaseline(
+      caseId,
+      'duration',
+    );
     const durationData = durationBaseline
       ? durationBaseline.history.map((h, i) => ({
           timestamp:
-            durationBaseline.updatedAt - (durationBaseline.history.length - i) * 24 * 60 * 60 * 1000,
+            durationBaseline.updatedAt -
+            (durationBaseline.history.length - i) * 24 * 60 * 60 * 1000,
           value: h,
         }))
       : [];
 
     // Predict each metric
-    const passRatePrediction = await this.predict(`${caseId}:pass_rate`, passRateData, options);
+    const passRatePrediction = await this.predict(
+      `${caseId}:pass_rate`,
+      passRateData,
+      options,
+    );
     const durationPrediction =
       durationData.length >= MIN_DATA_POINTS
         ? await this.predict(`${caseId}:duration`, durationData, options)
-        : this.createInsufficientDataPrediction(`${caseId}:duration`, durationData);
+        : this.createInsufficientDataPrediction(
+            `${caseId}:duration`,
+            durationData,
+          );
 
     // Calculate failure rate prediction (inverse of pass rate)
     const failureRatePrediction: TrendPrediction = {
@@ -183,7 +205,10 @@ class TrendPredictor {
     };
 
     // Determine overall trend for the case
-    const overallTrend = this.combineMetricTrends([passRatePrediction, durationPrediction]);
+    const overallTrend = this.combineMetricTrends([
+      passRatePrediction,
+      durationPrediction,
+    ]);
 
     return {
       caseId,
@@ -247,8 +272,12 @@ class TrendPredictor {
       .map((p) => p.caseId);
 
     // Determine overall direction
-    const improvingCount = casePredictions.filter((p) => p.trend === 'improving').length;
-    const decliningCount = casePredictions.filter((p) => p.trend === 'declining').length;
+    const improvingCount = casePredictions.filter(
+      (p) => p.trend === 'improving',
+    ).length;
+    const decliningCount = casePredictions.filter(
+      (p) => p.trend === 'declining',
+    ).length;
 
     let direction: TrendDirection;
     if (improvingCount > decliningCount * 1.5) {
@@ -260,7 +289,8 @@ class TrendPredictor {
     }
 
     const avgConfidence = Math.round(
-      casePredictions.reduce((sum, p) => sum + p.confidence, 0) / casePredictions.length
+      casePredictions.reduce((sum, p) => sum + p.confidence, 0) /
+        casePredictions.length,
     );
 
     // Create total executions prediction (placeholder based on pass rate trend)
@@ -279,7 +309,12 @@ class TrendPredictor {
     return {
       direction,
       confidence: avgConfidence,
-      summary: this.generateOverallSummary(direction, improving, declining, avgConfidence),
+      summary: this.generateOverallSummary(
+        direction,
+        improving,
+        declining,
+        avgConfidence,
+      ),
       topImproving: improving,
       topDeclining: declining,
       predictions: {
@@ -293,7 +328,10 @@ class TrendPredictor {
   /**
    * Compare different prediction models for a dataset
    */
-  compareModels(data: DataPoint[], horizon: number = DEFAULT_HORIZON_MS): ModelComparison[] {
+  compareModels(
+    data: DataPoint[],
+    horizon: number = DEFAULT_HORIZON_MS,
+  ): ModelComparison[] {
     if (data.length < MIN_DATA_POINTS) {
       return [];
     }
@@ -305,7 +343,8 @@ class TrendPredictor {
     try {
       const linear = linearRegressionPredict(sortedData, horizon);
       const mse =
-        linear.residuals.reduce((sum, r) => sum + r ** 2, 0) / linear.residuals.length || 0;
+        linear.residuals.reduce((sum, r) => sum + r ** 2, 0) /
+          linear.residuals.length || 0;
       comparisons.push({
         model: 'linear',
         mse,
@@ -319,7 +358,9 @@ class TrendPredictor {
     // Exponential smoothing
     try {
       const exp = exponentialSmoothingPredict(sortedData, horizon);
-      const dataRange = Math.max(...sortedData.map((d) => d.value)) - Math.min(...sortedData.map((d) => d.value));
+      const dataRange =
+        Math.max(...sortedData.map((d) => d.value)) -
+        Math.min(...sortedData.map((d) => d.value));
       comparisons.push({
         model: 'exponential',
         mse: exp.mse,
@@ -362,8 +403,13 @@ class TrendPredictor {
   private ensemblePredict(
     data: DataPoint[],
     horizon: number,
-    steps: number
-  ): { predictions: PredictionPoint[]; trend: TrendDirection; confidence: number; factors: TrendFactor[] } {
+    steps: number,
+  ): {
+    predictions: PredictionPoint[];
+    trend: TrendDirection;
+    confidence: number;
+    factors: TrendFactor[];
+  } {
     const comparisons = this.compareModels(data, horizon);
 
     if (comparisons.length === 0) {
@@ -377,11 +423,17 @@ class TrendPredictor {
 
     // Get predictions from each model
     const linearResult = linearRegressionPredict(data, horizon, steps);
-    const expResult = exponentialSmoothingPredict(data, horizon, steps, { optimizeParams: true });
+    const expResult = exponentialSmoothingPredict(data, horizon, steps, {
+      optimizeParams: true,
+    });
     const arimaResult = arimaPredict(data, horizon, steps);
 
     // Weight by inverse MSE
-    const linearWeight = 1 / (linearResult.residuals.reduce((s, r) => s + r ** 2, 0) / linearResult.residuals.length + 0.001);
+    const linearWeight =
+      1 /
+      (linearResult.residuals.reduce((s, r) => s + r ** 2, 0) /
+        linearResult.residuals.length +
+        0.001);
     const expWeight = 1 / (expResult.mse + 0.001);
     const arimaWeight = 1 / (arimaResult.aic + 0.001);
     const totalWeight = linearWeight + expWeight + arimaWeight;
@@ -394,14 +446,19 @@ class TrendPredictor {
       const arimaVal = arimaResult.predictions[i]?.value ?? 0;
 
       const value =
-        (linearVal * linearWeight + expVal * expWeight + arimaVal * arimaWeight) / totalWeight;
+        (linearVal * linearWeight +
+          expVal * expWeight +
+          arimaVal * arimaWeight) /
+        totalWeight;
 
       const linearStdErr = linearResult.predictions[i]?.standardError ?? 0;
       const arimaStdErr = arimaResult.predictions[i]?.standardError ?? 0;
       const stdErr = (linearStdErr + arimaStdErr) / 2;
 
       predictions.push({
-        timestamp: linearResult.predictions[i]?.timestamp ?? Date.now() + (i + 1) * (horizon / steps),
+        timestamp:
+          linearResult.predictions[i]?.timestamp ??
+          Date.now() + (i + 1) * (horizon / steps),
         value,
         lowerBound: value - 1.96 * stdErr,
         upperBound: value + 1.96 * stdErr,
@@ -417,7 +474,7 @@ class TrendPredictor {
       comparisons.reduce((sum, c, i) => {
         const weight = 1 / (c.mse + 0.001);
         return sum + c.confidence * weight;
-      }, 0) / comparisons.reduce((sum, c) => sum + 1 / (c.mse + 0.001), 0)
+      }, 0) / comparisons.reduce((sum, c) => sum + 1 / (c.mse + 0.001), 0),
     );
 
     const factors = this.analyzeTrendFactors(data, trend);
@@ -432,8 +489,12 @@ class TrendPredictor {
     data: DataPoint[],
     horizon: number,
     steps: number,
-    method: 'linear' | 'exponential' | 'arima'
-  ): { predictions: PredictionPoint[]; trend: TrendDirection; confidence: number } {
+    method: 'linear' | 'exponential' | 'arima',
+  ): {
+    predictions: PredictionPoint[];
+    trend: TrendDirection;
+    confidence: number;
+  } {
     switch (method) {
       case 'linear': {
         const result = linearRegressionPredict(data, horizon, steps);
@@ -450,8 +511,12 @@ class TrendPredictor {
       }
 
       case 'exponential': {
-        const result = exponentialSmoothingPredict(data, horizon, steps, { optimizeParams: true });
-        const dataRange = Math.max(...data.map((d) => d.value)) - Math.min(...data.map((d) => d.value));
+        const result = exponentialSmoothingPredict(data, horizon, steps, {
+          optimizeParams: true,
+        });
+        const dataRange =
+          Math.max(...data.map((d) => d.value)) -
+          Math.min(...data.map((d) => d.value));
         const stdErr = Math.sqrt(result.mse);
         return {
           predictions: result.predictions.map((p) => ({
@@ -493,10 +558,11 @@ class TrendPredictor {
   private generateFlatPredictions(
     data: DataPoint[],
     horizon: number,
-    steps: number
+    steps: number,
   ): PredictionPoint[] {
     const lastValue = data.length > 0 ? data[data.length - 1].value : 0;
-    const baseTimestamp = data.length > 0 ? data[data.length - 1].timestamp : Date.now();
+    const baseTimestamp =
+      data.length > 0 ? data[data.length - 1].timestamp : Date.now();
     const stepSize = horizon / steps;
 
     return Array.from({ length: steps }, (_, i) => ({
@@ -510,13 +576,20 @@ class TrendPredictor {
   /**
    * Create prediction result for insufficient data
    */
-  private createInsufficientDataPrediction(metricName: string, data: DataPoint[]): TrendPrediction {
+  private createInsufficientDataPrediction(
+    metricName: string,
+    data: DataPoint[],
+  ): TrendPrediction {
     const lastValue = data.length > 0 ? data[data.length - 1].value : 0;
 
     return {
       metricName,
       currentValue: lastValue,
-      predictions: this.generateFlatPredictions(data, DEFAULT_HORIZON_MS, DEFAULT_STEPS),
+      predictions: this.generateFlatPredictions(
+        data,
+        DEFAULT_HORIZON_MS,
+        DEFAULT_STEPS,
+      ),
       trend: 'stable',
       confidence: 0,
       factors: [
@@ -559,9 +632,7 @@ class TrendPredictor {
   /**
    * Detect trend from ARIMA predictions
    */
-  private detectArimaTrend(
-    predictions: { value: number }[]
-  ): TrendDirection {
+  private detectArimaTrend(predictions: { value: number }[]): TrendDirection {
     if (predictions.length < 2) return 'stable';
 
     const first = predictions[0].value;
@@ -582,10 +653,16 @@ class TrendPredictor {
       counts[t]++;
     }
 
-    if (counts.improving > counts.declining && counts.improving > counts.stable) {
+    if (
+      counts.improving > counts.declining &&
+      counts.improving > counts.stable
+    ) {
       return 'improving';
     }
-    if (counts.declining > counts.improving && counts.declining > counts.stable) {
+    if (
+      counts.declining > counts.improving &&
+      counts.declining > counts.stable
+    ) {
       return 'declining';
     }
     return 'stable';
@@ -603,9 +680,10 @@ class TrendPredictor {
   /**
    * Combine metric trends to determine overall trend
    */
-  private combineMetricTrends(
-    predictions: TrendPrediction[]
-  ): { direction: TrendDirection; confidence: number } {
+  private combineMetricTrends(predictions: TrendPrediction[]): {
+    direction: TrendDirection;
+    confidence: number;
+  } {
     const validPredictions = predictions.filter((p) => p.confidence > 0);
 
     if (validPredictions.length === 0) {
@@ -642,7 +720,7 @@ class TrendPredictor {
    */
   private aggregateMetric(
     predictions: CasePrediction[],
-    metric: 'passRate' | 'avgDuration'
+    metric: 'passRate' | 'avgDuration',
   ): TrendPrediction {
     const metricPredictions = predictions
       .map((p) => p.metrics[metric])
@@ -661,10 +739,13 @@ class TrendPredictor {
 
     // Average current values
     const avgCurrent =
-      metricPredictions.reduce((sum, m) => sum + m.currentValue, 0) / metricPredictions.length;
+      metricPredictions.reduce((sum, m) => sum + m.currentValue, 0) /
+      metricPredictions.length;
 
     // Average predictions at each step
-    const maxSteps = Math.max(...metricPredictions.map((m) => m.predictions.length));
+    const maxSteps = Math.max(
+      ...metricPredictions.map((m) => m.predictions.length),
+    );
     const avgPredictions: PredictionPoint[] = [];
 
     for (let i = 0; i < maxSteps; i++) {
@@ -676,9 +757,15 @@ class TrendPredictor {
 
       avgPredictions.push({
         timestamp: pointsAtStep[0].timestamp,
-        value: pointsAtStep.reduce((sum, p) => sum + p.value, 0) / pointsAtStep.length,
-        lowerBound: pointsAtStep.reduce((sum, p) => sum + p.lowerBound, 0) / pointsAtStep.length,
-        upperBound: pointsAtStep.reduce((sum, p) => sum + p.upperBound, 0) / pointsAtStep.length,
+        value:
+          pointsAtStep.reduce((sum, p) => sum + p.value, 0) /
+          pointsAtStep.length,
+        lowerBound:
+          pointsAtStep.reduce((sum, p) => sum + p.lowerBound, 0) /
+          pointsAtStep.length,
+        upperBound:
+          pointsAtStep.reduce((sum, p) => sum + p.upperBound, 0) /
+          pointsAtStep.length,
       });
     }
 
@@ -687,7 +774,8 @@ class TrendPredictor {
     const trend = this.consensusTrend(trends);
 
     const avgConfidence = Math.round(
-      metricPredictions.reduce((sum, m) => sum + m.confidence, 0) / metricPredictions.length
+      metricPredictions.reduce((sum, m) => sum + m.confidence, 0) /
+        metricPredictions.length,
     );
 
     return {
@@ -704,7 +792,10 @@ class TrendPredictor {
    * Aggregate trend factors from multiple predictions
    */
   private aggregateTrendFactors(predictions: TrendPrediction[]): TrendFactor[] {
-    const factorMap = new Map<string, { impact: number; count: number; description: string }>();
+    const factorMap = new Map<
+      string,
+      { impact: number; count: number; description: string }
+    >();
 
     for (const p of predictions) {
       for (const f of p.factors) {
@@ -713,7 +804,11 @@ class TrendPredictor {
           existing.impact += f.impact;
           existing.count++;
         } else {
-          factorMap.set(f.name, { impact: f.impact, count: 1, description: f.description });
+          factorMap.set(f.name, {
+            impact: f.impact,
+            count: 1,
+            description: f.description,
+          });
         }
       }
     }
@@ -731,7 +826,10 @@ class TrendPredictor {
   /**
    * Analyze factors contributing to the trend
    */
-  private analyzeTrendFactors(data: DataPoint[], trend: TrendDirection): TrendFactor[] {
+  private analyzeTrendFactors(
+    data: DataPoint[],
+    trend: TrendDirection,
+  ): TrendFactor[] {
     const factors: TrendFactor[] = [];
 
     if (data.length < 3) {
@@ -743,9 +841,11 @@ class TrendPredictor {
     const historicalCount = data.length - recentCount;
 
     const recentAvg =
-      data.slice(-recentCount).reduce((sum, d) => sum + d.value, 0) / recentCount;
+      data.slice(-recentCount).reduce((sum, d) => sum + d.value, 0) /
+      recentCount;
     const historicalAvg =
-      data.slice(0, historicalCount).reduce((sum, d) => sum + d.value, 0) / historicalCount;
+      data.slice(0, historicalCount).reduce((sum, d) => sum + d.value, 0) /
+      historicalCount;
 
     const change = ((recentAvg - historicalAvg) / (historicalAvg || 1)) * 100;
 
@@ -758,7 +858,8 @@ class TrendPredictor {
     // Check volatility
     const values = data.map((d) => d.value);
     const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
-    const variance = values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / values.length;
+    const variance =
+      values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / values.length;
     const cv = Math.sqrt(variance) / (mean || 1); // Coefficient of variation
 
     if (cv > 0.3) {
@@ -808,7 +909,7 @@ class TrendPredictor {
     direction: TrendDirection,
     improving: string[],
     declining: string[],
-    confidence: number
+    confidence: number,
   ): string {
     const parts: string[] = [];
 

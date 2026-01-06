@@ -2,10 +2,10 @@
  * Mention Handler Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { memberManager } from '../memberManager';
 import { MentionHandler } from '../mentionHandler';
 import { workspaceManager } from '../workspaceManager';
-import { memberManager } from '../memberManager';
 
 describe('MentionHandler', () => {
   let mh: MentionHandler;
@@ -245,10 +245,17 @@ describe('MentionHandler', () => {
   describe('validateAllMentions', () => {
     it('should validate all mentions in text', async () => {
       // Add members with user_ prefix to match getUserIdFromUsername output
-      await workspaceManager.addMember(testWorkspaceId, 'user_owner1', 'editor');
+      await workspaceManager.addMember(
+        testWorkspaceId,
+        'user_owner1',
+        'editor',
+      );
       await workspaceManager.addMember(testWorkspaceId, 'user_user1', 'viewer');
 
-      const result = await mh.validateAllMentions('@owner1 @user1', testWorkspaceId);
+      const result = await mh.validateAllMentions(
+        '@owner1 @user1',
+        testWorkspaceId,
+      );
 
       expect(result.valid).toHaveLength(2);
       expect(result.valid).toContain('owner1');
@@ -258,16 +265,26 @@ describe('MentionHandler', () => {
 
     it('should separate valid and invalid mentions', async () => {
       // Add member with user_ prefix
-      await workspaceManager.addMember(testWorkspaceId, 'user_owner1', 'editor');
+      await workspaceManager.addMember(
+        testWorkspaceId,
+        'user_owner1',
+        'editor',
+      );
 
-      const result = await mh.validateAllMentions('@owner1 @nonexistent', testWorkspaceId);
+      const result = await mh.validateAllMentions(
+        '@owner1 @nonexistent',
+        testWorkspaceId,
+      );
 
       expect(result.valid).toContain('owner1');
       expect(result.invalid).toContain('nonexistent');
     });
 
     it('should return empty arrays for text without mentions', async () => {
-      const result = await mh.validateAllMentions('Hello world', testWorkspaceId);
+      const result = await mh.validateAllMentions(
+        'Hello world',
+        testWorkspaceId,
+      );
 
       expect(result.valid).toEqual([]);
       expect(result.invalid).toEqual([]);

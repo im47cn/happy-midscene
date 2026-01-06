@@ -3,8 +3,8 @@
  * 验证节点 - AssertExists, AssertText, AssertState, AiAssert
  */
 
-import React, { memo } from 'react';
 import type { NodeProps } from '@xyflow/react';
+import React, { memo } from 'react';
 import { BaseNode } from './BaseNode';
 
 /**
@@ -12,7 +12,9 @@ import { BaseNode } from './BaseNode';
  */
 export const AssertExistsNode = memo<NodeProps>((props) => {
   const { data } = props;
-  const config = data.config as { target?: string; state?: string; negate?: boolean } | undefined;
+  const config = data.config as
+    | { target?: string; state?: string; negate?: boolean }
+    | undefined;
   const target = config?.target || '';
   const state = config?.state || 'visible';
   const negate = config?.negate ? '不' : '';
@@ -36,7 +38,9 @@ AssertExistsNode.displayName = 'AssertExistsNode';
  */
 export const AssertTextNode = memo<NodeProps>((props) => {
   const { data } = props;
-  const config = data.config as { target?: string; text?: string; operator?: string } | undefined;
+  const config = data.config as
+    | { target?: string; text?: string; operator?: string }
+    | undefined;
   const target = config?.target || '';
   const text = config?.text || '';
   const operator = config?.operator || 'contains';
@@ -60,7 +64,9 @@ AssertTextNode.displayName = 'AssertTextNode';
  */
 export const AssertStateNode = memo<NodeProps>((props) => {
   const { data } = props;
-  const config = data.config as { target?: string; state?: string; negate?: boolean } | undefined;
+  const config = data.config as
+    | { target?: string; state?: string; negate?: boolean }
+    | undefined;
   const target = config?.target || '';
   const state = config?.state || '';
   const negate = config?.negate ? '不' : '';

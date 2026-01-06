@@ -14,8 +14,8 @@ import type {
   SlowCase,
   SlowStep,
 } from '../../types/optimization';
-import type { IEfficiencyAnalyzer } from './interfaces';
 import { analyticsStorage } from '../analytics/analyticsStorage';
+import type { IEfficiencyAnalyzer } from './interfaces';
 
 // Thresholds for analysis
 const SLOW_CASE_PERCENTILE = 90; // Cases slower than 90% are considered slow
@@ -89,10 +89,7 @@ class EfficiencyAnalyzer implements IEfficiencyAnalyzer {
       );
       const slowSteps = this.analyzeSlowSteps(executions);
 
-      const percentile = this.calculatePercentile(
-        stats.avgDuration,
-        durations,
-      );
+      const percentile = this.calculatePercentile(stats.avgDuration, durations);
 
       slowCases.push({
         caseId: stats.caseId,
@@ -120,7 +117,8 @@ class EfficiencyAnalyzer implements IEfficiencyAnalyzer {
         type: 'sequential_dependency',
         description: `${sequentialIssues.length} test cases have sequential dependencies`,
         affectedCases: sequentialIssues,
-        suggestion: 'Consider extracting shared setup to beforeAll/beforeEach hooks',
+        suggestion:
+          'Consider extracting shared setup to beforeAll/beforeEach hooks',
       });
     }
 
@@ -221,7 +219,10 @@ class EfficiencyAnalyzer implements IEfficiencyAnalyzer {
           description: data.description,
           duration: avgDuration,
           averageDuration: avgDuration,
-          suggestion: this.getSuggestionForSlowStep(data.description, avgDuration),
+          suggestion: this.getSuggestionForSlowStep(
+            data.description,
+            avgDuration,
+          ),
         });
       }
     }
@@ -282,10 +283,7 @@ class EfficiencyAnalyzer implements IEfficiencyAnalyzer {
       const firstSteps = execs.map((e) => e.steps[0]?.description || '');
       const uniqueFirstSteps = new Set(firstSteps);
 
-      if (
-        uniqueFirstSteps.size === 1 &&
-        this.isSetupStep(firstSteps[0])
-      ) {
+      if (uniqueFirstSteps.size === 1 && this.isSetupStep(firstSteps[0])) {
         dependentCases.push(caseId);
       }
     }
@@ -297,7 +295,14 @@ class EfficiencyAnalyzer implements IEfficiencyAnalyzer {
    * Check if a step description indicates setup
    */
   private isSetupStep(description: string): boolean {
-    const setupKeywords = ['login', 'navigate', 'setup', 'init', 'open', 'goto'];
+    const setupKeywords = [
+      'login',
+      'navigate',
+      'setup',
+      'init',
+      'open',
+      'goto',
+    ];
     const lowerDesc = description.toLowerCase();
     return setupKeywords.some((keyword) => lowerDesc.includes(keyword));
   }
@@ -305,9 +310,10 @@ class EfficiencyAnalyzer implements IEfficiencyAnalyzer {
   /**
    * Find excessive waiting in test executions
    */
-  private findExcessiveWaiting(
-    executions: ExecutionRecord[],
-  ): { cases: string[]; totalWaitTime: number } {
+  private findExcessiveWaiting(executions: ExecutionRecord[]): {
+    cases: string[];
+    totalWaitTime: number;
+  } {
     const affectedCases = new Set<string>();
     let totalWaitTime = 0;
 

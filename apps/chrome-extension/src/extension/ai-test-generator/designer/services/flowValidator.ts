@@ -4,17 +4,21 @@
  */
 
 import type {
-  TestFlow,
-  DesignerNode,
   DesignerEdge,
+  DesignerNode,
   NodeType,
+  TestFlow,
 } from '../../types/designer';
 import { nodeRegistry } from './nodeRegistry';
 
 /**
  * 验证错误类型
  */
-export type ValidationErrorType = 'structure' | 'connection' | 'configuration' | 'cycle';
+export type ValidationErrorType =
+  | 'structure'
+  | 'connection'
+  | 'configuration'
+  | 'cycle';
 
 /**
  * 验证错误
@@ -130,13 +134,21 @@ export function validateNode(node: DesignerNode): ValidationError[] {
   }
 
   if (!node.type) {
-    errors.push({ type: 'structure', message: '节点缺少类型', nodeId: node.id });
+    errors.push({
+      type: 'structure',
+      message: '节点缺少类型',
+      nodeId: node.id,
+    });
   }
 
   // 验证节点定义
   const nodeDefinition = nodeRegistry.get(node.type as NodeType);
   if (!nodeDefinition) {
-    errors.push({ type: 'structure', message: `未知的节点类型: ${node.type}`, nodeId: node.id });
+    errors.push({
+      type: 'structure',
+      message: `未知的节点类型: ${node.type}`,
+      nodeId: node.id,
+    });
     return errors;
   }
 
@@ -148,7 +160,7 @@ export function validateNode(node: DesignerNode): ValidationError[] {
         type: 'configuration' as ValidationErrorType,
         message: e.message,
         nodeId: node.id,
-      }))
+      })),
     );
   }
 
@@ -158,13 +170,20 @@ export function validateNode(node: DesignerNode): ValidationError[] {
 /**
  * 验证边连接
  */
-function validateEdges(nodes: DesignerNode[], edges: DesignerEdge[]): ValidationError[] {
+function validateEdges(
+  nodes: DesignerNode[],
+  edges: DesignerEdge[],
+): ValidationError[] {
   const errors: ValidationError[] = [];
   const nodeIds = new Set(nodes.map((n) => n.id));
 
   edges.forEach((edge) => {
     if (!edge.source) {
-      errors.push({ type: 'connection', message: '边缺少源节点', edgeId: edge.id });
+      errors.push({
+        type: 'connection',
+        message: '边缺少源节点',
+        edgeId: edge.id,
+      });
     } else if (!nodeIds.has(edge.source)) {
       errors.push({
         type: 'connection',
@@ -174,7 +193,11 @@ function validateEdges(nodes: DesignerNode[], edges: DesignerEdge[]): Validation
     }
 
     if (!edge.target) {
-      errors.push({ type: 'connection', message: '边缺少目标节点', edgeId: edge.id });
+      errors.push({
+        type: 'connection',
+        message: '边缺少目标节点',
+        edgeId: edge.id,
+      });
     } else if (!nodeIds.has(edge.target)) {
       errors.push({
         type: 'connection',
@@ -190,7 +213,10 @@ function validateEdges(nodes: DesignerNode[], edges: DesignerEdge[]): Validation
 /**
  * 检测循环引用
  */
-function detectCycles(nodes: DesignerNode[], edges: DesignerEdge[]): ValidationError[] {
+function detectCycles(
+  nodes: DesignerNode[],
+  edges: DesignerEdge[],
+): ValidationError[] {
   const errors: ValidationError[] = [];
   const graph = new Map<string, string[]>();
 
@@ -249,7 +275,10 @@ function detectCycles(nodes: DesignerNode[], edges: DesignerEdge[]): ValidationE
 /**
  * 检测孤立节点（没有连接的节点）
  */
-function detectIsolatedNodes(nodes: DesignerNode[], edges: DesignerEdge[]): ValidationWarning[] {
+function detectIsolatedNodes(
+  nodes: DesignerNode[],
+  edges: DesignerEdge[],
+): ValidationWarning[] {
   const warnings: ValidationWarning[] = [];
   const connectedNodeIds = new Set<string>();
 
@@ -264,7 +293,10 @@ function detectIsolatedNodes(nodes: DesignerNode[], edges: DesignerEdge[]): Vali
       return;
     }
     if (!connectedNodeIds.has(node.id)) {
-      warnings.push({ message: `节点 ${node.data.label || node.id} 没有任何连接`, nodeId: node.id });
+      warnings.push({
+        message: `节点 ${node.data.label || node.id} 没有任何连接`,
+        nodeId: node.id,
+      });
     }
   });
 
@@ -274,7 +306,10 @@ function detectIsolatedNodes(nodes: DesignerNode[], edges: DesignerEdge[]): Vali
 /**
  * 验证节点配置
  */
-export function validateNodeConfig(type: NodeType, config: Record<string, unknown>): ValidationResult {
+export function validateNodeConfig(
+  type: NodeType,
+  config: Record<string, unknown>,
+): ValidationResult {
   const errors: ValidationError[] = [];
 
   const nodeDefinition = nodeRegistry.get(type);
@@ -289,7 +324,7 @@ export function validateNodeConfig(type: NodeType, config: Record<string, unknow
       ...validationResult.errors.map((e: any) => ({
         type: 'configuration' as ValidationErrorType,
         message: e.message,
-      }))
+      })),
     );
   }
 

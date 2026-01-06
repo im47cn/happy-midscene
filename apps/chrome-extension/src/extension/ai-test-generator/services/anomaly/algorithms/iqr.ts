@@ -35,7 +35,10 @@ export interface IQRResult {
 /**
  * Calculate IQR statistics from values
  */
-export function calculateIQRStats(values: number[], multiplier: number = 1.5): IQRStats {
+export function calculateIQRStats(
+  values: number[],
+  multiplier = 1.5,
+): IQRStats {
   if (values.length === 0) {
     return { q1: 0, q2: 0, q3: 0, iqr: 0, lowerBound: 0, upperBound: 0 };
   }
@@ -49,7 +52,8 @@ export function calculateIQRStats(values: number[], multiplier: number = 1.5): I
   const q3Index = Math.floor(n * 0.75);
 
   const q1 = sorted[q1Index];
-  const q2 = n % 2 === 0 ? (sorted[q2Index - 1] + sorted[q2Index]) / 2 : sorted[q2Index];
+  const q2 =
+    n % 2 === 0 ? (sorted[q2Index - 1] + sorted[q2Index]) / 2 : sorted[q2Index];
   const q3 = sorted[q3Index];
   const iqr = q3 - q1;
 
@@ -66,7 +70,7 @@ export function calculateIQRStats(values: number[], multiplier: number = 1.5): I
 export function detectIQRAnomaly(
   value: number,
   values: number[],
-  options: IQRDetectionOptions = {}
+  options: IQRDetectionOptions = {},
 ): IQRResult {
   const { multiplier = 1.5 } = options;
   const stats = calculateIQRStats(values, multiplier);
@@ -96,7 +100,7 @@ export function detectIQRAnomaly(
  */
 export function detectIQRAnomalies(
   values: number[],
-  options: IQRDetectionOptions = {}
+  options: IQRDetectionOptions = {},
 ): AnomalyPoint[] {
   const { multiplier = 1.5 } = options;
   const stats = calculateIQRStats(values, multiplier);
@@ -123,7 +127,10 @@ export function detectIQRAnomalies(
 /**
  * Get percentage of values that would be flagged as anomalies
  */
-export function getAnomalyPercentage(values: number[], multiplier: number = 1.5): number {
+export function getAnomalyPercentage(
+  values: number[],
+  multiplier = 1.5,
+): number {
   const anomalies = detectIQRAnomalies(values, { multiplier });
   return values.length > 0 ? (anomalies.length / values.length) * 100 : 0;
 }

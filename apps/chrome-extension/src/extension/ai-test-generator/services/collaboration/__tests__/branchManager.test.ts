@@ -2,10 +2,10 @@
  * Branch Manager Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { BranchManager } from '../branchManager';
+import type { ConflictResolution, CreateBranchData } from '../interfaces';
 import { versionControl } from '../versionControl';
-import type { CreateBranchData, ConflictResolution } from '../interfaces';
 
 describe('BranchManager', () => {
   let bm: BranchManager;
@@ -21,7 +21,7 @@ describe('BranchManager', () => {
       testFileId,
       'line1\nline2\nline3',
       'Initial version',
-      'user1'
+      'user1',
     );
   });
 
@@ -151,7 +151,7 @@ describe('BranchManager', () => {
         testFileId,
         'line1\nline2\nline3',
         'Base',
-        'user1'
+        'user1',
       );
 
       const source = await bm.createBranch({
@@ -180,7 +180,7 @@ describe('BranchManager', () => {
       });
 
       await expect(bm.merge('non-existent', target.id)).rejects.toThrow(
-        'One or both branches not found'
+        'One or both branches not found',
       );
     });
 
@@ -192,7 +192,7 @@ describe('BranchManager', () => {
       });
 
       await expect(bm.merge(source.id, 'non-existent')).rejects.toThrow(
-        'One or both branches not found'
+        'One or both branches not found',
       );
     });
 
@@ -210,7 +210,7 @@ describe('BranchManager', () => {
       });
 
       await expect(bm.merge(source.id, target.id)).rejects.toThrow(
-        'Cannot merge branches from different files'
+        'Cannot merge branches from different files',
       );
     });
 
@@ -230,7 +230,7 @@ describe('BranchManager', () => {
       await bm.abandon(source.id);
 
       await expect(bm.merge(source.id, target.id)).rejects.toThrow(
-        'Can only merge active branches'
+        'Can only merge active branches',
       );
     });
 
@@ -240,7 +240,7 @@ describe('BranchManager', () => {
         testFileId,
         'line1\nline2\nline3',
         'Base',
-        'user1'
+        'user1',
       );
 
       // Create source branch from base
@@ -263,13 +263,13 @@ describe('BranchManager', () => {
         testFileId,
         'line1-modified\nline2\nline3',
         'Source change',
-        'user1'
+        'user1',
       );
       const targetVersionId = await versionControl.createVersion(
         testFileId,
         'line1\nline2-modified\nline3',
         'Target change',
-        'user1'
+        'user1',
       );
 
       // Update branches to point to their respective conflicting versions
@@ -287,7 +287,7 @@ describe('BranchManager', () => {
         testFileId,
         'line1\nline2\nline3',
         'Base for conflict',
-        'user1'
+        'user1',
       );
 
       const source2 = await bm.createBranch({
@@ -332,7 +332,9 @@ describe('BranchManager', () => {
     });
 
     it('should throw error for non-existent branch', async () => {
-      await expect(bm.abandon('non-existent')).rejects.toThrow('Branch not found');
+      await expect(bm.abandon('non-existent')).rejects.toThrow(
+        'Branch not found',
+      );
     });
   });
 
@@ -360,9 +362,9 @@ describe('BranchManager', () => {
     });
 
     it('should throw error for non-existent branch', async () => {
-      await expect(
-        bm.resolveConflicts('non-existent', [])
-      ).rejects.toThrow('Branch not found');
+      await expect(bm.resolveConflicts('non-existent', [])).rejects.toThrow(
+        'Branch not found',
+      );
     });
 
     it('should handle accept_theirs resolution', async () => {
@@ -470,7 +472,7 @@ describe('BranchManager', () => {
       });
 
       await expect(
-        bm.compareBranches(branch.id, 'non-existent')
+        bm.compareBranches(branch.id, 'non-existent'),
       ).rejects.toThrow('One or both branches not found');
     });
 
@@ -492,7 +494,7 @@ describe('BranchManager', () => {
         testFileId,
         'different content',
         'New version',
-        'user1'
+        'user1',
       );
 
       const result = await bm.compareBranches(branch1.id, branch2.id);
@@ -517,7 +519,9 @@ describe('BranchManager', () => {
     });
 
     it('should throw error for non-existent branch', async () => {
-      await expect(bm.getBranchStatus('non-existent')).rejects.toThrow('Branch not found');
+      await expect(bm.getBranchStatus('non-existent')).rejects.toThrow(
+        'Branch not found',
+      );
     });
 
     it('should detect conflicts with main branch', async () => {
@@ -538,7 +542,7 @@ describe('BranchManager', () => {
         testFileId,
         'line1\nline2-modified\nline3',
         'Main change',
-        'user1'
+        'user1',
       );
 
       const status = await bm.getBranchStatus(feature.id);
@@ -591,7 +595,9 @@ describe('BranchManager', () => {
     });
 
     it('should throw error for non-existent branch', async () => {
-      await expect(bm.rename('non-existent', 'new-name')).rejects.toThrow('Branch not found');
+      await expect(bm.rename('non-existent', 'new-name')).rejects.toThrow(
+        'Branch not found',
+      );
     });
   });
 
@@ -621,11 +627,15 @@ describe('BranchManager', () => {
         createdBy: 'user1',
       });
 
-      await expect(bm.delete(branch.id)).rejects.toThrow('Cannot delete active branch');
+      await expect(bm.delete(branch.id)).rejects.toThrow(
+        'Cannot delete active branch',
+      );
     });
 
     it('should throw error for non-existent branch', async () => {
-      await expect(bm.delete('non-existent')).rejects.toThrow('Branch not found');
+      await expect(bm.delete('non-existent')).rejects.toThrow(
+        'Branch not found',
+      );
     });
 
     it('should remove branch from index', async () => {

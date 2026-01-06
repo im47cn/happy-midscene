@@ -11,9 +11,9 @@ import type {
   BaselineConfig,
   BaselineInfo,
   BaselineRecord,
+  HealthScore,
   LearnedPattern,
   PatternRecord,
-  HealthScore,
 } from '../../types/anomaly';
 
 const DB_NAME = 'midscene-anomaly-detection';
@@ -48,14 +48,21 @@ export interface IAnomalyStorage {
   getAnomaly(id: string): Promise<Anomaly | null>;
   getAllAnomalies(): Promise<Anomaly[]>;
   getActiveAnomalies(): Promise<Anomaly[]>;
-  getAnomaliesByTimeRange(startTime: number, endTime: number): Promise<Anomaly[]>;
+  getAnomaliesByTimeRange(
+    startTime: number,
+    endTime: number,
+  ): Promise<Anomaly[]>;
   getAnomaliesByMetric(metricName: string): Promise<Anomaly[]>;
   deleteAnomaly(id: string): Promise<void>;
   clearAnomalies(): Promise<void>;
 }
 
 export interface IBaselineStorage {
-  save(metricName: string, baseline: BaselineInfo, config: BaselineConfig): Promise<void>;
+  save(
+    metricName: string,
+    baseline: BaselineInfo,
+    config: BaselineConfig,
+  ): Promise<void>;
   get(metricName: string): Promise<BaselineRecord | null>;
   getAll(): Promise<BaselineRecord[]>;
   update(metricName: string, baseline: BaselineInfo): Promise<void>;
@@ -83,7 +90,13 @@ export interface IHealthScoreStorage {
 // Anomaly Storage Implementation
 // ============================================================================
 
-class AnomalyStorage implements IAnomalyStorage, IBaselineStorage, IPatternStorage, IHealthScoreStorage {
+class AnomalyStorage
+  implements
+    IAnomalyStorage,
+    IBaselineStorage,
+    IPatternStorage,
+    IHealthScoreStorage
+{
   private db: IDBDatabase | null = null;
   private initPromise: Promise<void> | null = null;
 
@@ -129,7 +142,9 @@ class AnomalyStorage implements IAnomalyStorage, IBaselineStorage, IPatternStora
 
         // Baselines store
         if (!db.objectStoreNames.contains(BASELINE_STORE)) {
-          const store = db.createObjectStore(BASELINE_STORE, { keyPath: 'metricName' });
+          const store = db.createObjectStore(BASELINE_STORE, {
+            keyPath: 'metricName',
+          });
           store.createIndex('_updatedAt', '_updatedAt', { unique: false });
         }
 
@@ -142,7 +157,9 @@ class AnomalyStorage implements IAnomalyStorage, IBaselineStorage, IPatternStora
 
         // Health scores store
         if (!db.objectStoreNames.contains(HEALTH_SCORE_STORE)) {
-          const store = db.createObjectStore(HEALTH_SCORE_STORE, { keyPath: 'calculatedAt' });
+          const store = db.createObjectStore(HEALTH_SCORE_STORE, {
+            keyPath: 'calculatedAt',
+          });
           store.createIndex('calculatedAt', 'calculatedAt', { unique: true });
         }
       };
@@ -168,7 +185,10 @@ class AnomalyStorage implements IAnomalyStorage, IBaselineStorage, IPatternStora
       const allItems = await this.getAll();
       if (allItems.length >= MAX_ANOMALY_ITEMS) {
         const itemsToRemove = allItems
-          .sort((a, b) => (a as AnomalyRecord)._createdAt - (b as AnomalyRecord)._createdAt)
+          .sort(
+            (a, b) =>
+              (a as AnomalyRecord)._createdAt - (b as AnomalyRecord)._createdAt,
+          )
           .slice(0, allItems.length - MAX_ANOMALY_ITEMS + 1);
         for (const item of itemsToRemove) {
           await this.delete(item.id);
@@ -261,7 +281,9 @@ class AnomalyStorage implements IAnomalyStorage, IBaselineStorage, IPatternStora
   async getByTimeRange(startTime: number, endTime: number): Promise<Anomaly[]> {
     try {
       const all = await this.getAll();
-      return all.filter((a) => a.detectedAt >= startTime && a.detectedAt <= endTime);
+      return all.filter(
+        (a) => a.detectedAt >= startTime && a.detectedAt <= endTime,
+      );
     } catch (error) {
       console.error('Failed to get anomalies by time range:', error);
       return [];
@@ -271,7 +293,9 @@ class AnomalyStorage implements IAnomalyStorage, IBaselineStorage, IPatternStora
   async getByMetric(metricName: string): Promise<Anomaly[]> {
     try {
       const all = await this.getAll();
-      return all.filter((a) => a.metric === metricName || a.metric.includes(metricName));
+      return all.filter(
+        (a) => a.metric === metricName || a.metric.includes(metricName),
+      );
     } catch (error) {
       console.error('Failed to get anomalies by metric:', error);
       return [];
@@ -295,7 +319,10 @@ class AnomalyStorage implements IAnomalyStorage, IBaselineStorage, IPatternStora
     return this.getActive();
   }
 
-  async getAnomaliesByTimeRange(startTime: number, endTime: number): Promise<Anomaly[]> {
+  async getAnomaliesByTimeRange(
+    startTime: number,
+    endTime: number,
+  ): Promise<Anomaly[]> {
     return this.getByTimeRange(startTime, endTime);
   }
 
@@ -387,7 +414,11 @@ class AnomalyStorage implements IAnomalyStorage, IBaselineStorage, IPatternStora
 
   // ==================== Baseline Operations ====================
 
-  async saveBaseline(metricName: string, baseline: BaselineInfo, config: BaselineConfig): Promise<void> {
+  async saveBaseline(
+    metricName: string,
+    baseline: BaselineInfo,
+    config: BaselineConfig,
+  ): Promise<void> {
     try {
       const db = await this.ensureDB();
       const now = Date.now();
@@ -450,7 +481,10 @@ class AnomalyStorage implements IAnomalyStorage, IBaselineStorage, IPatternStora
     }
   }
 
-  async updateBaseline(metricName: string, baseline: BaselineInfo): Promise<void> {
+  async updateBaseline(
+    metricName: string,
+    baseline: BaselineInfo,
+  ): Promise<void> {
     try {
       const existing = await this.getBaseline(metricName);
       if (!existing) {
@@ -618,7 +652,9 @@ class AnomalyStorage implements IAnomalyStorage, IBaselineStorage, IPatternStora
       const db = await this.ensureDB();
 
       // Check if we need to remove old items
-      const allScores = await this.getHealthScoreHistory(MAX_HEALTH_SCORE_ITEMS + 1);
+      const allScores = await this.getHealthScoreHistory(
+        MAX_HEALTH_SCORE_ITEMS + 1,
+      );
       if (allScores.length >= MAX_HEALTH_SCORE_ITEMS) {
         const scoresToRemove = allScores.slice(MAX_HEALTH_SCORE_ITEMS - 1);
         for (const oldScore of scoresToRemove) {
@@ -731,7 +767,9 @@ class AnomalyStorage implements IAnomalyStorage, IBaselineStorage, IPatternStora
   /**
    * Clean up all old data
    */
-  async cleanupOldData(retentionDays: number): Promise<{ anomalies: number; patterns: number }> {
+  async cleanupOldData(
+    retentionDays: number,
+  ): Promise<{ anomalies: number; patterns: number }> {
     const cutoffTime = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
     let anomaliesRemoved = 0;
     let patternsRemoved = 0;
@@ -770,13 +808,14 @@ class AnomalyStorage implements IAnomalyStorage, IBaselineStorage, IPatternStora
     patternCount: number;
     healthScoreCount: number;
   }> {
-    const [anomalies, activeAnomalies, baselines, patterns, healthScores] = await Promise.all([
-      this.getAll(),
-      this.getActive(),
-      this.getAllBaselines(),
-      this.getAllPatterns(),
-      this.getHealthScoreHistory(365),
-    ]);
+    const [anomalies, activeAnomalies, baselines, patterns, healthScores] =
+      await Promise.all([
+        this.getAll(),
+        this.getActive(),
+        this.getAllBaselines(),
+        this.getAllPatterns(),
+        this.getHealthScoreHistory(365),
+      ]);
 
     return {
       anomalyCount: anomalies.length,

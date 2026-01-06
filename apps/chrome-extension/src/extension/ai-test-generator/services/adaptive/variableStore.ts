@@ -39,12 +39,13 @@ export interface VariableStoreOptions {
 export class VariableStore {
   private variables: Map<string, any> = new Map();
   private snapshots: VariableSnapshot[] = [];
-  private changeListeners: Set<(event: VariableChangeEvent) => void> = new Set();
+  private changeListeners: Set<(event: VariableChangeEvent) => void> =
+    new Set();
   private options: VariableStoreOptions;
 
   constructor(
     initialVariables: Record<string, any> = {},
-    options: VariableStoreOptions = {}
+    options: VariableStoreOptions = {},
   ) {
     this.options = {
       enableSnapshots: true,
@@ -197,7 +198,10 @@ export class VariableStore {
     this.snapshots.push(snapshot);
 
     // Limit snapshots
-    if (this.options.maxSnapshots && this.snapshots.length > this.options.maxSnapshots) {
+    if (
+      this.options.maxSnapshots &&
+      this.snapshots.length > this.options.maxSnapshots
+    ) {
       this.snapshots.shift();
     }
 
@@ -292,7 +296,9 @@ let defaultStore: VariableStore | null = null;
 /**
  * 获取默认变量存储
  */
-export function getVariableStore(initialVariables?: Record<string, any>): VariableStore {
+export function getVariableStore(
+  initialVariables?: Record<string, any>,
+): VariableStore {
   if (!defaultStore) {
     defaultStore = new VariableStore(initialVariables);
   }

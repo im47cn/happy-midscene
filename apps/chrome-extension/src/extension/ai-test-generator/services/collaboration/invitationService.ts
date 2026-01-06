@@ -5,10 +5,7 @@
  */
 
 import type { Invitation, MemberRole } from '../../types/collaboration';
-import type {
-  IInvitationService,
-  CreateInvitationData,
-} from './interfaces';
+import type { CreateInvitationData, IInvitationService } from './interfaces';
 import { workspaceManager } from './workspaceManager';
 
 /**
@@ -86,7 +83,11 @@ export class InvitationService implements IInvitationService {
     const invitations: Invitation[] = [];
     for (const id of invitationIds) {
       const invitation = this.storage.invitations.get(id);
-      if (invitation && invitation.status === 'pending' && !this.isExpired(invitation)) {
+      if (
+        invitation &&
+        invitation.status === 'pending' &&
+        !this.isExpired(invitation)
+      ) {
         invitations.push({ ...invitation });
       }
     }
@@ -107,7 +108,11 @@ export class InvitationService implements IInvitationService {
     const invitations: Invitation[] = [];
     for (const id of invitationIds) {
       const invitation = this.storage.invitations.get(id);
-      if (invitation && invitation.status === 'pending' && !this.isExpired(invitation)) {
+      if (
+        invitation &&
+        invitation.status === 'pending' &&
+        !this.isExpired(invitation)
+      ) {
         invitations.push({ ...invitation });
       }
     }
@@ -137,7 +142,7 @@ export class InvitationService implements IInvitationService {
     await workspaceManager.addMember(
       invitation.workspaceId,
       userId,
-      invitation.role
+      invitation.role,
     );
 
     invitation.status = 'accepted';
@@ -174,7 +179,11 @@ export class InvitationService implements IInvitationService {
 
     // Remove from storage
     this.storage.invitations.delete(id);
-    this.removeFromIndex(this.storage.invitationsByWorkspace, invitation.workspaceId, id);
+    this.removeFromIndex(
+      this.storage.invitationsByWorkspace,
+      invitation.workspaceId,
+      id,
+    );
     this.removeFromIndex(this.storage.invitationsByEmail, invitation.email, id);
   }
 
@@ -232,7 +241,10 @@ export class InvitationService implements IInvitationService {
    */
   generateInviteLink(invitationId: string): string {
     // In production, this would use your actual domain
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://example.com';
+    const origin =
+      typeof window !== 'undefined'
+        ? window.location.origin
+        : 'https://example.com';
     return `${origin}/invite/${invitationId}`;
   }
 
@@ -253,7 +265,7 @@ export class InvitationService implements IInvitationService {
    */
   async existsForWorkspace(
     workspaceId: string,
-    email: string
+    email: string,
   ): Promise<boolean> {
     const pending = await this.getPendingForWorkspace(workspaceId);
     const normalizedEmail = email.toLowerCase();
@@ -306,7 +318,7 @@ export class InvitationService implements IInvitationService {
   private addToIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     if (!index.has(key)) {
       index.set(key, new Set());
@@ -320,7 +332,7 @@ export class InvitationService implements IInvitationService {
   private removeFromIndex(
     index: Map<string, Set<string>>,
     key: string,
-    value: string
+    value: string,
   ): void {
     const set = index.get(key);
     if (set) {

@@ -105,7 +105,10 @@ function generateRuleId(): string {
 /**
  * Validate regex pattern
  */
-function validateRegex(pattern: string, flags = ''): { valid: boolean; error?: string } {
+function validateRegex(
+  pattern: string,
+  flags = '',
+): { valid: boolean; error?: string } {
   try {
     new RegExp(pattern, flags);
     return { valid: true };
@@ -253,7 +256,8 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
         };
       case 'placeholder':
         return {
-          placeholder: values.placeholder ?? `[${values.category.toUpperCase()}]`,
+          placeholder:
+            values.placeholder ?? `[${values.category.toUpperCase()}]`,
         };
       default:
         return undefined;
@@ -379,7 +383,11 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
           label="描述"
           rules={[{ required: true, message: '请输入规则描述' }]}
         >
-          <Input.TextArea placeholder="描述此规则的用途" rows={2} maxLength={200} />
+          <Input.TextArea
+            placeholder="描述此规则的用途"
+            rows={2}
+            maxLength={200}
+          />
         </Form.Item>
 
         <Space style={{ width: '100%' }}>
@@ -424,7 +432,14 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
         </Form.Item>
 
         {/* Regex Tester */}
-        <div style={{ marginBottom: 16, padding: 12, background: '#f5f5f5', borderRadius: 4 }}>
+        <div
+          style={{
+            marginBottom: 16,
+            padding: 12,
+            background: '#f5f5f5',
+            borderRadius: 4,
+          }}
+        >
           <div style={{ marginBottom: 8, fontWeight: 500 }}>
             <ExperimentOutlined /> 测试正则
           </div>
@@ -440,7 +455,9 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
           {regexTestResult && (
             <div style={{ marginTop: 8, fontSize: 12 }}>
               {regexTestResult.error ? (
-                <span style={{ color: '#ff4d4f' }}>错误: {regexTestResult.error}</span>
+                <span style={{ color: '#ff4d4f' }}>
+                  错误: {regexTestResult.error}
+                </span>
               ) : regexTestResult.matches.length > 0 ? (
                 <span style={{ color: '#52c41a' }}>
                   匹配 {regexTestResult.matches.length} 处:{' '}
@@ -459,7 +476,11 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
 
         {/* Context Matching (Optional) */}
         <Space style={{ width: '100%' }}>
-          <Form.Item name="contextBefore" label="前置上下文" style={{ flex: 1 }}>
+          <Form.Item
+            name="contextBefore"
+            label="前置上下文"
+            style={{ flex: 1 }}
+          >
             <Input placeholder="可选，匹配前的文本" />
           </Form.Item>
           <Form.Item name="contextAfter" label="后置上下文" style={{ flex: 1 }}>

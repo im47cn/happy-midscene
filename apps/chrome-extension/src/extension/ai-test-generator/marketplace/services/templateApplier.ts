@@ -3,11 +3,7 @@
  * Applies templates by replacing parameters and generating YAML
  */
 
-import type {
-  ITemplateApplier,
-  ParameterDef,
-  Template,
-} from '../types';
+import type { ITemplateApplier, ParameterDef, Template } from '../types';
 
 /**
  * Template applier implementation
@@ -36,7 +32,7 @@ export class TemplateApplier implements ITemplateApplier {
    */
   validateParams(
     parameters: ParameterDef[],
-    values: Record<string, unknown>
+    values: Record<string, unknown>,
   ): { valid: boolean; errors: Record<string, string> } {
     const errors: Record<string, string> = {};
 
@@ -45,7 +41,10 @@ export class TemplateApplier implements ITemplateApplier {
       const stringValue = value !== undefined ? String(value) : '';
 
       // Check required
-      if (param.required && (value === undefined || value === null || stringValue === '')) {
+      if (
+        param.required &&
+        (value === undefined || value === null || stringValue === '')
+      ) {
         errors[param.name] = `${param.label} is required`;
         continue;
       }
@@ -62,11 +61,19 @@ export class TemplateApplier implements ITemplateApplier {
             errors[param.name] = `${param.label} must be a valid number`;
           } else if (param.validation) {
             const numValue = Number(value);
-            if (param.validation.min !== undefined && numValue < param.validation.min) {
-              errors[param.name] = `${param.label} must be at least ${param.validation.min}`;
+            if (
+              param.validation.min !== undefined &&
+              numValue < param.validation.min
+            ) {
+              errors[param.name] =
+                `${param.label} must be at least ${param.validation.min}`;
             }
-            if (param.validation.max !== undefined && numValue > param.validation.max) {
-              errors[param.name] = `${param.label} must be at most ${param.validation.max}`;
+            if (
+              param.validation.max !== undefined &&
+              numValue > param.validation.max
+            ) {
+              errors[param.name] =
+                `${param.label} must be at most ${param.validation.max}`;
             }
           }
           break;
@@ -80,14 +87,22 @@ export class TemplateApplier implements ITemplateApplier {
           break;
 
         case 'boolean':
-          if (typeof value !== 'boolean' && value !== 'true' && value !== 'false') {
+          if (
+            typeof value !== 'boolean' &&
+            value !== 'true' &&
+            value !== 'false'
+          ) {
             errors[param.name] = `${param.label} must be true or false`;
           }
           break;
 
         case 'select':
-          if (param.options && !param.options.some((opt) => opt.value === value)) {
-            errors[param.name] = `${param.label} must be one of the available options`;
+          if (
+            param.options &&
+            !param.options.some((opt) => opt.value === value)
+          ) {
+            errors[param.name] =
+              `${param.label} must be one of the available options`;
           }
           break;
 
@@ -95,11 +110,19 @@ export class TemplateApplier implements ITemplateApplier {
         case 'password':
         default:
           if (param.validation) {
-            if (param.validation.minLength !== undefined && stringValue.length < param.validation.minLength) {
-              errors[param.name] = `${param.label} must be at least ${param.validation.minLength} characters`;
+            if (
+              param.validation.minLength !== undefined &&
+              stringValue.length < param.validation.minLength
+            ) {
+              errors[param.name] =
+                `${param.label} must be at least ${param.validation.minLength} characters`;
             }
-            if (param.validation.maxLength !== undefined && stringValue.length > param.validation.maxLength) {
-              errors[param.name] = `${param.label} must be at most ${param.validation.maxLength} characters`;
+            if (
+              param.validation.maxLength !== undefined &&
+              stringValue.length > param.validation.maxLength
+            ) {
+              errors[param.name] =
+                `${param.label} must be at most ${param.validation.maxLength} characters`;
             }
             if (param.validation.pattern) {
               const regex = new RegExp(param.validation.pattern);
@@ -173,7 +196,10 @@ export class TemplateApplier implements ITemplateApplier {
   /**
    * Check if all required parameters are provided
    */
-  hasAllRequiredParams(parameters: ParameterDef[], values: Record<string, unknown>): boolean {
+  hasAllRequiredParams(
+    parameters: ParameterDef[],
+    values: Record<string, unknown>,
+  ): boolean {
     return parameters
       .filter((p) => p.required)
       .every((p) => {

@@ -17,7 +17,7 @@ import type {
 /**
  * 生成唯一 ID
  */
-export function generateId(prefix: string = 'node'): string {
+export function generateId(prefix = 'node'): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
@@ -69,10 +69,18 @@ const NODE_LABELS: Record<NodeType, string> = {
  * 默认端口定义
  */
 const DEFAULT_PORTS = {
-  singleInput: [{ id: 'in', label: '输入', type: 'default' as const, maxConnections: 1 }] as PortDefinition[],
-  singleOutput: [{ id: 'out', label: '输出', type: 'default' as const }] as PortDefinition[],
-  multiInput: [{ id: 'in', label: '输入', type: 'default' as const }] as PortDefinition[],
-  multiOutput: [{ id: 'out', label: '输出', type: 'default' as const }] as PortDefinition[],
+  singleInput: [
+    { id: 'in', label: '输入', type: 'default' as const, maxConnections: 1 },
+  ] as PortDefinition[],
+  singleOutput: [
+    { id: 'out', label: '输出', type: 'default' as const },
+  ] as PortDefinition[],
+  multiInput: [
+    { id: 'in', label: '输入', type: 'default' as const },
+  ] as PortDefinition[],
+  multiOutput: [
+    { id: 'out', label: '输出', type: 'default' as const },
+  ] as PortDefinition[],
   noPorts: [] as PortDefinition[],
   conditional: [
     { id: 'in', label: '输入', type: 'default' as const, maxConnections: 1 },
@@ -95,43 +103,123 @@ const DEFAULT_CONFIGS = {
   // 点击
   click: { target: '', timeout: 30000, onFailure: 'stop' as const },
   // 输入
-  input: { target: '', value: '', clearBefore: true, timeout: 30000, onFailure: 'stop' as const },
+  input: {
+    target: '',
+    value: '',
+    clearBefore: true,
+    timeout: 30000,
+    onFailure: 'stop' as const,
+  },
   // 滚动
-  scroll: { target: '', direction: 'down' as const, distance: 300, timeout: 30000, onFailure: 'stop' as const },
+  scroll: {
+    target: '',
+    direction: 'down' as const,
+    distance: 300,
+    timeout: 30000,
+    onFailure: 'stop' as const,
+  },
   // 等待
   wait: { duration: 1000, timeout: 30000, onFailure: 'stop' as const },
   // 导航
-  navigate: { url: '', waitForLoad: true, timeout: 30000, onFailure: 'stop' as const },
+  navigate: {
+    url: '',
+    waitForLoad: true,
+    timeout: 30000,
+    onFailure: 'stop' as const,
+  },
   // 悬停
-  hover: { target: '', duration: 500, timeout: 30000, onFailure: 'stop' as const },
+  hover: {
+    target: '',
+    duration: 500,
+    timeout: 30000,
+    onFailure: 'stop' as const,
+  },
   // 拖拽
-  drag: { from: '', to: '', duration: 500, timeout: 30000, onFailure: 'stop' as const },
+  drag: {
+    from: '',
+    to: '',
+    duration: 500,
+    timeout: 30000,
+    onFailure: 'stop' as const,
+  },
   // 断言存在
-  assertExists: { target: '', state: 'visible' as const, negate: false, timeout: 30000, onFailure: 'stop' as const },
+  assertExists: {
+    target: '',
+    state: 'visible' as const,
+    negate: false,
+    timeout: 30000,
+    onFailure: 'stop' as const,
+  },
   // 断言文本
-  assertText: { target: '', text: '', operator: 'contains' as const, timeout: 30000, onFailure: 'stop' as const },
+  assertText: {
+    target: '',
+    text: '',
+    operator: 'contains' as const,
+    timeout: 30000,
+    onFailure: 'stop' as const,
+  },
   // 断言状态
-  assertState: { target: '', state: 'checked' as const, negate: false, timeout: 30000, onFailure: 'stop' as const },
+  assertState: {
+    target: '',
+    state: 'checked' as const,
+    negate: false,
+    timeout: 30000,
+    onFailure: 'stop' as const,
+  },
   // AI 断言
   aiAssert: { assertion: '', timeout: 30000, onFailure: 'stop' as const },
   // 条件分支
-  ifElse: { condition: '', trueLabel: 'True', falseLabel: 'False', timeout: 30000, onFailure: 'stop' as const },
+  ifElse: {
+    condition: '',
+    trueLabel: 'True',
+    falseLabel: 'False',
+    timeout: 30000,
+    onFailure: 'stop' as const,
+  },
   // 循环
-  loop: { type: 'count' as const, count: 3, maxIterations: 50, timeout: 30000, onFailure: 'stop' as const },
+  loop: {
+    type: 'count' as const,
+    count: 3,
+    maxIterations: 50,
+    timeout: 30000,
+    onFailure: 'stop' as const,
+  },
   // 并行
-  parallel: { branches: 2, waitAll: true, timeout: 30000, onFailure: 'stop' as const },
+  parallel: {
+    branches: 2,
+    waitAll: true,
+    timeout: 30000,
+    onFailure: 'stop' as const,
+  },
   // 分组
   group: { label: '', collapsed: false, color: '#e3f2fd' },
   // 设置变量
   setVariable: { name: '', value: '', valueType: 'string' as const },
   // 提取数据
-  extractData: { target: '', extractType: 'text' as const, variable: '', timeout: 30000, onFailure: 'stop' as const },
+  extractData: {
+    target: '',
+    extractType: 'text' as const,
+    variable: '',
+    timeout: 30000,
+    onFailure: 'stop' as const,
+  },
   // 外部数据
-  externalData: { source: '', format: 'json' as const, variable: '', timeout: 30000, onFailure: 'stop' as const },
+  externalData: {
+    source: '',
+    format: 'json' as const,
+    variable: '',
+    timeout: 30000,
+    onFailure: 'stop' as const,
+  },
   // 注释
   comment: { content: '', color: '#fff9c4' },
   // 子流程
-  subflow: { subflowId: '', parameters: {}, timeout: 30000, onFailure: 'stop' as const },
+  subflow: {
+    subflowId: '',
+    parameters: {},
+    timeout: 30000,
+    onFailure: 'stop' as const,
+  },
   // 开始
   start: { variables: {} },
   // 结束
@@ -171,8 +259,17 @@ const CONFIG_SCHEMAS: Record<NodeType, ConfigSchema> = {
     properties: {
       subflowId: { type: 'string', title: '子流程 ID' },
       parameters: { type: 'object', title: '参数映射' },
-      timeout: { type: 'number', title: '超时 (ms)', minimum: 1000, maximum: 300000 },
-      onFailure: { type: 'string', title: '失败处理', enum: ['stop', 'skip', 'retry'] },
+      timeout: {
+        type: 'number',
+        title: '超时 (ms)',
+        minimum: 1000,
+        maximum: 300000,
+      },
+      onFailure: {
+        type: 'string',
+        title: '失败处理',
+        enum: ['stop', 'skip', 'retry'],
+      },
     },
     required: ['subflowId'],
   },
@@ -184,8 +281,17 @@ const CONFIG_SCHEMAS: Record<NodeType, ConfigSchema> = {
       count: { type: 'number', title: '点击次数', minimum: 1, maximum: 10 },
       doubleClick: { type: 'boolean', title: '双击' },
       rightClick: { type: 'boolean', title: '右键' },
-      timeout: { type: 'number', title: '超时 (ms)', minimum: 1000, maximum: 300000 },
-      onFailure: { type: 'string', title: '失败处理', enum: ['stop', 'skip', 'retry'] },
+      timeout: {
+        type: 'number',
+        title: '超时 (ms)',
+        minimum: 1000,
+        maximum: 300000,
+      },
+      onFailure: {
+        type: 'string',
+        title: '失败处理',
+        enum: ['stop', 'skip', 'retry'],
+      },
     },
     required: ['target'],
   },
@@ -196,9 +302,22 @@ const CONFIG_SCHEMAS: Record<NodeType, ConfigSchema> = {
       target: { type: 'string', title: '目标元素' },
       value: { type: 'string', title: '输入值' },
       clearBefore: { type: 'boolean', title: '输入前清空' },
-      submitKey: { type: 'string', title: '提交按键', enum: ['enter', 'tab', 'none'] },
-      timeout: { type: 'number', title: '超时 (ms)', minimum: 1000, maximum: 300000 },
-      onFailure: { type: 'string', title: '失败处理', enum: ['stop', 'skip', 'retry'] },
+      submitKey: {
+        type: 'string',
+        title: '提交按键',
+        enum: ['enter', 'tab', 'none'],
+      },
+      timeout: {
+        type: 'number',
+        title: '超时 (ms)',
+        minimum: 1000,
+        maximum: 300000,
+      },
+      onFailure: {
+        type: 'string',
+        title: '失败处理',
+        enum: ['stop', 'skip', 'retry'],
+      },
     },
     required: ['target', 'value'],
   },
@@ -207,20 +326,52 @@ const CONFIG_SCHEMAS: Record<NodeType, ConfigSchema> = {
     type: 'object',
     properties: {
       target: { type: 'string', title: '目标元素 (可选)' },
-      direction: { type: 'string', title: '方向', enum: ['up', 'down', 'left', 'right', 'intoView'] },
-      distance: { type: 'number', title: '距离 (px)', minimum: 10, maximum: 10000 },
-      timeout: { type: 'number', title: '超时 (ms)', minimum: 1000, maximum: 300000 },
-      onFailure: { type: 'string', title: '失败处理', enum: ['stop', 'skip', 'retry'] },
+      direction: {
+        type: 'string',
+        title: '方向',
+        enum: ['up', 'down', 'left', 'right', 'intoView'],
+      },
+      distance: {
+        type: 'number',
+        title: '距离 (px)',
+        minimum: 10,
+        maximum: 10000,
+      },
+      timeout: {
+        type: 'number',
+        title: '超时 (ms)',
+        minimum: 1000,
+        maximum: 300000,
+      },
+      onFailure: {
+        type: 'string',
+        title: '失败处理',
+        enum: ['stop', 'skip', 'retry'],
+      },
     },
   },
   // 等待
   wait: {
     type: 'object',
     properties: {
-      duration: { type: 'number', title: '等待时间 (ms)', minimum: 100, maximum: 60000 },
+      duration: {
+        type: 'number',
+        title: '等待时间 (ms)',
+        minimum: 100,
+        maximum: 60000,
+      },
       waitForElement: { type: 'string', title: '等待元素' },
-      timeout: { type: 'number', title: '超时 (ms)', minimum: 1000, maximum: 300000 },
-      onFailure: { type: 'string', title: '失败处理', enum: ['stop', 'skip', 'retry'] },
+      timeout: {
+        type: 'number',
+        title: '超时 (ms)',
+        minimum: 1000,
+        maximum: 300000,
+      },
+      onFailure: {
+        type: 'string',
+        title: '失败处理',
+        enum: ['stop', 'skip', 'retry'],
+      },
     },
     required: ['duration'],
   },
@@ -230,8 +381,17 @@ const CONFIG_SCHEMAS: Record<NodeType, ConfigSchema> = {
     properties: {
       url: { type: 'string', title: 'URL 地址' },
       waitForLoad: { type: 'boolean', title: '等待加载完成' },
-      timeout: { type: 'number', title: '超时 (ms)', minimum: 1000, maximum: 300000 },
-      onFailure: { type: 'string', title: '失败处理', enum: ['stop', 'skip', 'retry'] },
+      timeout: {
+        type: 'number',
+        title: '超时 (ms)',
+        minimum: 1000,
+        maximum: 300000,
+      },
+      onFailure: {
+        type: 'string',
+        title: '失败处理',
+        enum: ['stop', 'skip', 'retry'],
+      },
     },
     required: ['url'],
   },
@@ -240,9 +400,23 @@ const CONFIG_SCHEMAS: Record<NodeType, ConfigSchema> = {
     type: 'object',
     properties: {
       target: { type: 'string', title: '目标元素' },
-      duration: { type: 'number', title: '持续时间 (ms)', minimum: 100, maximum: 10000 },
-      timeout: { type: 'number', title: '超时 (ms)', minimum: 1000, maximum: 300000 },
-      onFailure: { type: 'string', title: '失败处理', enum: ['stop', 'skip', 'retry'] },
+      duration: {
+        type: 'number',
+        title: '持续时间 (ms)',
+        minimum: 100,
+        maximum: 10000,
+      },
+      timeout: {
+        type: 'number',
+        title: '超时 (ms)',
+        minimum: 1000,
+        maximum: 300000,
+      },
+      onFailure: {
+        type: 'string',
+        title: '失败处理',
+        enum: ['stop', 'skip', 'retry'],
+      },
     },
     required: ['target'],
   },
@@ -252,9 +426,23 @@ const CONFIG_SCHEMAS: Record<NodeType, ConfigSchema> = {
     properties: {
       from: { type: 'string', title: '源元素' },
       to: { type: 'string', title: '目标元素' },
-      duration: { type: 'number', title: '持续时间 (ms)', minimum: 100, maximum: 5000 },
-      timeout: { type: 'number', title: '超时 (ms)', minimum: 1000, maximum: 300000 },
-      onFailure: { type: 'string', title: '失败处理', enum: ['stop', 'skip', 'retry'] },
+      duration: {
+        type: 'number',
+        title: '持续时间 (ms)',
+        minimum: 100,
+        maximum: 5000,
+      },
+      timeout: {
+        type: 'number',
+        title: '超时 (ms)',
+        minimum: 1000,
+        maximum: 300000,
+      },
+      onFailure: {
+        type: 'string',
+        title: '失败处理',
+        enum: ['stop', 'skip', 'retry'],
+      },
     },
     required: ['from', 'to'],
   },
@@ -263,10 +451,23 @@ const CONFIG_SCHEMAS: Record<NodeType, ConfigSchema> = {
     type: 'object',
     properties: {
       target: { type: 'string', title: '目标元素' },
-      state: { type: 'string', title: '期望状态', enum: ['visible', 'hidden', 'enabled', 'disabled'] },
+      state: {
+        type: 'string',
+        title: '期望状态',
+        enum: ['visible', 'hidden', 'enabled', 'disabled'],
+      },
       negate: { type: 'boolean', title: '否定断言' },
-      timeout: { type: 'number', title: '超时 (ms)', minimum: 1000, maximum: 300000 },
-      onFailure: { type: 'string', title: '失败处理', enum: ['stop', 'skip', 'retry'] },
+      timeout: {
+        type: 'number',
+        title: '超时 (ms)',
+        minimum: 1000,
+        maximum: 300000,
+      },
+      onFailure: {
+        type: 'string',
+        title: '失败处理',
+        enum: ['stop', 'skip', 'retry'],
+      },
     },
     required: ['target'],
   },
@@ -276,9 +477,22 @@ const CONFIG_SCHEMAS: Record<NodeType, ConfigSchema> = {
     properties: {
       target: { type: 'string', title: '目标元素' },
       text: { type: 'string', title: '期望文本' },
-      operator: { type: 'string', title: '匹配方式', enum: ['equals', 'contains', 'matches', 'startsWith', 'endsWith'] },
-      timeout: { type: 'number', title: '超时 (ms)', minimum: 1000, maximum: 300000 },
-      onFailure: { type: 'string', title: '失败处理', enum: ['stop', 'skip', 'retry'] },
+      operator: {
+        type: 'string',
+        title: '匹配方式',
+        enum: ['equals', 'contains', 'matches', 'startsWith', 'endsWith'],
+      },
+      timeout: {
+        type: 'number',
+        title: '超时 (ms)',
+        minimum: 1000,
+        maximum: 300000,
+      },
+      onFailure: {
+        type: 'string',
+        title: '失败处理',
+        enum: ['stop', 'skip', 'retry'],
+      },
     },
     required: ['target', 'text'],
   },
@@ -287,10 +501,23 @@ const CONFIG_SCHEMAS: Record<NodeType, ConfigSchema> = {
     type: 'object',
     properties: {
       target: { type: 'string', title: '目标元素' },
-      state: { type: 'string', title: '期望状态', enum: ['checked', 'unchecked', 'selected', 'focused', 'readonly'] },
+      state: {
+        type: 'string',
+        title: '期望状态',
+        enum: ['checked', 'unchecked', 'selected', 'focused', 'readonly'],
+      },
       negate: { type: 'boolean', title: '否定断言' },
-      timeout: { type: 'number', title: '超时 (ms)', minimum: 1000, maximum: 300000 },
-      onFailure: { type: 'string', title: '失败处理', enum: ['stop', 'skip', 'retry'] },
+      timeout: {
+        type: 'number',
+        title: '超时 (ms)',
+        minimum: 1000,
+        maximum: 300000,
+      },
+      onFailure: {
+        type: 'string',
+        title: '失败处理',
+        enum: ['stop', 'skip', 'retry'],
+      },
     },
     required: ['target', 'state'],
   },
@@ -299,8 +526,17 @@ const CONFIG_SCHEMAS: Record<NodeType, ConfigSchema> = {
     type: 'object',
     properties: {
       assertion: { type: 'string', title: '断言描述' },
-      timeout: { type: 'number', title: '超时 (ms)', minimum: 1000, maximum: 300000 },
-      onFailure: { type: 'string', title: '失败处理', enum: ['stop', 'skip', 'retry'] },
+      timeout: {
+        type: 'number',
+        title: '超时 (ms)',
+        minimum: 1000,
+        maximum: 300000,
+      },
+      onFailure: {
+        type: 'string',
+        title: '失败处理',
+        enum: ['stop', 'skip', 'retry'],
+      },
     },
     required: ['assertion'],
   },
@@ -311,8 +547,17 @@ const CONFIG_SCHEMAS: Record<NodeType, ConfigSchema> = {
       condition: { type: 'string', title: '条件描述' },
       trueLabel: { type: 'string', title: 'True 分支标签' },
       falseLabel: { type: 'string', title: 'False 分支标签' },
-      timeout: { type: 'number', title: '超时 (ms)', minimum: 1000, maximum: 300000 },
-      onFailure: { type: 'string', title: '失败处理', enum: ['stop', 'skip', 'retry'] },
+      timeout: {
+        type: 'number',
+        title: '超时 (ms)',
+        minimum: 1000,
+        maximum: 300000,
+      },
+      onFailure: {
+        type: 'string',
+        title: '失败处理',
+        enum: ['stop', 'skip', 'retry'],
+      },
     },
     required: ['condition'],
   },
@@ -320,14 +565,32 @@ const CONFIG_SCHEMAS: Record<NodeType, ConfigSchema> = {
   loop: {
     type: 'object',
     properties: {
-      type: { type: 'string', title: '循环类型', enum: ['count', 'while', 'forEach'] },
+      type: {
+        type: 'string',
+        title: '循环类型',
+        enum: ['count', 'while', 'forEach'],
+      },
       count: { type: 'number', title: '循环次数', minimum: 1, maximum: 1000 },
       whileCondition: { type: 'string', title: '循环条件' },
       forEachCollection: { type: 'string', title: '数据源' },
       itemVariable: { type: 'string', title: '元素变量名' },
-      maxIterations: { type: 'number', title: '最大迭代次数', minimum: 1, maximum: 1000 },
-      timeout: { type: 'number', title: '超时 (ms)', minimum: 1000, maximum: 300000 },
-      onFailure: { type: 'string', title: '失败处理', enum: ['stop', 'skip', 'retry'] },
+      maxIterations: {
+        type: 'number',
+        title: '最大迭代次数',
+        minimum: 1,
+        maximum: 1000,
+      },
+      timeout: {
+        type: 'number',
+        title: '超时 (ms)',
+        minimum: 1000,
+        maximum: 300000,
+      },
+      onFailure: {
+        type: 'string',
+        title: '失败处理',
+        enum: ['stop', 'skip', 'retry'],
+      },
     },
     required: ['type'],
   },
@@ -337,8 +600,17 @@ const CONFIG_SCHEMAS: Record<NodeType, ConfigSchema> = {
     properties: {
       branches: { type: 'number', title: '分支数', minimum: 2, maximum: 10 },
       waitAll: { type: 'boolean', title: '等待所有分支' },
-      timeout: { type: 'number', title: '超时 (ms)', minimum: 1000, maximum: 300000 },
-      onFailure: { type: 'string', title: '失败处理', enum: ['stop', 'skip', 'retry'] },
+      timeout: {
+        type: 'number',
+        title: '超时 (ms)',
+        minimum: 1000,
+        maximum: 300000,
+      },
+      onFailure: {
+        type: 'string',
+        title: '失败处理',
+        enum: ['stop', 'skip', 'retry'],
+      },
     },
     required: ['branches'],
   },
@@ -357,7 +629,11 @@ const CONFIG_SCHEMAS: Record<NodeType, ConfigSchema> = {
     properties: {
       name: { type: 'string', title: '变量名' },
       value: { type: 'string', title: '变量值' },
-      valueType: { type: 'string', title: '变量类型', enum: ['string', 'number', 'boolean', 'array', 'object'] },
+      valueType: {
+        type: 'string',
+        title: '变量类型',
+        enum: ['string', 'number', 'boolean', 'array', 'object'],
+      },
     },
     required: ['name', 'value'],
   },
@@ -366,11 +642,24 @@ const CONFIG_SCHEMAS: Record<NodeType, ConfigSchema> = {
     type: 'object',
     properties: {
       target: { type: 'string', title: '目标元素' },
-      extractType: { type: 'string', title: '提取类型', enum: ['text', 'attribute', 'count', 'boundingRect'] },
+      extractType: {
+        type: 'string',
+        title: '提取类型',
+        enum: ['text', 'attribute', 'count', 'boundingRect'],
+      },
       attribute: { type: 'string', title: '属性名' },
       variable: { type: 'string', title: '保存到变量' },
-      timeout: { type: 'number', title: '超时 (ms)', minimum: 1000, maximum: 300000 },
-      onFailure: { type: 'string', title: '失败处理', enum: ['stop', 'skip', 'retry'] },
+      timeout: {
+        type: 'number',
+        title: '超时 (ms)',
+        minimum: 1000,
+        maximum: 300000,
+      },
+      onFailure: {
+        type: 'string',
+        title: '失败处理',
+        enum: ['stop', 'skip', 'retry'],
+      },
     },
     required: ['target', 'variable'],
   },
@@ -379,10 +668,23 @@ const CONFIG_SCHEMAS: Record<NodeType, ConfigSchema> = {
     type: 'object',
     properties: {
       source: { type: 'string', title: '数据源 URL' },
-      format: { type: 'string', title: '数据格式', enum: ['json', 'csv', 'yaml'] },
+      format: {
+        type: 'string',
+        title: '数据格式',
+        enum: ['json', 'csv', 'yaml'],
+      },
       variable: { type: 'string', title: '保存到变量' },
-      timeout: { type: 'number', title: '超时 (ms)', minimum: 1000, maximum: 300000 },
-      onFailure: { type: 'string', title: '失败处理', enum: ['stop', 'skip', 'retry'] },
+      timeout: {
+        type: 'number',
+        title: '超时 (ms)',
+        minimum: 1000,
+        maximum: 300000,
+      },
+      onFailure: {
+        type: 'string',
+        title: '失败处理',
+        enum: ['stop', 'skip', 'retry'],
+      },
     },
     required: ['source', 'variable'],
   },
@@ -430,7 +732,9 @@ class NodeRegistry {
    * 按分类获取节点定义
    */
   getByCategory(category: NodeCategory): NodeDefinition[] {
-    return Array.from(this.registry.values()).filter((def) => def.category === category);
+    return Array.from(this.registry.values()).filter(
+      (def) => def.category === category,
+    );
   }
 
   /**
@@ -446,7 +750,7 @@ class NodeRegistry {
   createNode(
     type: NodeType,
     position: { x: number; y: number },
-    overrides?: Partial<DesignerNode>
+    overrides?: Partial<DesignerNode>,
   ): DesignerNode {
     const definition = this.get(type);
     if (!definition) {
@@ -505,7 +809,7 @@ class NodeRegistry {
   private validateAgainstSchema(
     config: any,
     schema: ConfigSchema,
-    nodeType: NodeType
+    nodeType: NodeType,
   ): ValidationResult {
     const errors: any[] = [];
     const warnings: any[] = [];
@@ -514,7 +818,10 @@ class NodeRegistry {
       // 检查必填字段
       if (schema.required) {
         for (const field of schema.required) {
-          if (!config[field] || (typeof config[field] === 'string' && !config[field].trim())) {
+          if (
+            !config[field] ||
+            (typeof config[field] === 'string' && !config[field].trim())
+          ) {
             errors.push({
               type: 'configuration',
               message: `${schema.properties[field]?.title || field} 是必填项`,
@@ -526,13 +833,19 @@ class NodeRegistry {
       // 检查数值范围
       for (const [key, propSchema] of Object.entries(schema.properties)) {
         if (config[key] !== undefined) {
-          if (propSchema.minimum !== undefined && config[key] < propSchema.minimum) {
+          if (
+            propSchema.minimum !== undefined &&
+            config[key] < propSchema.minimum
+          ) {
             errors.push({
               type: 'configuration',
               message: `${propSchema.title || key} 不能小于 ${propSchema.minimum}`,
             });
           }
-          if (propSchema.maximum !== undefined && config[key] > propSchema.maximum) {
+          if (
+            propSchema.maximum !== undefined &&
+            config[key] > propSchema.maximum
+          ) {
             errors.push({
               type: 'configuration',
               message: `${propSchema.title || key} 不能大于 ${propSchema.maximum}`,
@@ -788,7 +1101,8 @@ class NodeRegistry {
       toYaml: (node) => {
         const config = node.data.config as any;
         const step: YamlStep = { assert: { exists: config.target } };
-        if (config.state && config.state !== 'visible') step.assert.state = config.state;
+        if (config.state && config.state !== 'visible')
+          step.assert.state = config.state;
         if (config.negate) step.assert.not = true;
         return [step];
       },
@@ -808,7 +1122,8 @@ class NodeRegistry {
         const config = node.data.config as any;
         const step: YamlStep = { assert: { text: config.text } };
         if (config.target) step.assert.target = config.target;
-        if (config.operator && config.operator !== 'contains') step.assert.operator = config.operator;
+        if (config.operator && config.operator !== 'contains')
+          step.assert.operator = config.operator;
         return [step];
       },
     });
@@ -886,7 +1201,14 @@ class NodeRegistry {
         } else if (config.type === 'while') {
           return [{ loop: { while: config.whileCondition } }];
         } else {
-          return [{ loop: { forEach: config.forEachCollection, as: config.itemVariable } }];
+          return [
+            {
+              loop: {
+                forEach: config.forEachCollection,
+                as: config.itemVariable,
+              },
+            },
+          ];
         }
       },
     });
@@ -957,7 +1279,10 @@ class NodeRegistry {
         if (config.extractType === 'text') {
           step.extract.text = config.target;
         } else if (config.extractType === 'attribute') {
-          step.extract.attribute = { name: config.attribute, from: config.target };
+          step.extract.attribute = {
+            name: config.attribute,
+            from: config.target,
+          };
         } else if (config.extractType === 'count') {
           step.extract.count = config.target;
         }
@@ -977,7 +1302,15 @@ class NodeRegistry {
       configSchema: CONFIG_SCHEMAS.externalData,
       toYaml: (node) => {
         const config = node.data.config as any;
-        return [{ load: { from: config.source, as: config.variable, format: config.format } }];
+        return [
+          {
+            load: {
+              from: config.source,
+              as: config.variable,
+              format: config.format,
+            },
+          },
+        ];
       },
     });
   }
@@ -994,12 +1327,15 @@ export const nodeRegistry = new NodeRegistry();
 export function createNode(
   type: NodeType,
   position: { x: number; y: number },
-  overrides?: Partial<DesignerNode>
+  overrides?: Partial<DesignerNode>,
 ): DesignerNode {
   return nodeRegistry.createNode(type, position, overrides);
 }
 
-export function validateNodeConfig(type: NodeType, config: any): ValidationResult {
+export function validateNodeConfig(
+  type: NodeType,
+  config: any,
+): ValidationResult {
   return nodeRegistry.validateConfig(type, config);
 }
 

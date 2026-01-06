@@ -2,13 +2,13 @@
  * RecommendEngine Tests
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { recommendEngine } from '../recommendEngine';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
   EfficiencyAnalysis,
   RedundancyReport,
   StabilityAnalysis,
 } from '../../../types/optimization';
+import { recommendEngine } from '../recommendEngine';
 
 // Mock localStorage for Node.js environment
 const localStorageMock = (() => {
@@ -132,40 +132,31 @@ describe('RecommendEngine', () => {
     it('should generate recommendations from efficiency analysis', async () => {
       const analysis = { efficiency: createEfficiencyAnalysis() };
 
-      const recommendations = await recommendEngine.generateRecommendations(
-        analysis,
-      );
+      const recommendations =
+        await recommendEngine.generateRecommendations(analysis);
 
       expect(recommendations.length).toBeGreaterThan(0);
-      expect(
-        recommendations.some((r) => r.type === 'efficiency'),
-      ).toBe(true);
+      expect(recommendations.some((r) => r.type === 'efficiency')).toBe(true);
     });
 
     it('should generate recommendations from redundancy report', async () => {
       const analysis = { redundancy: createRedundancyReport() };
 
-      const recommendations = await recommendEngine.generateRecommendations(
-        analysis,
-      );
+      const recommendations =
+        await recommendEngine.generateRecommendations(analysis);
 
       expect(recommendations.length).toBeGreaterThan(0);
-      expect(
-        recommendations.some((r) => r.type === 'redundancy'),
-      ).toBe(true);
+      expect(recommendations.some((r) => r.type === 'redundancy')).toBe(true);
     });
 
     it('should generate recommendations from stability analysis', async () => {
       const analysis = { stability: createStabilityAnalysis() };
 
-      const recommendations = await recommendEngine.generateRecommendations(
-        analysis,
-      );
+      const recommendations =
+        await recommendEngine.generateRecommendations(analysis);
 
       expect(recommendations.length).toBeGreaterThan(0);
-      expect(
-        recommendations.some((r) => r.type === 'stability'),
-      ).toBe(true);
+      expect(recommendations.some((r) => r.type === 'stability')).toBe(true);
     });
 
     it('should generate recommendations from multiple analyses', async () => {
@@ -175,9 +166,8 @@ describe('RecommendEngine', () => {
         stability: createStabilityAnalysis(),
       };
 
-      const recommendations = await recommendEngine.generateRecommendations(
-        analysis,
-      );
+      const recommendations =
+        await recommendEngine.generateRecommendations(analysis);
 
       expect(recommendations.length).toBeGreaterThan(3);
     });

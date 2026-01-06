@@ -6,14 +6,14 @@
  */
 
 import type {
-  Severity,
   AnomalyType,
   BaselineInfo,
   RootCause,
+  Severity,
 } from '../../types/anomaly';
 import {
-  SEVERITY_FACTOR_WEIGHTS,
   SEVERITY_DEVIATION_THRESHOLDS,
+  SEVERITY_FACTOR_WEIGHTS,
 } from '../../types/anomaly';
 
 // ============================================================================
@@ -66,7 +66,11 @@ class SeverityEvaluator {
     const factors = this.calculateFactors(input);
     const score = this.calculateScore(factors);
     const severity = this.scoreToSeverity(score);
-    const recommendation = this.generateRecommendation(severity, input, factors);
+    const recommendation = this.generateRecommendation(
+      severity,
+      input,
+      factors,
+    );
 
     return {
       severity,
@@ -104,7 +108,9 @@ class SeverityEvaluator {
 
     // Factor 3: Frequency/recurrence
     if (input.historicalFrequency !== undefined) {
-      const frequencyFactor = this.calculateFrequencyFactor(input.historicalFrequency);
+      const frequencyFactor = this.calculateFrequencyFactor(
+        input.historicalFrequency,
+      );
       factors.push({
         name: 'frequency',
         weight: SEVERITY_FACTOR_WEIGHTS.frequency,
@@ -115,7 +121,10 @@ class SeverityEvaluator {
 
     // Factor 4: Impact scope
     if (input.affectedCases !== undefined && input.totalCases !== undefined) {
-      const impactFactor = this.calculateImpactFactor(input.affectedCases, input.totalCases);
+      const impactFactor = this.calculateImpactFactor(
+        input.affectedCases,
+        input.totalCases,
+      );
       factors.push({
         name: 'impact',
         weight: SEVERITY_FACTOR_WEIGHTS.impact,
@@ -135,8 +144,13 @@ class SeverityEvaluator {
     }
 
     // Factor 6: Consecutive failures
-    if (input.consecutiveFailures !== undefined && input.consecutiveFailures > 1) {
-      const consecutiveFactor = this.calculateConsecutiveFactor(input.consecutiveFailures);
+    if (
+      input.consecutiveFailures !== undefined &&
+      input.consecutiveFailures > 1
+    ) {
+      const consecutiveFactor = this.calculateConsecutiveFactor(
+        input.consecutiveFailures,
+      );
       factors.push({
         name: 'consecutive',
         weight: 0.1,
@@ -282,7 +296,7 @@ class SeverityEvaluator {
   private generateRecommendation(
     severity: Severity,
     input: SeverityInput,
-    factors: SeverityFactor[]
+    factors: SeverityFactor[],
   ): string {
     const topFactors = factors
       .filter((f) => f.contribution > 0)
@@ -293,19 +307,25 @@ class SeverityEvaluator {
 
     const recommendations: Record<Severity, Record<string, string>> = {
       critical: {
-        deviation: 'Immediate investigation required. Value significantly outside normal range.',
-        duration: 'Long-standing critical issue. Escalate to team lead immediately.',
+        deviation:
+          'Immediate investigation required. Value significantly outside normal range.',
+        duration:
+          'Long-standing critical issue. Escalate to team lead immediately.',
         frequency: 'Recurring critical issue. Root cause analysis mandatory.',
         impact: 'Wide-spread impact. Consider rollback or hotfix.',
-        regression: 'Critical regression detected. Block deployments until resolved.',
+        regression:
+          'Critical regression detected. Block deployments until resolved.',
         consecutive: 'Extended failure sequence. Check for systemic issues.',
         default: 'Critical anomaly detected. Immediate action required.',
       },
       high: {
-        deviation: 'Significant deviation from baseline. Investigate within 24 hours.',
-        duration: 'Issue persisting for extended period. Schedule investigation.',
+        deviation:
+          'Significant deviation from baseline. Investigate within 24 hours.',
+        duration:
+          'Issue persisting for extended period. Schedule investigation.',
         frequency: 'Frequently occurring issue. Add to sprint backlog.',
-        impact: 'Affecting significant portion of tests. Prioritize investigation.',
+        impact:
+          'Affecting significant portion of tests. Prioritize investigation.',
         regression: 'Regression detected. Review recent changes.',
         consecutive: 'Multiple consecutive failures. Check test stability.',
         default: 'High severity anomaly. Plan investigation soon.',
@@ -330,7 +350,10 @@ class SeverityEvaluator {
       },
     };
 
-    return recommendations[severity][primaryFactor] || recommendations[severity].default;
+    return (
+      recommendations[severity][primaryFactor] ||
+      recommendations[severity].default
+    );
   }
 
   /**
@@ -352,7 +375,8 @@ class SeverityEvaluator {
     // Determine urgency
     let urgency: ImpactAssessment['urgency'];
     if (input.isRegression && scope === 'critical') urgency = 'immediate';
-    else if (scope === 'critical' || (input.consecutiveFailures ?? 0) >= 5) urgency = 'high';
+    else if (scope === 'critical' || (input.consecutiveFailures ?? 0) >= 5)
+      urgency = 'high';
     else if (scope === 'high' || input.isRegression) urgency = 'medium';
     else urgency = 'low';
 
@@ -360,7 +384,7 @@ class SeverityEvaluator {
     const estimatedImpact = this.generateImpactDescription(
       scope,
       affectedPercentage,
-      input.anomalyType
+      input.anomalyType,
     );
 
     return {
@@ -377,7 +401,7 @@ class SeverityEvaluator {
   private generateImpactDescription(
     scope: ImpactAssessment['scope'],
     percentage: number,
-    type: AnomalyType
+    type: AnomalyType,
   ): string {
     const typeDescriptions: Record<AnomalyType, string> = {
       duration_spike: 'test execution time',
@@ -416,9 +440,13 @@ class SeverityEvaluator {
   /**
    * Get severity from baseline deviation
    */
-  getSeverityFromDeviation(deviation: number, baseline: BaselineInfo): Severity {
+  getSeverityFromDeviation(
+    deviation: number,
+    baseline: BaselineInfo,
+  ): Severity {
     const absDeviation = Math.abs(deviation);
-    const normalizedDeviation = baseline.stdDev !== 0 ? absDeviation / baseline.stdDev : absDeviation;
+    const normalizedDeviation =
+      baseline.stdDev !== 0 ? absDeviation / baseline.stdDev : absDeviation;
 
     if (normalizedDeviation >= this.thresholds.critical) return 'critical';
     if (normalizedDeviation >= this.thresholds.high) return 'high';
@@ -430,7 +458,9 @@ class SeverityEvaluator {
    * Calculate priority score for sorting anomalies
    */
   calculatePriority(severity: Severity, input: SeverityInput): number {
-    const severityScore = { low: 25, medium: 50, high: 75, critical: 100 }[severity];
+    const severityScore = { low: 25, medium: 50, high: 75, critical: 100 }[
+      severity
+    ];
 
     // Boost priority for regressions
     const regressionBoost = input.isRegression ? 10 : 0;
@@ -438,13 +468,14 @@ class SeverityEvaluator {
     // Boost for high impact
     const impactBoost =
       input.affectedCases !== undefined && input.totalCases !== undefined
-        ? ((input.affectedCases / Math.max(input.totalCases, 1)) * 20)
+        ? (input.affectedCases / Math.max(input.totalCases, 1)) * 20
         : 0;
 
     // Reduce priority for frequently recurring (likely known) issues
-    const frequencyPenalty = input.historicalFrequency !== undefined
-      ? input.historicalFrequency * 5
-      : 0;
+    const frequencyPenalty =
+      input.historicalFrequency !== undefined
+        ? input.historicalFrequency * 5
+        : 0;
 
     return severityScore + regressionBoost + impactBoost - frequencyPenalty;
   }
@@ -452,7 +483,9 @@ class SeverityEvaluator {
   /**
    * Batch evaluate multiple anomalies and sort by priority
    */
-  evaluateAndPrioritize(inputs: SeverityInput[]): Array<SeverityResult & { priority: number }> {
+  evaluateAndPrioritize(
+    inputs: SeverityInput[],
+  ): Array<SeverityResult & { priority: number }> {
     return inputs
       .map((input) => {
         const result = this.evaluate(input);
