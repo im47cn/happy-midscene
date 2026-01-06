@@ -1,0 +1,225 @@
+// Jenkins Pipeline for Midscene CI
+//
+// Usage:
+// 1. Copy this file to your repository as Jenkinsfile
+// 2. Configure Jenkins with Pipeline plugin
+// 3. Add required plugins: TAP Plugin, HTML Publisher Plugin
+
+pipeline {
+    agent any
+
+    environment {
+        NODE_VERSION = '20'
+        MIDSCENE_PACKAGE = '.'
+        TEST_PATTERN = '**/*.test.ts'
+        SHARD_STRATEGY = 'time-based'
+        SHARD_COUNT = '2'
+        PARALLEL_WORKERS = '4'
+        REPORT_FORMATS = 'junit,json,html'
+        PASS_RATE_THRESHOLD = '80'
+        ARTIFACT_PATHS = 'test-results,screenshots,videos'
+    }
+
+    options {
+        // Keep builds for 30 days
+        buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '10'))
+        // Timeout after 1 hour
+        timeout(time: 1, unit: 'HOURS')
+        // Skip stale checkouts
+        skipStagesAfterUnstable()
+    }
+
+    stages {
+        stage('Setup') {
+            steps {
+                script {
+                    // Set Node.js version
+                    nodejs(nodeJSInstallationName: "${NODE_VERSION}") {
+                        sh 'node --version'
+                        sh 'npm --version || bun --version'
+                    }
+                }
+            }
+        }
+
+        stage('Install') {
+            steps {
+                script {
+                    sh 'npm ci || bun install'
+                }
+            }
+        }
+
+        stage('Test') {
+            parallel {
+                stage("Shard 1") {
+                    steps {
+                        runMidsceneTests(0, env.SHARD_COUNT as Integer)
+                    }
+                }
+                stage("Shard 2") {
+                    steps {
+                        runMidsceneTests(1, env.SHARD_COUNT as Integer)
+                    }
+                }
+            }
+        }
+
+        stage('Report') {
+            steps {
+                script {
+                    // Generate combined report
+                    sh '''
+                        bunx midscene report \
+                            --input test-results \
+                            --format html \
+                            --output test-results/midscene-report.html
+                    '''
+
+                    // Publish JUnit report
+                    junit testResults: 'test-results/junit-*.xml', allowEmptyResults: false
+
+                    // Publish HTML report
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'test-results',
+                        reportFiles: 'midscene-report.html',
+                        reportName: 'Midscene Test Report',
+                        reportTitles: 'Midscene Test Results'
+                    ])
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                script {
+                    def passRate = sh(
+                        script: '''
+                            bunx midscene quality-gate \
+                                --results test-results \
+                                --pass-rate ${PASS_RATE_THRESHOLD} \
+                                --json
+                        ''',
+                        returnStdout: true
+                    ).trim()
+
+                    def result = readJSON text: passRate
+
+                    echo "Quality Gate Result: ${result.passed ? 'PASSED' : 'FAILED'}"
+                    echo "Pass Rate: ${result.passRate}%"
+
+                    if (!result.passed) {
+                        error("Quality gate failed: ${result.failedRules.join(', ')}")
+                    }
+
+                    // Set build description
+                    currentBuild.description = """
+                        <b>Pass Rate:</b> ${result.passRate}%<br/>
+                        <b>Total Tests:</b> ${result.totalTests}<br/>
+                        <b>Failed:</b> ${result.failedTests}
+                    """.stripIndent().trim()
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Archive artifacts
+            archiveArtifacts artifacts: "${ARTIFACT_PATHS},test-results/**/*", fingerprint: true
+
+            // Clean workspace
+            cleanWs()
+        }
+        success {
+            echo '✅ Pipeline succeeded!'
+        }
+        failure {
+            echo '❌ Pipeline failed!'
+        }
+        unstable {
+            echo '⚠️ Pipeline is unstable'
+        }
+    }
+}
+
+// Helper function to run Midscene tests for a specific shard
+def runMidsceneTests(int shardIndex, int totalShards) {
+    dir(env.WORKSPACE) {
+        unstash 'workspace'
+
+        script {
+            def shardOutput = "test-results/shard-${shardIndex}.json"
+
+            sh """
+                bunx midscene test \\
+                    --pattern "${TEST_PATTERN}" \\
+                    --shard ${SHARD_STRATEGY} \\
+                    --shard-index ${shardIndex} \\
+                    --shard-total ${totalShards} \\
+                    --parallel ${PARALLEL_WORKERS} \\
+                    --report junit \\
+                    --report json \\
+                    --output test-results/shard-${shardIndex}
+            """
+
+            // Merge shard results
+            stash includes: "test-results/shard-${shardIndex}/**/*", name: "shard-${shardIndex}"
+        }
+    }
+}
+
+// Merge all shard results
+def mergeShardResults() {
+    sh """
+        # Merge all shard JSON files
+        bunx midscene merge-results \\
+            test-results/shard-*/results.json \\
+            --output test-results/results.json
+    """
+}
+
+// Custom quality gate rule
+def addCriticalTestsCheck(List<String> patterns) {
+    // Additional checks for critical tests
+    def failedTests = []
+    patterns.each { pattern ->
+        def result = sh(
+            script: "grep -l '\"status\": \"failed\"' test-results/junit-*.xml | xargs grep ${pattern}",
+            returnStatus: true
+        )
+        if (result == 0) {
+            failedTests << pattern
+        }
+    }
+
+    if (failedTests) {
+        error("Critical tests failed: ${failedTests.join(', ')}")
+    }
+}
+
+// Shared library support
+@Library('midscene-shared-library@main') _
+
+// Extend with additional methods
+def publishToDashboard(testResults) {
+    // Publish results to external dashboard
+    // Integrate with your test reporting service
+}
+
+def notifySlack(String status) {
+    // Send Slack notification
+    // Requires Slack plugin configuration
+    slackSend(
+        color: status == 'success' ? 'good' : 'danger',
+        message: """
+            Midscene CI Pipeline ${status}
+            Job: ${env.JOB_NAME}
+            Build: ${env.BUILD_NUMBER}
+            URL: ${env.BUILD_URL}
+        """.stripIndent().trim()
+    )
+}

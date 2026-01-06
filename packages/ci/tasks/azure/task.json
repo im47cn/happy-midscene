@@ -1,0 +1,189 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Microsoft/azure-pipelines-task-lib/master/tasks.schema.json",
+  "id": "a4e6a06c-3c9e-4e5a-9e8f-7b8c9d0e1f2a",
+  "name": "midscene-test",
+  "friendlyName": "Midscene Test Runner",
+  "description": "Run Midscene tests with smart sharding, parallel execution, and quality gates",
+  "helpMarkDown": "Run [Midscene](https://github.com/midscenejs/midscene) tests with CI/CD integration features including test sharding, parallel execution, quality gates, and multi-format reporting.",
+  "category": "Test",
+  "visibility": [
+    "Build",
+    "Release"
+  ],
+  "author": "Midscene",
+  "version": {
+    "Major": 1,
+    "Minor": 0,
+    "Patch": 0
+  },
+  "minimumAgentVersion": "2.144.0",
+  "instanceNameFormat": "Midscene Test $(testPattern)",
+  "inputs": [
+    {
+      "name": "testPattern",
+      "type": "string",
+      "label": "Test pattern",
+      "defaultValue": "**/*.test.ts",
+      "required": false,
+      "helpMarkDown": "Glob pattern for test files to run."
+    },
+    {
+      "name": "shardStrategy",
+      "type": "pickList",
+      "label": "Shard strategy",
+      "defaultValue": "time-based",
+      "required": false,
+      "options": {
+        "time-based": "Time-based (balances by historical duration)",
+        "count-based": "Count-based (equal test distribution)",
+        "hash-based": "Hash-based (consistent distribution)"
+      },
+      "helpMarkDown": "Strategy for distributing tests across shards."
+    },
+    {
+      "name": "shardCount",
+      "type": "int",
+      "label": "Number of shards",
+      "defaultValue": "2",
+      "required": false,
+      "helpMarkDown": "Number of parallel shards to create."
+    },
+    {
+      "name": "parallelWorkers",
+      "type": "int",
+      "label": "Parallel workers",
+      "defaultValue": "4",
+      "required": false,
+      "helpMarkDown": "Number of parallel workers per shard."
+    },
+    {
+      "name": "reportFormats",
+      "type": "multiSelect",
+      "label": "Report formats",
+      "defaultValue": "junit,json",
+      "options": {
+        "junit": "JUnit XML",
+        "json": "JSON",
+        "html": "HTML",
+        "markdown": "Markdown"
+      },
+      "required": false,
+      "helpMarkDown": "Formats for test reports."
+    },
+    {
+      "name": "outputDir",
+      "type": "string",
+      "label": "Output directory",
+      "defaultValue": "test-results",
+      "required": false,
+      "helpMarkDown": "Directory for test results and reports."
+    },
+    {
+      "name": "enableQualityGate",
+      "type": "boolean",
+      "label": "Enable quality gate",
+      "defaultValue": true,
+      "required": false,
+      "helpMarkDown": "Evaluate quality gate rules after tests complete."
+    },
+    {
+      "name": "passRateThreshold",
+      "type": "string",
+      "label": "Pass rate threshold (%)",
+      "defaultValue": "80",
+      "required": false,
+      "helpMarkDown": "Minimum pass rate percentage to pass quality gate."
+    },
+    {
+      "name": "criticalTests",
+      "type": "string",
+      "label": "Critical test patterns",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Comma-separated list of patterns for critical tests that must pass."
+    },
+    {
+      "name": "uploadArtifacts",
+      "type": "boolean",
+      "label": "Upload artifacts",
+      "defaultValue": true,
+      "required": false,
+      "helpMarkDown": "Upload test results and artifacts to Azure DevOps."
+    },
+    {
+      "name": "artifactPaths",
+      "type": "string",
+      "label": "Artifact paths",
+      "defaultValue": "test-results,screenshots,videos",
+      "required": false,
+      "helpMarkDown": "Comma-separated paths to include in artifacts."
+    },
+    {
+      "name": "failOnFailure",
+      "type": "boolean",
+      "label": "Fail on test failure",
+      "defaultValue": true,
+      "required": false,
+      "helpMarkDown": "Fail the pipeline if tests fail or quality gate fails."
+    },
+    {
+      "name": "packageManager",
+      "type": "radio",
+      "label": "Package manager",
+      "defaultValue": "bun",
+      "required": false,
+      "options": {
+        "npm": "npm",
+        "bun": "bun",
+        "yarn": "yarn",
+        "pnpm": "pnpm"
+      },
+      "helpMarkDown": "Package manager to use for running Midscene."
+    }
+  ],
+  "outputVariables": [
+    {
+      "name": "exitCode",
+      "description": "Exit code from test execution."
+    },
+    {
+      "name": "passRate",
+      "description": "Test pass rate percentage."
+    },
+    {
+      "name": "totalTests",
+      "description": "Total number of tests run."
+    },
+    {
+      "name": "passedTests",
+      "description": "Number of passed tests."
+    },
+    {
+      "name": "failedTests",
+      "description": "Number of failed tests."
+    },
+    {
+      "name": "reportPath",
+      "description": "Path to generated report."
+    }
+  ],
+  "execution": {
+    "Node20": {
+      "target": "index.js"
+    }
+  },
+  "messages": {
+    "postTest": {
+      "type": "info",
+      "value": "Midscene tests completed. Pass rate: %{passRate}%, Passed: %{passedTests}/%{totalTests}"
+    },
+    "testFailed": {
+      "type": "warning",
+      "value": "Midscene tests failed: %{failedTests} test(s) failed."
+    },
+    "qualityGateFailed": {
+      "type": "error",
+      "value": "Quality gate failed: %{failedRules}"
+    }
+  }
+}

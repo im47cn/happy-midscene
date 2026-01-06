@@ -1,0 +1,384 @@
+# CircleCI Orb for Midscene CI
+#
+# Usage:
+# version: 2.1
+# orbs:
+#   midscene: midscene/midscene@1.0.0
+# workflows:
+#   test:
+#     jobs:
+#       - midscene/test
+
+version: 2.1
+
+description: |
+  Run Midscene tests with smart sharding, parallel execution, and quality gates.
+  Includes support for multiple report formats and artifact uploads.
+
+# Orb metadata
+executors:
+  default:
+    description: |
+      Docker image with Node.js and Midscene installed
+    docker:
+      - image: cimg/node:20.11
+    resource_class: small
+
+  medium:
+    description: |
+      Docker image with medium resources
+    docker:
+      - image: cimg/node:20.11
+    resource_class: medium
+
+  large:
+    description: |
+      Docker image with large resources for parallel test execution
+    docker:
+      - image: cimg/node:20.11
+    resource_class: large+
+
+# Commands
+commands:
+  install:
+    description: |
+      Install Midscene and dependencies
+    parameters:
+      package-manager:
+        description: Package manager to use (npm, bun, yarn, pnpm)
+        type: string
+        default: bun
+      midscene-version:
+        description: Specific Midscene version to install
+        type: string
+        default: latest
+    steps:
+      - when:
+          condition:
+            equal: [ bun, << parameters.package-manager >> ]
+          steps:
+            - run:
+                name: Install Bun
+                command: |
+                  curl -fsSL https://bun.sh/install | bash
+                  echo 'export BUN_INSTALL="$HOME/.bun"' >> $BASH_ENV
+                  echo 'export PATH="$BUN_INSTALL/bin:$PATH"' >> $BASH_ENV
+      - when:
+          condition:
+            equal: [ pnpm, << parameters.package-manager >> ]
+          steps:
+            - run:
+                name: Install pnpm
+                command: corepack enable && corepack prepare pnpm --activate
+      - when:
+          condition:
+            equal: [ yarn, << parameters.package-manager >> ]
+          steps:
+            - run:
+                name: Install Yarn
+                command: corepack enable && corepack prepare yarn --activate
+      - restore_cache:
+          keys:
+            - midscene-deps-{{ checksum "package-lock.json" }}
+            - midscene-deps-{{ checksum "bun.lockb" }}
+            - midscene-deps-
+      - run:
+          name: Install dependencies
+          command: |
+            case "<< parameters.package-manager >>" in
+              bun)
+                bun install
+                ;;
+              npm)
+                npm ci
+                ;;
+              yarn)
+                yarn install --frozen-lockfile
+                ;;
+              pnpm)
+                pnpm install --frozen-lockfile
+                ;;
+            esac
+      - save_cache:
+          key: midscene-deps-{{ checksum "package-lock.json" }}-{{ checksum "bun.lockb" }}
+          paths:
+            - node_modules
+
+  run-tests:
+    description: |
+      Run Midscene tests with sharding and parallel execution
+    parameters:
+      test-pattern:
+        description: Glob pattern for test files
+        type: string
+        default: "**/*.test.ts"
+      shard-strategy:
+        description: Shard strategy (time-based, count-based, hash-based)
+        type: string
+        default: time-based
+      shard-count:
+        description: Number of shards to create
+        type: integer
+        default: 2
+      parallel-workers:
+        description: Number of parallel workers per shard
+        type: integer
+        default: 4
+      report-formats:
+        description: Report formats (comma-separated)
+        type: string
+        default: "junit,json,html"
+      output-dir:
+        description: Output directory for test results
+        type: string
+        default: "test-results"
+      package-manager:
+        description: Package manager to use
+        type: string
+        default: bun
+    steps:
+      - checkout
+      - install:
+          package-manager: << parameters.package-manager >>
+      - run:
+          name: Run Midscene tests
+          command: |
+            # Calculate shard index based on CircleCI parallelism
+            TOTAL_SHARDS=<< parameters.shard-count >>
+            SHARD_INDEX=$((CIRCLE_NODE_INDEX % TOTAL_SHARDS))
+
+            bunx midscene test \
+              --pattern "<< parameters.test-pattern >>" \
+              --shard << parameters.shard-strategy >> \
+              --shard-index $SHARD_INDEX \
+              --shard-total $TOTAL_SHARDS \
+              --parallel << parameters.parallel-workers >> \
+              --report << parameters.report-formats >> \
+              --output << parameters.output-dir >>
+          environment:
+            MIDSCENE_REPORTER: circleci
+      - store_test_results:
+          path: << parameters.output-dir >>
+      - store_artifacts:
+          path: << parameters.output-dir >>
+          destination: test-results
+      - store_artifacts:
+          path: screenshots
+          destination: screenshots
+          when: on_fail
+      - store_artifacts:
+          path: videos
+          destination: videos
+          when: on_fail
+
+  quality-gate:
+    description: |
+      Evaluate quality gate rules on test results
+    parameters:
+      results-dir:
+        description: Directory containing test results
+        type: string
+        default: "test-results"
+      pass-rate-threshold:
+        description: Minimum pass rate percentage
+        type: string
+        default: "80"
+      critical-tests:
+        description: Comma-separated critical test patterns
+        type: string
+        default: ""
+      fail-on-violation:
+        description: Fail job if quality gate fails
+        type: boolean
+        default: true
+    steps:
+      - run:
+          name: Evaluate Quality Gate
+          command: |
+            CRITICAL_ARGS=""
+            if [ -n "<< parameters.critical-tests >>" ]; then
+              CRITICAL_ARGS="--critical-tests << parameters.critical-tests >>"
+            fi
+
+            bunx midscene quality-gate \
+              --results << parameters.results-dir >> \
+              --pass-rate << parameters.pass-rate-threshold >> \
+              $CRITICAL_ARGS
+          when: always
+
+  upload-artifacts:
+    description: |
+      Collect and upload test artifacts
+    parameters:
+      artifact-paths:
+        description: Comma-separated paths to include
+        type: string
+        default: "test-results,screenshots,videos"
+      retention-days:
+        description: Artifact retention in days
+        type: integer
+        default: 30
+    steps:
+      - run:
+          name: Collect artifacts
+          command: |
+            echo "Collecting artifacts from: << parameters.artifact-paths >>"
+            du -sh << parameters.artifact-paths >> || true
+      - store_artifacts:
+          path: << parameters.artifact-paths >>
+          destination: midscene-artifacts
+
+# Jobs
+jobs:
+  test:
+    description: |
+      Run tests with parallel sharding
+    parameters:
+      executor:
+        description: Executor to use
+        type: executor
+        default: default
+      test-pattern:
+        description: Glob pattern for test files
+        type: string
+        default: "**/*.test.ts"
+      shard-strategy:
+        description: Shard strategy
+        type: string
+        default: time-based
+      shard-count:
+        description: Number of parallel shards
+        type: integer
+        default: 2
+      parallel-workers:
+        description: Workers per shard
+        type: integer
+        default: 4
+      report-formats:
+        description: Report formats
+        type: string
+        default: "junit,json,html"
+      package-manager:
+        description: Package manager
+        type: string
+        default: bun
+      enable-quality-gate:
+        description: Enable quality gate evaluation
+        type: boolean
+        default: true
+      pass-rate-threshold:
+        description: Pass rate threshold
+        type: string
+        default: "80"
+      parallelism:
+        description: CircleCI parallelism level
+        type: integer
+        default: 2
+    executor: << parameters.executor >>
+    parallelism: << parameters.parallelism >>
+    steps:
+      - run-tests:
+          test-pattern: << parameters.test-pattern >>
+          shard-strategy: << parameters.shard-strategy >>
+          shard-count: << parameters.shard-count >>
+          parallel-workers: << parameters.parallel-workers >>
+          report-formats: << parameters.report-formats >>
+          package-manager: << parameters.package-manager >>
+      - when:
+          condition: << parameters.enable-quality-gate >>
+          steps:
+              - quality-gate:
+                  pass-rate-threshold: << parameters.pass-rate-threshold >>
+      - upload-artifacts
+
+  report:
+    description: |
+      Generate and publish test reports
+    parameters:
+      executor:
+        description: Executor to use
+        type: executor
+        default: default
+      input-dir:
+        description: Directory containing test results
+        type: string
+        default: "test-results"
+      report-formats:
+        description: Report formats to generate
+        type: string
+        default: "html,markdown"
+    executor: << parameters.executor >>
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Generate reports
+          command: |
+            bunx midscene report \
+              --input << parameters.input-dir >> \
+              --format << parameters.report-formats >> \
+              --output << parameters.input-dir >>
+      - store_artifacts:
+          path: << parameters.input-dir >>
+          destination: reports
+
+# Examples
+examples:
+  basic:
+    description: |
+      Basic test execution with sharding
+    usage:
+      version: 2.1
+      orbs:
+        midscene: midscene/midscene@1.0.0
+      workflows:
+        test:
+          jobs:
+            - midscene/test
+
+  parallel:
+    description: |
+      Parallel test execution with 4 shards
+    usage:
+      version: 2.1
+      orbs:
+        midscene: midscene/midscene@1.0.0
+      workflows:
+        test:
+          jobs:
+            - midscene/test:
+                shard-count: 4
+                parallelism: 4
+
+  quality-gate:
+    description: |
+      Test execution with quality gate
+    usage:
+      version: 2.1
+      orbs:
+        midscene: midscene/midscene@1.0.0
+      workflows:
+        test:
+          jobs:
+            - midscene/test:
+                enable-quality-gate: true
+                pass-rate-threshold: "90"
+
+  full:
+    description: |
+      Complete CI workflow with reports
+    usage:
+      version: 2.1
+      orbs:
+        midscene: midscene/midscene@1.0.0
+      workflows:
+        test-and-report:
+          jobs:
+            - midscene/test:
+                shard-count: 4
+                parallelism: 4
+                report-formats: "junit,json,html"
+            - midscene/report:
+                requires:
+                  - midscene/test

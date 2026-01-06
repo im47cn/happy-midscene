@@ -1,0 +1,39 @@
+import { defineConfig } from '@rslib/core';
+import { version } from './package.json';
+
+export default defineConfig({
+  lib: [
+    {
+      output: {
+        distPath: {
+          root: 'dist/lib',
+        },
+      },
+      format: 'cjs',
+      syntax: 'es2020',
+      bundle: false,
+    },
+    {
+      output: {
+        distPath: {
+          root: 'dist/es',
+        },
+      },
+      dts: {
+        bundle: false,
+        distPath: 'dist/types',
+      },
+      format: 'esm',
+      bundle: false,
+      syntax: 'es2020',
+    },
+  ],
+  source: {
+    define: {
+      __VERSION__: JSON.stringify(version),
+    },
+  },
+  output: {
+    sourceMap: true,
+  },
+});

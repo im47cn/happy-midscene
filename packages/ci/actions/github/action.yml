@@ -1,0 +1,97 @@
+name: 'Midscene CI'
+description: 'Run Midscene tests in CI with smart sharding, parallel execution, and quality gates'
+author: 'Midscene
+
+branding:
+  icon: 'play-circle'
+  color: 'blue'
+
+inputs:
+  test-pattern:
+    description: 'Test file pattern (glob)'
+    required: false
+    default: '**/*.test.ts'
+
+  shard-strategy:
+    description: 'Shard strategy: time-based, count-based, or hash-based'
+    required: false
+    default: 'time-based'
+
+  shard-count:
+    description: 'Number of shards to create'
+    required: false
+    default: '2'
+
+  parallel:
+    description: 'Number of parallel workers'
+    required: false
+    default: '4'
+
+  report-formats:
+    description: 'Report formats (comma-separated: junit,json,html,markdown)'
+    required: false
+    default: 'junit,json'
+
+  quality-gate:
+    description: 'Enable quality gate evaluation'
+    required: false
+    default: 'true'
+
+  pass-rate-threshold:
+    description: 'Minimum pass rate percentage'
+    required: false
+    default: '80'
+
+  critical-tests:
+    description: 'Comma-separated list of critical test patterns'
+    required: false
+    default: ''
+
+  upload-artifacts:
+    description: 'Upload test artifacts as GitHub artifacts'
+    required: false
+    default: 'true'
+
+  artifact-paths:
+    description: 'Paths to include in artifacts'
+    required: false
+    default: 'test-results,screenshots,videos'
+
+  pr-comment:
+    description: 'Post test results as PR comment'
+    required: false
+    default: 'true'
+
+  fail-on-failure:
+    description: 'Fail the action if tests fail'
+    required: false
+    default: 'true'
+
+outputs:
+  exit-code:
+    description: 'Exit code from test execution'
+    value: ${{ steps.run-tests.outputs.exit-code }}
+
+  pass-rate:
+    description: 'Test pass rate percentage'
+    value: ${{ steps.run-tests.outputs.pass-rate }}
+
+  total-tests:
+    description: 'Total number of tests run'
+    value: ${{ steps.run-tests.outputs.total-tests }}
+
+  passed-tests:
+    description: 'Number of passed tests'
+    value: ${{ steps.run-tests.outputs.passed-tests }}
+
+  failed-tests:
+    description: 'Number of failed tests'
+    value: ${{ steps.run-tests.outputs.failed-tests }}
+
+  report-path:
+    description: 'Path to generated report'
+    value: ${{ steps.run-tests.outputs.report-path }}
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

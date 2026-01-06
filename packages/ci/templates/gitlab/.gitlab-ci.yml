@@ -1,0 +1,191 @@
+# GitLab CI Template for Midscene CI
+#
+# Usage:
+# 1. Copy this file to your repository as .gitlab-ci.yml
+# 2. Configure variables below
+# 3. Push to trigger pipeline
+
+variables:
+  # Node version
+  NODE_VERSION: "20"
+  # Midscene package location (relative to repo root)
+  MIDSCENE_PACKAGE: "."
+  # Test pattern
+  TEST_PATTERN: "**/*.test.ts"
+  # Shard configuration
+  SHARD_STRATEGY: "time-based"  # time-based, count-based, hash-based
+  SHARD_COUNT: "2"
+  PARALLEL_WORKERS: "4"
+  # Report formats (comma-separated)
+  REPORT_FORMATS: "junit,json"
+  # Quality gate
+  QUALITY_GATE_ENABLED: "true"
+  PASS_RATE_THRESHOLD: "80"
+  # Critical tests (comma-separated patterns)
+  CRITICAL_TESTS: ""
+  # Artifact paths
+  ARTIFACT_PATHS: "test-results,screenshots,videos"
+
+# Cache node_modules for faster builds
+cache:
+  key:
+    files:
+      - package-lock.json
+      - bun.lockb
+  paths:
+    - node_modules/
+
+stages:
+  - install
+  - test
+  - report
+  - quality-gate
+
+# Install dependencies
+install:
+  stage: install
+  image: node:${NODE_VERSION}
+  script:
+    - npm ci || bun install
+  artifacts:
+    paths:
+      - node_modules/
+    expire_in: 1 hour
+
+# Run tests with sharding
+test:
+  stage: test
+  image: node:${NODE_VERSION}
+  parallel: ${SHARD_COUNT}
+  script:
+    - |
+      bunx midscene test \
+        --pattern "$TEST_PATTERN" \
+        --shard ${SHARD_STRATEGY} \
+        --shard-index $CI_NODE_INDEX \
+        --shard-total $CI_NODE_TOTAL \
+        --parallel $PARALLEL_WORKERS \
+        --report $REPORT_FORMATS \
+        --output test-results
+  artifacts:
+    when: always
+    paths:
+      - test-results/
+      - screenshots/
+      - videos/
+    reports:
+      junit: test-results/junit-*.xml
+    expire_in: 7 days
+  coverage: '/Lines\s*:\s*(\d+\.\d+)%/'
+
+# Generate HTML report
+report:
+  stage: report
+  image: node:${NODE_VERSION}
+  dependencies:
+    - test
+  script:
+    - |
+      bunx midscene report \
+        --input test-results \
+        --format html \
+        --output test-results/midscene-report.html
+  artifacts:
+    when: always
+    paths:
+      - test-results/midscene-report.html
+    expire_in: 30 days
+  only:
+    - main
+    - merge_requests
+
+# Quality gate evaluation
+quality-gate:
+  stage: quality-gate
+  image: node:${NODE_VERSION}
+  dependencies:
+    - test
+  script:
+    - |
+      bunx midscene quality-gate \
+        --results test-results \
+        --pass-rate $PASS_RATE_THRESHOLD \
+        ${CRITICAL_TESTS:+--critical-tests "$CRITICAL_TESTS"}
+  allow_failure: false
+  only:
+    - merge_requests
+    - main
+
+# Optional: Upload to GitLab packages
+upload-artifacts:
+  stage: report
+  image: node:${NODE_VERSION}
+  dependencies:
+    - test
+  script:
+    - |
+      # Create artifact archive
+      tar -czf midscene-artifacts.tar.gz \
+        ${ARTIFACT_PATHS//,/ } \
+        test-results/
+  artifacts:
+    when: always
+    paths:
+      - midscene-artifacts.tar.gz
+    expire_in: 30 days
+  only:
+    - main
+
+# Merge request integration
+mr-test:
+  extends: test
+  artifacts:
+    when: always
+    paths:
+      - test-results/
+      - screenshots/
+      - videos/
+    reports:
+      junit: test-results/junit-*.xml
+    expire_in: 7 days
+  only:
+    - merge_requests
+
+# Post test results as MR comment
+# Requires: GITLAB_TOKEN variable with api scope
+mr-comment:
+  stage: report
+  image: node:${NODE_VERSION}
+  dependencies:
+    - test
+  script:
+    - |
+      # Install glab CLI
+      curl -sL https://cli.gitlab.io/install.sh | sh
+
+      # Generate comment body
+      COMMENT_BODY=$(cat <<EOF
+      ## 🧪 Midscene Test Results
+
+      | Metric | Value |
+      |--------|-------|
+      | **Pipeline** | $CI_PIPELINE_URL |
+      | **Branch** | $CI_COMMIT_REF_NAME |
+      | **Commit** | $CI_COMMIT_SHORT_SHA |
+
+      📊 [View full report]($CI_JOB_URL/artifacts/file/test-results/midscene-report.html)
+
+      EOF
+      )
+
+      # Post comment (requires GITLAB_TOKEN)
+      if [ -n "$GITLAB_TOKEN" ]; then
+        glab api \
+          --method POST \
+          /projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/notes \
+          -f body="$COMMENT_BODY"
+      fi
+  only:
+    - merge_requests
+  when: always
+  allow_failure: true

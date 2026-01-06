@@ -1,0 +1,57 @@
+{
+  "name": "@midscene/ci",
+  "description": "CI/CD integration for Midscene test automation with support for GitHub Actions, GitLab CI, Jenkins, Azure DevOps, and CircleCI",
+  "version": "1.1.0",
+  "repository": "https://github.com/web-infra-dev/midscene",
+  "homepage": "https://midscenejs.com/",
+  "main": "./dist/lib/index.js",
+  "types": "./dist/types/index.d.ts",
+  "module": "./dist/es/index.mjs",
+  "bin": {
+    "midscene-ci": "./bin/midscene-ci"
+  },
+  "files": ["dist", "README.md", "bin"],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/es/index.mjs",
+      "require": "./dist/lib/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/types.d.ts",
+      "import": "./dist/es/types.mjs",
+      "require": "./dist/lib/types.js"
+    }
+  },
+  "scripts": {
+    "dev": "npm run build:watch",
+    "build": "rslib build",
+    "build:watch": "rslib build --watch --no-clean",
+    "test": "vitest --run",
+    "test:watch": "vitest --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@midscene/core": "workspace:*",
+    "@midscene/shared": "workspace:*",
+    "glob": "11.0.0",
+    "js-yaml": "4.1.0",
+    "yargs": "17.7.2"
+  },
+  "devDependencies": {
+    "@rslib/core": "^0.18.3",
+    "@types/js-yaml": "4.0.9",
+    "@types/node": "^18.0.0",
+    "@types/yargs": "17.0.32",
+    "typescript": "^5.8.3",
+    "vitest": "3.0.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "license": "MIT"
+}
