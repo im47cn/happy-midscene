@@ -226,7 +226,7 @@ export const iconMockFactory = () => ({
   DeleteOutlined: () => <span data-testid="icon-delete" />,
   EditOutlined: () => <span data-testid="icon-edit" />,
   PlusOutlined: () => <span data-testid="icon-plus" />,
-  VariableOutlined: () => <span data-testid="icon-variable" />,
+  CodeOutlined: () => <span data-testid="icon-code" />,
   CheckCircleOutlined: () => <span data-testid="icon-check-circle" />,
   ExclamationCircleOutlined: () => <span data-testid="icon-exclamation" />,
   CheckOutlined: () => <span data-testid="icon-check" />,

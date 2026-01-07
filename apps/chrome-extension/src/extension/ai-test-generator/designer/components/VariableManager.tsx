@@ -9,7 +9,7 @@ import {
   DeleteOutlined,
   EditOutlined,
   PlusOutlined,
-  VariableOutlined,
+  CodeOutlined,
   CheckCircleOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
@@ -475,7 +475,7 @@ export function VariableManager({ visible = true, onClose }: VariableManagerProp
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <VariableOutlined style={{ fontSize: 18 }} />
+          <CodeOutlined style={{ fontSize: 18 }} />
           <span style={{ fontSize: 16, fontWeight: 500 }}>变量管理</span>
           <Tag color="blue">{variables.length} 个变量</Tag>
         </div>
