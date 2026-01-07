@@ -229,16 +229,19 @@ describe('VariableStore', () => {
     });
 
     it('should create multiple snapshots', () => {
-      store.set('x', 1);
-      store.createSnapshot();
+      // Use store with auto-snapshots disabled to test manual snapshot creation
+      const manualStore = new VariableStore({}, { enableSnapshots: false });
 
-      store.set('x', 2);
-      store.createSnapshot();
+      manualStore.set('x', 1);
+      manualStore.createSnapshot();
 
-      store.set('x', 3);
-      store.createSnapshot();
+      manualStore.set('x', 2);
+      manualStore.createSnapshot();
 
-      const snapshots = store.getSnapshots();
+      manualStore.set('x', 3);
+      manualStore.createSnapshot();
+
+      const snapshots = manualStore.getSnapshots();
 
       expect(snapshots).toHaveLength(3);
       expect(snapshots[0].variables.x).toBe(1);
@@ -456,7 +459,9 @@ describe('VariableStore', () => {
 
       const context = store.toExecutionContext();
 
-      expect(context.variables).toBe(store.variables);
+      // Should create a copy, not a reference, for isolation
+      expect(context.variables).not.toBe(store.variables);
+      expect(context.variables).toEqual(store.variables);
       expect(context.loopStack).toEqual([]);
       expect(context.pathHistory).toEqual([]);
       expect(context.errorStack).toEqual([]);

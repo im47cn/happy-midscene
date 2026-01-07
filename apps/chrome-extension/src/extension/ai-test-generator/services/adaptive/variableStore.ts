@@ -42,6 +42,7 @@ export class VariableStore {
   private changeListeners: Set<(event: VariableChangeEvent) => void> =
     new Set();
   private options: VariableStoreOptions;
+  private skipNextAutoSnapshot = false;
 
   constructor(
     initialVariables: Record<string, any> = {},
@@ -205,6 +206,9 @@ export class VariableStore {
       this.snapshots.shift();
     }
 
+    // Skip next auto-snapshot since we just created one manually
+    this.skipNextAutoSnapshot = true;
+
     return snapshot;
   }
 
@@ -238,7 +242,7 @@ export class VariableStore {
    */
   toExecutionContext(): AdaptiveExecutionContext {
     return {
-      variables: this.variables,
+      variables: new Map(this.variables),
       loopStack: [],
       pathHistory: [],
       errorStack: [],
@@ -250,7 +254,10 @@ export class VariableStore {
    * 从执行上下文恢复
    */
   fromExecutionContext(context: AdaptiveExecutionContext): void {
-    this.variables = context.variables;
+    this.variables.clear();
+    for (const [key, value] of context.variables.entries()) {
+      this.variables.set(key, value);
+    }
   }
 
   /**
@@ -268,7 +275,11 @@ export class VariableStore {
    */
   private createSnapshotIfNeeded(): void {
     if (this.options.enableSnapshots) {
-      this.createSnapshot();
+      if (this.skipNextAutoSnapshot) {
+        this.skipNextAutoSnapshot = false;
+      } else {
+        this.createSnapshot();
+      }
     }
   }
 
