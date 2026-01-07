@@ -10,3 +10,5 @@ export {
   validateNodeConfig,
 } from './flowValidator';
 export * from './fileManager';
+export * from './designerExecutor';
+export * from './templateManager';
