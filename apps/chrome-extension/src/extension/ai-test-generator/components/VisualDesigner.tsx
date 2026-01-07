@@ -9,12 +9,21 @@ import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { ElementPicker, NodePanel, PropertyPanel, Toolbar, VariableManager } from '../designer';
+import {
+  ElementPicker,
+  ExecutionPanel,
+  ExecutionPanelButton,
+  NodePanel,
+  PropertyPanel,
+  TemplateBrowser,
+  TemplateBrowserButton,
+  Toolbar,
+  VariableManager,
+} from '../designer';
 import { FlowCanvas } from '../designer/components/FlowCanvas';
 import { Minimap } from '../designer/components/Minimap';
 import { useDesignerStore } from '../designer/store';
 import type { DesignerFlow } from '../designer/types/designer';
-import { getTemplateManager } from '../designer/services/templateManager';
 import { exportYaml, importYaml } from '../designer/services/yamlConverter';
 import { useI18n } from '../../../i18n';
 
@@ -116,61 +125,20 @@ export const VisualDesigner: React.FC<VisualDesignerProps> = ({
   /**
    * 处理从模板加载
    */
-  const handleLoadTemplate = useCallback(async () => {
-    try {
-      const templateManager = getTemplateManager();
-      const templates = templateManager.getAllTemplates();
-      if (templates.length === 0) {
-        message.info('No templates available');
-        return;
-      }
-
-      // 简单选择第一个模板 (实际应用中应显示选择对话框)
-      const firstTemplate = templates[0];
-      const templateFlow = await templateManager.loadTemplate(firstTemplate.id);
-      if (templateFlow) {
-        setFlow(templateFlow);
-        message.success('Template loaded: ' + firstTemplate.name);
-      }
-    } catch (err) {
-      message.error('Failed to load template: ' + (err as Error).message);
-    }
+  const handleLoadTemplate = useCallback((templateFlow: DesignerFlow) => {
+    setFlow(templateFlow);
   }, [setFlow]);
 
   /**
-   * 处理保存为模板
+   * 处理执行完成
    */
-  const handleSaveAsTemplate = useCallback(() => {
-    if (!flow) {
-      message.warning('No flow to save as template');
-      return;
+  const handleExecutionComplete = useCallback((result: any) => {
+    if (result.success) {
+      message.success(`Test completed: ${result.completed}/${result.total} steps`);
+    } else {
+      message.warning(`Test completed with errors: ${result.errors?.length || 0} failures`);
     }
-
-    Modal.confirm({
-      title: 'Save as Template',
-      content: (
-        <div>
-          <p>Enter template name:</p>
-          <input id="template-name-input" defaultValue={flow.name} />
-        </div>
-      ),
-      async onOk() {
-        try {
-          const templateManager = getTemplateManager();
-          const nameInput = document.getElementById('template-name-input') as HTMLInputElement;
-          const nameValue = nameInput?.value || flow.name;
-
-          await templateManager.saveTemplate(flow, {
-            name: nameValue,
-            description: flow.description,
-          });
-          message.success('Template saved successfully');
-        } catch (err) {
-          message.error('Failed to save template: ' + (err as Error).message);
-        }
-      },
-    });
-  }, [flow]);
+  }, []);
 
   /**
    * 处理元素选择
@@ -270,12 +238,11 @@ export const VisualDesigner: React.FC<VisualDesignerProps> = ({
           >
             Variables
           </Button>
-          <Button type="text" onClick={handleLoadTemplate}>
-            Load Template
-          </Button>
-          <Button type="text" onClick={handleSaveAsTemplate}>
-            Save as Template
-          </Button>
+          <TemplateBrowserButton onSelectTemplate={handleLoadTemplate} />
+          <ExecutionPanelButton
+            flowId={flow?.id}
+            onExecutionComplete={handleExecutionComplete}
+          />
         </Space>
 
         <Space>
