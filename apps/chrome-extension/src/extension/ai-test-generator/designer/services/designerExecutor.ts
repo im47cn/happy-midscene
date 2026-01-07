@@ -760,4 +760,42 @@ export function createDesignerExecutor(
   return new DesignerExecutor(getExecutionEngine);
 }
 
+/**
+ * 默认执行器实例
+ */
+let defaultExecutor: DesignerExecutor | null = null;
+
+/**
+ * 获取默认执行器实例
+ */
+export function getDesignerExecutor(): DesignerExecutor {
+  if (!defaultExecutor) {
+    // 创建默认执行器，使用空的 executionEngine getter
+    // 实际使用时应该通过 setExecutionEngine 设置
+    defaultExecutor = new DesignerExecutor(() => null);
+  }
+  return defaultExecutor;
+}
+
+/**
+ * 设置执行引擎
+ */
+export function setExecutionEngine(
+  getExecutionEngine: () => ExecutionEngine | null,
+): void {
+  if (!defaultExecutor) {
+    defaultExecutor = new DesignerExecutor(getExecutionEngine);
+  } else {
+    // 更新现有执行器的 executionEngine getter
+    defaultExecutor['getExecutionEngine'] = getExecutionEngine;
+  }
+}
+
+/**
+ * 重置默认执行器
+ */
+export function resetDesignerExecutor(): void {
+  defaultExecutor = null;
+}
+
 export default DesignerExecutor;
