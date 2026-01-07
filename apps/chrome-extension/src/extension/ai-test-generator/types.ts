@@ -40,7 +40,8 @@ export type ViewMode =
   | 'history'
   | 'analytics'
   | 'settings'
-  | 'marketplace';
+  | 'marketplace'
+  | 'designer';
 
 export interface GeneratorState {
   // Input state

@@ -9,6 +9,7 @@ export { ErrorBoundary, ErrorFallback } from './ErrorBoundary';
 export { DeviceSelector, DeviceSelectorCompact } from './DeviceSelector';
 export { HealingConfirmDialog } from './HealingConfirmDialog';
 export { HealingStatistics } from './HealingStatistics';
+export { VisualDesigner } from './VisualDesigner';
 export * from './recommendation';
 export * from './anomaly';
 export * from './elementRepair';

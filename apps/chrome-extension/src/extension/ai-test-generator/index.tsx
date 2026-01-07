@@ -4,6 +4,7 @@
  */
 
 import {
+  ApartmentOutlined,
   BarChartOutlined,
   HistoryOutlined,
   KeyOutlined,
@@ -22,6 +23,7 @@ import {
   MarkdownInput,
   ShortcutsHelp,
   TestCasePreview,
+  VisualDesigner,
 } from './components';
 import { Dashboard } from './components/analytics';
 import { MaskingSettings } from './components/masking';
@@ -81,6 +83,9 @@ export function AITestGenerator() {
         break;
       case 'commit':
         setCurrentView('preview');
+        break;
+      case 'designer':
+        setCurrentView('input');
         break;
     }
   }, [currentView, setCurrentView]);
@@ -154,6 +159,24 @@ export function AITestGenerator() {
     [setCurrentView, t],
   );
 
+  const handleOpenDesigner = useCallback(() => {
+    setCurrentView('designer');
+  }, [setCurrentView]);
+
+  const handleCloseDesigner = useCallback(() => {
+    setCurrentView('input');
+  }, [setCurrentView]);
+
+  const handleDesignerExportYaml = useCallback(
+    (yaml: string) => {
+      // Set the exported YAML as generated YAML and switch to commit view
+      useGeneratorStore.getState().setGeneratedYaml(yaml);
+      setCurrentView('commit');
+      message.success(t('copiedToClipboard'));
+    },
+    [setCurrentView, t],
+  );
+
   const renderContent = () => {
     switch (currentView) {
       case 'input':
@@ -196,6 +219,13 @@ export function AITestGenerator() {
             onApplyTemplate={handleApplyTemplate}
           />
         );
+      case 'designer':
+        return (
+          <VisualDesigner
+            onBack={handleCloseDesigner}
+            onExportYaml={handleDesignerExportYaml}
+          />
+        );
       default:
         return <MarkdownInput />;
     }
@@ -233,6 +263,12 @@ export function AITestGenerator() {
             <ShopOutlined
               className="shortcuts-help-icon"
               onClick={handleOpenMarketplace}
+            />
+          </Tooltip>
+          <Tooltip title={t('visualDesigner')}>
+            <ApartmentOutlined
+              className="shortcuts-help-icon"
+              onClick={handleOpenDesigner}
             />
           </Tooltip>
           <Tooltip title={t('shortcutsHelp') + ' (?)'}>

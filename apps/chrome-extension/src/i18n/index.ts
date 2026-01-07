@@ -56,6 +56,7 @@ export const translations = {
     maskingSettings: '脱敏设置',
     templateMarket: '模板市场',
     shortcutsHelp: '快捷键帮助',
+    visualDesigner: '可视化设计器',
 
     // AI 测试生成器 - 输入界面
     inputTestRequirements: '输入测试需求',
@@ -439,6 +440,7 @@ export const translations = {
     maskingSettings: 'Masking Settings',
     templateMarket: 'Template Market',
     shortcutsHelp: 'Shortcuts Help',
+    visualDesigner: 'Visual Designer',
 
     // AI 测试生成器 - 输入界面
     inputTestRequirements: 'Input Test Requirements',
