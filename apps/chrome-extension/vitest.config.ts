@@ -6,9 +6,6 @@ export default defineConfig({
     include: ['src/**/__tests__/**/*.test.ts', 'src/**/__tests__/**/*.test.tsx'],
     environment: 'jsdom',
     globals: true,
-    environmentMatchGlobs: [
-      ['**/*.test.ts', 'node'],
-    ],
     setupFiles: ['./src/extension/ai-test-generator/designer/components/__tests__/setup.ts'],
     pool: 'forks',
     poolOptions: {

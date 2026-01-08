@@ -4,7 +4,13 @@
  */
 
 import { TextDecoder, TextEncoder } from 'node:util';
-import { vi } from 'vitest';
+import { vi, afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
+
+// Cleanup after each test to prevent pollution between test files
+afterEach(() => {
+  cleanup();
+});
 
 // Polyfill for TextEncoder/TextDecoder
 global.TextEncoder = TextEncoder as any;
