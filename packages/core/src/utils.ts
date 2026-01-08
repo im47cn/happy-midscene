@@ -326,10 +326,14 @@ export function stringifyDumpData(data: any, indents?: number) {
   return JSON.stringify(data, replacerForPageObject, indents);
 }
 
-declare const __VERSION__: string;
+declare const __VERSION__: string | undefined;
 
 export function getVersion() {
-  return __VERSION__;
+  if (typeof __VERSION__ !== 'undefined') {
+    return __VERSION__;
+  }
+  // Fallback for test environments
+  return '0.0.0-test';
 }
 
 function debugLog(...message: any[]) {

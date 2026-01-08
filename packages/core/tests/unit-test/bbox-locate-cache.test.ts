@@ -288,7 +288,7 @@ describe('bbox locate cache fix', () => {
       const locateTask = tasks.find((task) => task.subType === 'Locate');
 
       // Clear the mock to track new calls
-      vi.mocked(mockInterface.cacheFeatureForRect!).mockClear();
+      (mockInterface.cacheFeatureForRect as ReturnType<typeof vi.fn>).mockClear();
 
       await locateTask!.executor(locateTask!.param, {
         task: {
@@ -337,7 +337,7 @@ describe('bbox locate cache fix', () => {
       });
 
       // Mock rectMatchesCacheFeature to return a rect (simulating cache hit)
-      vi.mocked(mockInterface.rectMatchesCacheFeature!).mockResolvedValue({
+      (mockInterface.rectMatchesCacheFeature as ReturnType<typeof vi.fn>).mockResolvedValue({
         left: 300,
         top: 400,
         width: 100,
@@ -483,7 +483,7 @@ describe('bbox locate cache fix', () => {
 
     it('should handle cacheFeatureForRect returning empty object', async () => {
       // Mock cacheFeatureForRect to return empty object
-      vi.mocked(mockInterface.cacheFeatureForRect!).mockResolvedValue({});
+      (mockInterface.cacheFeatureForRect as ReturnType<typeof vi.fn>).mockResolvedValue({});
 
       const plansWithBbox = [
         {

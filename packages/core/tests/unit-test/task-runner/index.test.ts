@@ -191,9 +191,14 @@ describe(
       expect(runner.latestErrorTask()).toBeTruthy();
       expect(runner.isInErrorState()).toBeTruthy();
 
-      await expect(async () => {
+      // Verify that appending after error throws
+      let errorThrown = false;
+      try {
         await runner.append(insightFindTask());
-      }).rejects.toThrowError();
+      } catch (e) {
+        errorThrown = true;
+      }
+      expect(errorThrown).toBe(true);
     });
 
     it('allows append and flush when recovering from error', async () => {

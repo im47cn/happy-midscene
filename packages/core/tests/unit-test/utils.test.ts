@@ -62,14 +62,14 @@ describe('utils', () => {
     const reportPath = writeDumpReport('test', `{"foo": "${content}"}`);
     expect(reportPath).toBeTruthy();
     const reportContent = readFileSync(reportPath!, 'utf-8');
-    expect(reportContent).contains(content);
+    expect(reportContent).toContain(content);
   });
 
   it('write report file with empty dump', () => {
     const reportPath = writeDumpReport('test', '{}');
     expect(reportPath).toBeTruthy();
     const reportContent = readFileSync(reportPath!, 'utf-8');
-    expect(reportContent).contains('type="midscene_web_dump"');
+    expect(reportContent).toContain('type="midscene_web_dump"');
   });
 
   it('write report file with attributes', () => {
@@ -83,9 +83,9 @@ describe('utils', () => {
     });
     expect(reportPath).toBeTruthy();
     const reportContent = readFileSync(reportPath!, 'utf-8');
-    expect(reportContent).contains(content);
-    expect(reportContent).contains('foo="bar"');
-    expect(reportContent).contains('hello="world"');
+    expect(reportContent).toContain(content);
+    expect(reportContent).toContain('foo="bar"');
+    expect(reportContent).toContain('hello="world"');
   });
 
   it('overlapped', () => {
@@ -154,7 +154,8 @@ describe('utils', () => {
     'should handle multiple large reports correctly',
     { timeout: 30000 },
     async () => {
-      const tmpFile = createTempHtmlFile('');
+      // Create a temp file with a basic HTML structure that includes closing tag
+      const tmpFile = createTempHtmlFile('<html><body>Initial content</body></html>');
 
       // Create a large string of approximately 100MB
       const generateLargeString = (sizeInMB: number, identifier: string) => {

@@ -42,7 +42,7 @@ describe('reportMergingTool', () => {
     // assert merge success
     const mergedReportContent = readFileSync(mergedReportPath!, 'utf-8');
     expectedContents.forEach((content) => {
-      expect(mergedReportContent).contains(content);
+      expect(mergedReportContent).toContain(content);
     });
   });
 
@@ -60,7 +60,7 @@ describe('reportMergingTool', () => {
     });
     const mergedReportContent = readFileSync(mergedReportPath!, 'utf-8');
     expectedContents.forEach((content) => {
-      expect(mergedReportContent).contains(content);
+      expect(mergedReportContent).toContain(content);
     });
     // assert source report files deleted successfully
     tool.reportInfos.forEach((el: any) => {
@@ -80,7 +80,7 @@ describe('reportMergingTool', () => {
     );
     const mergedReportContent = readFileSync(mergedReportPath!, 'utf-8');
     expectedContents.forEach((content) => {
-      expect(mergedReportContent).contains(content);
+      expect(mergedReportContent).toContain(content);
     });
   });
 
@@ -102,7 +102,7 @@ describe('reportMergingTool', () => {
     );
     const mergedReportContent = readFileSync(mergedReportPath!, 'utf-8');
     expectedContents.forEach((content) => {
-      expect(mergedReportContent).contains(content);
+      expect(mergedReportContent).toContain(content);
     });
   });
 

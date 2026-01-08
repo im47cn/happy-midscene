@@ -10,10 +10,6 @@ import {
 import { getContextFromFixture } from 'tests/evaluation';
 import { beforeAll, expect, test, vi } from 'vitest';
 
-vi.setConfig({
-  testTimeout: 120 * 1000,
-});
-
 const defaultModelConfig = globalModelConfigManager.getModelConfig('default');
 
 test(

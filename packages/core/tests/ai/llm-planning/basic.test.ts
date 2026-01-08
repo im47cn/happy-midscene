@@ -7,11 +7,6 @@ import { mockActionSpace } from 'tests/common';
 import { getContextFromFixture } from 'tests/evaluation';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
-vi.setConfig({
-  testTimeout: 180 * 1000,
-  hookTimeout: 30 * 1000,
-});
-
 const modelConfig = globalModelConfigManager.getModelConfig('default');
 
 describe.skipIf(modelConfig.vlMode)('automation - llm planning', () => {

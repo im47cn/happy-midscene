@@ -11,10 +11,6 @@ dotenv.config({
   override: true,
 });
 
-vi.setConfig({
-  testTimeout: 30 * 1000, // Increased timeout for streaming tests
-});
-
 const defaultModelConfig = globalModelConfigManager.getModelConfig('default');
 
 describe(

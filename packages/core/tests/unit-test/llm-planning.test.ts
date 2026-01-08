@@ -40,14 +40,18 @@ describe('llm planning - qwen', () => {
 });
 
 describe('llm planning - doubao', () => {
+  const originalEnv = process.env;
+
   beforeEach(() => {
-    vi.stubEnv(OPENAI_BASE_URL, 'http://mock');
-    vi.stubEnv(OPENAI_API_KEY, 'mock');
-    vi.stubEnv(MIDSCENE_USE_DOUBAO_VISION, 'true');
+    process.env.OPENAI_BASE_URL = 'http://mock';
+    process.env.OPENAI_API_KEY = 'mock';
+    process.env.MIDSCENE_USE_DOUBAO_VISION = 'true';
   });
 
   afterEach(() => {
-    vi.unstubAllEnvs();
+    process.env.OPENAI_BASE_URL = originalEnv.OPENAI_BASE_URL;
+    process.env.OPENAI_API_KEY = originalEnv.OPENAI_API_KEY;
+    process.env.MIDSCENE_USE_DOUBAO_VISION = originalEnv.MIDSCENE_USE_DOUBAO_VISION;
   });
 
   it('fill locate param', () => {

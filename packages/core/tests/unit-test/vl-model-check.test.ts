@@ -17,13 +17,9 @@ vi.mock('@midscene/shared/logger', () => ({
   logMsg: vi.fn(),
 }));
 
-vi.mock('@midscene/core', async () => {
-  const actual = await vi.importActual('@midscene/core');
-  return {
-    ...actual,
-    Insight: vi.fn().mockImplementation(() => ({})),
-  };
-});
+vi.mock('@midscene/core', () => ({
+  Insight: vi.fn().mockImplementation(() => ({})),
+}));
 
 const mockedModelConfig = {
   MIDSCENE_MODEL_NAME: 'gpt-4o',

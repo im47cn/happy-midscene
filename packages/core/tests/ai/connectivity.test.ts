@@ -14,9 +14,6 @@ dotenv.config({
 
 const defaultModelConfig = globalModelConfigManager.getModelConfig('default');
 
-vi.setConfig({
-  testTimeout: 20 * 1000,
-});
 [
   '.env.qwen',
   '.env.gemini',

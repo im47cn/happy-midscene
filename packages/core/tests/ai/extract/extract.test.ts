@@ -3,11 +3,6 @@ import { globalModelConfigManager } from '@midscene/shared/env';
 import { getContextFromFixture } from 'tests/evaluation';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
-vi.setConfig({
-  testTimeout: 240 * 1000,
-  hookTimeout: 30 * 1000,
-});
-
 const defaultModelConfig = globalModelConfigManager.getModelConfig('default');
 
 describe('extract', () => {

@@ -116,10 +116,6 @@ describe('service-caller', () => {
 
   describe('custom OpenAI client', () => {
     beforeEach(() => {
-      vi.mock('openai');
-    });
-
-    afterEach(() => {
       vi.clearAllMocks();
     });
 

@@ -20,7 +20,7 @@ vi.mock('../../../src/ai-model', () => ({
   callAIWithStringResponse: vi.fn(),
 }));
 
-const mockCallAiWithStringResponse = vi.mocked(callAIWithStringResponse);
+const mockCallAiWithStringResponse = callAIWithStringResponse as ReturnType<typeof vi.fn>;
 
 describe('playwright-generator', () => {
   beforeEach(() => {

@@ -1,8 +1,9 @@
 import path from 'node:path';
+import { strict as assert } from 'node:assert';
 import { uiTarsPlanning } from '@/ai-model/ui-tars-planning';
 import { savePositionImg } from '@midscene/shared/img';
 import { getContextFromFixture } from 'tests/evaluation';
-import { assert, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 const isUiTars = process.env.MIDSCENE_USE_VLM_UI_TARS === '1';
 

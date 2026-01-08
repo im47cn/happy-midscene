@@ -39,10 +39,6 @@ const createMockInterface = () =>
 
 describe('Agent with custom OpenAI client', () => {
   beforeEach(() => {
-    vi.mock('openai');
-  });
-
-  afterEach(() => {
     vi.clearAllMocks();
   });
 

@@ -8,10 +8,6 @@ import {
 import { getContextFromFixture } from 'tests/evaluation';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 
-vi.setConfig({
-  testTimeout: 120 * 1000,
-});
-
 const modelConfig = globalModelConfigManager.getModelConfig('insight');
 
 describe.skipIf(!modelConfig.vlMode)('service locate with deep think', () => {
