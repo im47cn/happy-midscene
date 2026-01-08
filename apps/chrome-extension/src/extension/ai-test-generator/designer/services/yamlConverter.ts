@@ -280,11 +280,13 @@ function nodeToStep(
     case 'loop':
       step.type = 'loop';
       const loopBodyNodes = nextNodesByHandle.get(`${node.id}-body`) || [];
+      const loopType = config.loopType || config.type || 'count';
 
       step.loop = {
-        type: config.loopType || 'count',
+        type: loopType,
         count: typeof config.count === 'number' ? config.count : undefined,
-        condition: config.condition,
+        // For while loops, whileCondition is used; for other types, condition may be used
+        condition: loopType === 'while' ? config.whileCondition : config.condition,
         collection: config.collection,
         itemVar: config.itemVar,
         body: loopBodyNodes.map((n) =>
@@ -631,7 +633,12 @@ export function yamlToFlow(
         nodeType = 'loop';
         config.loopType = step.loop.type;
         config.count = step.loop.count;
-        config.condition = step.loop.condition;
+        // For while loops, map condition to whileCondition
+        if (step.loop.type === 'while') {
+          config.whileCondition = step.loop.condition;
+        } else {
+          config.condition = step.loop.condition;
+        }
         label = '循环';
       } else if (step.variable) {
         switch (step.variable.operation) {
