@@ -4,10 +4,12 @@
  */
 
 import type React from 'react';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DesignerNode, NodeConfig } from '../../types/designer';
 import { nodeRegistry, validateNodeConfig } from '../services/nodeRegistry';
 import { useDesignerStore } from '../store';
+import { ElementPickerButton } from './ElementPicker';
+import type { SelectedElement } from '../../types/elementRepair';
 
 export interface PropertyPanelProps {
   /** 自定义样式类名 */
@@ -67,6 +69,62 @@ const StringField: React.FC<StringFieldProps> = ({
           `}
         />
       )}
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+    </div>
+  );
+};
+
+/**
+ * TargetField 组件 - 目标元素选择字段（带元素选择器）
+ */
+interface TargetFieldProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  required?: boolean;
+  error?: string;
+  nodeId?: string;
+  targetField?: string;
+}
+
+const TargetField: React.FC<TargetFieldProps> = ({
+  label,
+  value,
+  onChange,
+  placeholder,
+  required = false,
+  error,
+  nodeId,
+  targetField = 'target',
+}) => {
+  const [pickerVisible, setPickerVisible] = useState(false);
+
+  return (
+    <div className="mb-3">
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </label>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className={`
+            flex-1 px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2
+            ${error ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}
+          `}
+        />
+        <ElementPickerButton
+          onElementSelected={(_element: SelectedElement, selector: string) => {
+            onChange(selector);
+          }}
+          nodeId={nodeId}
+          targetField={targetField}
+        />
+      </div>
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   );
@@ -281,12 +339,14 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
       case 'click':
         return (
           <>
-            <StringField
+            <TargetField
               label="目标元素"
               value={(config as any).target || ''}
               onChange={(v) => handleConfigChange('target', v)}
               placeholder="例如: 登录按钮"
               required
+              nodeId={selectedNode?.id}
+              targetField="target"
             />
             <NumberField
               label="点击次数"
@@ -329,12 +389,14 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
       case 'input':
         return (
           <>
-            <StringField
+            <TargetField
               label="目标元素"
               value={(config as any).target || ''}
               onChange={(v) => handleConfigChange('target', v)}
               placeholder="例如: 用户名输入框"
               required
+              nodeId={selectedNode?.id}
+              targetField="target"
             />
             <StringField
               label="输入值"
@@ -381,11 +443,13 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
               unit="ms"
               required
             />
-            <StringField
+            <TargetField
               label="等待元素 (可选)"
               value={(config as any).waitForElement || ''}
               onChange={(v) => handleConfigChange('waitForElement', v)}
               placeholder="留空则等待固定时间"
+              nodeId={selectedNode?.id}
+              targetField="waitForElement"
             />
           </>
         );
@@ -523,12 +587,14 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
       case 'extractData':
         return (
           <>
-            <StringField
+            <TargetField
               label="目标元素"
               value={(config as any).target || ''}
               onChange={(v) => handleConfigChange('target', v)}
               placeholder="例如: 数据列表"
               required
+              nodeId={selectedNode?.id}
+              targetField="target"
             />
             <SelectField
               label="提取类型"
@@ -562,12 +628,14 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
       case 'assertExists':
         return (
           <>
-            <StringField
+            <TargetField
               label="目标元素"
               value={(config as any).target || ''}
               onChange={(v) => handleConfigChange('target', v)}
               placeholder="例如: 成功提示"
               required
+              nodeId={selectedNode?.id}
+              targetField="target"
             />
             <SelectField
               label="期望状态"
@@ -591,11 +659,13 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
       case 'assertText':
         return (
           <>
-            <StringField
+            <TargetField
               label="目标元素 (可选)"
               value={(config as any).target || ''}
               onChange={(v) => handleConfigChange('target', v)}
               placeholder="留空则检查整个页面"
+              nodeId={selectedNode?.id}
+              targetField="target"
             />
             <StringField
               label="期望文本"
@@ -646,11 +716,13 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
       case 'scroll':
         return (
           <>
-            <StringField
+            <TargetField
               label="目标元素 (可选)"
               value={(config as any).target || ''}
               onChange={(v) => handleConfigChange('target', v)}
               placeholder="留空则滚动页面"
+              nodeId={selectedNode?.id}
+              targetField="target"
             />
             <SelectField
               label="滚动方向"
@@ -678,12 +750,14 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
       case 'hover':
         return (
           <>
-            <StringField
+            <TargetField
               label="目标元素"
               value={(config as any).target || ''}
               onChange={(v) => handleConfigChange('target', v)}
               placeholder="例如: 菜单项"
               required
+              nodeId={selectedNode?.id}
+              targetField="target"
             />
             <NumberField
               label="持续时间"
@@ -699,19 +773,23 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
       case 'drag':
         return (
           <>
-            <StringField
+            <TargetField
               label="源元素"
               value={(config as any).from || ''}
               onChange={(v) => handleConfigChange('from', v)}
               placeholder="被拖拽的元素"
               required
+              nodeId={selectedNode?.id}
+              targetField="from"
             />
-            <StringField
+            <TargetField
               label="目标元素"
               value={(config as any).to || ''}
               onChange={(v) => handleConfigChange('to', v)}
               placeholder="放置目标"
               required
+              nodeId={selectedNode?.id}
+              targetField="to"
             />
           </>
         );
