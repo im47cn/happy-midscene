@@ -1,5 +1,5 @@
-import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { existsSync, readFileSync, readdirSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
+import { beforeEach, describe, expect, it } from 'vitest';
 // @ts-ignore no types in es folder
 import { ReportMergingTool } from '../../dist/es/report';
 // @ts-ignore no types in es folder
@@ -12,23 +12,28 @@ function generateNReports(
   t: ReportMergingTool,
   withExpectedContent = true,
 ) {
+  // Use a unique random ID for each report to avoid any conflicts
+  const batchId = `${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
   const expectedContents = [];
   for (let i = 0; i < n; i++) {
     const content = `${c} ${i}`;
     if (withExpectedContent) expectedContents.push(content);
-    const reportPath = writeDumpReport(`report-to-merge-${i}`, {
+    const reportId = `${batchId}-${Math.random().toString(36).substring(2, 10)}`;
+    const reportPath = writeDumpReport(`report-to-merge-${reportId}`, {
       dumpString: content,
     });
-    t.append({
-      reportFilePath: reportPath,
-      reportAttributes: {
-        testDescription: `desc${i}`,
-        testDuration: 1,
-        testId: `${i}`,
-        testStatus: 'passed',
-        testTitle: `${i}`,
-      },
-    });
+    if (reportPath) {
+      t.append({
+        reportFilePath: reportPath,
+        reportAttributes: {
+          testDescription: `desc${i}`,
+          testDuration: 1,
+          testId: `${i}`,
+          testStatus: 'passed',
+          testTitle: `${i}`,
+        },
+      });
+    }
   }
   return expectedContents;
 }
